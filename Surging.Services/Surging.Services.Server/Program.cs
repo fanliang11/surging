@@ -76,7 +76,7 @@ namespace Surging.Services.Server
         }
 
         /// <summary>
-        ///添加缓存列表， 有利于测试，
+        ///添加路由列表， 有利于测试，
         /// </summary>
         public static void ConfigureRoutes()
         {
