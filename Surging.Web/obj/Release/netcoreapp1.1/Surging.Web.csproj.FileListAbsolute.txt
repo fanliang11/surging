@@ -1,0 +1,11 @@
+D:\开源项目\Surging\Surging.Web\bin\Release\netcoreapp1.1\Surging.Web.deps.json
+D:\开源项目\Surging\Surging.Web\bin\Release\netcoreapp1.1\Surging.Web.runtimeconfig.json
+D:\开源项目\Surging\Surging.Web\bin\Release\netcoreapp1.1\Surging.Web.runtimeconfig.dev.json
+D:\开源项目\Surging\Surging.Web\bin\Release\netcoreapp1.1\Surging.Web.dll
+D:\开源项目\Surging\Surging.Web\obj\Release\netcoreapp1.1\Surging.Web.csprojResolveAssemblyReference.cache
+D:\开源项目\Surging\Surging.Web\obj\Release\netcoreapp1.1\Surging.Web.AssemblyInfo.cs
+D:\开源项目\Surging\Surging.Web\bin\Release\netcoreapp1.1\Surging.Web.pdb
+D:\开源项目\Surging\Surging.Web\bin\Release\netcoreapp1.1\Surging.Core.Caching.dll
+D:\开源项目\Surging\Surging.Web\bin\Release\netcoreapp1.1\Surging.Core.Caching.pdb
+D:\开源项目\Surging\Surging.Web\obj\Release\netcoreapp1.1\Surging.Web.dll
+D:\开源项目\Surging\Surging.Web\obj\Release\netcoreapp1.1\Surging.Web.pdb
