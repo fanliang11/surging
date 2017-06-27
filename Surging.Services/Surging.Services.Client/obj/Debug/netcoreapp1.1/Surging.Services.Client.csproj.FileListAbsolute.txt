@@ -44,3 +44,8 @@ E:\开源项目\Surging\Surging.Services\Surging.Services.Client\obj\Debug\netco
 E:\开源项目\Surging\Surging.Services\Surging.Services.Client\obj\Debug\netcoreapp1.1\Surging.Services.Client.AssemblyInfo.cs
 E:\开源项目\Surging\Surging.Services\Surging.Services.Client\obj\Debug\netcoreapp1.1\Surging.Services.Client.dll
 E:\开源项目\Surging\Surging.Services\Surging.Services.Client\obj\Debug\netcoreapp1.1\Surging.Services.Client.pdb
+E:\开源项目\Surging\Surging.Services\Surging.Services.Client\bin\Debug\netcoreapp1.1\eventBusSettings.json
+E:\开源项目\Surging\Surging.Services\Surging.Services.Client\bin\Debug\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.dll
+E:\开源项目\Surging\Surging.Services\Surging.Services.Client\bin\Debug\netcoreapp1.1\Surging.Modules.Common.dll
+E:\开源项目\Surging\Surging.Services\Surging.Services.Client\bin\Debug\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.pdb
+E:\开源项目\Surging\Surging.Services\Surging.Services.Client\bin\Debug\netcoreapp1.1\Surging.Modules.Common.pdb

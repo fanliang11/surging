@@ -14,4 +14,3 @@ E:\开源项目\Surging\Surging.Core\Surging.Core.Caching\obj\Debug\netcoreapp1.
 E:\开源项目\Surging\Surging.Core\Surging.Core.Caching\obj\Debug\netcoreapp1.1\Surging.Core.Caching.AssemblyInfo.cs
 E:\开源项目\Surging\Surging.Core\Surging.Core.Caching\obj\Debug\netcoreapp1.1\Surging.Core.Caching.dll
 E:\开源项目\Surging\Surging.Core\Surging.Core.Caching\obj\Debug\netcoreapp1.1\Surging.Core.Caching.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.Caching\obj\Debug\netcoreapp1.1\Surging.Core.Caching.csprojResolveAssemblyReference.cache

@@ -1,7 +1,0 @@
-E:\开源项目\Surging\Magnum\bin\Release\netcoreapp1.1\Magnum.deps.json
-E:\开源项目\Surging\Magnum\bin\Release\netcoreapp1.1\Magnum.dll
-E:\开源项目\Surging\Magnum\obj\Release\netcoreapp1.1\Magnum.AssemblyInfo.cs
-E:\开源项目\Surging\Magnum\bin\Release\netcoreapp1.1\Magnum.pdb
-E:\开源项目\Surging\Magnum\obj\Release\netcoreapp1.1\Magnum.dll
-E:\开源项目\Surging\Magnum\obj\Release\netcoreapp1.1\Magnum.pdb
-E:\开源项目\Surging\Magnum\obj\Release\netcoreapp1.1\Magnum.csprojResolveAssemblyReference.cache

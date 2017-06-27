@@ -20,4 +20,3 @@ E:\开源项目\Surging\Surging.Core\Surging.Core.CPlatform\obj\Debug\netcoreapp
 E:\开源项目\Surging\Surging.Core\Surging.Core.CPlatform\obj\Debug\netcoreapp1.1\Surging.Core.CPlatform.csproj.GenerateResource.Cache
 E:\开源项目\Surging\Surging.Core\Surging.Core.CPlatform\obj\Debug\netcoreapp1.1\Surging.Core.CPlatform.dll
 E:\开源项目\Surging\Surging.Core\Surging.Core.CPlatform\obj\Debug\netcoreapp1.1\Surging.Core.CPlatform.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.CPlatform\obj\Debug\netcoreapp1.1\Surging.Core.CPlatform.csprojResolveAssemblyReference.cache
