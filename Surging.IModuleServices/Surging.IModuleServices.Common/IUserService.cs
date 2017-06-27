@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+﻿using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.IModuleServices.Common.Models;
 using System;
 using System.Collections.Generic;
@@ -26,5 +27,7 @@ namespace Surging.IModuleServices.Common
 
      
         Task TryThrowException();
+
+        Task PublishThroughEventBusAsync(IntegrationEvent evt);
     }
 }

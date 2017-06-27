@@ -3567,6 +3567,7 @@
           "Autofac.Extras.DynamicProxy": "4.2.1",
           "Microsoft.Extensions.DependencyInjection": "1.1.1",
           "Microsoft.NETCore.App": "1.1.1",
+          "Surging.Core.CPlatform": "1.0.0",
           "Surging.Core.Caching": "1.0.0",
           "Surging.Core.Common": "1.0.0",
           "Surging.Core.ProxyGenerator": "1.0.0"
@@ -9827,10 +9828,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\开源项目\\Surging\\Surging.Web\\Surging.Web.csproj",
+      "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Web\\Surging.Web.csproj",
       "projectName": "Surging.Web",
-      "projectPath": "D:\\开源项目\\Surging\\Surging.Web\\Surging.Web.csproj",
-      "outputPath": "D:\\开源项目\\Surging\\Surging.Web\\obj\\",
+      "projectPath": "E:\\开源项目\\Surging\\Surging.Web\\Surging.Web.csproj",
+      "outputPath": "E:\\开源项目\\Surging\\Surging.Web\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"
@@ -9838,14 +9839,14 @@
       "frameworks": {
         "netcoreapp1.1": {
           "projectReferences": {
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj"
             }
           }
         }

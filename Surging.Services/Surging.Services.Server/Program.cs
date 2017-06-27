@@ -16,6 +16,11 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Surging.Core.EventBusRabbitMQ;
+using Surging.Core.EventBusRabbitMQ.Configurations;
+using Surging.IModuleServices.Common.Models.Events;
+using Surging.Core.CPlatform.EventBus;
+using Surging.Modules.Common.IntegrationEvents.EventHandling;
 
 namespace Surging.Services.Server
 {
@@ -26,14 +31,19 @@ namespace Surging.Services.Server
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var services = new ServiceCollection();
             var builder = new ContainerBuilder();
+            var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory);
+            ConfigureEventBus(config);
             ConfigureLogging(services);
             builder.Populate(services);
             ConfigureService(builder);
             ServiceLocator.Current = builder.Build();
-            ConfigureCache();
+            ConfigureCache(config);
             ServiceLocator.GetService<ILoggerFactory>()
                    .AddConsole((c, l) => (int)l >= 3);
             ConfigureRoutes();
+            ServiceLocator.GetService<ISubscriptionAdapt>().SubscribeAt();
+          var d=  ServiceLocator.GetService<UserLoginDateChangeHandler>();
             StartService();
             Console.ReadLine();
         }
@@ -49,10 +59,11 @@ namespace Surging.Services.Server
             builder.RegisterServices();
             builder.RegisterRepositories();
             builder.RegisterModules();
+            builder.RegisterServiceBus();
             builder.AddCoreServce()
                  .AddServiceRuntime()
                  .UseSharedFileRouteManager("c:\\routes.txt")//配置本地路由文件路径
-                 .UseDotNettyTransport();//配置Netty
+                 .UseDotNettyTransport().UseRabbitMQTransport().AddRabbitMqAdapt();//配置Netty
             builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
         }
 
@@ -65,14 +76,19 @@ namespace Surging.Services.Server
             services.AddLogging();
         }
 
+        public static void ConfigureEventBus(IConfigurationBuilder build)
+        {
+            build
+            .AddEventBusFile("eventBusSettings.json", optional: false);
+        }
+
         /// <summary>
         /// 配置缓存服务
         /// </summary>
-        public static void ConfigureCache()
+        public static void ConfigureCache(IConfigurationBuilder build)
         {
-            new ConfigurationBuilder()
-           .SetBasePath(AppContext.BaseDirectory)
-           .AddCacheFile("cacheSettings.json", optional: false);
+            build
+              .AddCacheFile("cacheSettings.json", optional: false);
         }
 
         /// <summary>

@@ -14,6 +14,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Surging.Core.ProxyGenerator.Utilitys;
+using Surging.Core.EventBusRabbitMQ;
+using Surging.Core.EventBusRabbitMQ.Configurations;
+using Microsoft.Extensions.Configuration;
+using Surging.IModuleServices.Common.Models.Events;
 
 namespace Surging.Services.Client
 {
@@ -24,6 +28,9 @@ namespace Surging.Services.Client
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var services = new ServiceCollection();
             var builder = new ContainerBuilder();
+            var config = new ConfigurationBuilder()
+           .SetBasePath(AppContext.BaseDirectory);
+            ConfigureEventBus(config);
             ConfigureLogging(services);
             builder.Populate(services);
             ConfigureService(builder);
@@ -31,6 +38,16 @@ namespace Surging.Services.Client
             ServiceLocator.GetService<ILoggerFactory>()
                 .AddConsole((c, l) => (int)l >= 3);
             Test(RegisterServiceProx(builder));
+            TestRabbitMq();
+        }
+
+        /// <summary>
+        /// 配置事件总线
+        /// </summary>
+        public static void ConfigureEventBus(IConfigurationBuilder build)
+        {
+            build
+            .AddEventBusFile("eventBusSettings.json", optional: false);
         }
 
         /// <summary>
@@ -47,7 +64,7 @@ namespace Surging.Services.Client
             var serviceBulider = builder
                  .AddClient()
                  .UseSharedFileRouteManager("c:\\routes.txt")
-                 .UseDotNettyTransport();
+                 .UseDotNettyTransport().UseRabbitMQTransport();
         }
 
         /// <summary>
@@ -95,6 +112,16 @@ namespace Surging.Services.Client
                     Console.ReadLine();
                 } while (true);
             }).Wait();
+        }
+
+        public static void TestRabbitMq()
+        {
+            ServiceLocator.GetService<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
+            {
+                Age = "18",
+                Name = "fanly",
+                UserId = "1"
+            });
         }
     }
 }

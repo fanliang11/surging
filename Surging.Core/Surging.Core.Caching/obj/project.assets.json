@@ -8302,10 +8302,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj",
+      "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj",
       "projectName": "Surging.Core.Caching",
-      "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj",
-      "outputPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\obj\\",
+      "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj",
+      "outputPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"

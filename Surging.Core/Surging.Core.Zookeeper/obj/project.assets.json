@@ -7986,10 +7986,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj",
+      "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj",
       "projectName": "Surging.Core.Zookeeper",
-      "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj",
-      "outputPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\obj\\",
+      "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj",
+      "outputPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"
@@ -7997,8 +7997,8 @@
       "frameworks": {
         "netcoreapp1.1": {
           "projectReferences": {
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj"
             }
           }
         }

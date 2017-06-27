@@ -481,6 +481,7 @@
           "Autofac.Extensions.DependencyInjection": "4.1.0",
           "Autofac.Extras.DynamicProxy": "4.2.1",
           "Microsoft.Extensions.DependencyInjection": "1.1.1",
+          "Surging.Core.CPlatform": "1.0.0",
           "Surging.Core.Caching": "1.0.0",
           "Surging.Core.Common": "1.0.0",
           "Surging.Core.ProxyGenerator": "1.0.0"

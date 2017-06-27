@@ -32,6 +32,11 @@ namespace Surging.Core.CPlatform
             return _container.Resolve(type);
         }
 
+        public T GetInstances<T>(Type type) where T : class
+        {
+            return _container.Resolve(type) as T;
+        }
+
         public object GetInstances(string name,Type type)  
         {
             // var appConfig = AppConfig.DefaultInstance;

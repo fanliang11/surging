@@ -3017,6 +3017,7 @@
           "Autofac.Extras.DynamicProxy": "4.2.1",
           "Microsoft.Extensions.DependencyInjection": "1.1.1",
           "Microsoft.NETCore.App": "1.1.1",
+          "Surging.Core.CPlatform": "1.0.0",
           "Surging.Core.Caching": "1.0.0",
           "Surging.Core.Common": "1.0.0",
           "Surging.Core.ProxyGenerator": "1.0.0"
@@ -8786,10 +8787,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj",
+      "projectUniqueName": "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj",
       "projectName": "Surging.IModuleServices.Common",
-      "projectPath": "D:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj",
-      "outputPath": "D:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\obj\\",
+      "projectPath": "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj",
+      "outputPath": "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"
@@ -8797,8 +8798,8 @@
       "frameworks": {
         "netcoreapp1.1": {
           "projectReferences": {
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj"
             }
           }
         }

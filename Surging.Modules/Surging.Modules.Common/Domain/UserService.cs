@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.EventBus.Implementation;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -14,9 +16,11 @@ namespace Surging.Modules.Common.Domain
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
-        public UserService(UserRepository repository)
+        private readonly IEventBus _eventBus;
+        public UserService(UserRepository repository, IEventBus eventBus)
         {
             this._repository = repository;
+            this._eventBus = eventBus;
         }
 
         public Task<string> GetUserName(int id)
@@ -68,6 +72,12 @@ namespace Surging.Modules.Common.Domain
         public Task TryThrowException()
         {
             throw new Exception("用户Id非法！");
+        }
+
+        public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
+        {
+            _eventBus.Publish(evt);
+            await Task.CompletedTask;
         }
 
         #endregion Implementation of IUserService

@@ -8730,6 +8730,7 @@
       "Autofac.Extras.DynamicProxy >= 4.2.1",
       "Microsoft.Extensions.DependencyInjection >= 1.1.1",
       "Microsoft.NETCore.App >= 1.1.1",
+      "Surging.Core.CPlatform >= 1.0.0",
       "Surging.Core.Caching >= 1.0.0",
       "Surging.Core.Common >= 1.0.0",
       "Surging.Core.ProxyGenerator >= 1.0.0"
@@ -8741,10 +8742,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj",
+      "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj",
       "projectName": "Surging.Core.System",
-      "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj",
-      "outputPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\obj\\",
+      "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj",
+      "outputPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"
@@ -8752,14 +8753,17 @@
       "frameworks": {
         "netcoreapp1.1": {
           "projectReferences": {
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj"
+            },
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj"
             }
           }
         }

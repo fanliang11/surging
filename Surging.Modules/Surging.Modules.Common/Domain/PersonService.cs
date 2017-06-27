@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.EventBus.Events;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -69,6 +70,11 @@ namespace Surging.Modules.Common.Domain
         public Task TryThrowException()
         {
             throw new Exception("用户Id非法！");
+        }
+
+        public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
+        {
+            await Task.CompletedTask;
         }
 
         #endregion Implementation of IUserService

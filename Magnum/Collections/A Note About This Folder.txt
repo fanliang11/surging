@@ -1,0 +1,8 @@
+﻿This folder was forked from the following open-source project, originally started by Wintellect.
+
+PowerCollections
+
+http://www.codeplex.com/PowerCollections
+
+
+The fork is ongoing as the code is refactored to fit the style of Magnum.

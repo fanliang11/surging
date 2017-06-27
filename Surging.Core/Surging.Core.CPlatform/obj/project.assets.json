@@ -7854,10 +7854,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj",
+      "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj",
       "projectName": "Surging.Core.CPlatform",
-      "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj",
-      "outputPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\obj\\",
+      "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj",
+      "outputPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"

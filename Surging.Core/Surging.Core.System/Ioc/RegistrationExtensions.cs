@@ -15,6 +15,7 @@ using System.Reflection;
 using Autofac.Core.Registration;
 using Surging.Core.Common.ServicesException;
 using Surging.Core.System.Intercept;
+using Surging.Core.CPlatform.EventBus.Events;
 
 namespace Surging.Core.System.Ioc
 {
@@ -132,13 +133,32 @@ namespace Surging.Core.System.Ioc
             #endregion
             return result;
         }
+        public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterServiceBus
+            (
+            this ContainerBuilder builder)
+        {
+            var referenceAssemblies = builder.GetReferenceAssembly();
+            IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> result = null;
+            var assemblies = referenceAssemblies.Where(
+              p =>
+              p.GetCustomAttribute<AssemblyModuleTypeAttribute>().Type == ModuleType.BusinessModule ||
+              p.GetCustomAttribute<AssemblyModuleTypeAttribute>().Type == ModuleType.Domain).ToList();
 
-        /// <summary>
-        ///依赖注入仓储模块程序集
-        /// </summary>
-        /// <param name="builder">IOC容器</param>
-        /// <returns>返回注册模块信息</returns>
-        public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterRepositories
+            foreach (var assembly in assemblies)
+            {
+                result = builder.RegisterAssemblyTypes(assembly)
+                 .Where(t => typeof(IIntegrationEventHandler).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().SingleInstance();
+                result = builder.RegisterAssemblyTypes(assembly)
+               .Where(t => typeof(IIntegrationEventHandler).IsAssignableFrom(t)).SingleInstance();
+            }
+            return result;
+        }
+            /// <summary>
+            ///依赖注入仓储模块程序集
+            /// </summary>
+            /// <param name="builder">IOC容器</param>
+            /// <returns>返回注册模块信息</returns>
+            public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterRepositories
             (
             this ContainerBuilder builder)
         {

@@ -768,6 +768,18 @@
           "lib/netstandard1.3/Newtonsoft.Json.dll": {}
         }
       },
+      "Polly/5.1.0": {
+        "type": "package",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1"
+        },
+        "compile": {
+          "lib/netstandard1.0/Polly.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/Polly.dll": {}
+        }
+      },
       "protobuf-net/2.2.1": {
         "type": "package",
         "dependencies": {
@@ -784,6 +796,32 @@
         },
         "runtime": {
           "lib/netstandard1.3/protobuf-net.dll": {}
+        }
+      },
+      "RabbitMQ.Client/4.1.3": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections.Concurrent": "4.0.12",
+          "System.Console": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.11",
+          "System.IO": "4.1.0",
+          "System.Linq": "4.1.0",
+          "System.Net.NameResolution": "4.0.0",
+          "System.Net.Security": "4.0.0",
+          "System.Net.Sockets": "4.1.0",
+          "System.Reflection.Extensions": "4.0.1",
+          "System.Reflection.TypeExtensions": "4.1.0",
+          "System.Runtime.Extensions": "4.1.0",
+          "System.Text.RegularExpressions": "4.1.0",
+          "System.Threading": "4.0.11",
+          "System.Threading.Thread": "4.0.0",
+          "System.Threading.Timer": "4.0.1"
+        },
+        "compile": {
+          "lib/netstandard1.5/RabbitMQ.Client.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.5/RabbitMQ.Client.dll": {}
         }
       },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
@@ -3111,6 +3149,18 @@
           "Surging.Core.CPlatform": "1.0.0"
         }
       },
+      "Surging.Core.EventBusRabbitMQ/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v1.1",
+        "dependencies": {
+          "Autofac": "4.6.0",
+          "Microsoft.Extensions.DependencyInjection": "1.1.1",
+          "Microsoft.NETCore.App": "1.1.1",
+          "Polly": "5.1.0",
+          "RabbitMQ.Client": "4.1.3",
+          "Surging.Core.CPlatform": "1.0.0"
+        }
+      },
       "Surging.Core.ProxyGenerator/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v1.1",
@@ -3132,6 +3182,7 @@
           "Autofac.Extras.DynamicProxy": "4.2.1",
           "Microsoft.Extensions.DependencyInjection": "1.1.1",
           "Microsoft.NETCore.App": "1.1.1",
+          "Surging.Core.CPlatform": "1.0.0",
           "Surging.Core.Caching": "1.0.0",
           "Surging.Core.Common": "1.0.0",
           "Surging.Core.ProxyGenerator": "1.0.0"
@@ -3872,6 +3923,21 @@
         "tools/install.ps1"
       ]
     },
+    "Polly/5.1.0": {
+      "sha512": "FyFV3/F1TpAW+7tp2YDUJ67aYG57mFkvPhBEDFgslfpnDORLXtn0N+Ou0gvvxMvRPnDA3bggDmqxNhkxe4zjBg==",
+      "type": "package",
+      "path": "polly/5.1.0",
+      "files": [
+        "lib/net45/Polly.XML",
+        "lib/net45/Polly.dll",
+        "lib/net45/Polly.pdb",
+        "lib/netstandard1.0/Polly.XML",
+        "lib/netstandard1.0/Polly.dll",
+        "lib/netstandard1.0/Polly.pdb",
+        "polly.5.1.0.nupkg.sha512",
+        "polly.nuspec"
+      ]
+    },
     "protobuf-net/2.2.1": {
       "sha512": "MvkcTeIu/AgdbYPO6LTVWlyNVeFcEpo/icaTLNYRM3u2T1/zrL9aSE761371wx1OJv72RsU2VWO8EFaPyKbiUg==",
       "type": "package",
@@ -3883,6 +3949,19 @@
         "lib/netstandard1.3/protobuf-net.xml",
         "protobuf-net.2.2.1.nupkg.sha512",
         "protobuf-net.nuspec"
+      ]
+    },
+    "RabbitMQ.Client/4.1.3": {
+      "sha512": "TVmWOlW1KM/kNoG32YXffig33aPuS5BwBncGtQuCdVu9TTY5wa/Pu5S6r6v5Q3sGHJB9Ui/wtwveS4orY6YTDw==",
+      "type": "package",
+      "path": "rabbitmq.client/4.1.3",
+      "files": [
+        "lib/net451/RabbitMQ.Client.dll",
+        "lib/net451/RabbitMQ.Client.xml",
+        "lib/netstandard1.5/RabbitMQ.Client.dll",
+        "lib/netstandard1.5/RabbitMQ.Client.xml",
+        "rabbitmq.client.4.1.3.nupkg.sha512",
+        "rabbitmq.client.nuspec"
       ]
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
@@ -9046,6 +9125,11 @@
       "path": "../../Surging.Core/Surging.Core.DotNetty/Surging.Core.DotNetty.csproj",
       "msbuildProject": "../../Surging.Core/Surging.Core.DotNetty/Surging.Core.DotNetty.csproj"
     },
+    "Surging.Core.EventBusRabbitMQ/1.0.0": {
+      "type": "project",
+      "path": "../../Surging.Core/Surging.Core.EventBusRabbitMQ/Surging.Core.EventBusRabbitMQ.csproj",
+      "msbuildProject": "../../Surging.Core/Surging.Core.EventBusRabbitMQ/Surging.Core.EventBusRabbitMQ.csproj"
+    },
     "Surging.Core.ProxyGenerator/1.0.0": {
       "type": "project",
       "path": "../../Surging.Core/Surging.Core.ProxyGenerator/Surging.Core.ProxyGenerator.csproj",
@@ -9084,6 +9168,7 @@
       "Surging.Core.Caching >= 1.0.0",
       "Surging.Core.Common >= 1.0.0",
       "Surging.Core.DotNetty >= 1.0.0",
+      "Surging.Core.EventBusRabbitMQ >= 1.0.0",
       "Surging.Core.System >= 1.0.0",
       "Surging.Core.Zookeeper >= 1.0.0",
       "Surging.IModuleServices.Common >= 1.0.0",
@@ -9097,10 +9182,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\开源项目\\Surging\\Surging.Services\\Surging.Services.Server\\Surging.Services.Server.csproj",
+      "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Services\\Surging.Services.Server\\Surging.Services.Server.csproj",
       "projectName": "Surging.Services.Server",
-      "projectPath": "D:\\开源项目\\Surging\\Surging.Services\\Surging.Services.Server\\Surging.Services.Server.csproj",
-      "outputPath": "D:\\开源项目\\Surging\\Surging.Services\\Surging.Services.Server\\obj\\",
+      "projectPath": "E:\\开源项目\\Surging\\Surging.Services\\Surging.Services.Server\\Surging.Services.Server.csproj",
+      "outputPath": "E:\\开源项目\\Surging\\Surging.Services\\Surging.Services.Server\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"
@@ -9108,29 +9193,32 @@
       "frameworks": {
         "netcoreapp1.1": {
           "projectReferences": {
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Caching\\Surging.Core.Caching.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.EventBusRabbitMQ\\Surging.Core.EventBusRabbitMQ.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.EventBusRabbitMQ\\Surging.Core.EventBusRabbitMQ.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Modules\\Surging.Modules.Common\\Surging.Modules.Common.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Modules\\Surging.Modules.Common\\Surging.Modules.Common.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj"
+            "E:\\开源项目\\Surging\\Surging.Modules\\Surging.Modules.Common\\Surging.Modules.Common.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Modules\\Surging.Modules.Common\\Surging.Modules.Common.csproj"
             },
-            "D:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj": {
-              "projectPath": "D:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj"
+            },
+            "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj"
             }
           }
         }
