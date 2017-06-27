@@ -12,7 +12,7 @@ AddRabbitMqAdapt()//基于rabbitmq的消费的服务适配<br/>
 增加订阅功能：
 <br/>
 
- ServiceLocator.GetService<ISubscriptionAdapt>().SubscribeAt();
+ ServiceLocator.GetService<<<ISubscriptionAdapt>>>().SubscribeAt();
  
 <br/>
 IDE:Visual Studio 2017
