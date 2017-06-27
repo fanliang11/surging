@@ -10,7 +10,9 @@
 UseRabbitMQTransport() //rabbitmq 服务配置<br/>
 AddRabbitMqAdapt()//基于rabbitmq的消费的服务适配<br/>
 增加订阅功能：<br/>
+` ``C#
  ServiceLocator.GetService<<ISubscriptionAdapt>>().SubscribeAt();
+ ` ``
  <br/>
 <br/>
 IDE:Visual Studio 2017
