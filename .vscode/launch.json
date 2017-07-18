@@ -2,10 +2,32 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (web)",
+            "name": "Server",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "ServerBuild",
+            "program": "$${workspaceRoot}/Surging.Services/Surging.Services.Server/bin/Debug/netcoreapp1.1/Surging.Services.Server.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Client",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "ClientBuild",
+            "program": "${workspaceRoot}/Surging.Services/Surging.Services.Client/bin/Debug/netcoreapp1.1/Surging.Services.Client.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Web",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "WebBuild",
             "program": "${workspaceRoot}/Surging/Surging.Web/bin/Debug/netcoreapp1.1/Surging.Web",
             "args": [],
             "cwd": "${workspaceRoot}",
