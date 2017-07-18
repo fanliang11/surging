@@ -1,9 +1,0 @@
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\bin\Release\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.deps.json
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\obj\Release\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.csprojResolveAssemblyReference.cache
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\obj\Release\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.AssemblyInfo.cs
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\bin\Release\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.dll
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\bin\Release\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\bin\Release\netcoreapp1.1\Surging.Core.CPlatform.dll
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\bin\Release\netcoreapp1.1\Surging.Core.CPlatform.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\obj\Release\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.dll
-E:\开源项目\Surging\Surging.Core\Surging.Core.EventBusRabbitMQ\obj\Release\netcoreapp1.1\Surging.Core.EventBusRabbitMQ.pdb
