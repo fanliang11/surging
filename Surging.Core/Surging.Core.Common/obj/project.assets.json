@@ -1523,6 +1523,9 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
       "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj",
       "projectName": "Surging.Core.Common",

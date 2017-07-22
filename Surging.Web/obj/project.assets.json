@@ -3200,13 +3200,12 @@
       },
       "Surging.Core.Caching/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v1.1",
+        "framework": ".NETCoreApp,Version=v2.0",
         "dependencies": {
           "Microsoft.Extensions.Configuration": "1.1.2",
           "Microsoft.Extensions.Configuration.Binder": "1.1.2",
           "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.2",
           "Microsoft.Extensions.Configuration.FileExtensions": "1.1.2",
-          "Microsoft.NETCore.App": "1.1.2",
           "Newtonsoft.Json": "10.0.2",
           "ServiceStack.Common.Core": "1.0.41",
           "ServiceStack.Interfaces.Core": "1.0.41",

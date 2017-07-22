@@ -2745,13 +2745,12 @@
       },
       "Surging.Core.Caching/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v1.1",
+        "framework": ".NETCoreApp,Version=v2.0",
         "dependencies": {
           "Microsoft.Extensions.Configuration": "1.1.2",
           "Microsoft.Extensions.Configuration.Binder": "1.1.2",
           "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.2",
           "Microsoft.Extensions.Configuration.FileExtensions": "1.1.2",
-          "Microsoft.NETCore.App": "1.1.2",
           "Newtonsoft.Json": "10.0.2",
           "ServiceStack.Common.Core": "1.0.41",
           "ServiceStack.Interfaces.Core": "1.0.41",
@@ -9411,6 +9410,9 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
       "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Services\\Surging.Services.Client\\Surging.Services.Client.csproj",
       "projectName": "Surging.Services.Client",
@@ -9433,29 +9435,29 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj": {
-              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj"
-            },
             "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj": {
               "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj"
-            },
-            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj": {
-              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj"
             },
             "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.EventBusRabbitMQ\\Surging.Core.EventBusRabbitMQ.csproj": {
               "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.EventBusRabbitMQ\\Surging.Core.EventBusRabbitMQ.csproj"
             },
-            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj": {
-              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Common\\Surging.Core.Common.csproj"
+            },
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj"
             },
             "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj": {
               "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj"
             },
-            "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj": {
-              "projectPath": "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj"
+            "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj"
             },
             "E:\\开源项目\\Surging\\Surging.Modules\\Surging.Modules.Common\\Surging.Modules.Common.csproj": {
               "projectPath": "E:\\开源项目\\Surging\\Surging.Modules\\Surging.Modules.Common\\Surging.Modules.Common.csproj"
+            },
+            "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj": {
+              "projectPath": "E:\\开源项目\\Surging\\Surging.IModuleServices\\Surging.IModuleServices.Common\\Surging.IModuleServices.Common.csproj"
             }
           }
         }
@@ -9469,34 +9471,34 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
-          "Microsoft.NETCore.App": {
-            "target": "Package",
-            "version": "2.0.0-preview2-25407-01",
-            "autoReferenced": true
-          },
-          "Autofac": {
-            "target": "Package",
-            "version": "4.6.0"
-          },
-          "Microsoft.Extensions.Configuration": {
-            "target": "Package",
-            "version": "1.1.2"
-          },
           "Microsoft.Extensions.DependencyInjection": {
             "target": "Package",
             "version": "1.1.1"
           },
-          "Microsoft.Extensions.Logging": {
-            "target": "Package",
-            "version": "1.1.2"
-          },
-          "Microsoft.Extensions.Logging.Console": {
+          "Microsoft.Extensions.Configuration": {
             "target": "Package",
             "version": "1.1.2"
           },
           "System.Text.Encoding.CodePages": {
             "target": "Package",
             "version": "4.3.0"
+          },
+          "Microsoft.NETCore.App": {
+            "target": "Package",
+            "version": "2.0.0-preview2-25407-01",
+            "autoReferenced": true
+          },
+          "Microsoft.Extensions.Logging.Console": {
+            "target": "Package",
+            "version": "1.1.2"
+          },
+          "Microsoft.Extensions.Logging": {
+            "target": "Package",
+            "version": "1.1.2"
+          },
+          "Autofac": {
+            "target": "Package",
+            "version": "4.6.0"
           }
         },
         "imports": [

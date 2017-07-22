@@ -7237,6 +7237,9 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
       "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.CPlatform\\Surging.Core.CPlatform.csproj",
       "projectName": "Surging.Core.CPlatform",
@@ -7270,25 +7273,15 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
-          "Microsoft.NETCore.App": {
-            "suppressParent": "All",
+          "Microsoft.Extensions.FileProviders.Physical": {
             "target": "Package",
-            "version": "2.0.0-preview2-25407-01",
-            "autoReferenced": true
+            "version": "1.1.1"
           },
-          "Autofac": {
-            "target": "Package",
-            "version": "4.6.0"
-          },
-          "Microsoft.CodeAnalysis.CSharp.Scripting": {
-            "target": "Package",
-            "version": "2.3.0"
-          },
-          "Microsoft.Extensions.Configuration": {
+          "Microsoft.Extensions.Configuration.FileExtensions": {
             "target": "Package",
             "version": "1.1.2"
           },
-          "Microsoft.Extensions.Configuration.FileExtensions": {
+          "Microsoft.Extensions.Configuration": {
             "target": "Package",
             "version": "1.1.2"
           },
@@ -7296,17 +7289,27 @@
             "target": "Package",
             "version": "1.1.1"
           },
-          "Microsoft.Extensions.DependencyModel": {
+          "Microsoft.NETCore.App": {
+            "suppressParent": "All",
             "target": "Package",
-            "version": "1.1.2"
+            "version": "2.0.0-preview2-25407-01",
+            "autoReferenced": true
           },
-          "Microsoft.Extensions.FileProviders.Physical": {
+          "Microsoft.CodeAnalysis.CSharp.Scripting": {
             "target": "Package",
-            "version": "1.1.1"
+            "version": "2.3.0"
           },
           "Microsoft.Extensions.Logging": {
             "target": "Package",
             "version": "1.1.2"
+          },
+          "Microsoft.Extensions.DependencyModel": {
+            "target": "Package",
+            "version": "1.1.2"
+          },
+          "Autofac": {
+            "target": "Package",
+            "version": "4.6.0"
           },
           "Newtonsoft.Json": {
             "target": "Package",

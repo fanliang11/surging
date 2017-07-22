@@ -2587,13 +2587,12 @@
       },
       "Surging.Core.Caching/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v1.1",
+        "framework": ".NETCoreApp,Version=v2.0",
         "dependencies": {
           "Microsoft.Extensions.Configuration": "1.1.2",
           "Microsoft.Extensions.Configuration.Binder": "1.1.2",
           "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.2",
           "Microsoft.Extensions.Configuration.FileExtensions": "1.1.2",
-          "Microsoft.NETCore.App": "1.1.2",
           "Newtonsoft.Json": "10.0.2",
           "ServiceStack.Common.Core": "1.0.41",
           "ServiceStack.Interfaces.Core": "1.0.41",
@@ -8925,6 +8924,9 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
       "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.System\\Surging.Core.System.csproj",
       "projectName": "Surging.Core.System",
@@ -8971,6 +8973,14 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
+          "Autofac.Extensions.DependencyInjection": {
+            "target": "Package",
+            "version": "4.1.0"
+          },
+          "Microsoft.Extensions.DependencyInjection": {
+            "target": "Package",
+            "version": "1.1.1"
+          },
           "Microsoft.NETCore.App": {
             "suppressParent": "All",
             "target": "Package",
@@ -8980,14 +8990,6 @@
           "Autofac": {
             "target": "Package",
             "version": "4.6.0"
-          },
-          "Autofac.Extensions.DependencyInjection": {
-            "target": "Package",
-            "version": "4.1.0"
-          },
-          "Microsoft.Extensions.DependencyInjection": {
-            "target": "Package",
-            "version": "1.1.1"
           }
         },
         "imports": [

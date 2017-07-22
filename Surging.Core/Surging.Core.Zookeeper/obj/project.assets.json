@@ -7718,6 +7718,9 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
       "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.Zookeeper\\Surging.Core.Zookeeper.csproj",
       "projectName": "Surging.Core.Zookeeper",
@@ -7755,15 +7758,15 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
+          "Microsoft.Extensions.DependencyInjection": {
+            "target": "Package",
+            "version": "1.1.1"
+          },
           "Microsoft.NETCore.App": {
             "suppressParent": "All",
             "target": "Package",
             "version": "2.0.0-preview2-25407-01",
             "autoReferenced": true
-          },
-          "Microsoft.Extensions.DependencyInjection": {
-            "target": "Package",
-            "version": "1.1.1"
           },
           "ZooKeeperNetEx": {
             "target": "Package",

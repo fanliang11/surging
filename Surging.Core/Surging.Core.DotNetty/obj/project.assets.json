@@ -8007,6 +8007,9 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
       "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.DotNetty\\Surging.Core.DotNetty.csproj",
       "projectName": "Surging.Core.DotNetty",
@@ -8044,6 +8047,10 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
+          "DotNetty.Codecs": {
+            "target": "Package",
+            "version": "0.4.5"
+          },
           "Microsoft.NETCore.App": {
             "suppressParent": "All",
             "target": "Package",
@@ -8053,10 +8060,6 @@
           "Autofac": {
             "target": "Package",
             "version": "4.6.0"
-          },
-          "DotNetty.Codecs": {
-            "target": "Package",
-            "version": "0.4.5"
           }
         },
         "imports": [

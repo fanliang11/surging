@@ -7327,6 +7327,9 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
       "projectUniqueName": "E:\\开源项目\\Surging\\Surging.Core\\Surging.Core.ProxyGenerator\\Surging.Core.ProxyGenerator.csproj",
       "projectName": "Surging.Core.ProxyGenerator",
@@ -7364,27 +7367,27 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
+          "System.Runtime.Loader": {
+            "target": "Package",
+            "version": "4.3.0"
+          },
+          "Microsoft.Extensions.DependencyInjection": {
+            "target": "Package",
+            "version": "1.1.1"
+          },
           "Microsoft.NETCore.App": {
             "suppressParent": "All",
             "target": "Package",
             "version": "2.0.0-preview2-25407-01",
             "autoReferenced": true
           },
-          "Autofac": {
-            "target": "Package",
-            "version": "4.6.0"
-          },
           "Microsoft.CodeAnalysis.CSharp": {
             "target": "Package",
             "version": "2.3.0"
           },
-          "Microsoft.Extensions.DependencyInjection": {
+          "Autofac": {
             "target": "Package",
-            "version": "1.1.1"
-          },
-          "System.Runtime.Loader": {
-            "target": "Package",
-            "version": "4.3.0"
+            "version": "4.6.0"
           }
         },
         "imports": [
