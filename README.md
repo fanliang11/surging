@@ -18,10 +18,13 @@ AddRabbitMqAdapt()//基于rabbitmq的消费的服务适配<br/>
 * 增加容错策略Injection，脚本注入：
 
 <br/>
+
 ```c#
 [Command(Strategy= StrategyType.Injection ,Injection = @"return null;")]
-```     
+```    
+
  <br/>
+ 
 ```C#  
 [Command(Strategy= StrategyType.Injection ,Injection = @"return 
 Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
@@ -30,7 +33,6 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
             Age=18
          });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
 ```
-* 增加容错策略Injection，本地模块注入：   
 
 ```C#  
 [Command(Strategy= StrategyType.Injection ,Injection = @"return 
@@ -40,13 +42,16 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
             Age=18
          });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
 ```
+
+* 增加容错策略Injection，本地模块注入：   
+
 <br/>
+
 ```C#  
 [Command(Strategy= StrategyType.Injection ,Injection = @"return true;")] 
 ```
-
- 
 <br/>
+
 IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
 框架：.NET core 2.0
