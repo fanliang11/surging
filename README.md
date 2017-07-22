@@ -34,14 +34,6 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
          });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
 ```
 
-```C#  
-[Command(Strategy= StrategyType.Injection ,Injection = @"return 
-Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
-         {
-            Name=""fanly"",
-            Age=18
-         });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
-```
 
 * 增加容错策略Injection，本地模块注入：   
 
