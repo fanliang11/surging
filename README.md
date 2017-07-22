@@ -15,6 +15,7 @@ AddRabbitMqAdapt()//基于rabbitmq的消费的服务适配<br/>
  <br/>
 增加服务容错、服务容错降级、服务强制降级
 <br/>
+
 * 增加容错策略Injection，脚本注入：
 
 <br/>
