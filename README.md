@@ -22,9 +22,9 @@ AddRabbitMqAdapt()//基于rabbitmq的消费的服务适配<br/>
 /// 脚本注入
 /// </summary>
 [Command(Strategy= StrategyType.Injection ,Injection = @"return null;")]
- ` ``      
+```     
  <br/>
- ``` c#    
+```C#  
 /// <summary>
 /// 脚本注入
 /// </summary>
@@ -34,10 +34,28 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
             Name=""fanly"",
             Age=18
          });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
- ` ``
-   
+```
+* 增加容错策略Injection，本地模块注入：   
+```C#  
+/// <summary>
+/// 脚本注入
+/// </summary>
+[Command(Strategy= StrategyType.Injection ,Injection = @"return 
+Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
+         {
+            Name=""fanly"",
+            Age=18
+         });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
+```
 <br/>
-
+```C#  
+/// <summary>
+/// 本地模块注入
+/// </summary>
+/// <param name="id"></param>
+/// <returns></returns>
+[Command(Strategy= StrategyType.Injection ,Injection = @"return true;")] 
+```
 
  
 <br/>
