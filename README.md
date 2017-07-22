@@ -16,18 +16,13 @@ AddRabbitMqAdapt()//基于rabbitmq的消费的服务适配<br/>
 增加服务容错、服务容错降级、服务强制降级
 <br/>
 * 增加容错策略Injection，脚本注入：
+
 <br/>
 ```c#
-/// <summary>
-/// 脚本注入
-/// </summary>
 [Command(Strategy= StrategyType.Injection ,Injection = @"return null;")]
 ```     
  <br/>
 ```C#  
-/// <summary>
-/// 脚本注入
-/// </summary>
 [Command(Strategy= StrategyType.Injection ,Injection = @"return 
 Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
          {
@@ -36,10 +31,8 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
          });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
 ```
 * 增加容错策略Injection，本地模块注入：   
+
 ```C#  
-/// <summary>
-/// 脚本注入
-/// </summary>
 [Command(Strategy= StrategyType.Injection ,Injection = @"return 
 Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
          {
@@ -49,11 +42,6 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ```
 <br/>
 ```C#  
-/// <summary>
-/// 本地模块注入
-/// </summary>
-/// <param name="id"></param>
-/// <returns></returns>
 [Command(Strategy= StrategyType.Injection ,Injection = @"return true;")] 
 ```
 
