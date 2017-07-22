@@ -11,8 +11,34 @@ UseRabbitMQTransport() //rabbitmq 服务配置<br/>
 AddRabbitMqAdapt()//基于rabbitmq的消费的服务适配<br/>
 增加订阅功能：
 <br/>
-
  ServiceLocator.GetService< ISubscriptionAdapt >().SubscribeAt();
+ <br/>
+增加服务容错、服务容错降级、服务强制降级
+<br/>
+* 增加容错策略Injection，脚本注入：
+<br/>
+` ``c#
+          /// <summary>
+        /// 脚本注入
+        /// </summary>
+        [Command(Strategy= StrategyType.Injection ,Injection = @"return null;")]
+ ` ``      
+ <br/>
+` ``c#    
+        /// <summary>
+        /// 脚本注入
+        /// </summary>
+        [Command(Strategy= StrategyType.Injection ,Injection = @"return 
+         Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
+         {
+            Name=""fanly"",
+            Age=18
+         });",InjectionNamespaces =new string[] { "Surging.IModuleServices.Common"})] 
+ ` ``
+   
+<br/>
+
+
  
 <br/>
 IDE:Visual Studio 2017 15.3 Preview ,vscode
