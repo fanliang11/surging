@@ -40,7 +40,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             var addressEntry = _concurrent.GetOrAdd(key, k => new Lazy<AddressEntry>(() => new AddressEntry(context.Address))).Value;
             AddressModel addressModel;
             addressModel = addressEntry.GetAddress();
-            return addressModel;
+            return await Task.FromResult(addressModel);
         }
 
         #endregion Overrides of AddressSelectorBase

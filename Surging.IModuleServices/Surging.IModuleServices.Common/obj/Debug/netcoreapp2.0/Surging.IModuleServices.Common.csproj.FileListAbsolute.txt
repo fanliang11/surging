@@ -1,0 +1,17 @@
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.IModuleServices.Common.deps.json
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.IModuleServices.Common.dll
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.IModuleServices.Common.pdb
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.Caching.dll
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.Common.dll
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.CPlatform.dll
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.ProxyGenerator.dll
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.System.dll
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.System.pdb
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.Common.pdb
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.CPlatform.pdb
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.ProxyGenerator.pdb
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\bin\Debug\netcoreapp2.0\Surging.Core.Caching.pdb
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\obj\Debug\netcoreapp2.0\Surging.IModuleServices.Common.csprojResolveAssemblyReference.cache
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\obj\Debug\netcoreapp2.0\Surging.IModuleServices.Common.csproj.CoreCompileInputs.cache
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\obj\Debug\netcoreapp2.0\Surging.IModuleServices.Common.dll
+E:\开源项目\Surging\Surging.IModuleServices\Surging.IModuleServices.Common\obj\Debug\netcoreapp2.0\Surging.IModuleServices.Common.pdb

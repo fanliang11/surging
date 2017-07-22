@@ -96,7 +96,6 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 else
                 {
                     _logger.LogCritical("FATAL ERROR: RabbitMQ connections could not be created and opened");
-
                     return false;
                 }
             }

@@ -43,7 +43,7 @@ namespace Surging.Services.Server
                    .AddConsole((c, l) => (int)l >= 3);
             ConfigureRoutes();
             ServiceLocator.GetService<ISubscriptionAdapt>().SubscribeAt();
-          var d=  ServiceLocator.GetService<UserLoginDateChangeHandler>();
+            var d = ServiceLocator.GetService<UserLoginDateChangeHandler>();
             StartService();
             Console.ReadLine();
         }

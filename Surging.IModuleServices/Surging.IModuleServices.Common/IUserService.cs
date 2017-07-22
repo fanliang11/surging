@@ -1,5 +1,8 @@
 ﻿using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+using Surging.Core.CPlatform.Support;
+using Surging.Core.CPlatform.Support.Attributes;
+using Surging.Core.ProxyGenerator.Implementation;
 using Surging.IModuleServices.Common.Models;
 using System;
 using System.Collections.Generic;
@@ -19,6 +22,7 @@ namespace Surging.IModuleServices.Common
 
         Task<DateTime> GetUserLastSignInTime(int id);
 
+        [Command(Strategy= StrategyType.Injection ,RequestCacheEnabled =true ,ExecutionTimeoutInMilliseconds =10, BreakerRequestVolumeThreshold=0, Injection = @"return null;")] 
         Task<UserModel> GetUser(int id);
 
         Task<bool> Update(int id, UserModel model);

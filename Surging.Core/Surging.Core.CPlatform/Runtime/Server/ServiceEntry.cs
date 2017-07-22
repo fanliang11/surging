@@ -14,6 +14,7 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// </summary>
         public  Func<string, IDictionary<string, object>,Task<object>> Func { get; set; }
         
+        public List<Attribute> Attributes { get; set; }
         /// <summary>
         /// 服务描述符。
         /// </summary>

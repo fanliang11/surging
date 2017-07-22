@@ -35,9 +35,9 @@ namespace Surging.Core.Caching.RedisCache
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        internal string _password;
+        internal string _password = null;
 
-        internal string _bucket;
+        internal string _bucket = null;
         /// <summary>
         /// 默认缓存失效时间
         /// </summary>
@@ -45,7 +45,7 @@ namespace Surging.Core.Caching.RedisCache
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        internal string _defaultExpireTime;
+        internal string _defaultExpireTime=null;
 
         /// <summary>
         /// 连接失效时间
@@ -54,7 +54,7 @@ namespace Surging.Core.Caching.RedisCache
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        internal string _connectTimeout;
+        internal string _connectTimeout = null;
 
         /// <summary>
         /// 规则名（现在只实现哈希一致性）
@@ -63,7 +63,7 @@ namespace Surging.Core.Caching.RedisCache
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        internal string _ruleName;
+        internal string _ruleName = null;
 
         /// <summary>
         /// 哈希节点容器
@@ -77,12 +77,12 @@ namespace Surging.Core.Caching.RedisCache
         /// <summary>
         /// 对象池上限
         /// </summary>
-        internal string _maxSize;
+        internal string _maxSize = null;
 
         /// <summary>
         /// 对象池下限
         /// </summary>
-        internal string _minSize;
+        internal string _minSize=null;
 
         #region 构造函数
         /// <summary>

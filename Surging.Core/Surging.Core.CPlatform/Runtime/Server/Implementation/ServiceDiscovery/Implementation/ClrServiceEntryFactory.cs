@@ -2,8 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -17,15 +19,12 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
     public class ClrServiceEntryFactory : IClrServiceEntryFactory
     {
         #region Field
-
         private readonly CPlatformContainer _serviceProvider;
         private readonly IServiceIdGenerator _serviceIdGenerator;
         private readonly ITypeConvertibleService _typeConvertibleService;
-
         #endregion Field
 
         #region Constructor
-
         public ClrServiceEntryFactory(CPlatformContainer serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService)
         {
             _serviceProvider = serviceProvider;
@@ -58,9 +57,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         private ServiceEntry Create(MethodInfo method)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
-           
 
-          
             var serviceDescriptor = new ServiceDescriptor
             {
                 Id = serviceId
@@ -71,13 +68,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
-            
+
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
-                Func =(key, parameters) =>
+                Attributes = method.GetCustomAttributes().ToList(),
+                Func = (key, parameters) =>
              {
-                 var serviceScopeFactory = _serviceProvider.GetInstances<IServiceScopeFactory>();
+
                  var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
                  foreach (var parameterInfo in method.GetParameters())
@@ -86,7 +84,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
-                 }
+                 } 
                  var result = method.Invoke(instance, list.ToArray());
                  return Task.FromResult(result);
              }

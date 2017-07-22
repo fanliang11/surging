@@ -35,7 +35,6 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
             _consumerChannel = CreateConsumerChannel();
-
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 
