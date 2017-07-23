@@ -6,3 +6,4 @@ E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Release\netcoreapp2
 E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Release\netcoreapp2.0\Surging.Core.Common.AssemblyInfo.cs
 E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Release\netcoreapp2.0\Surging.Core.Common.dll
 E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Release\netcoreapp2.0\Surging.Core.Common.pdb
+E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Release\netcoreapp2.0\Surging.Core.Common.csprojResolveAssemblyReference.cache

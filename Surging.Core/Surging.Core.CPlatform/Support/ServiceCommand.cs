@@ -32,7 +32,7 @@ namespace Surging.Core.CPlatform.Support
         /// </summary>
         public int BreakeErrorThresholdPercentage { get; set; } = 50;
         /// <summary>
-        /// 熔断多少秒后去尝试请求
+        /// 熔断多少毫秒后去尝试请求
         /// </summary>
         public int BreakeSleepWindowInMilliseconds { get; set; } = 60000;
         /// <summary>

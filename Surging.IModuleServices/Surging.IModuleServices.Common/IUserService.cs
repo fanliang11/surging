@@ -22,7 +22,7 @@ namespace Surging.IModuleServices.Common
 
         Task<DateTime> GetUserLastSignInTime(int id);
 
-        [Command(Strategy= StrategyType.Injection ,RequestCacheEnabled =true ,ExecutionTimeoutInMilliseconds =10, BreakerRequestVolumeThreshold=0, Injection = @"return null;")] 
+        [Command(Strategy= StrategyType.Failover,FailoverCluster =3)] 
         Task<UserModel> GetUser(int id);
 
         Task<bool> Update(int id, UserModel model);
