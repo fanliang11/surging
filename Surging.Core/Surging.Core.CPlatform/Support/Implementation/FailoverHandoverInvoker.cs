@@ -29,19 +29,20 @@ namespace Surging.Core.CPlatform.Support.Implementation
         }
 
         #endregion Constructor
+
         public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string _serviceKey)
         {
-            var time=0;
-            T result=default(T);
-            RemoteInvokeResultMessage message=null;
+            var time = 0;
+            T result = default(T);
+            RemoteInvokeResultMessage message = null;
             var command = _commandProvider.GetCommand(serviceId);
             do
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
-                if(message != null && message.Result !=null)
+                if (message != null && message.Result != null)
                     result = (T)_typeConvertibleService.Convert(message.Result, typeof(T));
-            } while ( message == null && ++time < command.FailoverCluster);
-            return await Task.FromResult(result);
+            } while (message == null && ++time < command.FailoverCluster);
+            return result;
         }
 
         public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string _serviceKey)
