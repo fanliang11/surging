@@ -21,6 +21,7 @@ using Microsoft.Extensions.DependencyModel;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Surging.Core.CPlatform;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -162,6 +163,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     UsingDirective(GetQualifiedNameSyntax("System.Collections.Generic")),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ITypeConvertibleService).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(IRemoteInvokeService).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(CPlatformContainer).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
                 });
@@ -191,7 +193,12 @@ namespace Surging.Core.ProxyGenerator.Implementation
                                 Parameter(
                                     Identifier("serviceKey"))
                                     .WithType(
-                                        IdentifierName("String"))
+                                        IdentifierName("String")),
+                                 Token(SyntaxKind.CommaToken),
+                                Parameter(
+                                    Identifier("serviceProvider"))
+                                    .WithType(
+                                        IdentifierName("CPlatformContainer"))
                             })))
                 .WithInitializer(
                         ConstructorInitializer(
@@ -206,7 +213,10 @@ namespace Surging.Core.ProxyGenerator.Implementation
                                             IdentifierName("typeConvertibleService")),
                                           Token(SyntaxKind.CommaToken),
                                         Argument(
-                                            IdentifierName("serviceKey"))
+                                            IdentifierName("serviceKey")),
+                                           Token(SyntaxKind.CommaToken),
+                                        Argument(
+                                            IdentifierName("serviceProvider"))
                                     }))))
                 .WithBody(Block());
         }

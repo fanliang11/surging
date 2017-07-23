@@ -1,9 +1,7 @@
 ﻿using Autofac.Core;
 using Autofac.Features.Scanning;
-using Castle.DynamicProxy;
 using Surging.Core.System.Module;
 using Surging.Core.System.Module.Attributes;
-using Autofac.Extras.DynamicProxy;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -91,7 +89,6 @@ namespace Surging.Core.System.Ioc
             if (builder == null) throw new ArgumentNullException("builder");
 
             #region 接口服务注入
-            builder.RegisterType<CacheProviderInterceptor>();
             var interfaceAssemblies = referenceAssemblies.Where(
                 p =>
                 p.GetCustomAttribute<AssemblyModuleTypeAttribute>().Type == ModuleType.InterFaceService ||
@@ -100,7 +97,7 @@ namespace Surging.Core.System.Ioc
             {
                 result = builder.RegisterAssemblyTypes(interfaceAssembly)
                     .Where(t => t.Name.StartsWith("I")).Where(t => t.Name.EndsWith("Service"))
-                    .AsImplementedInterfaces().EnableInterfaceInterceptors();
+                    .AsImplementedInterfaces();
 
             }
             #endregion
@@ -113,7 +110,7 @@ namespace Surging.Core.System.Ioc
             foreach (var domainAssembly in domainAssemblies)
             {
                 result = builder.RegisterAssemblyTypes(domainAssembly)
-              .Where(t => t.Name.EndsWith("Service") && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces().EnableInterfaceInterceptors();
+              .Where(t => t.Name.EndsWith("Service") && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
               //  result = builder.RegisterAssemblyTypes(domainAssembly)
               //.Where(t => t.Name.EndsWith("Service") && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).EnableClassInterceptors();
                 var types = domainAssembly.GetTypes().Where(t => t.Name.EndsWith("Service") && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
@@ -124,8 +121,8 @@ namespace Surging.Core.System.Ioc
                         .FirstOrDefault(t => t.Name.StartsWith("I") && t.Name.EndsWith("Service"));
                     if (interfaceObj != null)
                     {
-                        builder.RegisterType(type).AsImplementedInterfaces().EnableInterfaceInterceptors().Named(module.ModuleName, interfaceObj);
-                        builder.RegisterType(type).EnableClassInterceptors().Named(module.ModuleName, type);
+                        builder.RegisterType(type).AsImplementedInterfaces().Named(module.ModuleName, interfaceObj);
+                        builder.RegisterType(type).Named(module.ModuleName, type);
                     }
                 }
 
@@ -173,8 +170,7 @@ namespace Surging.Core.System.Ioc
             foreach (var repositoryAssembly in repositoryAssemblies)
             {
                 result = builder.RegisterAssemblyTypes(repositoryAssembly)
-                    .Where(t => t.Name.EndsWith("Repository"))
-                    .EnableClassInterceptors().InterceptedBy(typeof(CacheProviderInterceptor));
+                    .Where(t => t.Name.EndsWith("Repository"));
             }
             return result;
         }

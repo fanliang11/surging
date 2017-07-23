@@ -8,11 +8,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
+using System.Threading;
 
 namespace Surging.Modules.Common.Domain
 {
     [ModuleName("User")]
-   public class UserService: IUserService
+    public class UserService : IUserService
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;

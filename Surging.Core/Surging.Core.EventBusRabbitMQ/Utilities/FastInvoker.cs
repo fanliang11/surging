@@ -17,7 +17,6 @@ namespace Surging.Core.EventBusRabbitMQ.Utilities
             {
                 if (_current == null)
                     _current = new FastInvoker<T>();
-
                 return _current;
             }
         }
@@ -27,9 +26,7 @@ namespace Surging.Core.EventBusRabbitMQ.Utilities
             var call = expression.Body as MethodCallExpression;
             if (call == null)
                 throw new ArgumentException("只支持方法调用表达式。 ", "expression");
-
             Action<T> invoker = GetInvoker(() => call.Method);
-
             invoker(target);
         }
 
@@ -44,10 +41,8 @@ namespace Surging.Core.EventBusRabbitMQ.Utilities
             {
                 if (method.IsGenericMethod)
                     return GetGenericMethodFromTypes(method.GetGenericMethodDefinition(), genericTypes);
-
                 return method;
             });
-
             invoker(target);
         }
 
@@ -55,15 +50,12 @@ namespace Surging.Core.EventBusRabbitMQ.Utilities
         {
             if (!method.IsGenericMethod)
                 throw new ArgumentException("不能为非泛型方法指定泛型类型。: " + method.Name);
-
             Type[] genericArguments = method.GetGenericArguments();
-
             if (genericArguments.Length != genericTypes.Length)
             {
                 throw new ArgumentException("传递的泛型参数的数目错误" + genericTypes.Length
                                             + " (needed " + genericArguments.Length + ")");
             }
-
             method = method.GetGenericMethodDefinition().MakeGenericMethod(genericTypes);
             return method;
         }

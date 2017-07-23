@@ -18,6 +18,9 @@ using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Microsoft.Extensions.Configuration;
 using Surging.IModuleServices.Common.Models.Events;
+using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Services.Client
 {
@@ -49,7 +52,7 @@ namespace Surging.Services.Client
             build
             .AddEventBusFile("eventBusSettings.json", optional: false);
         }
-
+        
         /// <summary>
         /// 配置相关服务
         /// </summary>
@@ -65,6 +68,7 @@ namespace Surging.Services.Client
                  .AddClient()
                  .UseSharedFileRouteManager("c:\\routes.txt")
                  .UseDotNettyTransport().UseRabbitMQTransport();
+            builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
         }
 
         /// <summary>
@@ -96,7 +100,7 @@ namespace Surging.Services.Client
         {
             Task.Run(async () =>
             {
-                var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+                var userProxy = serviceProxyFactory.CreateProxy<IUserService>("Person");
                 await userProxy.GetUser(1);
                 do
                 {
@@ -105,7 +109,7 @@ namespace Surging.Services.Client
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
-                        await userProxy.GetUser(1);
+                       await  userProxy.GetUser(1);
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
