@@ -1,9 +1,0 @@
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\bin\Debug\netcoreapp2.0\Surging.Core.Common.deps.json
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\bin\Debug\netcoreapp2.0\Surging.Core.Common.dll
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\bin\Debug\netcoreapp2.0\Surging.Core.Common.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Debug\netcoreapp2.0\Surging.Core.Common.csproj.CoreCompileInputs.cache
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Debug\netcoreapp2.0\Surging.Core.Common.AssemblyInfoInputs.cache
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Debug\netcoreapp2.0\Surging.Core.Common.AssemblyInfo.cs
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Debug\netcoreapp2.0\Surging.Core.Common.dll
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Debug\netcoreapp2.0\Surging.Core.Common.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.Common\obj\Debug\netcoreapp2.0\Surging.Core.Common.csprojResolveAssemblyReference.cache
