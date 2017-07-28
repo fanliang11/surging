@@ -43,6 +43,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ```C#  
 [Command(Strategy= StrategyType.Injection ,Injection = @"return true;")] 
 ```
+
 <br/>
 
 怎么启用缓存拦截?
@@ -50,7 +51,8 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 <br/>
 ```C#  
    [Command(Strategy= StrategyType.Failover,FailoverCluster =3,RequestCacheEnabled =true)]  //RequestCacheEnabled =true 就是启用缓存
-   ```
+```
+
 <br/>
 怎么拦截获取缓存
  <br/>
@@ -60,6 +62,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ```C#  
  [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", Mode = CacheTargetType.Redis, Time = 480)]
     ```
+    
 <br/>
 怎么拦截删除缓存
  <br/>
@@ -69,6 +72,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ```C#  
   [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", Mode = CacheTargetType.Redis)]
       ```
+      
          <br/>
 怎么添加缓存KEY
    <br/>
