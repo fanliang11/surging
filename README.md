@@ -43,7 +43,55 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ```C#  
 [Command(Strategy= StrategyType.Injection ,Injection = @"return true;")] 
 ```
+
 <br/>
+
+增加缓存降级，怎么使用？
+<br/>
+在业务接口方法上添加如下特性
+<br/>
+
+```C#  
+   [Command(Strategy= StrategyType.Failover,FailoverCluster =3,RequestCacheEnabled =true)]  //RequestCacheEnabled =true 就是启用缓存
+```
+
+<br/>
+怎么拦截获取缓存
+ <br/>
+在业务接口方法上添加如下特性
+ <br/>
+ 
+```C#  
+ [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", Mode = CacheTargetType.Redis, Time = 480)]
+```
+    
+<br/>
+怎么拦截删除缓存
+ <br/>
+在业务接口方法上添加如下特性
+ <br/>
+ 
+```C#  
+  [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", Mode = CacheTargetType.Redis)]
+```
+      
+<br/>
+怎么添加缓存KEY
+   <br/>
+在业务模型属性上添加，如下特性，可以支持多个
+   <br/>
+   
+```C# 
+[CacheKey(1)]
+```
+        
+<br/>
+配置拦截器
+<br/>
+   
+```C# 
+ .AddClientIntercepted(typeof(CacheProviderInterceptor))
+```
 
 IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
