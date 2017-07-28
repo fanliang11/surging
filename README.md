@@ -82,7 +82,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
    <br/>
    
 ```C# 
-        [CacheKey(1)]
+[CacheKey(1)]
 ```
         
 <br/>
