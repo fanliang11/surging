@@ -164,6 +164,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     UsingDirective(GetQualifiedNameSyntax(typeof(ITypeConvertibleService).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(IRemoteInvokeService).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(CPlatformContainer).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
                 });
         }
