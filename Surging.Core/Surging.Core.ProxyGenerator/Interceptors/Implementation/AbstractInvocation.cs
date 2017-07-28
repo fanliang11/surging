@@ -29,10 +29,10 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             proxyObject = proxy;
         }
 
-        public object Proxy => proxyObject; 
+        public object Proxy => proxyObject;
 
-        public string ServiceId =>  _serviceId; 
-        public string[] CacheKey => _cacheKey; 
+        public string ServiceId => _serviceId;
+        public string[] CacheKey => _cacheKey;
 
         public IDictionary<string, object> Arguments => _arguments;
 
@@ -41,7 +41,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
         public object ReturnValue => _returnValue;
 
         public abstract Task Proceed();
-       
+
 
         public void SetArgumentValue(int index, object value)
         {

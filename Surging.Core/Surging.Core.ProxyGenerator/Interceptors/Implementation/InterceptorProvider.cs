@@ -47,7 +47,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                     var runtimeProperties = param.GetType().GetRuntimeProperties();
                     var properties = (from q in runtimeProperties
                                       let k = (from m in CustomAttributeData.GetCustomAttributes(q)
-                                               where GetKeyAttributeDerivedType(typeof(KeyAttribute), m.Constructor.DeclaringType)
+                                               where IsKeyAttributeDerivedType(typeof(KeyAttribute), m.Constructor.DeclaringType)
                                                select new AttributeFactory(m).Create()).FirstOrDefault()
                                       where k != null
                                       orderby (k as KeyAttribute).SortIndex
@@ -60,7 +60,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             return reuslt;
         }
 
-        private bool GetKeyAttributeDerivedType(Type baseType,Type derivedType)
+        private bool IsKeyAttributeDerivedType(Type baseType,Type derivedType)
         {
             bool result = false;
             var key = Tuple.Create(baseType, derivedType);
