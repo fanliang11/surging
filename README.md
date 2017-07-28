@@ -46,7 +46,8 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 
 <br/>
 
-怎么启用缓存拦截?
+增加缓存降级，怎么使用？
+<br/>
 在业务接口方法上添加如下特性
 <br/>
 
