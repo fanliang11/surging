@@ -74,7 +74,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
   [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", Mode = CacheTargetType.Redis)]
 ```
       
-         <br/>
+<br/>
 怎么添加缓存KEY
    <br/>
 在业务模型属性上添加，如下特性，可以支持多个
@@ -84,9 +84,9 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
         [CacheKey(1)]
 ```
         
-           <br/>
+<br/>
 配置拦截器
-   <br/>
+<br/>
    
 ```C# 
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
