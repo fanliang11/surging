@@ -62,7 +62,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  
 ```C#  
  [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", Mode = CacheTargetType.Redis, Time = 480)]
-    ```
+```
     
 <br/>
 怎么拦截删除缓存
@@ -72,7 +72,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  
 ```C#  
   [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", Mode = CacheTargetType.Redis)]
-      ```
+```
       
          <br/>
 怎么添加缓存KEY
@@ -80,17 +80,17 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 在业务模型属性上添加，如下特性，可以支持多个
    <br/>
    
-   ```C# 
+```C# 
         [CacheKey(1)]
-        ```
+```
         
            <br/>
 配置拦截器
    <br/>
    
-   ```C# 
+```C# 
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
-         ```
+```
 
 IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
