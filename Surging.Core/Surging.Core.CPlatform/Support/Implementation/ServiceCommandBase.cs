@@ -14,7 +14,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         public async Task<object> Run(string text, params string[] InjectionNamespaces)
         {
-            object result = null;
+            object result = scripts;
             var scriptOptions = ScriptOptions.Default.WithImports("System.Threading.Tasks");
             if (InjectionNamespaces != null)
             {
@@ -26,6 +26,10 @@ namespace Surging.Core.CPlatform.Support.Implementation
             if (!scripts.ContainsKey(text))
             {
                 result = scripts.GetOrAdd(text, await CSharpScript.EvaluateAsync(text, scriptOptions));
+            }
+            else
+            {
+                scripts.TryGetValue(text, out result);
             }
             return result;
         }

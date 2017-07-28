@@ -68,6 +68,10 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             {
                 result =_derivedTypes.GetOrAdd(key, derivedType.IsSubclassOf(baseType) || derivedType == baseType);
             }
+            else
+            {
+                _derivedTypes.TryGetValue(key, out result);
+            }
             return result;
         }
     }

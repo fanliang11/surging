@@ -63,7 +63,7 @@ namespace Surging.Services.Server
             builder.AddCoreServce()
                  .AddServiceRuntime()
                  .UseSharedFileRouteManager("c:\\routes.txt")//配置本地路由文件路径
-                 .UseDotNettyTransport().UseRabbitMQTransport().AddRabbitMqAdapt();//配置Netty
+                 .UseDotNettyTransport().UseRabbitMQTransport().AddRabbitMQAdapt();//配置Netty
             builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
         }
 
