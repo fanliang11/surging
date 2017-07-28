@@ -8,4 +8,3 @@ E:\开源项目\Surging\Surging.Core\Surging.Core.ProxyGenerator\obj\Debug\netco
 E:\开源项目\Surging\Surging.Core\Surging.Core.ProxyGenerator\obj\Debug\netcoreapp2.0\Surging.Core.ProxyGenerator.AssemblyInfo.cs
 E:\开源项目\Surging\Surging.Core\Surging.Core.ProxyGenerator\obj\Debug\netcoreapp2.0\Surging.Core.ProxyGenerator.dll
 E:\开源项目\Surging\Surging.Core\Surging.Core.ProxyGenerator\obj\Debug\netcoreapp2.0\Surging.Core.ProxyGenerator.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.ProxyGenerator\obj\Debug\netcoreapp2.0\Surging.Core.ProxyGenerator.csprojResolveAssemblyReference.cache

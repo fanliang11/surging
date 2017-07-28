@@ -21,6 +21,8 @@ using Surging.IModuleServices.Common.Models.Events;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Routing;
+using Surging.Core.System.Intercept;
+using Surging.IModuleServices.Common.Models;
 
 namespace Surging.Services.Client
 {
@@ -66,6 +68,7 @@ namespace Surging.Services.Client
             builder.RegisterModules();
             var serviceBulider = builder
                  .AddClient()
+                 .AddClientIntercepted(typeof(CacheProviderInterceptor))
                  .UseSharedFileRouteManager("c:\\routes.txt")
                  .UseDotNettyTransport().UseRabbitMQTransport();
             builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
@@ -101,7 +104,7 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("Person");
-                await userProxy.GetUser(1);
+                await userProxy.GetUser(new UserModel { UserId=2});
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
@@ -109,7 +112,7 @@ namespace Surging.Services.Client
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
-                       await  userProxy.GetUser(1);
+                       await  userProxy.GetUser(new UserModel { UserId = 2 });
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");

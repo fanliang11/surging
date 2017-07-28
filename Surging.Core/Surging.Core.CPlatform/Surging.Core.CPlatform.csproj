@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Transport\" />
+    <Folder Include="新文件夹\" />
   </ItemGroup>
 
   <ItemGroup>

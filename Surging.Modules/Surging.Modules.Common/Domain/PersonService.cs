@@ -41,7 +41,7 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(DateTime.Now);
         }
 
-        public Task<UserModel> GetUser(int id)
+        public Task<UserModel> GetUser(UserModel user)
         {
             return Task.FromResult(new UserModel
             {

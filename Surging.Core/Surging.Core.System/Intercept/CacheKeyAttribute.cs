@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.ProxyGenerator.Interceptors.Implementation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,7 +10,10 @@ namespace Surging.Core.System.Intercept
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property,
         AllowMultiple = false)]
-    public class CacheKeyAttribute : Attribute
+    public class CacheKeyAttribute : KeyAttribute
     {
+        public CacheKeyAttribute(int sortIndex) : base(sortIndex)
+        {
+        }
     }
 }

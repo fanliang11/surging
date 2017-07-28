@@ -23,7 +23,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             {
                 var command = (from q in _serviceEntryManager.GetEntries()
                                let k = q.Attributes
-                               where k.OfType<CommandAttribute>().Count() > 0
+                               where k.OfType<CommandAttribute>().Count() > 0 && q.Descriptor.Id==serviceId
                                select k.OfType<CommandAttribute>().FirstOrDefault()).FirstOrDefault();
                 result = ConvertServiceCommand(command);
                 _serviceCommand.AddOrUpdate(serviceId, result, (s, r) => result);

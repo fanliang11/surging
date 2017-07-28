@@ -60,15 +60,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
 
             var serviceDescriptor = new ServiceDescriptor
             {
-                Id = serviceId
-            };
+                Id = serviceId,
 
+            };
             var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
             foreach (var descriptorAttribute in descriptorAttributes)
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
-
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
@@ -84,13 +83,12 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
-                 } 
+                 }
                  var result = method.Invoke(instance, list.ToArray());
                  return Task.FromResult(result);
              }
             };
         }
-
         #endregion Private Method
     }
 }

@@ -3,6 +3,7 @@ using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Support;
+using Surging.Core.ProxyGenerator.Interceptors;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
         private readonly CPlatformContainer _serviceProvider;
         private readonly IServiceCommandProvider _commandProvider;
         private readonly IBreakeRemoteInvokeService _breakeRemoteInvokeService;
+        private readonly IInterceptor _interceptor;
         #endregion Field
 
         #region Constructor
@@ -34,6 +36,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             _serviceProvider = serviceProvider;
             _commandProvider = serviceProvider.GetInstances<IServiceCommandProvider>();
             _breakeRemoteInvokeService = serviceProvider.GetInstances<IBreakeRemoteInvokeService>();
+            _interceptor= serviceProvider.GetInstances<IInterceptor>();
         }
         #endregion Constructor
 
@@ -47,17 +50,42 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// <returns>调用结果。</returns>
         protected async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId)
         {
-            var message =await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
+            object result = default(T);
+            var command = _commandProvider.GetCommand(serviceId);
+            RemoteInvokeResultMessage message;
+            if (!command.RequestCacheEnabled)
+            {
+                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
+                if (message == null)
+                {
+                    var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
+                    return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
+                }
+            }
+            else
+            {
+                var invocation = GetInvocation(parameters, serviceId);
+                await _interceptor.Intercept(invocation);
+                message = invocation.ReturnValue is RemoteInvokeResultMessage
+                    ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
+            }
+            if (message != null)
+                result = _typeConvertibleService.Convert(message.Result, typeof(T));
+            return (T)result;
+        }
+
+
+        public async Task<object> CallInvoke(IDictionary<string, object> parameters, string serviceId)
+        {
+            object result = null;
+            var message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
             if (message == null)
             {
                 var command = _commandProvider.GetCommand(serviceId);
                 var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
+                return await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
             }
-            if (message == null)
-                return default(T);
-            var result = _typeConvertibleService.Convert(message.Result, typeof(T));
-            return (T)result;
+            return result;
         }
 
         /// <summary>
@@ -75,6 +103,12 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
                 await invoker.Invoke(parameters, serviceId, _serviceKey);
             }
+        }
+
+        private IInvocation GetInvocation(IDictionary<string, object> parameters, string serviceId)
+        {
+            var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
+            return invocation.GetInvocation(this, parameters, serviceId);
         }
 
         #endregion Protected Method

@@ -3,9 +3,9 @@ E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\bin\Debug\netcoreapp2
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\bin\Debug\netcoreapp2.0\Surging.Core.DotNetty.pdb
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\bin\Debug\netcoreapp2.0\Surging.Core.CPlatform.dll
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\bin\Debug\netcoreapp2.0\Surging.Core.CPlatform.pdb
-E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\obj\Debug\netcoreapp2.0\Surging.Core.DotNetty.csprojResolveAssemblyReference.cache
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\obj\Debug\netcoreapp2.0\Surging.Core.DotNetty.csproj.CoreCompileInputs.cache
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\obj\Debug\netcoreapp2.0\Surging.Core.DotNetty.AssemblyInfoInputs.cache
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\obj\Debug\netcoreapp2.0\Surging.Core.DotNetty.AssemblyInfo.cs
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\obj\Debug\netcoreapp2.0\Surging.Core.DotNetty.dll
 E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\obj\Debug\netcoreapp2.0\Surging.Core.DotNetty.pdb
+E:\开源项目\Surging\Surging.Core\Surging.Core.DotNetty\obj\Debug\netcoreapp2.0\Surging.Core.DotNetty.csprojResolveAssemblyReference.cache

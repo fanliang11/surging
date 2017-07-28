@@ -10,8 +10,8 @@ namespace Surging.Core.CPlatform.Support.Implementation
 {
     public class FailoverInjectionInvoker : IClusterInvoker
     {
-        public IServiceCommandProvider _serviceCommandProvider;
-        public IServiceEntryManager _serviceEntryManager;
+        public readonly IServiceCommandProvider _serviceCommandProvider;
+        public readonly IServiceEntryManager _serviceEntryManager;
         private readonly ITypeConvertibleService _typeConvertibleService;
 
         public FailoverInjectionInvoker(IServiceCommandProvider serviceCommandProvider, IServiceEntryManager serviceEntryManager, ITypeConvertibleService typeConvertibleService)
