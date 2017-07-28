@@ -19,7 +19,8 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
         {
             _serviceEntryManager = serviceEntryManager;
         }
-        public IInvocation GetInvocation(object proxy, IDictionary<string, object> parameters, string serviceId)
+        public IInvocation GetInvocation(object proxy, IDictionary<string, object> parameters,
+            string serviceId,Type returnType)
         {
             var entry = (from q in _serviceEntryManager.GetEntries()
                          let k = q.Attributes
@@ -31,6 +32,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                     serviceId,
                     GetKey(parameters),
                     entry.Attributes,
+                    returnType,
                     proxy
                 }) as IInvocation;
         }
@@ -46,13 +48,11 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                 {
                     var runtimeProperties = param.GetType().GetRuntimeProperties();
                     var properties = (from q in runtimeProperties
-                                      let k = (from m in CustomAttributeData.GetCustomAttributes(q)
-                                               where IsKeyAttributeDerivedType(typeof(KeyAttribute), m.Constructor.DeclaringType)
-                                               select new AttributeFactory(m).Create()).FirstOrDefault()
+                                      let k = q.GetCustomAttribute<KeyAttribute>()
                                       where k != null
                                       orderby (k as KeyAttribute).SortIndex
                                       select q).ToList();
-                 
+
                     reuslt = properties.Count() > 0 ?
                               properties.Select(p => p.GetValue(parameterValue.Values.FirstOrDefault()).ToString()).ToArray() : reuslt;
                 }

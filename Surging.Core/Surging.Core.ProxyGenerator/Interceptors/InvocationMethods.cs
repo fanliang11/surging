@@ -16,6 +16,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors
                                                              typeof(string),
                                                              typeof(string[]),
                                                              typeof(List<Attribute>),
+                                                             typeof(Type),
                                                              typeof(object)
                                                      },
                                                      null);

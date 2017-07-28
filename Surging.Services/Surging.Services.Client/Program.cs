@@ -23,6 +23,7 @@ using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
+using Surging.Core.Caching.Configurations;
 
 namespace Surging.Services.Client
 {
@@ -39,6 +40,7 @@ namespace Surging.Services.Client
             ConfigureLogging(services);
             builder.Populate(services);
             ConfigureService(builder);
+            ConfigureCache(config);
             ServiceLocator.Current = builder.Build();
             ServiceLocator.GetService<ILoggerFactory>()
                 .AddConsole((c, l) => (int)l >= 3);
@@ -81,6 +83,15 @@ namespace Surging.Services.Client
         public static void ConfigureLogging(IServiceCollection services)
         {
             services.AddLogging();
+        }
+
+        /// <summary>
+        /// 配置缓存服务
+        /// </summary>
+        public static void ConfigureCache(IConfigurationBuilder build)
+        {
+            build
+              .AddCacheFile("cacheSettings.json", optional: false);
         }
 
         /// <summary>

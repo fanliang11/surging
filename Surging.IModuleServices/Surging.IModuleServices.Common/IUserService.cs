@@ -24,11 +24,16 @@ namespace Surging.IModuleServices.Common
 
         Task<DateTime> GetUserLastSignInTime(int id);
 
-        [Command(Strategy= StrategyType.Failover,FailoverCluster =3,RequestCacheEnabled =true)]
-        [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", Mode = CacheTargetType.Redis, Time = 480)]
+        [Command(Strategy= StrategyType.Injection,Injection = @"return
+new Surging.IModuleServices.Common.Models.UserModel
+         {
+            Name=""fanly"",
+            Age=18
+         };", InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" },RequestCacheEnabled =true)]
+        [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType =SectionType.ddlCache, Mode = CacheTargetType.MemoryCache, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
 
-        [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", Mode = CacheTargetType.Redis)]
+        [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.MemoryCache)]
         Task<bool> Update(int id, UserModel model);
 
         Task<IDictionary<string, string>> GetDictionary();

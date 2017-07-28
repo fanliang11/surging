@@ -11,6 +11,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
         private readonly string _serviceId;
         private readonly string[] _cacheKey;
         private readonly List<Attribute> _attributes;
+        private readonly Type _returnType;
         protected readonly object proxyObject;
         protected object _returnValue;
 
@@ -19,6 +20,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
            string serviceId,
             string[] cacheKey,
             List<Attribute> attributes,
+            Type  returnType,
             object proxy
             )
         {
@@ -26,6 +28,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             _serviceId = serviceId;
             _cacheKey = cacheKey;
             _attributes = attributes;
+            _returnType = returnType;
             proxyObject = proxy;
         }
 
@@ -38,7 +41,9 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 
         public List<Attribute> Attributes => _attributes;
 
-        public object ReturnValue => _returnValue;
+        object IInvocation.ReturnValue { get => _returnValue; set => _returnValue=value; }
+
+        public Type ReturnType => _returnType;
 
         public abstract Task Proceed();
 
