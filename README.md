@@ -49,6 +49,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 怎么启用缓存拦截?
 在业务接口方法上添加如下特性
 <br/>
+
 ```C#  
    [Command(Strategy= StrategyType.Failover,FailoverCluster =3,RequestCacheEnabled =true)]  //RequestCacheEnabled =true 就是启用缓存
 ```
