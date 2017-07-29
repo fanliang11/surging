@@ -149,7 +149,7 @@ namespace Surging.Core.Caching.RedisCache
                 MinSize = int.Parse(node.MinSize),
                 MaxSize = int.Parse(node.MaxSize),
             });
-            redis.Set(GetKeySuffix(key),value,timeSpan);
+            redis.Set(GetKeySuffix(key), value, timeSpan);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Surging.Core.Caching.RedisCache
         {
             this.AddTaskAsync(key, value, timeSpan);
         }
-        
+
         /// <summary>
         /// 根据KEY键集合获取返回对象集合
         /// </summary>
@@ -179,10 +179,21 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public IDictionary<string, T> Get<T>(IEnumerable<string> keys)
         {
-            var result = new Dictionary<string, T>();
+            IDictionary<string, T> result = null;
             foreach (var key in keys)
             {
-                this.Add(key, this.Get<T>(key));
+
+                var node = GetRedisNode(key);
+                var redis = GetRedisClient(new RedisEndpoint()
+                {
+                    DbIndex = int.Parse(node.Db),
+                    Host = node.Host,
+                    Password = node.Password,
+                    Port = int.Parse(node.Port),
+                    MinSize = int.Parse(node.MinSize),
+                    MaxSize = int.Parse(node.MaxSize),
+                });
+                result.Add(key,  redis.Get<T>(key));
             }
             return result;
         }
@@ -213,8 +224,7 @@ namespace Surging.Core.Caching.RedisCache
                     MinSize = int.Parse(node.MinSize),
                     MaxSize = int.Parse(node.MaxSize),
                 });
-                result= await redis.GetManyAsync<T>(keys);
-         
+                result.Add(key, await redis.GetAsync<T>(key));
             }
             return result;
         }
@@ -334,7 +344,7 @@ namespace Surging.Core.Caching.RedisCache
                 Port = int.Parse(node.Port),
                 MinSize = int.Parse(node.MinSize),
                 MaxSize = int.Parse(node.MaxSize),
-            }); 
+            });
             redis.Remove(GetKeySuffix(key));
 
         }

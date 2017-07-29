@@ -1,11 +1,8 @@
-﻿
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
 using Surging.Core.Caching.Interfaces;
 using Surging.Core.Caching.Utilities;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Surging.Core.Caching.RedisCache
 {
@@ -27,12 +24,13 @@ namespace Surging.Core.Caching.RedisCache
                     var objectPool = new ObjectPool<IDatabase>(() =>
                     {
                         var point = string.Format("{0}:{1}", info.Host, info.Port);
-                        var redisClient = ConnectionMultiplexer.Connect(new ConfigurationOptions() {
+                        var redisClient = ConnectionMultiplexer.Connect(new ConfigurationOptions()
+                        {
                             EndPoints = { { point } },
                             ServiceName = point,
-                            Password=info.Password,
-                            ConnectTimeout=connectTimeout
-                         });
+                            Password = info.Password,
+                            ConnectTimeout = connectTimeout
+                        });
                         return redisClient.GetDatabase(info.DbIndex);
                     }, info.MinSize, info.MaxSize);
                     _pool.GetOrAdd(key, objectPool);

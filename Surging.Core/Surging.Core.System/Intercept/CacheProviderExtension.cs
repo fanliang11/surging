@@ -12,30 +12,38 @@ namespace Surging.Core.System.Intercept
         public static async Task<T> GetFromCacheFirst<T>(this ICacheProvider cacheProvider, string key, Func<Task<T>> getFromPersistence, Type returnType, long? storeTime = null) where T : class
         {
             object returnValue;
-            var resultJson = cacheProvider.Get<string>(key);
-            if (string.IsNullOrEmpty(resultJson) || resultJson == "\"[]\"")
+            try
             {
-                returnValue = await getFromPersistence();
-                if (returnValue != null)
+                var resultJson = cacheProvider.Get<string>(key);
+                if (string.IsNullOrEmpty(resultJson) || resultJson == "\"[]\"")
                 {
-                    resultJson = JsonConvert.SerializeObject(returnValue);
-                    if (storeTime.HasValue)
+                    returnValue = await getFromPersistence();
+                    if (returnValue != null)
                     {
-                        cacheProvider.Remove(key);
-                        cacheProvider.Add(key, resultJson, storeTime.Value);
-                    }
-                    else
-                    {
-                        cacheProvider.Remove(key);
-                        cacheProvider.Add(key, resultJson);
+                        resultJson = JsonConvert.SerializeObject(returnValue);
+                        if (storeTime.HasValue)
+                        {
+                            cacheProvider.Remove(key);
+                            cacheProvider.Add(key, resultJson, storeTime.Value);
+                        }
+                        else
+                        {
+                            cacheProvider.Remove(key);
+                            cacheProvider.Add(key, resultJson);
+                        }
                     }
                 }
+                else
+                {
+                    returnValue = JsonConvert.DeserializeObject(resultJson, returnType);
+                }
+                return returnValue as T;
             }
-            else
+            catch
             {
-                returnValue =  JsonConvert.DeserializeObject(resultJson, returnType);
+                returnValue = await getFromPersistence();
+                return returnValue as T;
             }
-            return returnValue as T;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             List<Attribute> attributes,
             Type returnType,
             object proxy
-            ) : base(arguments, serviceId, cacheKey, attributes, returnType,proxy)
+            ) : base(arguments, serviceId, cacheKey, attributes, returnType, proxy)
         {
         }
 

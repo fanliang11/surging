@@ -20,7 +20,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
            string serviceId,
             string[] cacheKey,
             List<Attribute> attributes,
-            Type  returnType,
+            Type returnType,
             object proxy
             )
         {
@@ -41,7 +41,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 
         public List<Attribute> Attributes => _attributes;
 
-        object IInvocation.ReturnValue { get => _returnValue; set => _returnValue=value; }
+        object IInvocation.ReturnValue { get => _returnValue; set => _returnValue = value; }
 
         public Type ReturnType => _returnType;
 

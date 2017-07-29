@@ -1,4 +1,5 @@
-﻿using Surging.Core.ProxyGenerator.Interceptors.Implementation;
+﻿using Microsoft.Extensions.Logging;
+using Surging.Core.ProxyGenerator.Interceptors.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

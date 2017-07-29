@@ -7,6 +7,7 @@ using System.Collections;
 using Surging.Core.ProxyGenerator.Utilitys;
 using System.Collections.Concurrent;
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 {
@@ -14,7 +15,6 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
     {
         private readonly IServiceEntryManager _serviceEntryManager;
         ConcurrentDictionary<Tuple<Type, Type>,bool> _derivedTypes = new ConcurrentDictionary<Tuple<Type, Type>, bool>();
-
         public InterceptorProvider(IServiceEntryManager serviceEntryManager)
         {
             _serviceEntryManager = serviceEntryManager;
