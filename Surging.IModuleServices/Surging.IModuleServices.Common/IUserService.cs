@@ -16,6 +16,7 @@ namespace Surging.IModuleServices.Common
     [ServiceBundle]
     public interface IUserService
     {
+
         Task<string> GetUserName(int id);
 
         Task<bool> Exists(int id);
@@ -29,7 +30,7 @@ new Surging.IModuleServices.Common.Models.UserModel
          {
             Name=""fanly"",
             Age=18
-         };", InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" },RequestCacheEnabled =true)]
+         };", InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType =SectionType.ddlCache, Mode = CacheTargetType.MemoryCache, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
 

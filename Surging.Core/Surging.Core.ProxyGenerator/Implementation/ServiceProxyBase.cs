@@ -52,12 +52,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
         {
             object result = default(T);
             var command = _commandProvider.GetCommand(serviceId);
-            RemoteInvokeResultMessage message;
+            RemoteInvokeResultMessage message; 
             if (!command.RequestCacheEnabled)
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
                 if (message == null)
                 {
+                   
                     var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
                     return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
                 }

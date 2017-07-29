@@ -33,21 +33,26 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         public ServiceCommand ConvertServiceCommand(CommandAttribute command)
         {
-            return new ServiceCommand
+            var result = new ServiceCommand();
+            if (command != null)
             {
-                CircuitBreakerForceOpen = command.CircuitBreakerForceOpen,
-                ExecutionTimeoutInMilliseconds = command.ExecutionTimeoutInMilliseconds,
-                FailoverCluster = command.FailoverCluster,
-                Injection = command.Injection,
-                RequestCacheEnabled = command.RequestCacheEnabled,
-                Strategy = command.Strategy,
-                InjectionNamespaces = command.InjectionNamespaces,
-                BreakeErrorThresholdPercentage = command.BreakeErrorThresholdPercentage,
-                BreakerForceClosed = command.BreakerForceClosed,
-                BreakerRequestVolumeThreshold = command.BreakerRequestVolumeThreshold,
-                BreakeSleepWindowInMilliseconds = command.BreakeSleepWindowInMilliseconds,
-                MaxConcurrentRequests = command.MaxConcurrentRequests
-            };
+                result = new ServiceCommand
+                {
+                    CircuitBreakerForceOpen = command.CircuitBreakerForceOpen,
+                    ExecutionTimeoutInMilliseconds = command.ExecutionTimeoutInMilliseconds,
+                    FailoverCluster = command.FailoverCluster,
+                    Injection = command.Injection,
+                    RequestCacheEnabled = command.RequestCacheEnabled,
+                    Strategy = command.Strategy,
+                    InjectionNamespaces = command.InjectionNamespaces,
+                    BreakeErrorThresholdPercentage = command.BreakeErrorThresholdPercentage,
+                    BreakerForceClosed = command.BreakerForceClosed,
+                    BreakerRequestVolumeThreshold = command.BreakerRequestVolumeThreshold,
+                    BreakeSleepWindowInMilliseconds = command.BreakeSleepWindowInMilliseconds,
+                    MaxConcurrentRequests = command.MaxConcurrentRequests
+                };
+            }
+            return result;
         }
     }
 }
