@@ -30,11 +30,12 @@ new Surging.IModuleServices.Common.Models.UserModel
          {
             Name=""fanly"",
             Age=18
-         };", InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
-        [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType =SectionType.ddlCache, Mode = CacheTargetType.MemoryCache, Time = 480)]
+         };", RequestCacheEnabled =true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
+        [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType =SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
 
-        [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.MemoryCache)]
+        [Command(Strategy = StrategyType.Failover, RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
+        [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis)]
         Task<bool> Update(int id, UserModel model);
 
         Task<IDictionary<string, string>> GetDictionary();

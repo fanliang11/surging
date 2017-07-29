@@ -57,7 +57,7 @@ namespace Surging.Core.Caching.RedisCache
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public long DbIndex
+        public int DbIndex
         {
             get; set;
         }
