@@ -109,7 +109,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseRouteManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceRouteManager> factory)
         {
-            builder.Services.RegisterAdapter(factory);
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
             return builder;
         }
 

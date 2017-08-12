@@ -68,8 +68,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             {
                 var key = address.ToString();
                 MonitorEntry entry;
-
-                return !_dictionary.TryGetValue(key, out entry) || entry.Health;
+                return !_dictionary.TryGetValue(key, out entry) ? Check(address): entry.Health;
             });
         }
 
@@ -108,6 +107,23 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             {
                 MonitorEntry value;
                 _dictionary.TryRemove(addressModel.ToString(), out value);
+            }
+        }
+
+        private static bool Check(AddressModel address)
+        {
+            bool isHealth = false;
+            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                try
+                {
+                    socket.Connect(address.CreateEndPoint());
+                    isHealth = true;
+                }
+                catch
+                {
+                }
+                return isHealth;
             }
         }
 

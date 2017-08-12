@@ -68,6 +68,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
+           var fastInvoker = FastInvoke.GetMethodInvoker(method);
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
@@ -84,7 +85,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
                  }
-                 var result = method.Invoke(instance, list.ToArray());
+                 var result = fastInvoker(instance, list.ToArray()); //method.Invoke(instance, list.ToArray());
                  return Task.FromResult(result);
              }
             };

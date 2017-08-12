@@ -21,6 +21,8 @@ using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.IModuleServices.Common.Models.Events;
 using Surging.Core.CPlatform.EventBus;
 using Surging.Modules.Common.IntegrationEvents.EventHandling;
+using Surging.Core.Zookeeper;
+using Surging.Core.Zookeeper.Configurations;
 
 namespace Surging.Services.Server
 {
@@ -62,7 +64,7 @@ namespace Surging.Services.Server
             builder.RegisterServiceBus();
             builder.AddCoreServce()
                  .AddServiceRuntime()
-                 .UseSharedFileRouteManager("c:\\routes.txt")//配置本地路由文件路径
+                 .UseZooKeeperRouteManager(new ConfigInfo("127.0.0.1:2181"))
                  .UseDotNettyTransport().UseRabbitMQTransport().AddRabbitMQAdapt();//配置Netty
             builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
         }
@@ -104,7 +106,7 @@ namespace Surging.Services.Server
                 ServiceDescriptor = i.Descriptor
             }).ToList();
             var serviceRouteManager = ServiceLocator.GetService<IServiceRouteManager>();
-            serviceRouteManager.SetRoutesAsync(addressDescriptors).Wait();
+            serviceRouteManager.SetRoutesAsync(addressDescriptors);
         }
 
         /// <summary>

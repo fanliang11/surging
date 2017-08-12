@@ -24,6 +24,8 @@ using Surging.Core.CPlatform.Routing;
 using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.Zookeeper;
+using Surging.Core.Zookeeper.Configurations;
 
 namespace Surging.Services.Client
 {
@@ -71,7 +73,7 @@ namespace Surging.Services.Client
             var serviceBulider = builder
                  .AddClient()
                  .AddClientIntercepted(typeof(CacheProviderInterceptor))
-                 .UseSharedFileRouteManager("c:\\routes.txt")
+                .UseZooKeeperRouteManager(new ConfigInfo("127.0.0.1:2181"))
                  .UseDotNettyTransport().UseRabbitMQTransport();
             builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
         }
