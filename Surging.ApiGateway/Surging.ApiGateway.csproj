@@ -5,7 +5,6 @@
     <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
     <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
     <UserSecretsId>aspnet-Surging.ApiGateway-147A234E-A922-4E6A-89B8-DCC64AEA96EE</UserSecretsId>
-    <PackageTargetFallback>portable-net45+win8</PackageTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
