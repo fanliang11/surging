@@ -125,23 +125,44 @@
                 }
             });
 
-            $mainbox.on('pjax:beforeSend', function(xhr, options, event) {
+            var onStart = function () {
                 if ($("#nprogress").length == 0)
                     $("body").append(createProgressBar());
 
-                setTimeout(function() {
+                setTimeout(function () {
                     $("#nprogress").css("opacity", "1");
                     $(".bar", "#nprogress").attr("style", " -webkit-transform: translate3d(-9.8%, 0px, 0px);-moz-transform: translate3d(-9.8%, 0px, 0px);");
                 }, 200);
+            }
+
+            var onComplete = function () {
+                $(".bar", "#nprogress").attr("style", " -webkit-transform: translate3d(-0%, 0px, 0px); -moz-transform: translate3d(-0%, 0px, 0px);");
+                setTimeout(function () {
+                    $("#nprogress").remove();
+                }, 200);
+            }
+
+            $(document).ajaxStart(onStart)
+                .ajaxSuccess(onComplete); 
+
+            $mainbox.on('pjax:beforeSend', function(xhr, options, event) {
+                //if ($("#nprogress").length == 0)
+                //    $("body").append(createProgressBar());
+
+                //setTimeout(function() {
+                //    $("#nprogress").css("opacity", "1");
+                //    $(".bar", "#nprogress").attr("style", " -webkit-transform: translate3d(-9.8%, 0px, 0px);-moz-transform: translate3d(-9.8%, 0px, 0px);");
+                //}, 200);
+                onStart();
 
             });
 
             $mainbox.on('pjax:complete', function(xhr, textStatus, options, event) {
-                $(".bar", "#nprogress").attr("style", " -webkit-transform: translate3d(-0%, 0px, 0px); -moz-transform: translate3d(-0%, 0px, 0px);");
-                setTimeout(function() {
-                    $("#nprogress").remove();
-                }, 200);
-
+                //$(".bar", "#nprogress").attr("style", " -webkit-transform: translate3d(-0%, 0px, 0px); -moz-transform: translate3d(-0%, 0px, 0px);");
+                //setTimeout(function() {
+                //    $("#nprogress").remove();
+                //}, 200);
+                onComplete();
                 pageStyleChange($(event.target));
                 //if ($(event.target).data("mode") == "popup") {  // 下版在做，弹出多层
                 //    popupMode($(event.target));

@@ -19,13 +19,15 @@
             <div id="sample-table-2_wrapper" class="dataTables_wrapper" role="grid">
                 <div class="row">
                     <div class="col-sm-6">
-
-                        关键字：<input type="text" name="queryParam" id="queryParam" placeholder="服务Id">
-                        <button id="searchManager" class="btn btn-primary">搜&#12288;索</button>
+                        <form id="searchForm">
+                            关键字：<input type="text" name="queryParam" id="queryParam" placeholder="服务Id">
+                            <input type="hidden" name="address" value="@ViewBag.address" />
+                            <button id="btnSearch" type="submit" class="btn btn-primary">搜&#12288;索</button>
+                        </form>
                     </div>
                 </div>
                 <div>
-                    <table id="dataRegion" class="table table-striped table-bordered table-hover dataTable">
+                    <table id="dataServiceDescriptor" class="table table-striped table-bordered table-hover dataTable">
                         <thead>
                             <tr role="row">
                                 <th style="width: 6%"></th>
@@ -38,41 +40,30 @@
                         </thead>
                         <tbody id="">
 
-                            @{
-                                var index = 0;
-                                foreach (var model in Model)
-                                {
-                                    ++index;
-                                    <tr>
-                                        <td class="center">
-                                            @if (index % 2 == 1)
-                                            {
-                                                <span class="badge badge-grey "> @(index)</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge badge-success"> @(index)</span>
-
-                                            }
-                                        </td>
-                                        <td class="center">       @(model.Id)</td>
-                                        <td class="center">@(model.GroupName())</td>
-                                        <td class="center">@(model.WaitExecution()?"是":"否")</td>
-                                        <td class="center">@(model.Director())</td>
-                                        <td class="center">@(model.Date())</td>
-                                    </tr>
-                                }
-                            }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
- @if (!isPjax)
- {
+@if (!isPjax)
+{
     @section SubFootJS
         {
-
+        <script type="text/javascript">
+            seajs.use("apps_servicemange/view/servicedescriptor.guide.js", function(a) {
+            a.init({
+            });
+        });
+        </script>
     }
- }
+}
+else
+{
+    <script type="text/javascript">
+        seajs.use("apps_servicemange/view/servicedescriptor.guide.js", function (a) {
+            a.init({
+            });
+        });
+    </script>
+}

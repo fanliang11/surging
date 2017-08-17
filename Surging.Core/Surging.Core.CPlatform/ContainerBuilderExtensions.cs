@@ -86,7 +86,6 @@ namespace Surging.Core.CPlatform
             builder.Services.RegisterType(typeof(StringObjectSerializer)).As(typeof(ISerializer<object>)).SingleInstance();
             return builder;
         }
-
         #region RouteManager
 
         /// <summary>
@@ -315,7 +314,7 @@ namespace Surging.Core.CPlatform
         /// </summary>
         /// <param name="services">服务集合。</param>
         /// <returns>服务构建者。</returns>
-        public static IServiceBuilder AddCoreServce(this ContainerBuilder services)
+        public static IServiceBuilder AddCoreService(this ContainerBuilder services)
         {
             Check.NotNull(services, "services");
             services.RegisterType<DefaultServiceIdGenerator>().As<IServiceIdGenerator>().SingleInstance();

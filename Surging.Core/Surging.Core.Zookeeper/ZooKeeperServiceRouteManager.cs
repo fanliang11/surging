@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper
 {
-   public class ZooKeeperServiceRouteManager : ServiceRouteManagerBase, IDisposable
+    public class ZooKeeperServiceRouteManager : ServiceRouteManagerBase, IDisposable
     {
         private ZooKeeper _zooKeeper;
         private readonly ConfigInfo _configInfo;
@@ -24,7 +24,7 @@ namespace Surging.Core.Zookeeper
         private readonly ILogger<ZooKeeperServiceRouteManager> _logger;
         private ServiceRoute[] _routes;
         private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
-        
+
 
         public ZooKeeperServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IServiceRouteFactory serviceRouteFactory,
@@ -37,7 +37,7 @@ namespace Surging.Core.Zookeeper
             CreateZooKeeper().Wait();
             EnterRoutes().Wait();
         }
-        
+
 
         /// <summary>
         /// 获取所有可用的服务路由信息。
@@ -146,7 +146,7 @@ namespace Surging.Core.Zookeeper
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
-           var serviceRoutes= await GetRoutes(routes.Select(p => p.ServiceDescriptor.Id));
+            var serviceRoutes = await GetRoutes(routes.Select(p => p.ServiceDescriptor.Id));
             if (serviceRoutes.Count() > 0)
             {
                 foreach (var route in routes)
@@ -169,7 +169,7 @@ namespace Surging.Core.Zookeeper
         {
             if (_zooKeeper != null)
                 await _zooKeeper.closeAsync();
-            _zooKeeper = new ZooKeeper(_configInfo.ConnectionString,(int)_configInfo.SessionTimeout.TotalMilliseconds
+            _zooKeeper = new ZooKeeper(_configInfo.ConnectionString, (int)_configInfo.SessionTimeout.TotalMilliseconds
                , new ReconnectionWatcher(
                     () =>
                     {
@@ -180,7 +180,7 @@ namespace Surging.Core.Zookeeper
                         _connectionWait.Reset();
                         await CreateZooKeeper();
                     }));
-           
+
         }
 
         private async Task CreateSubdirectory(string path)
@@ -215,7 +215,6 @@ namespace Surging.Core.Zookeeper
                 return null;
 
             var descriptor = _serializer.Deserialize<byte[], ServiceRouteDescriptor>(data);
-
             return (await _serviceRouteFactory.CreateServiceRoutesAsync(new[] { descriptor })).First();
         }
 
@@ -228,7 +227,7 @@ namespace Surging.Core.Zookeeper
             {
                 var data = (await _zooKeeper.getDataAsync(path, watcher)).Data;
                 watcher.SetCurrentData(data);
-                result= await GetRoute(data);
+                result = await GetRoute(data);
             }
             return result;
         }
@@ -249,8 +248,8 @@ namespace Surging.Core.Zookeeper
 
                 var nodePath = $"{rootPath}{children}";
                 var route = await GetRoute(nodePath);
-                if(route!=null)
-                routes.Add(route);
+                if (route != null)
+                    routes.Add(route);
             }
 
             return routes.ToArray();
@@ -356,7 +355,7 @@ namespace Surging.Core.Zookeeper
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("路由数据更新成功。");
         }
-        
+
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public void Dispose()
@@ -364,6 +363,6 @@ namespace Surging.Core.Zookeeper
             _connectionWait.Dispose();
             _zooKeeper.closeAsync().Wait();
         }
-        
+
     }
 }

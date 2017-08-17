@@ -19,6 +19,7 @@ using Surging.Core.Zookeeper.Configurations;
 using Surging.Core.Zookeeper;
 using Surging.Core.ApiGateWay;
 using Surging.Core.ProxyGenerator.Utilitys;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace Surging.ApiGateway
 {
@@ -54,7 +55,7 @@ namespace Surging.ApiGateway
             builder.RegisterRepositories();
             builder.RegisterModules();
             builder.Populate(services);
-            var serviceBulider = builder.AddCoreServce()
+            var serviceBulider = builder.AddCoreService()
                  .AddServiceRuntime()
                  .UseZooKeeperRouteManager(new ConfigInfo("127.0.0.1:2181"))
                  .UseDotNettyTransport().AddApiGateWay();
@@ -83,6 +84,9 @@ namespace Surging.ApiGateway
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            var myProvider = new FileExtensionContentTypeProvider();
+            myProvider.Mappings.Add(".tpl", "text/plain");
+            app.UseStaticFiles(new StaticFileOptions() { ContentTypeProvider = myProvider });
 
             app.UseStaticFiles();
             app.UseMvc(routes =>
@@ -93,4 +97,3 @@ namespace Surging.ApiGateway
             });
         }
     }
-}

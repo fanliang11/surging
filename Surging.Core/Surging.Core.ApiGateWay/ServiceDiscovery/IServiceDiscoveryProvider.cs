@@ -9,8 +9,8 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery
 {
    public interface IServiceDiscoveryProvider
     {
-        Task<IEnumerable<ServiceAddressModel>> GetAddressAsync();
+        Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null);
 
-        Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync( string address);
+        Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(string address, string condition = null);
     }
 }

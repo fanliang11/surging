@@ -1,5 +1,6 @@
 ﻿using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Routing.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,9 +69,20 @@ namespace Surging.Core.CPlatform.Routing
         /// 获取地址
         /// </summary>
         /// <returns></returns>
-        public static async Task<IEnumerable<AddressModel>> GetAddressAsync(this IServiceRouteManager serviceRouteManager)
+        public static async Task<IEnumerable<AddressModel>> GetAddressAsync(this IServiceRouteManager serviceRouteManager, string condition = null)
         {
             var routes = await serviceRouteManager.GetRoutesAsync();
+            if (condition != null)
+            {
+                if (!condition.IsIP())
+                {
+                    routes = routes.Where(p => p.ServiceDescriptor.Id == condition);
+                }
+                else
+                {
+                    routes = routes.Where(p => p.Address.Any(m => m.ToString()==condition));
+                }
+            }
             Dictionary<string, AddressModel> result = new Dictionary<string, AddressModel>();
             foreach (var route in routes)
             {
@@ -86,11 +98,19 @@ namespace Surging.Core.CPlatform.Routing
             return result.Values;
         }
 
-        public static async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(this IServiceRouteManager serviceRouteManager,string address)
+        public static async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(this IServiceRouteManager serviceRouteManager, string address, string serviceId = null)
         {
-             var routes= await serviceRouteManager.GetRoutesAsync();
-            return routes.Where(p => p.Address.Any(m=>m.ToString()==address))
-             .Select(p => p.ServiceDescriptor);
+            var routes = await serviceRouteManager.GetRoutesAsync();
+            if (serviceId == null)
+            {
+                return routes.Where(p => p.Address.Any(m => m.ToString() == address))
+                 .Select(p => p.ServiceDescriptor);
+            }
+            else
+            {
+                return routes.Where(p => p.ServiceDescriptor.Id == serviceId)
+               .Select(p => p.ServiceDescriptor);
+            }
         }
     }
 }

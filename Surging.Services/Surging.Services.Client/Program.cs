@@ -117,7 +117,7 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                await userProxy.GetUser(new UserModel { UserId=1});
+                await userProxy.GetUserId("user");
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");

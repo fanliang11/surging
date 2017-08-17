@@ -62,7 +62,7 @@ namespace Surging.Services.Server
             builder.RegisterRepositories();
             builder.RegisterModules();
             builder.RegisterServiceBus();
-            builder.AddCoreServce()
+            builder.AddCoreService()
                  .AddServiceRuntime()
                  .UseZooKeeperRouteManager(new ConfigInfo("127.0.0.1:2181"))
                  .UseDotNettyTransport().UseRabbitMQTransport().AddRabbitMQAdapt();//配置Netty

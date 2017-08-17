@@ -29,7 +29,7 @@ namespace Surging.Core.ProxyGenerator
         public static IServiceBuilder AddClient(this ContainerBuilder services)
         {
             return services
-                .AddCoreServce()
+                .AddCoreService()
                 .AddClientRuntime()
                 .AddClientProxy();
         }

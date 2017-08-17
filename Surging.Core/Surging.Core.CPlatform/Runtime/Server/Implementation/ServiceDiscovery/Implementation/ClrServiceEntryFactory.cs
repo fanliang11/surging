@@ -78,6 +78,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
 
                  var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
+            
                  foreach (var parameterInfo in method.GetParameters())
                  {
                      var value = parameters[parameterInfo.Name];
@@ -85,6 +86,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
                  }
+                
                  var result = fastInvoker(instance, list.ToArray()); //method.Invoke(instance, list.ToArray());
                  return Task.FromResult(result);
              }

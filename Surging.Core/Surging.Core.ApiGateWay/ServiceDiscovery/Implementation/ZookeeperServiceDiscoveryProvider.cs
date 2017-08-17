@@ -14,11 +14,10 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
         {
 
         }
-        public async Task<IEnumerable<ServiceAddressModel>> GetAddressAsync()
+        public async Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null)
         {
             var result = new List<ServiceAddressModel>();
-            var addresses= await GetService<IServiceRouteManager>().GetAddressAsync();
-
+            var addresses= await GetService<IServiceRouteManager>().GetAddressAsync(condition);
             foreach (var address in addresses)
             {
                 result.Add(new ServiceAddressModel
@@ -30,11 +29,10 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
             return result;
         }
 
-        public async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(string address)
+        public async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(string address, string condition = null)
         {
-            return await GetService<IServiceRouteManager>().GetServiceDescriptorAsync(address);
+            return await GetService<IServiceRouteManager>().GetServiceDescriptorAsync(address,condition);
         }
 
-        
     }
 }

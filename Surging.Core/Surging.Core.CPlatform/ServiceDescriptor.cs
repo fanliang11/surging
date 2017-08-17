@@ -104,6 +104,7 @@ namespace Surging.Core.CPlatform
     /// <summary>
     /// 服务描述符。
     /// </summary>
+    [Serializable]
     public class ServiceDescriptor
     {
         /// <summary>
