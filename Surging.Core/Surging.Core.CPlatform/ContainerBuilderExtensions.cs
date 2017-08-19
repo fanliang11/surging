@@ -113,6 +113,18 @@ namespace Surging.Core.CPlatform
         }
 
         /// <summary>
+        /// 设置服务命令管理者。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <param name="factory">服务命令管理者实例工厂。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseCommandManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCommandManager> factory)
+        {
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
+        /// <summary>
         /// 设置服务路由管理者。
         /// </summary>
         /// <param name="builder">服务构建者。</param>
@@ -288,6 +300,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder AddClusterSupport(this IServiceBuilder builder)
         {
+
             builder.Services.RegisterType(typeof(ServiceCommandProvider)).As(typeof(IServiceCommandProvider)).SingleInstance();
             builder.Services.RegisterType(typeof(BreakeRemoteInvokeService)).As(typeof(IBreakeRemoteInvokeService)).SingleInstance();
             builder.Services.RegisterType(typeof(FailoverInjectionInvoker)).AsImplementedInterfaces()
@@ -359,6 +372,10 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
-        
+        public static void AddMicroService(this ContainerBuilder builder,Action<IServiceBuilder> option)
+        {
+            option.Invoke(builder.AddCoreService());
+        }
+
     }
 }

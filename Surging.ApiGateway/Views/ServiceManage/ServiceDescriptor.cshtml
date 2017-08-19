@@ -13,6 +13,11 @@
                 服务元数据
             </small>
         </h1>
+        <div class="ace-settings-container">
+            <a href="@Context.Request.Headers["Referer"]" class="btn btn-app btn-xs btn-warning ace-settings-btn" data-pjax=".page-content">
+                <i class="icon-back bigger-150"></i>
+            </a>
+        </div>
     </div>
     <div class="row">
         <div class="col-xs-12">
@@ -32,10 +37,11 @@
                             <tr role="row">
                                 <th style="width: 6%"></th>
                                 <th class="center">服务Id</th>
-                                <th class="center" width="25%">名称</th>
+                                <th class="center" width="20%">名称</th>
                                 <th class="center" width="6%">是否阻塞</th>
                                 <th class="center" width="12%">负责人</th>
                                 <th class="center" width="12%">更新时间</th>
+                                <th class="center" width="6%">操作</th>
                             </tr>
                         </thead>
                         <tbody id="">

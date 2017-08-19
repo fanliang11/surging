@@ -8,6 +8,7 @@ using Surging.Core.ApiGateWay.ServiceDiscovery;
 using Surging.Core.ApiGateWay.Utilities;
 using Surging.Core.ApiGateWay.ServiceDiscovery.Implementation;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Support;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -41,6 +42,20 @@ namespace Surging.ApiGateway.Controllers
         {
             ViewBag.address = address;
             return View();
+        }
+
+        public IActionResult FaultTolerant(params string [] serviceIds)
+        {
+            ViewBag.ServiceIds = $" ['{string.Join(",", serviceIds)}']";
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetCommandDescriptor(string[] serviceIds)
+        {
+            var list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptor(serviceIds);
+            var result = ServiceResult<IEnumerable<ServiceCommandDescriptor>>.Create(true, list);
+            return Json(result);
         }
     }
 }

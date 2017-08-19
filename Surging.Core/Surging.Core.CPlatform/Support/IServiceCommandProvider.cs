@@ -7,7 +7,7 @@ namespace Surging.Core.CPlatform.Support
 {
     public interface IServiceCommandProvider
     {
-        ServiceCommand GetCommand(string serviceId);
+        Task<ServiceCommand> GetCommand(string serviceId);
         Task<object> Run(string text, params string[] InjectionNamespaces);
     }
 }

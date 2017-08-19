@@ -405,6 +405,9 @@ a .icon-rotate-90:before, a .icon-rotate-180:before, a .icon-rotate-270:before, 
 .surging-icon-wrench:before {
     content: "\fda0";
 }
+.surging-icon-home:before {
+    content: "\fd77";
+}
 .icon-servicemange:before {
     content: "\fd69";
 }

@@ -2,15 +2,15 @@
     var $ = jQuery = require('jquery');
     require('jquerytmpl');
     var def = {
-        wrap: "#dataServiceDescriptor tbody",
+        wrap: "#dataFaultTolerant tbody",
         btnSearch: "#btnSearch",
-        searchForm:"#searchForm",
+        searchForm: "#searchForm",
         queryParam: "#queryParam"
     };
     var config = require('../url.config.js');
     var serviceaddress = function (options) {
         var defaults = {
-            servicedescriptor_tpl: require("../../templates/servicedescriptor_template.tpl")
+           faulttolerant_tpl: require("../../templates/faulttolerant_template.tpl")
         };
         var self = this;
         this.opts = $.extend(defaults, options || {});
@@ -20,23 +20,22 @@
             var self = this;
             self.initEvent();
             self.loadData();
-
         },
         initEvent: function () {
             var self = this;
-            $(def.searchForm).off("submit").bind("submit", function () {
-                self.loadData();
-                return false;
+            $(def.btnSearch).off("click").bind("click", function () {
+                self.loadData($(def.queryParam).val());
             });
         },
-        loadData: function () {
+        loadData: function (condition) {
             var self = this;
             var formData = $(def.searchForm).serializeArray();
+            formData[1].value = eval(formData[1].value);
             $.when(
-                $.post(config.GET_SERVICEDESCRIPTOR, formData))
+                $.post(config.GET_COMMANDDESCRIPTOR, formData))
                 .then(function (data) {
                     if (data.isSucceed) {
-                        var tpl = $.tmpl(self.opts.servicedescriptor_tpl, data);
+                        var tpl = $.tmpl(self.opts.faulttolerant_tpl, data);
                         $(def.wrap).html(tpl);
                     }
                 });

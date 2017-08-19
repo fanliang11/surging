@@ -70,12 +70,14 @@ namespace Surging.Services.Client
             builder.RegisterServices();
             builder.RegisterRepositories();
             builder.RegisterModules();
-            var serviceBulider = builder
-                 .AddClient()
-                 .AddClientIntercepted(typeof(CacheProviderInterceptor))
-                .UseZooKeeperRouteManager(new ConfigInfo("127.0.0.1:2181"))
-                 .UseDotNettyTransport().UseRabbitMQTransport();
-            builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+            builder.AddMicroService(option => {
+                option.AddClient();
+                option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+                option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                option.UseDotNettyTransport();
+                option.UseRabbitMQTransport();
+                builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+            });
         }
 
         /// <summary>

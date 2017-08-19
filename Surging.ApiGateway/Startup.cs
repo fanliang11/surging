@@ -55,11 +55,14 @@ namespace Surging.ApiGateway
             builder.RegisterRepositories();
             builder.RegisterModules();
             builder.Populate(services);
-            var serviceBulider = builder.AddCoreService()
-                 .AddServiceRuntime()
-                 .UseZooKeeperRouteManager(new ConfigInfo("127.0.0.1:2181"))
-                 .UseDotNettyTransport().AddApiGateWay();
-            builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+            builder.AddMicroService(option =>
+            {
+                option.AddServiceRuntime();
+                option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                option.UseDotNettyTransport();
+                option.AddApiGateWay();
+                builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+            });
 
             ServiceLocator.Current = builder.Build();
             var serviceHost = ServiceLocator.Current.Resolve<IServiceHost>();
@@ -97,3 +100,4 @@ namespace Surging.ApiGateway
             });
         }
     }
+}

@@ -17,7 +17,11 @@
 								{{/if}}
 										</td>
                                         <td class="center">${metadatas.Director}</td>
-                                        <td class="center">${metadatas.Date}</td>             
+                                        <td class="center">${metadatas.Date}</td>         
+										  <td class="center"><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+                                                   <a href="/ServiceManage/FaultTolerant?serviceIds={{= id}}" nodemenu="" class="grey editRegion" data-pjax=".page-content"><i class="icon-lightbulb  bigger-120"></i>查看容错规则</a>
+
+                             </div></td>
                            
                         </tr>
 						  {{/each}}

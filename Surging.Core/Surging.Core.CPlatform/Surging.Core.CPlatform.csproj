@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Transport\" />
+    <Folder Include="ServiceCommand\" />
   </ItemGroup>
 
   <ItemGroup>

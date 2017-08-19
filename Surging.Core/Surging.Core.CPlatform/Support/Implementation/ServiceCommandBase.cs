@@ -9,7 +9,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
 {
    public abstract class ServiceCommandBase: IServiceCommandProvider
     { 
-        public abstract ServiceCommand GetCommand(string serviceId);
+        public abstract Task<ServiceCommand> GetCommand(string serviceId);
         ConcurrentDictionary<string,  object> scripts = new ConcurrentDictionary<string,  object>();
 
         public async Task<object> Run(string text, params string[] InjectionNamespaces)

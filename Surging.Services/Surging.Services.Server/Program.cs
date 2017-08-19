@@ -23,6 +23,7 @@ using Surging.Core.CPlatform.EventBus;
 using Surging.Modules.Common.IntegrationEvents.EventHandling;
 using Surging.Core.Zookeeper;
 using Surging.Core.Zookeeper.Configurations;
+using Surging.Core.CPlatform.Support;
 
 namespace Surging.Services.Server
 {
@@ -36,16 +37,16 @@ namespace Surging.Services.Server
             var config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory);
             ConfigureEventBus(config);
+            ConfigureCache(config);
             ConfigureLogging(services);
             builder.Populate(services);
             ConfigureService(builder);
             ServiceLocator.Current = builder.Build();
-            ConfigureCache(config);
             ServiceLocator.GetService<ILoggerFactory>()
                    .AddConsole((c, l) => (int)l >= 3);
             ConfigureRoutes();
             ServiceLocator.GetService<ISubscriptionAdapt>().SubscribeAt();
-            var d = ServiceLocator.GetService<UserLoginDateChangeHandler>();
+            ServiceLocator.GetService<IServiceCommandManager>().SetServiceCommandsAsync();
             StartService();
             Console.ReadLine();
         }
@@ -62,11 +63,15 @@ namespace Surging.Services.Server
             builder.RegisterRepositories();
             builder.RegisterModules();
             builder.RegisterServiceBus();
-            builder.AddCoreService()
-                 .AddServiceRuntime()
-                 .UseZooKeeperRouteManager(new ConfigInfo("127.0.0.1:2181"))
-                 .UseDotNettyTransport().UseRabbitMQTransport().AddRabbitMQAdapt();//配置Netty
-            builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+            builder.AddMicroService(option =>
+            {
+                option.AddServiceRuntime();
+                option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                option.UseDotNettyTransport();
+                option.UseRabbitMQTransport();
+                option.AddRabbitMQAdapt();
+                builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+            });
         }
 
         /// <summary>
