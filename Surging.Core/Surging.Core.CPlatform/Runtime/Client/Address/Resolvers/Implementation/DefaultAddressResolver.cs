@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
+using Surging.Core.CPlatform.Routing.Implementation;
 
 namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 {
@@ -23,7 +25,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         private readonly IAddressSelector _addressSelector;
         private readonly IHealthCheckService _healthCheckService;
         private readonly CPlatformContainer _container;
-
+        private readonly ConcurrentDictionary<string, ServiceRoute> _concurrent =
+  new ConcurrentDictionary<string, ServiceRoute>();
         #endregion Field
 
         #region Constructor
@@ -35,6 +38,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             _logger = logger;
             _addressSelector = container.GetInstances<IAddressSelector>();
             _healthCheckService = healthCheckService;
+            serviceRouteManager.Changed += ServiceRouteManager_Removed;
+            serviceRouteManager.Removed += ServiceRouteManager_Removed;
+            serviceRouteManager.Created += ServiceRouteManager_Add;
         }
 
         #endregion Constructor
@@ -50,9 +56,14 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务id：{serviceId}，解析可用地址。");
-            var descriptors = await _serviceRouteManager.GetRoutesAsync();
-            var descriptor = descriptors.FirstOrDefault(i => i.ServiceDescriptor.Id == serviceId);
-
+            ServiceRoute descriptor;
+            _concurrent.TryGetValue(serviceId, out descriptor);
+            if (descriptor == null)
+            {
+                var descriptors = await _serviceRouteManager.GetRoutesAsync();
+                descriptor = descriptors.FirstOrDefault(i => i.ServiceDescriptor.Id == serviceId);
+                _concurrent.GetOrAdd(serviceId, descriptor);
+            }
             if (descriptor == null)
             {
                 if (_logger.IsEnabled(LogLevel.Warning))
@@ -86,6 +97,24 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 Descriptor = descriptor.ServiceDescriptor,
                 Address = address
             });
+        }
+
+        private static string GetCacheKey(ServiceDescriptor descriptor)
+        {
+            return descriptor.Id;
+        }
+
+        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
+        {
+            var key = GetCacheKey(e.Route.ServiceDescriptor);
+            ServiceRoute value;
+            _concurrent.TryRemove(key, out value);
+        }
+
+        private void ServiceRouteManager_Add(object sender, ServiceRouteEventArgs e)
+        {
+            var key = GetCacheKey(e.Route.ServiceDescriptor);
+            _concurrent.GetOrAdd(key, e.Route);
         }
 
         #endregion Implementation of IAddressResolver

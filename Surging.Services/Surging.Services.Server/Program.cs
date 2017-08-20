@@ -46,7 +46,7 @@ namespace Surging.Services.Server
                    .AddConsole((c, l) => (int)l >= 3);
             ConfigureRoutes();
             ServiceLocator.GetService<ISubscriptionAdapt>().SubscribeAt();
-            ServiceLocator.GetService<IServiceCommandManager>().SetServiceCommandsAsync();
+          //  ServiceLocator.GetService<IServiceCommandManager>().SetServiceCommandsAsync();
             StartService();
             Console.ReadLine();
         }
