@@ -6,24 +6,22 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.EventBus;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Support;
 using Surging.Core.DotNetty;
+using Surging.Core.EventBusRabbitMQ;
+using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.ProxyGenerator.Utilitys;
 using Surging.Core.System.Ioc;
+using Surging.Core.Zookeeper;
+using Surging.Core.Zookeeper.Configurations;
 using System;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Surging.Core.EventBusRabbitMQ;
-using Surging.Core.EventBusRabbitMQ.Configurations;
-using Surging.IModuleServices.Common.Models.Events;
-using Surging.Core.CPlatform.EventBus;
-using Surging.Modules.Common.IntegrationEvents.EventHandling;
-using Surging.Core.Zookeeper;
-using Surging.Core.Zookeeper.Configurations;
-using Surging.Core.CPlatform.Support;
 
 namespace Surging.Services.Server
 {

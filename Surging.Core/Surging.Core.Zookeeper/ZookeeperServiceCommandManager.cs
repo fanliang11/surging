@@ -1,18 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using org.apache.zookeeper;
-using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Implementation;
 using Surging.Core.Zookeeper.Configurations;
 using Surging.Core.Zookeeper.WatcherProvider;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-using Surging.Core.CPlatform.Runtime.Server;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper
 {
@@ -24,7 +23,6 @@ namespace Surging.Core.Zookeeper
         private readonly ILogger<ZookeeperServiceCommandManager> _logger;
         private ServiceCommandDescriptor[] _serviceCommands;
         private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
-
 
         public ZookeeperServiceCommandManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer,IServiceEntryManager serviceEntryManager,
@@ -133,13 +131,12 @@ namespace Surging.Core.Zookeeper
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
             var commands = await GetServiceCommands(serviceCommands.Select(p => p.ServiceId));
-            //if(commands.Count()==0)
-            //{
+            if (commands.Count() == 0)
+            {
                 await SetServiceCommandsAsync(serviceCommands);
-            //}
+            }
         }
-
-
+        
         private async Task CreateZooKeeper()
         {
             if (_zooKeeper != null)
