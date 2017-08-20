@@ -57,9 +57,9 @@ public static class ServiceRouteManagerExtensions
     /// </summary>
     /// <returns>服务命令集合。</returns>
     public static async Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync
-        (this IServiceCommandManager serviceCommandManager, string[] serviceIds)
+        (this IServiceCommandManager serviceCommandManager, params string[] serviceIds)
     {
         var result = (await serviceCommandManager.GetServiceCommandsAsync());
-        return  result.Where(p => serviceIds.Contains(p.ServiceId));
+        return result.Where(p => serviceIds.Contains(p.ServiceId) );
     }
 }

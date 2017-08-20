@@ -31,9 +31,9 @@ namespace Surging.ApiGateway.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetServiceDescriptor(string address,string queryParam)
+        public async Task<IActionResult> GetServiceDescriptor(string address, string queryParam)
         {
-            var list = await ServiceLocator.GetService<IServiceDiscoveryProvider>().GetServiceDescriptorAsync(address,queryParam);
+            var list = await ServiceLocator.GetService<IServiceDiscoveryProvider>().GetServiceDescriptorAsync(address, queryParam);
             var result = ServiceResult<IEnumerable<ServiceDescriptor>>.Create(true, list);
             return Json(result);
         }
@@ -44,16 +44,38 @@ namespace Surging.ApiGateway.Controllers
             return View();
         }
 
-        public IActionResult FaultTolerant(params string [] serviceIds)
+        public IActionResult FaultTolerant(string serviceId, string address)
         {
-            ViewBag.ServiceIds = $" ['{string.Join(",", serviceIds)}']";
+            ViewBag.ServiceId = serviceId;
+            ViewBag.Address = address;
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GetCommandDescriptor(string[] serviceIds)
+        public async Task<IActionResult> EditFaultTolerant(string serviceId)
         {
-            var list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptor(serviceIds);
+           var  list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptor(serviceId);
+            return View(list.FirstOrDefault());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditFaultTolerant(ServiceCommandDescriptor model)
+        {
+              await ServiceLocator.GetService<IFaultTolerantProvider>().SetCommandDescriptorByAddress(model);
+            return Json(ServiceResult.Create(true));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetCommandDescriptor(string serviceId, string address)
+        {
+            IEnumerable<ServiceCommandDescriptor> list = null;
+            if (!string.IsNullOrEmpty(serviceId))
+            {
+                list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptor(serviceId);
+            }
+            else if (!string.IsNullOrEmpty(address))
+            {
+                list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptorByAddress(address);
+            }
             var result = ServiceResult<IEnumerable<ServiceCommandDescriptor>>.Create(true, list);
             return Json(result);
         }

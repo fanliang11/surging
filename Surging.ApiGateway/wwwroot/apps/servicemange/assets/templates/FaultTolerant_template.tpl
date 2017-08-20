@@ -40,7 +40,7 @@
 			<td class="center">${breakerRequestVolumeThreshold}</td>  
 			<td class="center">${maxConcurrentRequests}</td>  
 			<td class="center"><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                    <a href="/ServiceManage/FaultTolerant?id={{= id}}" nodemenu="" class="grey editRegion" data-pjax=".page-content"><i class="icon-lightbulb  bigger-120"></i>编辑</a>
+                    <a href="javascript:void(0)" class="grey editFaultTolerant"><i class="icon-lightbulb  bigger-120"></i>编辑</a>
                     </div>
 			</td>
                            

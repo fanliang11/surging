@@ -320,3 +320,7 @@ section.active, section.active > #app_wrap {
         transform: rotate(360deg);
     }
 }
+.form-horizontal .control-sm
+{
+    padding-top:4px;
+}

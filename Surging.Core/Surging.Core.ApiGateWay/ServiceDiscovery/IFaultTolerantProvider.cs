@@ -8,6 +8,10 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery
 {
     public interface IFaultTolerantProvider
     {
-        Task<IEnumerable<ServiceCommandDescriptor>> GetCommandDescriptor(string [] serviceIds);
+        Task<IEnumerable<ServiceCommandDescriptor>> GetCommandDescriptor(params string [] serviceIds);
+
+        Task<IEnumerable<ServiceCommandDescriptor>> GetCommandDescriptorByAddress(string address);
+
+        Task SetCommandDescriptorByAddress(ServiceCommandDescriptor model);
     }
 }

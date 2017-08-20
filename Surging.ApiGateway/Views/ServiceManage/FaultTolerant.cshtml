@@ -28,7 +28,8 @@
                 <div class="col-sm-6">
                     <form id="searchForm">
                         关键字：<input type="text" name="queryParam" id="queryParam" placeholder="服务Id">
-                        <input type="hidden" name="serviceIds" value="@ViewBag.ServiceIds" />
+                        <input type="hidden" name="serviceId" value="@ViewBag.ServiceId" />
+                        <input type="hidden" name="address" value="@ViewBag.Address" />
                         <button id="btnSearch" type="submit" class="btn btn-primary">搜&#12288;索</button>
                     </form>
                 </div>
@@ -56,6 +57,27 @@
                     <tbody id=""></tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 700px;">
+        <div class="modal-content">
+            <form id="eventForm" action="" name="eventForm" method="post" class="form-horizontal">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">容错规则编辑</h4>
+                </div>
+                <div class="modal-body" >
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" id="submitEvent" data-loading-text='<i class="icon-spinner icon-spin bigger-110"></i>提交中...' autocomplete="off">提交</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -104,18 +104,6 @@ namespace Surging.Core.Zookeeper
 
             serviceCommand = serviceCommand.ToArray();
 
-            if (_serviceCommands != null)
-            {
-                var oldCommandIds = _serviceCommands.Select(i => i.ServiceId).ToArray();
-                var newCommandIds = serviceCommand.Select(i => i.ServiceId).ToArray();
-                var deletedCommandIds = oldCommandIds.Except(newCommandIds).ToArray();
-                foreach (var deletedRouteId in deletedCommandIds)
-                {
-                    var nodePath = $"{path}{deletedRouteId}";
-                    await _zooKeeper.deleteAsync(nodePath);
-                }
-            }
-
             foreach (var command in serviceCommand)
             {
                 var nodePath = $"{path}{command.ServiceId}";
@@ -145,10 +133,10 @@ namespace Surging.Core.Zookeeper
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
             var commands = await GetServiceCommands(serviceCommands.Select(p => p.ServiceId));
-            if(commands.Count()==0)
-            {
+            //if(commands.Count()==0)
+            //{
                 await SetServiceCommandsAsync(serviceCommands);
-            }
+            //}
         }
 
 

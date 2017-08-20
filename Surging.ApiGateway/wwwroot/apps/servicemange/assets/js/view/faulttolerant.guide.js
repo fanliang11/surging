@@ -3,6 +3,10 @@
     require('jquerytmpl');
     var def = {
         wrap: "#dataFaultTolerant tbody",
+        modal: "#myModal",
+        modalBody: "#myModal .modal-body",
+        modalForm: "#eventForm",
+        editFaultTolerant:".editFaultTolerant",
         btnSearch: "#btnSearch",
         searchForm: "#searchForm",
         queryParam: "#queryParam"
@@ -21,22 +25,54 @@
             self.initEvent();
             self.loadData();
         },
+        openDiag: function (id)
+        {
+            $.when(
+                $.get(config.EDIT_FAULTTOLERANT, {serviceId:id}))
+                .then(function (data) {
+                    $(def.modalBody).replaceWith(data);
+                    $(def.modal).modal('show');
+                });
+
+        },
         initEvent: function () {
             var self = this;
             $(def.btnSearch).off("click").bind("click", function () {
-                self.loadData($(def.queryParam).val());
+                self.loadData();
+            });
+            $(def.modalForm).off("submit").bind("submit", function () {
+                self.bindSubmit();
+                return false;
+            });
+            $(def.editFaultTolerant).off("click").bind("click", function () {
+                var $tr = $(this).parents("tr");
+                var serviceId = $.tmplItem($tr).data.entity[$tr.index()].serviceId;
+                self.openDiag(serviceId);
             });
         },
-        loadData: function (condition) {
+        bindSubmit: function () {
+            var self = this;
+            var formData = $(def.modalForm).serializeObject();
+            formData.InjectionNamespaces = formData.InjectionNamespaces.split(',');
+            $.when(
+                $.post(config.EDIT_FAULTTOLERANT, formData))
+                .then(function (data) {
+                    if (data.isSucceed) {
+                        $(def.modal).modal('hide');
+                        self.loadData();
+                    }
+                });
+        },
+        loadData: function () {
             var self = this;
             var formData = $(def.searchForm).serializeArray();
-            formData[1].value = eval(formData[1].value);
             $.when(
                 $.post(config.GET_COMMANDDESCRIPTOR, formData))
                 .then(function (data) {
                     if (data.isSucceed) {
                         var tpl = $.tmpl(self.opts.faulttolerant_tpl, data);
                         $(def.wrap).html(tpl);
+                        self.initEvent();
                     }
                 });
         }

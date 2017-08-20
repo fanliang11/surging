@@ -18,6 +18,7 @@
 							</td>
                             <td class="center"><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
                                                    <a href="/ServiceManage/ServiceDescriptor?address={{= [address.ip,address.port].join(":")}}" nodemenu="" class="grey editRegion" data-pjax=".page-content"><i class="icon-lightbulb  bigger-120"></i>查看元数据</a>
+												     <a href="/ServiceManage/FaultTolerant?address={{= [address.ip,address.port].join(":")}}" nodemenu="" class="grey editRegion" data-pjax=".page-content"><i class="icon-lightbulb  bigger-120"></i>查看容错规则</a>
                                                    <a href="javascript:void(0);" class="red delRegion"><i class="icon-trash bigger-120"></i>禁用</a>
 
                              </div></td>
