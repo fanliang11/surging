@@ -4,30 +4,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Caching.Configurations;
-using Surging.Core.CPlatform;
-using Surging.Core.CPlatform.Address;
-using Surging.Core.CPlatform.EventBus;
-using Surging.Core.CPlatform.Routing;
-using Surging.Core.CPlatform.Runtime.Server;
-using Surging.Core.CPlatform.Support;
-using Surging.Core.DotNetty;
-using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ProxyGenerator.Utilitys;
-using Surging.Core.System.Intercept;
 using Surging.Core.System.Ioc;
-using Surging.Core.Zookeeper;
-using Surging.Core.Zookeeper.Configurations;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
 using Surging.IModuleServices.Common.Models.Events;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Surging.Services.Server
@@ -49,14 +34,6 @@ namespace Surging.Services.Server
             ConfigureLogging(services);
             builder.Populate(services);
             _builder = builder;
-            builder.AddMicroService(option => {
-                option.AddClient();
-                option.AddClientIntercepted(typeof(CacheProviderInterceptor));
-                option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                option.UseDotNettyTransport();
-                option.UseRabbitMQTransport();
-                builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
-            });
             ServiceLocator.Current = builder.Build();
             return ServiceLocator.Current;
         }

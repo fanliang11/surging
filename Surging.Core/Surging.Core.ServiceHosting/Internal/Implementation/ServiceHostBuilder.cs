@@ -17,17 +17,19 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
     public class ServiceHostBuilder : IServiceHostBuilder
     {
         private readonly List<Action<IServiceCollection>> _configureServicesDelegates;
-        private ContainerBuilder hostingServices;
+        private readonly List<Action<ContainerBuilder>> _registerServicesDelegates;
+        
         public ServiceHostBuilder()
         {
             _configureServicesDelegates = new List<Action<IServiceCollection>>();
+            _registerServicesDelegates = new List<Action<ContainerBuilder>>();
         }
         public IServiceHost Build()
         {
             var services = BuildCommonServices();
+            var hostingServices = RegisterServices();
             var applicationServices = services.Clone();
             var hostingServiceProvider = services.BuildServiceProvider();
-            if (hostingServices == null) hostingServices = new ContainerBuilder();
             hostingServices.Populate(services);
             var host = new ServiceHost(hostingServices,hostingServiceProvider);
             host.Initialize();
@@ -36,11 +38,14 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
 
         public IServiceHostBuilder RegisterServices(Action<ContainerBuilder> builder)
         {
-            hostingServices = new ContainerBuilder();
-            builder.Invoke(hostingServices);
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+            _registerServicesDelegates.Add(builder);
             return this;
         }
-
+        
         public IServiceHostBuilder ConfigureServices(Action<IServiceCollection> configureServices)
         {
             if (configureServices == null)
@@ -59,6 +64,16 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
                 configureServices(services);
             }
             return services;
+        }
+
+        private ContainerBuilder RegisterServices()
+        {
+            var hostingServices = new ContainerBuilder();
+            foreach (var registerServices in _registerServicesDelegates)
+            {
+                registerServices(hostingServices);
+            }
+            return hostingServices;
         }
     }
 }

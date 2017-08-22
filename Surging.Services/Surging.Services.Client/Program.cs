@@ -1,34 +1,17 @@
 ﻿using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform;
 using Surging.Core.DotNetty;
-using Surging.Core.ProxyGenerator;
-using Surging.Core.System.Ioc;
-using Surging.IModuleServices.Common;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Surging.Core.ProxyGenerator.Utilitys;
 using Surging.Core.EventBusRabbitMQ;
-using Surging.Core.EventBusRabbitMQ.Configurations;
-using Microsoft.Extensions.Configuration;
-using Surging.IModuleServices.Common.Models.Events;
-using Surging.Core.CPlatform.Runtime.Server;
-using Surging.Core.CPlatform.Address;
-using Surging.Core.CPlatform.Routing;
+using Surging.Core.ProxyGenerator;
+using Surging.Core.ProxyGenerator.Utilitys;
+using Surging.Core.ServiceHosting;
+using Surging.Core.ServiceHosting.Internal.Implementation;
 using Surging.Core.System.Intercept;
-using Surging.IModuleServices.Common.Models;
-using Surging.Core.Caching.Configurations;
+using Surging.Core.System.Ioc;
 using Surging.Core.Zookeeper;
 using Surging.Core.Zookeeper.Configurations;
-using Surging.Core.ServiceHosting.Internal.Implementation;
 using Surging.Services.Server;
-using Surging.Core.ServiceHosting;
+using System.Text;
 
 namespace Surging.Services.Client
 {
@@ -44,6 +27,18 @@ namespace Surging.Services.Client
                     option.RegisterServices();
                     option.RegisterRepositories();
                     option.RegisterModules();
+                })
+                .RegisterServices(builder =>
+                {
+                    builder.AddMicroService(option =>
+                    {
+                        option.AddClient();
+                        option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+                        option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                        option.UseDotNettyTransport();
+                        option.UseRabbitMQTransport();
+                        builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+                    });
                 })
                 .UseStartup<Startup>()
                 .Build();

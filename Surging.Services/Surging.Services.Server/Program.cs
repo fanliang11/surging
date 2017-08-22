@@ -1,29 +1,14 @@
 ﻿using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform;
-using Surging.Core.CPlatform.Address;
-using Surging.Core.CPlatform.EventBus;
-using Surging.Core.CPlatform.Routing;
-using Surging.Core.CPlatform.Runtime.Server;
-using Surging.Core.CPlatform.Support;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;
-using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.ProxyGenerator.Utilitys;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
 using Surging.Core.System.Ioc;
 using Surging.Core.Zookeeper;
 using Surging.Core.Zookeeper.Configurations;
-using System;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Surging.Services.Server
 {
@@ -39,6 +24,18 @@ namespace Surging.Services.Server
                     option.RegisterRepositories();
                     option.RegisterModules();
                     option.RegisterServiceBus();
+                })
+                .RegisterServices(builder =>
+                {
+                    builder.AddMicroService(option =>
+                    {
+                        option.AddServiceRuntime();
+                        option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                        option.UseDotNettyTransport();
+                        option.UseRabbitMQTransport();
+                        option.AddRabbitMQAdapt();
+                        builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+                    });
                 })
                 .UseStartup<Startup>()
                 .Build();

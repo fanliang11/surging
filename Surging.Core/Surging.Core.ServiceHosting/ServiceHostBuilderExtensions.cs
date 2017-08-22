@@ -35,7 +35,7 @@ namespace Surging.Core.ServiceHosting
                     }
                 });
         }
-        
+
         public static IServiceHostBuilder UseStartup<TStartup>(this IServiceHostBuilder hostBuilder) where TStartup : class
         {
             return hostBuilder.UseStartup(typeof(TStartup));
