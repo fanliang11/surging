@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26711.1
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Common", "Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj", "{F9B2DBAE-34D5-4CF0-9CBB-67A87580BB6A}"
 EndProject
@@ -38,6 +38,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.ApiGateway", "Surging.ApiGateway\Surging.ApiGateway.csproj", "{70FC4EE8-AC84-4774-BC0E-DE26A4B743B1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.ApiGateWay", "Surging.Core\Surging.Core.ApiGateWay\Surging.Core.ApiGateWay.csproj", "{58E21930-A34E-4669-89F6-9322C4847E6D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.ServiceHosting", "Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj", "{610D8A1D-719B-4ADB-B06F-662EA2C7013F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,10 @@ Global
 		{58E21930-A34E-4669-89F6-9322C4847E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58E21930-A34E-4669-89F6-9322C4847E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58E21930-A34E-4669-89F6-9322C4847E6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{610D8A1D-719B-4ADB-B06F-662EA2C7013F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{610D8A1D-719B-4ADB-B06F-662EA2C7013F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{610D8A1D-719B-4ADB-B06F-662EA2C7013F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{610D8A1D-719B-4ADB-B06F-662EA2C7013F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -119,6 +125,7 @@ Global
 		{4D97446B-5E54-482C-ABAE-857577274B0B} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{EE2A8BC3-CA17-4C22-A873-19927BAFB009} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{58E21930-A34E-4669-89F6-9322C4847E6D} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{610D8A1D-719B-4ADB-B06F-662EA2C7013F} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
