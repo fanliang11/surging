@@ -1,17 +1,44 @@
 # surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper作为surging服务的注册中心，集成了哈希，随机，轮询作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
 <br />
-增加EventBus服务的文件配置：<br/>
- new ConfigurationBuilder()<br/>
-.SetBasePath(AppContext.BaseDirectory)<br/>
- .AddEventBusFile("eventBusSettings.json", optional: false);<br/>
-增加EventBus服务的依赖注入：<br/>
-  new ContainerBuilder().RegisterServiceBus();<br/>
-增加rabbitmq 服务配置：<br/>
-UseRabbitMQTransport() //rabbitmq 服务配置<br/>
-AddRabbitMQAdapt()//基于rabbitmq的消费的服务适配<br/>
-增加订阅功能：
+
+启动配置：
+
+ <br/>
+ 
+ ```c#
+var host = new ServiceHostBuilder()
+                .RegisterServices(option=> {
+                    option.Initialize(); //初始化服务
+                    option.RegisterServices();//依赖注入领域服务
+                    option.RegisterRepositories();//依赖注入仓储
+                    option.RegisterModules();//依赖注入第三方模块
+                    option.RegisterServiceBus();//依赖注入ServiceBus
+                })
+                .RegisterServices(builder =>
+                {
+                    builder.AddMicroService(option =>
+                    {
+                        option.AddServiceRuntime();//
+                        option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));//使用ZooKeeper管理
+                        option.UseDotNettyTransport();//使用Netty传输
+                        option.UseRabbitMQTransport();//使用rabbitmq 传输
+                        option.AddRabbitMQAdapt();//基于rabbitmq的消费的服务适配
+                        builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//初始化注入容器
+                    });
+                })
+                .UseStartup<Startup>()
+                .Build();
+ ```    
+                
 <br/>
+
+订阅功能：
+<br/>
+
+```c#
  ServiceLocator.GetService< ISubscriptionAdapt >().SubscribeAt();
+ ```    
+ 
  <br/>
 增加服务容错、服务容错降级、服务强制降级
 
