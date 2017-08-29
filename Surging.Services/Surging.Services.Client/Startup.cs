@@ -100,7 +100,7 @@ namespace Surging.Services.Server
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
-                        await userProxy.GetUser(new UserModel { UserId = 1 });
+                        await userProxy.Get(new System.Collections.Generic.List<UserModel>() { new UserModel { UserId = 1 } });
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");

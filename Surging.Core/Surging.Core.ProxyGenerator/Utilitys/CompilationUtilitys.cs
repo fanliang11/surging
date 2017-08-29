@@ -30,7 +30,8 @@ namespace Surging.Core.ProxyGenerator.Utilitys
             {
                 "System.Runtime",
                 "mscorlib",
-                "System.Threading.Tasks"
+                "System.Threading.Tasks",
+                  "System.Collections"
             };
             references = assemblys.Select(i => MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName(i)).Location)).Concat(references);
 #endif
@@ -53,7 +54,7 @@ namespace Surging.Core.ProxyGenerator.Utilitys
         {
             trees = trees.Concat(new[] { GetAssemblyInfo(assemblyInfo) });
             var compilation = CSharpCompilation.Create(assemblyName, trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-
+             var type=  compilation.GetTypeByMetadataName("List`1");
             var stream = new MemoryStream();
             var result = compilation.Emit(stream);
             if (!result.Success && logger != null)

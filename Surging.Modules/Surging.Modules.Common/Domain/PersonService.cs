@@ -50,6 +50,11 @@ namespace Surging.Modules.Common.Domain
             });
         }
 
+       public Task<bool> Get(List<UserModel> users)
+        {
+            return Task.FromResult(true);
+        }
+
         public Task<bool> Update(int id, UserModel model)
         {
             return Task.FromResult(true);

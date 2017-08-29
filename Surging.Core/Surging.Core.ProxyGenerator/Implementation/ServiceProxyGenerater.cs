@@ -263,11 +263,21 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
             foreach (var parameter in method.GetParameters())
             {
-                parameterDeclarationList.Add(Parameter(
-                                    Identifier(parameter.Name))
-                                    .WithType(GetQualifiedNameSyntax(parameter.ParameterType)));
-                parameterDeclarationList.Add(Token(SyntaxKind.CommaToken));
+                if (parameter.ParameterType.IsGenericType)
+                {
+                    parameterDeclarationList.Add(Parameter(
+                                     Identifier(parameter.Name))
+                                     .WithType(GetTypeSyntax(parameter.ParameterType)));
+                }
+                else
+                {
+                    parameterDeclarationList.Add(Parameter(
+                                        Identifier(parameter.Name))
+                                        .WithType(GetQualifiedNameSyntax(parameter.ParameterType)));
 
+                }
+                parameterDeclarationList.Add(Token(SyntaxKind.CommaToken));
+               
                 parameterList.Add(InitializerExpression(
                     SyntaxKind.ComplexElementInitializerExpression,
                     SeparatedList<ExpressionSyntax>(
