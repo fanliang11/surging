@@ -31,6 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Update="CPlatformResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>CPlatformResource.Designer.cs</LastGenOutput>

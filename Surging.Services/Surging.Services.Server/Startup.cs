@@ -41,11 +41,6 @@ namespace Surging.Services.Server
         {
             app.Resolve<ILoggerFactory>()
                     .AddConsole((c, l) => (int)l >= 3);
-            ConfigureRoutes();
-            app.Resolve<ISubscriptionAdapt>().SubscribeAt();
-            app.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
-            StartService();
-            Console.ReadLine();
         }
 
         #region 私有方法
@@ -71,35 +66,6 @@ namespace Surging.Services.Server
         {
             build
               .AddCacheFile("cacheSettings.json", optional: false);
-        }
-
-        /// <summary>
-        ///添加路由列表， 有利于测试，
-        /// </summary>
-        private void ConfigureRoutes()
-        {
-            var serviceEntryManager = ServiceLocator.GetService<IServiceEntryManager>();
-            var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-            new ServiceRoute
-            {
-                Address = new[] { new IpAddressModel { Ip = "127.0.0.1", Port = 98 } },
-                ServiceDescriptor = i.Descriptor
-            }).ToList();
-            var serviceRouteManager = ServiceLocator.GetService<IServiceRouteManager>();
-            serviceRouteManager.SetRoutesAsync(addressDescriptors);
-        }
-
-        /// <summary>
-        /// 启动服务
-        /// </summary>
-        private void StartService()
-        {
-            var serviceHost = ServiceLocator.GetService<IServiceHost>();
-            Task.Factory.StartNew(async () =>
-            {
-                await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 98));
-                Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
-            }).Wait();
         }
         #endregion
 

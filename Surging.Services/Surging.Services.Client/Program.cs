@@ -40,8 +40,13 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
+                .UseClient()
                 .UseStartup<Startup>()
                 .Build();
+
+            using (host.Run())
+            {
+            }
         }
     }
 }

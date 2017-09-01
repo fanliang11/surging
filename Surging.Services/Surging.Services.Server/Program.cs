@@ -9,6 +9,7 @@ using Surging.Core.System.Ioc;
 using Surging.Core.Zookeeper;
 using Surging.Core.Zookeeper.Configurations;
 using System.Text;
+using System;
 
 namespace Surging.Services.Server
 {
@@ -16,9 +17,10 @@ namespace Surging.Services.Server
     {
         static void Main(string[] args)
         {
-             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var host = new ServiceHostBuilder()
-                .RegisterServices(option=> {
+                .RegisterServices(option =>
+                {
                     option.Initialize();
                     option.RegisterServices();
                     option.RegisterRepositories();
@@ -37,8 +39,15 @@ namespace Surging.Services.Server
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
+                .SubscribeAt()
+                .UseServer("127.0.0.1", 98)
                 .UseStartup<Startup>()
                 .Build();
+
+            using (host.Run())
+            {
+                Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
+            }
         }
     }
 }

@@ -15,25 +15,36 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
         private IStartup _startup;
         private IContainer _applicationServices;
         private readonly IServiceProvider _hostingServiceProvider;
+        private readonly List<Action<IContainer>> _mapServicesDelegates;
 
         public ServiceHost(ContainerBuilder builder,
-            IServiceProvider hostingServiceProvider)
+            IServiceProvider hostingServiceProvider,
+             List<Action<IContainer>> mapServicesDelegate)
         {
             _builder = builder;
             _hostingServiceProvider = hostingServiceProvider;
+            _mapServicesDelegates = mapServicesDelegate;
         }
 
         public void Dispose()
         {
-
+            (_hostingServiceProvider as IDisposable)?.Dispose();
         }
 
-        public void Initialize()
+        public IDisposable Run()
+        {
+            if (_applicationServices != null)
+                MapperServices(_applicationServices);
+            return this;
+        }
+
+        public IContainer Initialize()
         {
             if (_applicationServices == null)
             {
                 _applicationServices = BuildApplication();
             }
+            return _applicationServices;
         }
 
         private void EnsureApplicationServices()
@@ -70,6 +81,14 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             {
                 Console.Out.WriteLine("应用程序启动异常: " + ex.ToString());
                 throw;
+            }
+        }
+
+        private void MapperServices(IContainer mapper)
+        {
+            foreach (var mapServices in _mapServicesDelegates)
+            {
+                mapServices(mapper);
             }
         }
     }

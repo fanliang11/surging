@@ -9,9 +9,8 @@ namespace Surging.Core.ServiceHosting.Internal
 {
    public interface IServiceHost : IDisposable
     {
- 
+        IDisposable Run();
 
-        void Initialize();
-
+        IContainer Initialize();
     }
 }

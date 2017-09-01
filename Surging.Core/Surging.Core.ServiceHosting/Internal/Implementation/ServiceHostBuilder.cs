@@ -18,12 +18,15 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
     {
         private readonly List<Action<IServiceCollection>> _configureServicesDelegates;
         private readonly List<Action<ContainerBuilder>> _registerServicesDelegates;
-        
+        private readonly List<Action<IContainer>> _mapServicesDelegates;
+
         public ServiceHostBuilder()
         {
             _configureServicesDelegates = new List<Action<IServiceCollection>>();
             _registerServicesDelegates = new List<Action<ContainerBuilder>>();
+            _mapServicesDelegates = new List<Action<IContainer>>();
         }
+
         public IServiceHost Build()
         {
             var services = BuildCommonServices();
@@ -31,9 +34,19 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             var applicationServices = services.Clone();
             var hostingServiceProvider = services.BuildServiceProvider();
             hostingServices.Populate(services);
-            var host = new ServiceHost(hostingServices,hostingServiceProvider);
-            host.Initialize();
+            var host = new ServiceHost(hostingServices,hostingServiceProvider, _mapServicesDelegates);
+            var container= host.Initialize();
             return host;
+        }
+
+        public IServiceHostBuilder MapServices(Action<IContainer> mapper)
+        {
+            if (mapper == null)
+            {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+            _mapServicesDelegates.Add(mapper);
+            return this;
         }
 
         public IServiceHostBuilder RegisterServices(Action<ContainerBuilder> builder)
@@ -65,7 +78,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             }
             return services;
         }
-
+        
         private ContainerBuilder RegisterServices()
         {
             var hostingServices = new ContainerBuilder();
