@@ -34,7 +34,6 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
                 dataWatches = value;
             }
         }
-        
 
         private HashSet<Watcher> Materialize()
         {

@@ -9,7 +9,6 @@ namespace Surging.Core.Consul.WatcherProvider
     public abstract class WatcherBase : Watcher
     {
 
-
         protected WatcherBase()
         {
          
