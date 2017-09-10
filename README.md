@@ -26,8 +26,15 @@ var host = new ServiceHostBuilder()
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//初始化注入容器
                     });
                 })
+                .SubscribeAt()     //消息订阅
+                .UseServer("127.0.0.1", 98)
                 .UseStartup<Startup>()
                 .Build();
+                
+            using (host.Run())
+            {
+                Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
+            }
  ```    
                 
 <br/>
