@@ -19,7 +19,8 @@ var host = new ServiceHostBuilder()
                     builder.AddMicroService(option =>
                     {
                         option.AddServiceRuntime();//
-                        option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));//使用ZooKeeper管理
+                        // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //使用Zookeeper管理
+                        option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//使用Consul管理
                         option.UseDotNettyTransport();//使用Netty传输
                         option.UseRabbitMQTransport();//使用rabbitmq 传输
                         option.AddRabbitMQAdapt();//基于rabbitmq的消费的服务适配
