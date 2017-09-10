@@ -161,10 +161,7 @@ namespace Surging.Core.Zookeeper
             }
             await base.SetRoutesAsync(routes);
         }
-
-
-
-
+        
         private async Task CreateZooKeeper()
         {
             if (_zooKeeper != null)

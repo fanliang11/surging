@@ -32,6 +32,7 @@
     <ProjectReference Include="..\Surging.Core\Surging.Core.ApiGateWay\Surging.Core.ApiGateWay.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.Caching\Surging.Core.Caching.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj" />
+    <ProjectReference Include="..\Surging.Core\Surging.Core.Consul\Surging.Core.Consul.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.DotNetty\Surging.Core.DotNetty.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
