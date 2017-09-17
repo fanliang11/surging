@@ -20,6 +20,7 @@
                                         <td class="center">${metadatas.Date}</td>         
 										  <td class="center"><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
                                                    <a href="/ServiceManage/FaultTolerant?serviceId={{= id}}" nodemenu="" class="grey editRegion" data-pjax=".page-content"><i class="icon-lightbulb  bigger-120"></i>查看容错规则</a>
+												    <a href="/ServiceManage/ServiceSubscriber?serviceId={{= id}}" nodemenu="" class="grey editRegion" data-pjax=".page-content"><i class="icon-lightbulb  bigger-120"></i>查看订阅者</a>
 
                              </div></td>
                            

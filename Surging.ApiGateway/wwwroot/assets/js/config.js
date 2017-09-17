@@ -16,7 +16,7 @@
         "apps_servicemange":"apps/servicemange/assets/js"
     },
     map: [
-        [/^(.*\.(?:css|js))(.*)$/i, '$1?t=20175589']
+        [/^(.*\.(?:css|js))(.*)$/i, '$1?t=20176589']
     ],
     debug: false,
     base: "/"

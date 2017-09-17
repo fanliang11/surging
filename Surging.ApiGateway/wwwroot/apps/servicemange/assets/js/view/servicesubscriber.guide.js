@@ -2,20 +2,19 @@
     var $ = jQuery = require('jquery');
     require('jquerytmpl');
     var def = {
-        wrap: "#dataServiceDescriptor tbody",
+        wrap: "#dataSubscriber tbody",
         btnSearch: "#btnSearch",
-        searchForm: "#searchForm",
         queryParam: "#queryParam"
     };
     var config = require('../url.config.js');
-    var descriptor = function (options) {
+    var serviceSubscriber = function (options) {
         var defaults = {
-            servicedescriptor_tpl: require("../../templates/servicedescriptor_template.tpl")
+            servicesubscriber_tpl: require("../../templates/servicesubscriber_template.tpl")
         };
         var self = this;
         this.opts = $.extend(defaults, options || {});
     };
-    descriptor.prototype = {
+    serviceSubscriber.prototype = {
         init: function () {
             var self = this;
             self.initEvent();
@@ -24,26 +23,24 @@
         },
         initEvent: function () {
             var self = this;
-            $(def.searchForm).off("submit").bind("submit", function () {
-                self.loadData();
-                return false;
+            $(def.btnSearch).off("click").bind("click", function () {
+                self.loadData($(def.queryParam).val());
             });
         },
-        loadData: function () {
+        loadData: function (condition) {
             var self = this;
-            var formData = $(def.searchForm).serializeArray();
             $.when(
-                $.post(config.GET_SERVICEDESCRIPTOR, formData))
+                $.post(config.GET_SUBSCRIBER, { queryParam: condition }))
                 .then(function (data) {
                     if (data.isSucceed) {
-                        var tpl = $.tmpl(self.opts.servicedescriptor_tpl, data);
+                        var tpl = $.tmpl(self.opts.servicesubscriber_tpl, data);
                         $(def.wrap).html(tpl);
                     }
                 });
         }
     };
     exports.init = function (options) {
-        var obj = new descriptor(options);
+        var obj = new serviceSubscriber(options);
         obj.init();
     };
 

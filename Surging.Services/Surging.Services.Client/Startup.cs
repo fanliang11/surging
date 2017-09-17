@@ -42,8 +42,7 @@ namespace Surging.Services.Server
         {
             app.Resolve<ILoggerFactory>()
                     .AddConsole((c, l) => (int)l >= 3);
-            Test(RegisterServiceProx(_builder));
-            TestRabbitMq();
+            RegisterServiceProx(_builder);
         }
 
         #region 私有方法

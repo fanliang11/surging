@@ -12,8 +12,10 @@ namespace Surging.Core.Zookeeper.Configurations
         /// <param name="connectionString">连接字符串。</param>
         /// <param name="routePath">路由配置路径。</param>
         /// <param name="chRoot">根节点。</param>
-        public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes", string commandPath= "/services/serviceCommands",
-            string chRoot = null) : this(connectionString, TimeSpan.FromSeconds(20), routePath, commandPath, chRoot)
+        public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes",
+            string subscriberPath = "/services/serviceSubscribers",
+            string commandPath = "/services/serviceCommands",
+            string chRoot = null) : this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath, commandPath, chRoot)
         {
         }
 
@@ -24,11 +26,14 @@ namespace Surging.Core.Zookeeper.Configurations
         /// <param name="routePath">路由配置路径。</param>
         /// <param name="sessionTimeout">会话超时时间。</param>
         /// <param name="chRoot">根节点。</param>
-        public ConfigInfo(string connectionString, TimeSpan sessionTimeout, string routePath = "/services/serviceRoutes",  string commandPath = "/services/serviceCommands",
+        public ConfigInfo(string connectionString, TimeSpan sessionTimeout, string routePath = "/services/serviceRoutes",
+            string subscriberPath = "/services/serviceSubscribers",
+            string commandPath = "/services/serviceCommands",
             string chRoot = null)
         {
             ChRoot = chRoot;
             CommandPath = commandPath;
+            SubscriberPath = subscriberPath;
             ConnectionString = connectionString;
             RoutePath = routePath;
             SessionTimeout = sessionTimeout;
@@ -48,6 +53,11 @@ namespace Surging.Core.Zookeeper.Configurations
         /// 路由配置路径。
         /// </summary>
         public string RoutePath { get; set; }
+
+        /// <summary>
+        /// 订阅者配置路径
+        /// </summary>
+        public string SubscriberPath { get; set; }
 
         /// <summary>
         /// 会话超时时间。

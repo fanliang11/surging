@@ -9,12 +9,13 @@ using Surging.Core.ServiceHosting.Internal;
 using Surging.Core.CPlatform.Runtime.Server;
 using System.Net;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Runtime.Client;
 
 namespace Surging.Core.CPlatform
 {
     public static class ServiceHostBuilderExtensions
     {
-        public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder,string ip,int port)
+        public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, string ip, int port)
         {
             return hostBuilder.MapServices(mapper =>
             {
@@ -39,7 +40,21 @@ namespace Surging.Core.CPlatform
         {
             return hostBuilder.MapServices(mapper =>
             {
-               
+                var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
+                var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
+                {
+                    i.Descriptor.Metadatas = null;
+                    return new ServiceSubscriber
+                    {
+                        Address = new[] { new IpAddressModel {
+                     Ip = Dns.GetHostEntry(Dns.GetHostName())
+                 .AddressList.FirstOrDefault<IPAddress>
+                 (a => a.AddressFamily.ToString().Equals("InterNetwork")).ToString() } },
+                        ServiceDescriptor = i.Descriptor
+                    };
+                }).ToList();
+                mapper.Resolve<IServiceSubscribeManager>().SetSubscribersAsync(addressDescriptors);
+
             });
         }
     }
