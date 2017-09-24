@@ -11,6 +11,8 @@ namespace Surging.Core.Zookeeper.Configurations
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
         /// <param name="routePath">路由配置路径。</param>
+        /// <param name="subscriberPath">订阅者配置路径</param>
+        /// <param name="commandPath">服务命令配置路径</param>
         /// <param name="chRoot">根节点。</param>
         public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
@@ -24,6 +26,8 @@ namespace Surging.Core.Zookeeper.Configurations
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
         /// <param name="routePath">路由配置路径。</param>
+        /// <param name="commandPath">服务命令配置路径</param>
+        /// <param name="subscriberPath">订阅者配置路径</param>
         /// <param name="sessionTimeout">会话超时时间。</param>
         /// <param name="chRoot">根节点。</param>
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout, string routePath = "/services/serviceRoutes",

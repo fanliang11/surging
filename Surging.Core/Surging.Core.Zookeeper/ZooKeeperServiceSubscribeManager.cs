@@ -35,8 +35,7 @@ namespace Surging.Core.Zookeeper
             CreateZooKeeper().Wait();
             EnterSubscribers().Wait();
         }
-
-
+        
         /// <summary>
         /// 获取所有可用的服务订阅者信息。
         /// </summary>
@@ -106,9 +105,9 @@ namespace Surging.Core.Zookeeper
 
             if (_subscribers != null)
             {
-                var oldRouteIds = _subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var newRouteIds = subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var deletedSubscriberIds = oldRouteIds.Except(newRouteIds).ToArray();
+                var oldSubscriberIds = _subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
+                var newSubscriberIds = subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
+                var deletedSubscriberIds = oldSubscriberIds.Except(newSubscriberIds).ToArray();
                 foreach (var deletedSubscriberId in deletedSubscriberIds)
                 {
                     var nodePath = $"{path}{deletedSubscriberId}";
@@ -230,7 +229,7 @@ namespace Surging.Core.Zookeeper
                 rootPath += "/";
 
             childrens = childrens.ToArray();
-            var routes = new List<ServiceSubscriber>(childrens.Count());
+            var subscribers = new List<ServiceSubscriber>(childrens.Count());
 
             foreach (var children in childrens)
             {
@@ -238,11 +237,11 @@ namespace Surging.Core.Zookeeper
                     _logger.LogDebug($"准备从节点：{children}中获取订阅者信息。");
 
                 var nodePath = $"{rootPath}{children}";
-                var route = await GetSubscriber(nodePath);
-                if (route != null)
-                    routes.Add(route);
+                var subscriber = await GetSubscriber(nodePath);
+                if (subscribers != null)
+                    subscribers.Add(subscriber);
             }
-            return routes.ToArray();
+            return subscribers.ToArray();
         }
 
         private async Task EnterSubscribers()

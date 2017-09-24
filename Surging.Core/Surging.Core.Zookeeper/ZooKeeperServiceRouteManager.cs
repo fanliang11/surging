@@ -25,7 +25,6 @@ namespace Surging.Core.Zookeeper
         private ServiceRoute[] _routes;
         private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
 
-
         public ZooKeeperServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IServiceRouteFactory serviceRouteFactory,
             ILogger<ZooKeeperServiceRouteManager> logger) : base(stringSerializer)

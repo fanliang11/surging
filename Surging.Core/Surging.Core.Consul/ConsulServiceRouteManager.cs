@@ -42,9 +42,8 @@ namespace Surging.Core.Consul
                  config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
              });
             EnterRoutes().Wait();
-  
-
         }
+
         public override async Task ClearAsync()
         {
             var queryResult = await _consul.KV.List(_configInfo.RoutePath);
@@ -170,10 +169,13 @@ namespace Surging.Core.Consul
             ServiceRoute result = null;
             var watcher = new NodeMonitorWatcher(_consul, _manager, path,
                  async (oldData, newData) => await NodeChange(oldData, newData));
-            var data = (await _consul.GetDataAsync(path));
-            watcher.SetCurrentData(data);
-            result = await GetRoute(data);
-
+            var queryResult = await _consul.KV.Keys(path);
+            if (queryResult.Response != null)
+            {
+                var data = (await _consul.GetDataAsync(path));
+                watcher.SetCurrentData(data);
+                result = await GetRoute(data);
+            }
             return result;
         }
 

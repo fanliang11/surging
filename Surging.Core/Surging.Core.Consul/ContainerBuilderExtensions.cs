@@ -6,6 +6,7 @@ using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using System;
@@ -55,6 +56,21 @@ namespace Surging.Core.Consul
             });
         }
 
+        public static IServiceBuilder UseConsulServiceSubscribeManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseSubscribeManager(provider =>
+            {
+                var result = new ConsulServiceSubscribeManager(
+                    configInfo,
+                    provider.GetRequiredService<ISerializer<byte[]>>(),
+                    provider.GetRequiredService<ISerializer<string>>(),
+                    provider.GetRequiredService<IClientWatchManager>(),
+                    provider.GetRequiredService<IServiceSubscriberFactory>(),
+                    provider.GetRequiredService<ILogger<ConsulServiceSubscribeManager>>());
+                return result;
+            });
+        }
+
         /// <summary>
         /// 设置使用基于Consul的Watch机制
         /// </summary>
@@ -72,6 +88,7 @@ namespace Surging.Core.Consul
         public static IServiceBuilder UseConsulManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseConsulRouteManager(configInfo)
+                .UseConsulServiceSubscribeManager(configInfo)
                .UseConsulCommandManager(configInfo).UseConsulWatch(configInfo);
         }
     }

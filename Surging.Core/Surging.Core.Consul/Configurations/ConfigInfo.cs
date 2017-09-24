@@ -10,8 +10,13 @@ namespace Surging.Core.Consul.Configurations
         /// 初始化会话超时为20秒的consul配置信息。
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
-        public ConfigInfo(string connectionString,string routePath = "services/serviceRoutes/", string commandPath = "services/serviceCommands/") :
-            this(connectionString, TimeSpan.FromSeconds(20), routePath, commandPath)
+        /// <param name="commandPath">服务命令配置路径</param>
+        /// <param name="routePath">路由路径配置路径</param>
+        /// <param name="subscriberPath">订阅者配置路径</param>
+        public ConfigInfo(string connectionString,string routePath = "services/serviceRoutes/",
+             string subscriberPath = "services/serviceSubscribers",
+            string commandPath = "services/serviceCommands/") :
+            this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath,commandPath)
         {
         }
 
@@ -20,11 +25,17 @@ namespace Surging.Core.Consul.Configurations
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
         /// <param name="sessionTimeout">会话超时时间。</param>
-        public ConfigInfo(string connectionString, TimeSpan sessionTimeout,string routePath = "services/serviceRoutes/", string commandPath = "services/serviceCommands/")
+        /// <param name="commandPath">服务命令配置命令。</param>
+        /// <param name="subscriberPath">订阅者配置命令。</param>
+        public ConfigInfo(string connectionString, TimeSpan sessionTimeout,
+            string routePath = "services/serviceRoutes/",
+             string subscriberPath = "services/serviceSubscribers",
+            string commandPath = "services/serviceCommands/")
         {
             
             SessionTimeout = sessionTimeout;
             RoutePath = routePath;
+            SubscriberPath = subscriberPath;
             CommandPath = commandPath;
             var  address= connectionString.Split(":");
             if(address.Length>1)
@@ -56,6 +67,11 @@ namespace Surging.Core.Consul.Configurations
         /// 命令配置路径
         /// </summary>
         public string CommandPath { get; set; }
+
+        /// <summary>
+        /// 订阅者配置路径
+        /// </summary>
+        public string SubscriberPath { get; set; }
 
         /// <summary>
         /// 路由配置路径。
