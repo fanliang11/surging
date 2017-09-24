@@ -147,11 +147,11 @@ namespace Surging.Core.Zookeeper
             {
                 foreach (var subscriber in subscribers)
                 {
-                    var serviceRoute = serviceSubscribers.Where(p => p.ServiceDescriptor.Id == subscriber.ServiceDescriptor.Id).FirstOrDefault();
-                    if (serviceRoute != null)
+                    var serviceSubscriber = serviceSubscribers.Where(p => p.ServiceDescriptor.Id == subscriber.ServiceDescriptor.Id).FirstOrDefault();
+                    if (serviceSubscriber != null)
                     {
                         subscriber.Address = subscriber.Address.Concat(
-                            subscriber.Address.Except(serviceRoute.Address));
+                            subscriber.Address.Except(serviceSubscriber.Address));
                     }
                 }
             }
