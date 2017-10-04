@@ -19,7 +19,7 @@ namespace Surging.Core.CPlatform
         {
             return descriptor.GetMetadata<string>("GroupName");
         }
-
+        
         /// <summary>
         /// 设置组名称。
         /// </summary>
@@ -58,6 +58,28 @@ namespace Surging.Core.CPlatform
         }
 
         /// <summary>
+        /// 获取是否启用授权
+        /// </summary>
+        /// <param name="descriptor">服务描述符。</param>
+        /// <param name="enable">是否启用</param>
+        /// <returns>服务描述符。</returns>
+        public static ServiceDescriptor EnableAuthorization(this ServiceDescriptor descriptor, bool enable)
+        {
+            descriptor.Metadatas["EnableAuthorization"] = enable;
+            return descriptor;
+        }
+
+        /// <summary>
+        /// 获取是否启用授权
+        /// </summary>
+        /// <param name="descriptor">服务描述符。</param>
+        /// <returns>服务描述符。</returns>
+        public static bool EnableAuthorization(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata("EnableAuthorization", true);
+        }
+
+        /// <summary>
         /// 获取负责人
         /// </summary>
         /// <param name="descriptor">服务描述符。</param>
@@ -72,11 +94,11 @@ namespace Surging.Core.CPlatform
         /// 获取日期
         /// </summary>
         /// <param name="descriptor">服务描述符。</param>
-        /// <param name="waitExecution">日期/param>
+        /// <param name="date">日期</param>
         /// <returns>服务描述符。</returns>
-        public static ServiceDescriptor Date(this ServiceDescriptor descriptor, string Date)
+        public static ServiceDescriptor Date(this ServiceDescriptor descriptor, string date)
         {
-            descriptor.Metadatas["Date"] = Date;
+            descriptor.Metadatas["Date"] = date;
             return descriptor;
         }
 

@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Convertibles.Implementation;
+using Surging.Core.CPlatform.Filters;
+using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Routing;
@@ -343,6 +345,9 @@ namespace Surging.Core.CPlatform
             services.Register(p => new CPlatformContainer(p));
             services.RegisterType(typeof(DefaultTypeConvertibleProvider)).As(typeof(ITypeConvertibleProvider)).SingleInstance();
             services.RegisterType(typeof(DefaultTypeConvertibleService)).As(typeof(ITypeConvertibleService)).SingleInstance();
+            services.RegisterType(typeof(TokenAttribute)).As(typeof(IAuthorizationFilter)).SingleInstance();
+            services.RegisterType(typeof(TokenAttribute)).As(typeof(IFilter)).SingleInstance();
+            services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceRouteFactory)).As(typeof(IServiceRouteFactory)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
             return new ServiceBuilder(services)

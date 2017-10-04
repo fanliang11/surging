@@ -27,6 +27,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         public string Director { get; set; }
 
         /// <summary>
+        /// 是否授权
+        /// </summary>
+        public bool EnableAuthorization { get; set; }
+        /// <summary>
         /// 名称
         /// </summary>
         public string Name { get; set; }
@@ -44,6 +48,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         {
             descriptor
                 .WaitExecution(IsWaitExecution)
+                .EnableAuthorization(EnableAuthorization)
                 .Director(Director)
                 .GroupName(Name)
                 .Date(Date);

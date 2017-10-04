@@ -10,21 +10,32 @@ using Surging.Core.CPlatform.Runtime.Server;
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Runtime.Client;
+using System;
 
 namespace Surging.Core.CPlatform
 {
     public static class ServiceHostBuilderExtensions
     {
-        public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, string ip, int port)
+        public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, string ip, int port, string token="True")
         {
             return hostBuilder.MapServices(mapper =>
             {
                 mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
+                bool enableToken; 
+                if(!bool.TryParse(token,out enableToken))
+                {
+                    string serviceToken= token;
+                }
+                else
+                {
+                    if(enableToken) token = Guid.NewGuid().ToString("N");
+                    else token = null;
+                }
                 var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                 new ServiceRoute
                 {
-                    Address = new[] { new IpAddressModel { Ip = ip, Port = port } },
+                    Address = new[] { new IpAddressModel { Ip = ip, Port = port, Token= token } },
                     ServiceDescriptor = i.Descriptor
                 }).ToList();
                 mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
