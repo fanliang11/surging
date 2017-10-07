@@ -13,7 +13,7 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
         private readonly IClientWatchManager _manager;
         private readonly ConsulClient _client;
         private readonly string _path;
-        private byte[] _currentData ;
+        private byte[] _currentData=new byte[0] ;
         public NodeMonitorWatcher(ConsulClient client, IClientWatchManager manager, string path, Action<byte[], byte[]> action)
         {
             this._action = action;
@@ -25,19 +25,18 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
 
         public NodeMonitorWatcher SetCurrentData(byte[] currentData)
         {
-            _currentData = currentData ;
+            _currentData = currentData  ;
             return this;
         }
 
         protected override async Task ProcessImpl()
         {
-            var watcher = new NodeMonitorWatcher(_client, _manager, _path,_action);
-            RegisterWatch(watcher);
+            RegisterWatch(this);
             var result = await _client.GetDataAsync(_path);
             if (result != null)
             {
                 _action(_currentData, result);
-                watcher.SetCurrentData(result);
+                this.SetCurrentData(result);
             }
         }
 

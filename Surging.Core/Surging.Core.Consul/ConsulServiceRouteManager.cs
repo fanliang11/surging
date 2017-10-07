@@ -185,7 +185,8 @@ namespace Surging.Core.Consul
                 return;
 
             var watcher = new ChildrenMonitorWatcher(_consul,_manager, _configInfo.RoutePath,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
+                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
+                  (result) =>  ConvertPaths(result).Result);
             if ( _consul.KV.Keys(_configInfo.RoutePath).Result.Response?.Count()>0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.RoutePath);
@@ -216,7 +217,25 @@ namespace Surging.Core.Consul
             return true;
         }
 
-        public async Task NodeChange(byte[] oldData, byte[] newData)
+        /// <summary>
+        /// 转化路径集合
+        /// </summary>
+        /// <param name="datas">信息数据集合</param>
+        /// <returns>返回路径集合</returns>
+        private  async  Task<string[]> ConvertPaths(string [] datas)
+        {
+            List<string> paths=new List<string>();
+            foreach (var data in datas)
+            {
+                var result = await GetRouteData(data);
+                var serviceId = result?.ServiceDescriptor.Id;
+                if (!string.IsNullOrEmpty(serviceId))
+                    paths.Add(serviceId);
+            }
+            return paths.ToArray();
+        }
+
+        private async Task NodeChange(byte[] oldData, byte[] newData)
         {
             if (DataEquals(oldData, newData))
                 return;
@@ -237,7 +256,7 @@ namespace Surging.Core.Consul
             OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
         }
 
-        public async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
+        private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
                 _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
@@ -256,7 +275,7 @@ namespace Surging.Core.Consul
                 _logger.LogInformation($"需要被添加的路由节点：{string.Join(",", createdChildrens)}");
 
             //获取新增的路由信息。
-            var newRoutes = (await GetRouteDatas(createdChildrens)).ToArray();
+            var newRoutes = (await GetRoutes(createdChildrens)).ToArray();
 
             var routes = _routes.ToArray();
             lock (_routes)

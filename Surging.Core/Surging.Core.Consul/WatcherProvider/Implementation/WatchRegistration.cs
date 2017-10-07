@@ -29,6 +29,7 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
                     watchers = new HashSet<Watcher>();
                     watches[clientPath] = watchers;
                 }
+               if(! watchers.Contains(watcher))
                 watchers.Add(watcher);
             }
         }

@@ -193,7 +193,8 @@ namespace Surging.Core.Consul
                 return;
 
             var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CommandPath,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
+                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
+                       (result) => ConvertPaths(result));
             if (_consul.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.CommandPath);
@@ -208,6 +209,24 @@ namespace Surging.Core.Consul
                     _logger.LogWarning($"无法获取服务命令信息，因为节点：{_configInfo.CommandPath}，不存在。");
                 _serviceCommands = new ServiceCommandDescriptor[0];
             }
+        }
+
+        /// <summary>
+        /// 转化路径集合
+        /// </summary>
+        /// <param name="datas">信息数据集合</param>
+        /// <returns>返回路径集合</returns>
+        private  string[] ConvertPaths(string[] datas)
+        {
+            List<string> paths = new List<string>();
+            foreach (var data in datas)
+            {
+                var result =  GetServiceCommandData(data);
+                var serviceId = result?.ServiceId;
+                if (string.IsNullOrEmpty(serviceId))
+                    paths.Add(serviceId);
+            }
+            return paths.ToArray();
         }
 
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
