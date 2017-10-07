@@ -29,6 +29,8 @@ var host = new ServiceHostBuilder()
                 })
                 .SubscribeAt()     //消息订阅
                 .UseServer("127.0.0.1", 98)
+              //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
+              //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
                 .UseStartup<Startup>()
                 .Build();
                 
