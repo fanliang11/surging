@@ -93,7 +93,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscribers)
         {
-            var serviceSubscribers = await GetSubscribers(subscribers.Select(p => p.ServiceDescriptor.Id));
+            var serviceSubscribers = await GetSubscribers(subscribers.Select(p =>$"{ _configInfo.SubscriberPath }{ p.ServiceDescriptor.Id}"));
             if (serviceSubscribers.Count() > 0)
             {
                 foreach (var subscriber in subscribers)

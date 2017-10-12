@@ -364,14 +364,9 @@ namespace Surging.Core.CPlatform
 
             builder.Services.Register(provider =>
             {
-#if NET
+
                 var assemblys = AppDomain.CurrentDomain.GetAssemblies();
-#else
-                var assemblys =
-            provider.ComponentRegistry.Registrations.SelectMany(x => x.Services)
-           .OfType<IServiceWithType>()
-           .Select(x => x.ServiceType.GetTypeInfo().Assembly);
-#endif
+
                 var refAssemblies = builder.GetType().GetTypeInfo().Assembly.GetReferencedAssemblies().Select(p => p.FullName).ToList();
                 Regex regex = new Regex("Microsoft.\\w*|System.\\w*", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 var types = assemblys.Where(i => i.IsDynamic == false
