@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Views\AuthenticationManage\" />
+    <Folder Include="wwwroot\apps\authmanage\assets\css\img\" />
+    <Folder Include="wwwroot\apps\authmanage\assets\js\view\" />
+    <Folder Include="wwwroot\apps\authmanage\assets\templates\" />
     <Folder Include="wwwroot\apps\servicemange\assets\images\" />
     <Folder Include="wwwroot\assets\css\plugins\" />
     <Folder Include="wwwroot\assets\templates\" />

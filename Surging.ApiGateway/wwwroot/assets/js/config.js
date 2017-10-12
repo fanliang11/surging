@@ -13,7 +13,8 @@
     paths: {
         "common": "assets/js",
         "lib": "assets/lib",
-        "apps_servicemange":"apps/servicemange/assets/js"
+        "apps_servicemange": "apps/servicemange/assets/js",
+        "apps_authmanage":"apps/authmanage/assets/js"
     },
     map: [
         [/^(.*\.(?:css|js))(.*)$/i, '$1?t=20176589']
