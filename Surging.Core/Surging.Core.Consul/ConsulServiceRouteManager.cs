@@ -74,7 +74,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
-            var serviceRoutes = await GetRoutes(routes.Select(p => p.ServiceDescriptor.Id));
+            var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
             if (serviceRoutes.Count() > 0)
             {
                 foreach (var route in routes)
@@ -83,7 +83,7 @@ namespace Surging.Core.Consul
                     if (serviceRoute != null)
                     {
                         route.Address = route.Address.Concat(
-                            route.Address.Except(serviceRoute.Address));
+                            serviceRoute.Address.Except(route.Address));
                     }
                 }
             }

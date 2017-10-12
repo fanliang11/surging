@@ -154,7 +154,7 @@ namespace Surging.Core.Zookeeper
                     if (serviceRoute != null)
                     {
                         route.Address = route.Address.Concat(
-                            route.Address.Except(serviceRoute.Address));
+                          serviceRoute.Address.Except(route.Address));
                     }
                 }
             }
