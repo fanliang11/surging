@@ -80,7 +80,7 @@ namespace Surging.Core.Consul
 
             var newCommand = GetServiceCommand(newData);
             //得到旧的服务命令。
-            var oldCommand = _serviceCommands.First(i => i.ServiceId == newCommand.ServiceId);
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
 
             lock (_serviceCommands)
             {

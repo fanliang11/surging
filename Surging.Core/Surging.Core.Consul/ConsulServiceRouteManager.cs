@@ -242,7 +242,7 @@ namespace Surging.Core.Consul
 
             var newRoute = await GetRoute(newData);
             //得到旧的路由。
-            var oldRoute = _routes.First(i => i.ServiceDescriptor.Id == newRoute.ServiceDescriptor.Id);
+            var oldRoute = _routes.FirstOrDefault(i => i.ServiceDescriptor.Id == newRoute.ServiceDescriptor.Id);
 
             lock (_routes)
             {
