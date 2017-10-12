@@ -14,7 +14,7 @@ namespace Surging.Core.Consul.Configurations
         /// <param name="routePath">路由路径配置路径</param>
         /// <param name="subscriberPath">订阅者配置路径</param>
         public ConfigInfo(string connectionString,string routePath = "services/serviceRoutes/",
-             string subscriberPath = "services/serviceSubscribers",
+             string subscriberPath = "services/serviceSubscribers/",
             string commandPath = "services/serviceCommands/") :
             this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath,commandPath)
         {
@@ -29,7 +29,7 @@ namespace Surging.Core.Consul.Configurations
         /// <param name="subscriberPath">订阅者配置命令。</param>
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout,
             string routePath = "services/serviceRoutes/",
-             string subscriberPath = "services/serviceSubscribers",
+             string subscriberPath = "services/serviceSubscribers/",
             string commandPath = "services/serviceCommands/")
         {
             
