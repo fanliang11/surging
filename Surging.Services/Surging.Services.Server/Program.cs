@@ -27,7 +27,7 @@ namespace Surging.Services.Server
                     option.RegisterServices();
                     option.RegisterRepositories();
                     option.RegisterModules();
-                    option.RegisterServiceBus();
+                    //option.RegisterServiceBus();
                 })
                 .RegisterServices(builder =>
                 {
@@ -37,8 +37,8 @@ namespace Surging.Services.Server
                        // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
-                        option.UseRabbitMQTransport();
-                        option.AddRabbitMQAdapt();
+                        //option.UseRabbitMQTransport();
+                        //option.AddRabbitMQAdapt();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })

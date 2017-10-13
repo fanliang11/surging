@@ -181,7 +181,7 @@ namespace Surging.Core.Consul
 
         private async Task EnterRoutes()
         {
-            if (_routes != null)
+            if (_routes!=null)
                 return;
 
             var watcher = new ChildrenMonitorWatcher(_consul,_manager, _configInfo.RoutePath,

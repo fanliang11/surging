@@ -108,15 +108,15 @@ namespace Surging.Services.Server
             }).Wait();
         }
 
-        public static void TestRabbitMq()
-        {
-            ServiceLocator.GetService<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
-            {
-                Age = "18",
-                Name = "fanly",
-                UserId = "1"
-            });
-        }
+        //public static void TestRabbitMq()
+        //{
+        //    ServiceLocator.GetService<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
+        //    {
+        //        Age = "18",
+        //        Name = "fanly",
+        //        UserId = "1"
+        //    });
+        //}
         #endregion
 
     }
