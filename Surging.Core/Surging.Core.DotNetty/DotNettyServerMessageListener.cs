@@ -78,8 +78,7 @@ namespace Surging.Core.DotNetty
                         await OnReceived(sender, message);
                     }, _logger));
                 }));
-            _channel = await bootstrap.BindAsync(endPoint);
-
+                _channel = await bootstrap.BindAsync(endPoint);
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"服务主机启动成功，监听地址：{endPoint}。");
         }
