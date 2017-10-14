@@ -36,10 +36,10 @@ namespace Surging.Services.Client
                     {
                         option.AddClient();
                         option.AddClientIntercepted(typeof(CacheProviderInterceptor));
-                       //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                       option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
+                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                        option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
-                        //option.UseRabbitMQTransport();
+                        option.UseRabbitMQTransport();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
@@ -50,7 +50,7 @@ namespace Surging.Services.Client
             using (host.Run())
             {
                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
-                //Startup.TestRabbitMq();
+                Startup.TestRabbitMq();
             }
         }
     }

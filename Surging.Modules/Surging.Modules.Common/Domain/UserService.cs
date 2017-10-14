@@ -18,10 +18,10 @@ namespace Surging.Modules.Common.Domain
         #region Implementation of IUserService
         private readonly UserRepository _repository;
         private readonly IEventBus _eventBus;
-        public UserService(UserRepository repository)
+        public UserService(UserRepository repository, IEventBus eventBus)
         {
             this._repository = repository;
-            //this._eventBus = eventBus;
+            this._eventBus = eventBus;
         }
 
         public Task<string> GetUserName(int id)
@@ -80,11 +80,11 @@ namespace Surging.Modules.Common.Domain
             throw new Exception("用户Id非法！");
         }
 
-        //public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
-        //{
-        //    _eventBus.Publish(evt);
-        //    await Task.CompletedTask;
-        //}
+        public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
+        {
+            _eventBus.Publish(evt);
+            await Task.CompletedTask;
+        }
 
         #endregion Implementation of IUserService
     }

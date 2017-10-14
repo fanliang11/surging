@@ -22,20 +22,21 @@ namespace Surging.Core.CPlatform
             {
                 mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
-                bool enableToken; 
-                if(!bool.TryParse(token,out enableToken))
+                bool enableToken;
+                string serviceToken;
+                if (!bool.TryParse(token,out enableToken))
                 {
-                    string serviceToken= token;
+                      serviceToken= token;
                 }
                 else
                 {
-                    if(enableToken) token = Guid.NewGuid().ToString("N");
-                    else token = null;
+                    if(enableToken) serviceToken = Guid.NewGuid().ToString("N");
+                    else serviceToken = null;
                 }
                 var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                 new ServiceRoute
                 {
-                    Address = new[] { new IpAddressModel { Ip = ip, Port = port, Token= token } },
+                    Address = new[] { new IpAddressModel { Ip = ip, Port = port, Token= serviceToken } },
                     ServiceDescriptor = i.Descriptor
                 }).ToList();
                 mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
