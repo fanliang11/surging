@@ -1,4 +1,4 @@
-# surging 　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/surging/blob/master/README.EN.md)
+# surging 　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/surging/blob/master/README.md)
 # surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission.
 <br />
 
