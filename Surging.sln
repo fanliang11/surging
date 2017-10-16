@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Common", "Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj", "{F9B2DBAE-34D5-4CF0-9CBB-67A87580BB6A}"
 EndProject
@@ -42,6 +42,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.ServiceHosting", "Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj", "{610D8A1D-719B-4ADB-B06F-662EA2C7013F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Consul", "Surging.Core\Surging.Core.Consul\Surging.Core.Consul.csproj", "{F467EA55-5779-46B6-87E4-00476DE2C401}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{24FB4EBE-A2EA-4F49-9B89-C560EB9414B7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liuxd.IModuleServices.System", "Liuxd.ISystemServices\Liuxd.IModuleServices.System.csproj", "{F92FDEEF-06F2-4B5B-B8D8-AA965E4B0D25}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liuxd.ModuleServices.System", "Liuxd.ModuleServices.System\Liuxd.ModuleServices.System.csproj", "{1D31729A-199B-4AE5-9DC9-23DA3FD3087F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liuxd.ServerHost.System", "Liuxd.ServerHost.System\Liuxd.ServerHost.System.csproj", "{C4C48CDA-3903-41F0-91B9-D0021005A960}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +121,18 @@ Global
 		{F467EA55-5779-46B6-87E4-00476DE2C401}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F467EA55-5779-46B6-87E4-00476DE2C401}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F467EA55-5779-46B6-87E4-00476DE2C401}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F92FDEEF-06F2-4B5B-B8D8-AA965E4B0D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F92FDEEF-06F2-4B5B-B8D8-AA965E4B0D25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F92FDEEF-06F2-4B5B-B8D8-AA965E4B0D25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F92FDEEF-06F2-4B5B-B8D8-AA965E4B0D25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D31729A-199B-4AE5-9DC9-23DA3FD3087F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D31729A-199B-4AE5-9DC9-23DA3FD3087F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D31729A-199B-4AE5-9DC9-23DA3FD3087F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D31729A-199B-4AE5-9DC9-23DA3FD3087F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4C48CDA-3903-41F0-91B9-D0021005A960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4C48CDA-3903-41F0-91B9-D0021005A960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4C48CDA-3903-41F0-91B9-D0021005A960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4C48CDA-3903-41F0-91B9-D0021005A960}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -133,6 +153,9 @@ Global
 		{58E21930-A34E-4669-89F6-9322C4847E6D} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{610D8A1D-719B-4ADB-B06F-662EA2C7013F} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{F467EA55-5779-46B6-87E4-00476DE2C401} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{F92FDEEF-06F2-4B5B-B8D8-AA965E4B0D25} = {24FB4EBE-A2EA-4F49-9B89-C560EB9414B7}
+		{1D31729A-199B-4AE5-9DC9-23DA3FD3087F} = {24FB4EBE-A2EA-4F49-9B89-C560EB9414B7}
+		{C4C48CDA-3903-41F0-91B9-D0021005A960} = {24FB4EBE-A2EA-4F49-9B89-C560EB9414B7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}

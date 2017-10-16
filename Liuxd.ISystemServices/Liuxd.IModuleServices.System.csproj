@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Liuxd.IModuleServices.System</AssemblyName>
+    <RootNamespace>Liuxd.IModuleServices.System</RootNamespace>
+    <Description>服务的应用层接口</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Surging.Core\Surging.Core.System\Surging.Core.System.csproj" />
+  </ItemGroup>
+
+</Project>

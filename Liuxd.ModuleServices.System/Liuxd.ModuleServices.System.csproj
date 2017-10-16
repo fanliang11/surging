@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Company />
+    <Product>业务模块</Product>
+    <Authors>刘旭东</Authors>
+    <Description />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liuxd.ISystemServices\Liuxd.IModuleServices.System.csproj" />
+    <ProjectReference Include="..\Surging.Core\Surging.Core.System\Surging.Core.System.csproj" />
+  </ItemGroup>
+
+</Project>
