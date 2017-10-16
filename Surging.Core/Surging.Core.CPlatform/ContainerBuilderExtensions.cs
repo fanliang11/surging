@@ -1,13 +1,13 @@
 ﻿using Autofac;
 using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Convertibles.Implementation;
+using Surging.Core.CPlatform.Filters;
+using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
-using Surging.Core.CPlatform.Logging;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -31,7 +31,6 @@ using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.CPlatform.Transport.Codec.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -86,7 +85,6 @@ namespace Surging.Core.CPlatform
             builder.Services.RegisterType(typeof(StringObjectSerializer)).As(typeof(ISerializer<object>)).SingleInstance();
             return builder;
         }
-
         #region RouteManager
 
         /// <summary>
@@ -109,7 +107,31 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseRouteManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceRouteManager> factory)
         {
-            builder.Services.RegisterAdapter(factory);
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
+        /// <summary>
+        /// 设置服务订阅管理者。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <param name="factory">服务订阅管理者实例工厂。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseSubscribeManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceSubscribeManager> factory)
+        {
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
+        /// <summary>
+        /// 设置服务命令管理者。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <param name="factory">服务命令管理者实例工厂。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseCommandManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCommandManager> factory)
+        {
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
             return builder;
         }
 
@@ -143,7 +165,7 @@ namespace Surging.Core.CPlatform
                 provider.GetRequiredService<ILogger<SharedFileServiceRouteManager>>()));
         }
 
-        public static IServiceBuilder UseSharedFileRouteManager(this IServiceBuilder builder, string ip,string port)
+        public static IServiceBuilder UseSharedFileRouteManager(this IServiceBuilder builder, string ip, string port)
         {
             return builder.UseRouteManager(provider =>
             new SharedFileServiceRouteManager(
@@ -289,6 +311,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder AddClusterSupport(this IServiceBuilder builder)
         {
+
             builder.Services.RegisterType(typeof(ServiceCommandProvider)).As(typeof(IServiceCommandProvider)).SingleInstance();
             builder.Services.RegisterType(typeof(BreakeRemoteInvokeService)).As(typeof(IBreakeRemoteInvokeService)).SingleInstance();
             builder.Services.RegisterType(typeof(FailoverInjectionInvoker)).AsImplementedInterfaces()
@@ -315,18 +338,22 @@ namespace Surging.Core.CPlatform
         /// </summary>
         /// <param name="services">服务集合。</param>
         /// <returns>服务构建者。</returns>
-        public static IServiceBuilder AddCoreServce(this ContainerBuilder services)
+        public static IServiceBuilder AddCoreService(this ContainerBuilder services)
         {
             Check.NotNull(services, "services");
             services.RegisterType<DefaultServiceIdGenerator>().As<IServiceIdGenerator>().SingleInstance();
             services.Register(p => new CPlatformContainer(p));
             services.RegisterType(typeof(DefaultTypeConvertibleProvider)).As(typeof(ITypeConvertibleProvider)).SingleInstance();
             services.RegisterType(typeof(DefaultTypeConvertibleService)).As(typeof(ITypeConvertibleService)).SingleInstance();
+            services.RegisterType(typeof(TokenAttribute)).As(typeof(IAuthorizationFilter)).SingleInstance();
+            services.RegisterType(typeof(TokenAttribute)).As(typeof(IFilter)).SingleInstance();
+            services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceRouteFactory)).As(typeof(IServiceRouteFactory)).SingleInstance();
+            services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
-           
+
         }
 
         private static IServiceBuilder AddRuntime(this IServiceBuilder builder)
@@ -337,14 +364,9 @@ namespace Surging.Core.CPlatform
 
             builder.Services.Register(provider =>
             {
-#if NET
+
                 var assemblys = AppDomain.CurrentDomain.GetAssemblies();
-#else
-                var assemblys =
-            provider.ComponentRegistry.Registrations.SelectMany(x => x.Services)
-           .OfType<IServiceWithType>()
-           .Select(x => x.ServiceType.GetTypeInfo().Assembly);
-#endif
+
                 var refAssemblies = builder.GetType().GetTypeInfo().Assembly.GetReferencedAssemblies().Select(p => p.FullName).ToList();
                 Regex regex = new Regex("Microsoft.\\w*|System.\\w*", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
                 var types = assemblys.Where(i => i.IsDynamic == false
@@ -360,6 +382,10 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
-        
+        public static void AddMicroService(this ContainerBuilder builder, Action<IServiceBuilder> option)
+        {
+            option.Invoke(builder.AddCoreService());
+        }
+
     }
 }

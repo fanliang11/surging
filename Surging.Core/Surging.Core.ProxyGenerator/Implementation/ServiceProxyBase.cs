@@ -51,14 +51,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
         protected async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId)
         {
             object result = default(T);
-            var command = _commandProvider.GetCommand(serviceId);
+            var command =await _commandProvider.GetCommand(serviceId);
             RemoteInvokeResultMessage message; 
             if (!command.RequestCacheEnabled)
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
                 if (message == null)
                 {
-                   
                     var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
                     return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
                 }
@@ -82,7 +81,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             task.Wait();
             if (task.Result == null)
             {
-                var command = _commandProvider.GetCommand(serviceId);
+                var command =await _commandProvider.GetCommand(serviceId);
                 var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
                 return await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
             }
@@ -100,7 +99,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
             if (message == null)
             {
-                var command = _commandProvider.GetCommand(serviceId);
+                var command =await _commandProvider.GetCommand(serviceId);
                 var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
                 await invoker.Invoke(parameters, serviceId, _serviceKey);
             }

@@ -1,0 +1,1245 @@
+ul,
+li
+{
+    margin: 0;
+    padding: 0;
+
+    list-style-type: none;
+}
+.multiline .selectpicker > li{width: 100px;float: left;}
+.multiline .bootstrap-select-searchbox input.form-control{height: 30px;padding: 6px 8px;}
+.multiline .dropdown-menu .selectpicker{min-width: 420px;width:420px;}
+.multiline .selectpicker > li > a { padding: 4px 15px; }
+
+@-webkit-keyframes app-active-reverse
+{
+    0%
+    {
+        -webkit-transform: translate3d(-600%, 55.1%, 0) scale(20);
+    }
+
+    38%
+    {
+        color: transparent;
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(55.1%, 55.1%, 0) scale(1);
+    }
+
+    82%
+    {
+        -webkit-transform: translate3d(-27.5%, -27.5%, 0);
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(0%, 0%, 0);
+    }
+}
+
+@-webkit-keyframes app-task-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-190%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-190%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+@-webkit-keyframes app-board-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-350%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-350%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+@-webkit-keyframes app-diary-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-450%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-450%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+@-webkit-keyframes app-calendar-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-600%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-600%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+
+@-webkit-keyframes app-workflow-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-190%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-190%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+@-webkit-keyframes app-crm-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-350%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-350%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+@-webkit-keyframes app-project-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-450%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-450%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+@-webkit-keyframes app-group-active
+{
+    16%
+    {
+        -webkit-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -webkit-transform: translate3d(-600%, 0%, 0) scale(1);
+
+        color: #fff;
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -webkit-transform: translate3d(-600%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+
+@-moz-keyframes app-active-reverse
+{
+    0%
+    {
+        -moz-transform: translate3d(-600%, 55.1%, 0) scale(20);
+    }
+
+    38%
+    {
+        color: transparent;
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(55.1%, 55.1%, 0) scale(1);
+    }
+
+    82%
+    {
+        -moz-transform: translate3d(-27.5%, -27.5%, 0);
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(0%, 0%, 0);
+    }
+}
+
+@-moz-keyframes app-task-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-190%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-190%, 0%, 0) scale(25);
+    }
+}
+@-moz-keyframes app-board-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-350%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-350%, 0%, 0) scale(25);
+    }
+}
+@-moz-keyframes app-diary-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-450%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-450%, 0%, 0) scale(25);
+    }
+}
+@-moz-keyframes app-calendar-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-600%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-600%, 0%, 0) scale(25);
+    }
+}
+
+@-moz-keyframes app-workflow-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-190%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-190%, 0%, 0) scale(25);
+
+        color: transparent;
+    }
+}
+@-moz-keyframes app-crm-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-350%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-350%, 0%, 0) scale(25);
+    }
+}
+@-moz-keyframes app-project-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-450%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-450%, 0%, 0) scale(25);
+    }
+}
+@-moz-keyframes app-group-active
+{
+    16%
+    {
+        -moz-transform: translate3d(27.5%, 0%, 0);
+    }
+
+    50%
+    {
+        -moz-transform: translate3d(-600%, 0%, 0) scale(1);
+    }
+
+    62%
+    {
+        color: transparent;
+    }
+
+    100%
+    {
+        -moz-transform: translate3d(-600%, 0%, 0) scale(25);
+    }
+}
+
+
+
+.page-loading
+{
+    font-size: 20px;
+
+    margin-top: 200px;
+
+    text-align: center;
+}
+.page-loading .icon-spinner.icon-spin
+{
+    font-size: 20px !important;
+
+    margin-right: 5px;
+}
+.overlay
+{
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+
+    visibility: hidden;
+    overflow: hidden;
+
+    width: 100%;
+    height: 100%;
+}
+.overlay .wrap
+{
+    margin: 150px auto 0;
+}
+.overlay .close_box
+{
+    font-size: 36px;
+
+    position: absolute;
+    top: 50px;
+    right: 50px;
+
+    cursor: pointer;
+}
+.overlay .close_box  i
+{
+    display: inline-block;
+
+    width: 50px;
+    height: 50px;
+}
+.wraps
+{
+    display: block;
+
+    width: 80%;
+    max-width: 740px;
+    margin: 120px auto 0;
+}
+.noscroll
+{
+    overflow: hidden;
+
+    width: 100%;
+    height: 100%;
+}
+/*后台公用样式*/
+
+/***应用图标样式***/
+.pc-app-btn
+{
+    font-size: 18px;
+    font-weight: normal;
+    line-height: 1.7;
+
+    position: relative;
+
+    display: inline-block;
+    margin: 2px;
+
+    transition: background-color .3s ease-in 0s;
+    text-align: center;
+
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+}
+.pc-app-btn:focus,
+.pc-app-btn:active:focus,
+.pc-app-btn.active:focus,
+.pc-sns-btn:focus,
+.pc-sns-btn:active:focus,
+.pc-sns-btn.active:focus
+{
+    outline: none;
+}
+.pc-sns-btn
+{
+    font-weight: normal;
+    line-height: 1.7;
+
+    position: relative;
+
+    display: inline-block;
+
+    width: 75px;
+    height: 75px;
+    margin: 2px;
+    margin-bottom: 15px;
+
+    text-align: center;
+
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+}
+.pc-sns-btn .pc-sns-text
+{
+    font-size: 14px;
+    line-height: 75px;
+
+    display: block;
+
+    width: 75px;
+    height: 75px;
+
+    vertical-align: middle;
+}
+
+.pc-app-btn .app-icon {
+    display: block;
+    width: 85px;
+    height: 85px;
+    -webkit-transition: transform 0.5s 0.5s;
+    -moz-transition: transform 0.5s 0.5s;
+    -ms-transition: transform 0.5s 0.5s;
+    -o-transition: transform 0.5s 0.5s;
+    transition: transform 0.5s 0.5s;
+    background: url('img/app_icon_all.png') repeat-y;
+}
+    .pc-app-btn .app-icon:hover {
+        opacity: 1;
+        transform: rotateZ(360deg);
+    }
+
+
+
+.pc-app-btn:hover .app-icon::before {
+   animation: 2s linear 0s normal none infinite running spinAround;
+}
+.pc-sns-btn .sns-icon
+{
+    font-size: 12px;
+    font-style: normal;
+    font-variant: normal;
+
+    display: block;
+
+    width: 75px;
+    height: 75px;
+
+    background: url('img/sns_icon_all.png') no-repeat;
+}
+.pc-app-btn:hover,
+.pc-sns-btn:hover,
+.pc-sns-btn:active,
+.pc-sns-btn:focus
+{
+    text-decoration: none;
+
+    color: #fff;
+}
+
+.pc-app-btn .round
+{
+    font-weight: normal;
+    line-height: 25px;
+
+    position: absolute;
+    top: 7px;
+    right: 0;
+
+    width: 20px;
+    height: 20px;
+    margin-left: 0;
+
+    color: #fff;
+    background-color: #fff;
+}
+
+.pc-app-btn .round i
+{
+    font-size: 14px;
+}
+.pc-app-btn.pc-app-monitor .round i
+{
+    color: #35495c;
+}
+.pc-app-btn.pc-app-service .round i
+{
+    color: #c03e33;
+}
+.pc-sns-btn .round
+{
+    font-weight: normal;
+
+    position: absolute;
+    top: 0;
+    right: -5px;
+
+    color: #fff;
+    background-color: #5891aa;
+}
+.pc-sns-btn .round.a
+{
+    -webkit-transition-timing-function: ease-in, ease-out;
+       -moz-transition-timing-function: ease-in, ease-out;
+    -webkit-transition-duration: .4s, .3s;
+       -moz-transition-duration: .4s, .3s;
+    -webkit-transition-property: right, top;
+       -moz-transition-property: right, top;
+}
+.pc-sns-btn .round.b
+{
+    -webkit-transition-timing-function: ease-out, ease-in;
+       -moz-transition-timing-function: ease-out, ease-in;
+    -webkit-transition-duration: .3s, .4s;
+       -moz-transition-duration: .3s, .4s;
+    -webkit-transition-property: right, top;
+       -moz-transition-property: right, top;
+}
+.pc-sns-btn .round.a
+{
+    top: 60px;
+    right: 10px;
+}
+.pc-sns-btn .round.b
+{
+    top: 0;
+    right: -5px;
+}
+
+.pc-app-btn.active-reverse
+{
+    z-index: 9;
+
+    -webkit-animation: app-active-reverse 1s 1 ease-in-out;
+       -moz-animation: app-active-reverse 1s 1 ease-in-out;
+            animation: app-active-reverse 1s 1 ease-in-out;
+}
+.pc-app-btn.active
+{
+    z-index: 99;
+}
+.pc-app-monitor.active
+{
+    -webkit-animation: app-workflow-active 1s 1 ease-in-out;
+       -moz-animation: app-workflow-active 1s 1 ease-in-out;
+            animation: app-workflow-active 1s 1 ease-in-out;
+}
+.pc-app-service.active
+{
+    -webkit-animation: app-crm-active 1s 1 ease-in-out;
+       -moz-animation: app-crm-active 1s 1 ease-in-out;
+            animation: app-crm-active 1s 1 ease-in-out;
+}
+.pc-app-defend.active
+{
+    -webkit-animation: app-project-active 1s 1 ease-in-out;
+       -moz-animation: app-project-active 1s 1 ease-in-out;
+            animation: app-project-active 1s 1 ease-in-out;
+}
+.pc-app-identity.active
+{
+    -webkit-animation: app-group-active 1s 1 ease-in-out;
+       -moz-animation: app-group-active 1s 1 ease-in-out;
+            animation: app-group-active 1s 1 ease-in-out;
+}
+.pc-app-task.active
+{
+    -webkit-animation: app-task-active 1s 1 ease-in-out;
+       -moz-animation: app-task-active 1s 1 ease-in-out;
+            animation: app-task-active 1s 1 ease-in-out;
+}
+.pc-app-board.active
+{
+    -webkit-animation: app-board-active 1s 1 ease-in-out;
+       -moz-animation: app-board-active 1s 1 ease-in-out;
+            animation: app-board-active 1s 1 ease-in-out;
+}
+.pc-app-diversion.active
+{
+    -webkit-animation: app-diary-active 1s 1 ease-in-out;
+       -moz-animation: app-diary-active 1s 1 ease-in-out;
+            animation: app-diary-active 1s 1 ease-in-out;
+}
+.pc-app-calendar.active
+{
+    -webkit-animation: app-calendar-active 1s 1 ease-in-out;
+       -moz-animation: app-calendar-active 1s 1 ease-in-out;
+            animation: app-calendar-active 1s 1 ease-in-out;
+}
+.pc-app-flowrate .active
+{
+    -webkit-animation: app-board-active 1s 1 ease-in-out;
+       -moz-animation: app-board-active 1s 1 ease-in-out;
+            animation: app-board-active 1s 1 ease-in-out;
+}
+
+
+
+/*工作流*/
+.pc-app-btn.pc-app-monitor
+{
+    background-color: #35495c;
+}
+
+.pc-app-monitor .app-icon {
+    background-position: -4px -4px;
+}
+.pc-app-monitor:hover .app-icon
+{
+    background-position: -4px -90px;
+}
+
+/*客户关系*/
+.pc-app-btn.pc-app-service
+{
+    background-color: #00bd81;
+}
+.pc-app-service .app-icon
+{
+    background-position: -90px -4px;
+}
+.pc-app-service:hover .app-icon
+{
+    background-position: -90px -90px;
+}
+
+/*项目任务*/
+.pc-app-btn.pc-app-defend
+{
+    background-color: #005b8d;
+}
+.pc-app-defend .app-icon
+{
+    background-position: -178px -4px;
+}
+.pc-app-defend:hover .app-icon
+{
+    background-position: -178px -90px;
+}
+
+/*工作小组*/
+.pc-app-btn.pc-app-identity
+{
+    background-color: #ed686e;
+}
+.pc-app-identity .app-icon
+{
+    background-position: -268px -4px;
+}
+.pc-app-identity:hover .app-icon
+{
+    background-position: -268px -90px;
+}
+
+/*日程提醒*/
+.pc-app-btn.pc-app-calendar
+{
+    background-color: #66bb5e;
+}
+.pc-app-calendar .app-icon
+{
+    background-position: -700px -4px;
+}
+.pc-app-calendar:hover .app-icon
+{
+    background-position: -700px -90px;
+}
+
+/*电子白板*/
+.pc-app-btn.pc-app-board
+{
+    background-color: #c33357;
+}
+.pc-app-board .app-icon
+{
+    background-position: -525px -4px;
+}
+.pc-app-board:hover .app-icon
+{
+    background-position: -525px -90px;
+}
+
+/*工作日志*/
+.pc-app-btn.pc-app-diversion {
+    background-color: #00b7d3;
+}
+.pc-app-diversion .app-icon
+{
+    background-position: -440px -4px;
+}
+.pc-app-diversion:hover .app-icon
+{
+    background-position: -440px -90px;
+}
+/*任务管理*/
+.pc-app-btn.pc-app-task
+{
+    background-color: #58aa89;
+}
+.pc-app-task .app-icon
+{
+    background-position: -616px -4px;
+}
+.pc-app-task:hover .app-icon
+{
+    background-position: -616px -90px;
+}
+/*任务管理*/
+.pc-app-btn.pc-app-flowrate  {
+    background-color: #00a6c0;
+}
+.pc-app-flowrate  .app-icon
+{
+    background-position: -358px  -4px;
+}
+.pc-app-flowrate :hover .app-icon
+{
+    background-position: -358px  -90px;
+}
+.pc-sns-workfeed .sns-icon
+{
+    background-position: 7px 9px;
+}
+.pc-sns-workmsg .sns-icon
+{
+    background-position: -53px 9px;
+}
+.pc-sns-worknotify .sns-icon
+{
+    background-position: -113px 9px;
+}
+.pc-sns-interest .sns-icon
+{
+    background-position: -174px 13px;
+}
+.pc-sns-friend .sns-icon
+{
+    background-position: -231px 11px;
+}
+.pc-sns-messages .sns-icon
+{
+    background-position: -291px 11px;
+}
+.pc-sns-notices .sns-icon
+{
+    background-position: -351px 11px;
+}
+
+.pc-tabs > li > a
+{
+    min-width: 66px;
+    padding: 3px 15px;
+
+    text-align: center;
+
+    color: #fff;
+    border: none;
+    border-radius: 0;
+}
+.pc-tabs > li > a:focus
+{
+    outline: none;
+}
+.pc-tabs > li.active > a
+{
+    margin-top: -3px;
+    padding-top: 6px;
+}
+.pc-tabs > li.active > a,
+.pc-tabs > li.active > a:hover,
+.pc-tabs > li.active > a:focus
+{
+    cursor: default;
+
+    color: #fff;
+    border: none;
+    border-radius: 0;
+}
+.pc-tabs > li > a:hover
+{
+    opacity: .8;
+}
+.pc-tabs .tab-black,
+.pc-tabs > li.active > a.tab-black,
+.pc-tabs > li > a.tab-black:hover,
+.pc-tabs > li > a.tab-black:focus
+{
+    background-color: #374a5b;
+}
+
+.pc-tabs .tab-red,
+.pc-tabs > li.active > a.tab-red,
+.pc-tabs > li > a.tab-red:hover,
+.pc-tabs > li > a.tab-red:focus
+{
+    background-color: #fd6d52;
+}
+.pc-tabs .tab-green,
+.pc-tabs > li.active > a.tab-green,
+.pc-tabs > li > a.tab-green:hover,
+.pc-tabs > li > a.tab-green:focus
+{
+    background-color: #66bb5e;
+}
+.pc-tabs .tab-blue,
+.pc-tabs > li.active > a.tab-blue,
+.pc-tabs > li > a.tab-blue:hover,
+.pc-tabs > li > a.tab-blue:focus
+{
+    background-color: #2798dc;
+}
+.pc-tabs .tab-skyblue,
+.pc-tabs > li.active > a.tab-skyblue,
+.pc-tabs > li > a.tab-skyblue:hover,
+.pc-tabs > li > a.tab-skyblue:focus
+{
+    background-color: #50c0e8;
+}
+
+.pc-tabs .tab-dark-green,
+.pc-tabs > li.active > a.tab-dark-green,
+.pc-tabs > li > a.tab-dark-green:hover,
+.pc-tabs > li > a.tab-dark-green:focus
+{
+    background-color: #049a99;
+}
+
+
+.pc-tabs .tab-darkred,
+.pc-tabs > li.active > a.tab-darkred,
+.pc-tabs > li > a.tab-darkred:hover,
+.pc-tabs > li > a.tab-darkred:focus
+{
+    background-color: #c13e34;
+}
+.pc-tabs .tab-rosered,
+.pc-tabs > li.active > a.tab-rosered,
+.pc-tabs > li > a.tab-rosered:hover,
+.pc-tabs > li > a.tab-rosered:focus
+{
+    background-color: #ef686e;
+}
+
+.pc-tabs .tab-gray,
+.pc-tabs > li.active > a.tab-gray,
+.pc-tabs > li > a.tab-gray:hover,
+.pc-tabs > li > a.tab-gray:focus
+{
+    background-color: #898989;
+}
+
+.pc-tabs .tab-doc,
+.pc-tabs > li.active > a.tab-doc,
+.pc-tabs > li > a.tab-doc:hover,
+.pc-tabs > li > a.tab-doc:focus
+{
+    background-color: #58aa89;
+}
+
+.pc-tabs .tab-trends,
+.pc-tabs > li.active > a.tab-trends,
+.pc-tabs > li > a.tab-trends:hover,
+.pc-tabs > li > a.tab-trends:focus
+{
+    background-color: #5f84ce;
+}
+
+.pc-tabs .tab-contacts,
+.pc-tabs > li.active > a.tab-contacts,
+.pc-tabs > li > a.tab-contacts:hover,
+.pc-tabs > li > a.tab-contacts:focus
+{
+    background-color: #c33357;
+}
+
+
+
+
+.pc-left-nav
+{
+    position: fixed;
+    z-index: 2;
+    top: 120px;
+    left: 40px;
+
+    width: 80px;
+}
+
+
+.pc-view-layer
+{
+    position: absolute;
+    z-index: 8;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    overflow: auto;
+
+    padding: 25px 0;
+
+    background: rgba(229,229,229,.95);
+}
+.pc-view-layer > .pc-view.set-container
+{
+    width: 1000px;
+    min-width: 1000px;
+}
+
+.pc-wrapper
+{
+    position: absolute;
+    top: 60px;
+    bottom: 40px;
+
+    width: 100%;
+}
+.pc-navbar
+{
+    position: relative;
+    z-index: 9;
+
+    margin-bottom: 0;
+}
+
+.pc-content
+{
+    position: absolute;
+    top: 0;
+
+    overflow: hidden;
+
+    width: 100%;
+    height: 100%;
+}
+/*.pc-app{opacity: 0.5;}
+.pc-app:hover{opacity:1;}*/
+.pc-app .pc-app-btn
+{
+    margin: 15px;
+}
+.pc-index .pc-sns-btn
+{
+    margin: 20px 23px;
+}
+.pc-index,
+.pc-app,
+.pc-left
+{
+    position: absolute;
+
+    height: 100%;
+}
+.pc-index {
+    width: 50%;
+    padding: 0px 0 0 10px;
+    -webkit-transition: width .8s;
+    transition: width .8s;
+}
+.pc-index > .index-wrap
+{
+    width: 100%;
+    min-width: 200px;
+    height: 300px;
+    margin-top: 70px;
+}
+    .pc-index > .index-wrap > .index-wrap-inner {
+
+        margin: 15px 20px;
+        text-align: left;
+        width: 80%;
+    }
+
+.pc-index .index-head
+{
+    margin:10px 0px;
+
+    color: #3b80b7;
+}
+.pc-index .index-feed
+{
+    margin: 10px auto;
+    padding-left: 30px;
+}
+.pc-left
+{
+    overflow: hidden;
+
+    width: 50%;
+
+    -webkit-transition: width .5s;
+            transition: width .5s;
+}
+.pc-left .content
+{
+    padding-top: 20px;
+    padding-right: 40px;
+    padding-left: 150px;
+}
+.pc-app
+{
+    left: 50%;
+
+    width: 50%;
+    padding: 10px 0 0 10px;
+
+    -webkit-transition: left .6s,background-color .3s;
+            transition: left .6s,background-color .3s;
+}
+.pc-app.pull-in{display: block; left: 86.333%;}
+.pc-app.pull-out{display: block;width: 50%;left: 50%;background-color:rgba(0,0,0,0.5);z-index: 99;}
+.pc-app > .app-wrap
+{
+    width: 500px;
+    min-width: 200px;
+    margin-top: 80px;
+    margin-left: 10%;
+
+    text-align: center;
+}
+.pc-tools-bar
+{
+    position: fixed;
+    z-index: 1000;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    min-height: 40px;
+
+    background-color: #343d46;
+}
+.pc-tools-bar .row
+{
+    margin: 0;
+}
+.tool-box
+{
+    padding: 0;
+
+    text-align: center;
+
+    border-right: solid 1px #1f272a;
+    border-left: solid 1px #777;
+    background-color: #343d46;
+}
+
+.tool-box:hover
+{
+    background-color: #45515c;
+}
+.tool-box > a
+{
+    line-height: 40px;
+
+    display: block;
+
+    height: 40px;
+
+    color: #fff;
+}
+.tool-box > a:hover,
+.tool-box > a:active
+{
+    text-decoration: none;
+}
+
+@-moz-document url-prefix()
+{
+    .tool-box.tool-timecard .surging-icon-calendar > em
+    {
+        top: 12px;
+        left: 7px;
+    }
+}
+
+.tool-box.tool-invite > a > i
+{
+    font-size: 22px;
+    vertical-align:middle;
+}
+.tool-box.tool-invite > a{
+    padding:6px 0px;line-height: 28px;
+}
+.tool-box.tool-invite > a > span{vertical-align:middle;padding-left:10px
+}
+

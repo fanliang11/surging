@@ -173,9 +173,9 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             };
 
             channel.BasicConsume(queue: _queueName,
-                                 noAck: true,
+                                  autoAck:true,
                                  consumer: consumer);
-
+         
             channel.CallbackException += (sender, ea) =>
             {
                 _consumerChannel.Dispose();

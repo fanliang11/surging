@@ -5,6 +5,7 @@ using Autofac;
 using System;
 using Surging.Core.ProxyGenerator.Interceptors;
 using Surging.Core.ProxyGenerator.Interceptors.Implementation;
+using Surging.Core.CPlatform.Support;
 
 namespace Surging.Core.ProxyGenerator
 {
@@ -29,7 +30,14 @@ namespace Surging.Core.ProxyGenerator
         public static IServiceBuilder AddClient(this ContainerBuilder services)
         {
             return services
-                .AddCoreServce()
+                .AddCoreService()
+                .AddClientRuntime()
+                .AddClientProxy();
+        }
+
+        public static IServiceBuilder AddClient(this IServiceBuilder builder)
+        {
+            return builder
                 .AddClientRuntime()
                 .AddClientProxy();
         }

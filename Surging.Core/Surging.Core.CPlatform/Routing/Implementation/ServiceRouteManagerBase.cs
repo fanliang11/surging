@@ -93,7 +93,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         /// </summary>
         /// <param name="routes">服务路由集合。</param>
         /// <returns>一个任务。</returns>
-        Task IServiceRouteManager.SetRoutesAsync(IEnumerable<ServiceRoute> routes)
+        public virtual Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
             if (routes == null)
                 throw new ArgumentNullException(nameof(routes));

@@ -35,7 +35,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             var time = 0;
             T result = default(T);
             RemoteInvokeResultMessage message = null;
-            var command = _commandProvider.GetCommand(serviceId);
+            var command =await _commandProvider.GetCommand(serviceId);
             do
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
@@ -48,7 +48,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
         public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string _serviceKey)
         {
             var time = 0;
-            var command = _commandProvider.GetCommand(serviceId);
+            var command =await _commandProvider.GetCommand(serviceId);
             while (await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey) == null && ++time < command.FailoverCluster) ;
         }
     }

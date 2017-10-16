@@ -1,0 +1,38 @@
+﻿@{
+    Layout = null;
+}
+<header class="navbar pc-navbar">
+    <div class="ew-navbar-header">
+        <a class="ew-navbar-logo pull-left" href="@Url.Action("Index","Home")" title="返回首页">
+            <h3 style="display: inline; color: rgb(255, 255, 255);">Surging Gateway</h3><i class="surging-icon-house-dialog"></i>
+        </a>
+    </div>
+    <div class="ew-navbar-info pull-right hidden-xs">
+        <ul class="nav pull-right pc-nav">
+            <li class="nav-item notice-num">
+                <a class="nav-item-link" href="javascript:;" data-toggle="dropdown"><i class="surging-icon-message"></i><span class="round round_0">12</span></a>
+                <ul class="message-menu dropdown-menu blue-menu with-arrow">
+                    <li><a class="nav-item-link-1" href="javascript:void(0);" data-pjax="#main" data-mode="sns">内部消息<span class="round round_1">8</span></a></li>
+                    <li class="last-child"><a class="nav-item-link-5" href="javascript:void(0);" data-pjax="#main" data-mode="sns">应用通知<span class="round round_5">3</span></a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a class="nav-item-link" href="javascript:;" data-toggle="dropdown"><i class="surging-icon-wrench"></i></a>
+                <ul class="user-menu dropdown-menu blue-menu with-arrow">
+                    <li><a href="javascript:void(0);" data-pjax=".pc-wrapper" data-mode="popup">帐号管理</a></li>
+                    <li><a href="javascript:void(0);" data-pjax=".pc-wrapper" data-mode="popup">修改密码</a></li>
+                    <li class="last-child"><a href="javascript:void(0);">退　　出</a></li>
+                </ul>
+            </li>
+            <li class="nav-item nav-user-info">
+                <a class="nav-item-link" href="javascript:void(0);" target="_blank">
+                    <img alt="fanly" src="~/assets/images/Heading.jpg" class="nav-user-photo">
+                    <div class="user-info">
+                        <span>您好,</span>
+                        <span class="ent-name">fanly</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+</header>

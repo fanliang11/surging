@@ -156,7 +156,7 @@ namespace Surging.Core.Caching.NetCache
                     }
                     Thread.Sleep(taskInterval * 60 * 1000);
                 }
-                catch (Exception ex)
+                catch
                 {
                      Dispose();
                     GCThreadProvider.AddThread(new ParameterizedThreadStart(Collect));

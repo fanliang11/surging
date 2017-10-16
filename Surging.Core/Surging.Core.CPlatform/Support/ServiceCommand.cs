@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,6 +13,7 @@ namespace Surging.Core.CPlatform.Support
         /// <summary>
         /// 容错策略
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public StrategyType Strategy { get; set; }
         /// <summary>
         /// 执行超时时间

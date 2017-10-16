@@ -23,7 +23,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string serviceKey)
         {
-            var command = _serviceCommandProvider.GetCommand(serviceId);
+            var command = await _serviceCommandProvider.GetCommand(serviceId);
             var result = await _serviceCommandProvider.Run(command.Injection, command.InjectionNamespaces);
             if (result is Boolean)
             {
@@ -38,7 +38,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string serviceKey)
         {
-            var command = _serviceCommandProvider.GetCommand(serviceId);
+            var command =await _serviceCommandProvider.GetCommand(serviceId);
             var injectionResult = await _serviceCommandProvider.Run(command.Injection, command.InjectionNamespaces);
             if (injectionResult is Boolean)
             {

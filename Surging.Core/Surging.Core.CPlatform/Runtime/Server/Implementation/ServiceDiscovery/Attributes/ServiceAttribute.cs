@@ -21,6 +21,23 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         /// </summary>
         public bool IsWaitExecution { get; set; }
 
+        /// <summary>
+        /// 负责人
+        /// </summary>
+        public string Director { get; set; }
+
+        /// <summary>
+        /// 是否授权
+        /// </summary>
+        public bool EnableAuthorization { get; set; }
+        /// <summary>
+        /// 名称
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// 日期
+        /// </summary>
+        public string Date { get; set; }
         #region Overrides of DescriptorAttribute
 
         /// <summary>
@@ -29,7 +46,12 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         /// <param name="descriptor">服务描述符。</param>
         public override void Apply(ServiceDescriptor descriptor)
         {
-            descriptor.WaitExecution(IsWaitExecution);
+            descriptor
+                .WaitExecution(IsWaitExecution)
+                .EnableAuthorization(EnableAuthorization)
+                .Director(Director)
+                .GroupName(Name)
+                .Date(Date);
         }
 
         #endregion Overrides of ServiceDescriptorAttribute

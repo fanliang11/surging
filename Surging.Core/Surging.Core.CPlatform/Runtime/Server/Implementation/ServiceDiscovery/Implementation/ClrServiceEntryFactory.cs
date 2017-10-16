@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.Convertibles;
+using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Utilities;
@@ -49,7 +50,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 yield return Create(methodInfo);
             }
         }
-
         #endregion Implementation of IClrServiceEntryFactory
 
         #region Private Method
@@ -57,26 +57,31 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         private ServiceEntry Create(MethodInfo method)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
-
+            var attributes = method.GetCustomAttributes().ToList();
             var serviceDescriptor = new ServiceDescriptor
             {
                 Id = serviceId,
-
             };
+
             var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
             foreach (var descriptorAttribute in descriptorAttributes)
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
+            serviceDescriptor.EnableAuthorization(!serviceDescriptor.EnableAuthorization()
+                ? attributes.Any(p => p is AuthorizationFilterAttribute) :
+                serviceDescriptor.EnableAuthorization());
+            var fastInvoker = FastInvoke.GetMethodInvoker(method);
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
-                Attributes = method.GetCustomAttributes().ToList(),
+                Attributes = attributes,
                 Func = (key, parameters) =>
              {
 
                  var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
+
                  foreach (var parameterInfo in method.GetParameters())
                  {
                      var value = parameters[parameterInfo.Name];
@@ -84,7 +89,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
                  }
-                 var result = method.Invoke(instance, list.ToArray());
+                 var result = fastInvoker(instance, list.ToArray()); //method.Invoke(instance, list.ToArray());
                  return Task.FromResult(result);
              }
             };
