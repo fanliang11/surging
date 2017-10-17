@@ -30,8 +30,8 @@ namespace Surging.Core.EventBusRabbitMQ
             {
                 var logger = provider.Resolve<ILogger<DefaultRabbitMQPersistentConnection>>();
                 var HostName = AppConfig.Configuration["EventBusConnection"];
-                var rabbitUserName= AppConfig.Configuration["EventBusConnection"];
-                var rabbitPassword= AppConfig.Configuration["EventBusConnection"];
+                var rabbitUserName= AppConfig.Configuration["EventBusUserName"];
+                var rabbitPassword= AppConfig.Configuration["EventBusPassword"];
 
                 if (string.IsNullOrWhiteSpace(rabbitPassword) || string.IsNullOrWhiteSpace(rabbitUserName))
                 {
