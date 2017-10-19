@@ -1,8 +1,9 @@
 ﻿
     @{
         ViewBag.Title = "服务管理";
-        var isPjax = !string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"]); ;
+        var isPjax = !string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"]) ;
         Layout = isPjax ? null : "_ServiceManageLayout.cshtml";
+        ViewBag.Selected="ServiceSubscriber";
     }
     <div class="page-header">
         <h1>

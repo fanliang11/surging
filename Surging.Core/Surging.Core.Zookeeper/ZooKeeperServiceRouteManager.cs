@@ -60,7 +60,7 @@ namespace Surging.Core.Zookeeper
             var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             var index = 0;
-            while (childrens.Any())
+            while (childrens.Count()>1)
             {
                 var nodePath = "/" + string.Join("/", childrens);
 

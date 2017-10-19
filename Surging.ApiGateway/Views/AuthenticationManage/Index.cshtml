@@ -1,17 +1,16 @@
 ﻿
 @{
-    ViewBag.Title = "服务管理";
+    ViewBag.Title = "认证管理";
     var isPjax = (!string.IsNullOrEmpty(Context.Request.Query["XPJAX"]) && bool.Parse(Context.Request.Query["XPJAX"]))
-              && (!string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"])) ;
-    Layout = isPjax ? null : "_ServiceManageLayout.cshtml";
-    ViewBag.Selected = "Index";
+              && (!string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"]));
+    Layout = isPjax ? null : "_AuthenticationManage.cshtml";
 }
 <div class="page-header">
     <h1>
-        服务管理
+       认证管理
         <small>
             <i class="icon-double-angle-right"></i>
-            服务管理
+            服务令牌
         </small>
     </h1>
     <div class="ace-settings-container">
@@ -25,12 +24,12 @@
         <div id="sample-table-2_wrapper" class="dataTables_wrapper" role="grid">
             <div class="row">
                 <div class="col-sm-6">
-
                     关键字：<input type="text" name="queryParam" id="queryParam" placeholder="机器名\服务Id">
                     <button id="btnSearch" class="btn btn-primary">搜&#12288;索</button>
                 </div>
             </div>
-            <div><table id="dataService" class="table table-striped table-bordered table-hover dataTable">
+            <div>
+                <table id="dataService" class="table table-striped table-bordered table-hover dataTable">
                     <thead>
                         <tr role="row">
                             <th style="width: 6%"></th>
@@ -40,32 +39,30 @@
                             <th class="center">操作</th>
                         </tr>
                     </thead>
-                    <tbody id="">
-               
-                    </tbody>
+                    <tbody id=""></tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-@if (!isPjax)
+@*@if (!isPjax)
 {
     @section SubFootJS
         {
-<script type="text/javascript">
-    seajs.use("apps_servicemange/view/address.guide.js", function(a) {
+        <script type="text/javascript">
+            seajs.use("apps_authmanage/view/address.guide.js", function(a) {
             a.init({
             });
         });
-</script>
+        </script>
     }
 }
 else
 {
     <script type="text/javascript">
-        seajs.use("apps_servicemange/view/address.guide.js", function (a) {
+        seajs.use("apps_authmanage/view/address.guide.js", function (a) {
             a.init({
             });
         });
     </script>
-}
+}*@
