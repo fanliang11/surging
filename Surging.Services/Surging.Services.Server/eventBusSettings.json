@@ -1,5 +1,4 @@
-﻿{
-  "EventBusConnection": "localhost",
-  "EventBusUserName": "",
-  "EventBusPassword": "" 
+{
+  "EventBusConnection": "localhost"
 }
+
