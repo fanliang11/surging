@@ -18,6 +18,11 @@ namespace Surging.Core.CPlatform.Address
         /// 访问的令牌
         /// </summary>
         public string Token { get; set; }
+
+        /// <summary>
+        /// 是否禁用令牌验证
+        /// </summary>
+        public bool DisableAuth { get; set; }
         /// <summary>
         /// 重写后的标识。
         /// </summary>

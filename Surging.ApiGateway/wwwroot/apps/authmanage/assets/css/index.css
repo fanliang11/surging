@@ -346,3 +346,12 @@
     margin: 0px;
     padding: 0px;
 }
+/*Modal*/
+.modal .modal-header {
+    background-color: #2e425a;
+    color: #fff;
+}
+.modal .close, .modal .close:hover {
+    color: #fff;
+    opacity: 1;
+}

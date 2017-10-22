@@ -8,9 +8,9 @@ using Surging.Core.CPlatform;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
-    public class ZookeeperServiceDiscoveryProvider : ServiceBase, IServiceDiscoveryProvider
+    public class ServiceDiscoveryProvider : ServiceBase, IServiceDiscoveryProvider
     {
-        public ZookeeperServiceDiscoveryProvider()
+        public ServiceDiscoveryProvider()
         {
 
         }

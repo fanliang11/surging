@@ -80,8 +80,8 @@ namespace Surging.Core.Consul
                 var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
                 if (serviceRoute != null)
                 {
-                    route.Address = route.Address.Concat(
-                        serviceRoute.Address.Except(route.Address));
+                    route.Address = serviceRoute.Address.Concat(
+                      route.Address.Except(serviceRoute.Address));
                 }
             }
             await base.SetRoutesAsync(routes);

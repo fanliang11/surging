@@ -66,6 +66,17 @@ namespace Surging.Core.CPlatform.Routing
         }
 
         /// <summary>
+        /// 获取令牌
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<string> GetTokensAsync(this IServiceRouteManager serviceRouteManager, string ipAddress)
+        {
+            var routes = await serviceRouteManager.GetAddressAsync(ipAddress);
+            var address = routes.FirstOrDefault();
+            return address?.Token;
+        }
+        
+        /// <summary>
         /// 获取地址
         /// </summary>
         /// <returns></returns>
