@@ -11,7 +11,7 @@ using Surging.Core.Zookeeper;
 using System.Text;
 using System;
 using Surging.Core.Consul;
-using Surging.Core.Consul.Configurations; 
+using Surging.Core.Consul.Configurations;
 
 namespace Surging.Services.Server
 {
@@ -34,7 +34,7 @@ namespace Surging.Services.Server
                     builder.AddMicroService(option =>
                     {
                         option.AddServiceRuntime();
-                        // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
@@ -43,7 +43,7 @@ namespace Surging.Services.Server
                     });
                 })
                 .SubscribeAt()
-                .UseServer("127.0.0.1", 198)
+                .UseServer("127.0.0.1", 98)
                 .UseStartup<Startup>()
                 .Build();
 

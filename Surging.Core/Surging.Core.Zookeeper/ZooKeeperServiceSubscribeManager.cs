@@ -58,7 +58,7 @@ namespace Surging.Core.Zookeeper
             var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             var index = 0;
-            while (childrens.Any())
+            while (childrens.Count() >1)
             {
                 var nodePath = "/" + string.Join("/", childrens);
 
@@ -143,16 +143,13 @@ namespace Surging.Core.Zookeeper
         public override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscribers)
         {
             var serviceSubscribers = await GetSubscribers(subscribers.Select(p => p.ServiceDescriptor.Id));
-            if (serviceSubscribers.Count() > 0)
+            foreach (var subscriber in subscribers)
             {
-                foreach (var subscriber in subscribers)
+                var serviceSubscriber = serviceSubscribers.Where(p => p.ServiceDescriptor.Id == subscriber.ServiceDescriptor.Id).FirstOrDefault();
+                if (serviceSubscriber != null)
                 {
-                    var serviceSubscriber = serviceSubscribers.Where(p => p.ServiceDescriptor.Id == subscriber.ServiceDescriptor.Id).FirstOrDefault();
-                    if (serviceSubscriber != null)
-                    {
-                        subscriber.Address = subscriber.Address.Concat(
-                            subscriber.Address.Except(serviceSubscriber.Address));
-                    }
+                    subscriber.Address = subscriber.Address.Concat(
+                        subscriber.Address.Except(serviceSubscriber.Address));
                 }
             }
             await base.SetSubscribersAsync(subscribers);
@@ -238,7 +235,7 @@ namespace Surging.Core.Zookeeper
 
                 var nodePath = $"{rootPath}{children}";
                 var subscriber = await GetSubscriber(nodePath);
-                if (subscribers != null)
+                if (subscriber != null)
                     subscribers.Add(subscriber);
             }
             return subscribers.ToArray();

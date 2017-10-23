@@ -97,10 +97,9 @@
             return template;
         };
         var pageStyleChange = function (o) {
-            if (o.parents(".sidebar").length == 0) return;
-            $(".sidebar").find(".active").removeClass("active");
-            o.parents("li").addClass("active");
-            o.parents(".submenu").parents("li").addClass("open active");
+            if (o.parents(".app-left-nav").length == 0) return;
+            $(".app-left-nav").find(".active").removeClass("popup active");
+            o.parents("li").find(".board-group ").addClass("popup active");
         };
         var BindEvent = function() {
             $mainbox.on('click', '[data-pjax]', function(event) {

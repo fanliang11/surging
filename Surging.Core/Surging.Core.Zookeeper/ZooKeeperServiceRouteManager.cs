@@ -60,7 +60,7 @@ namespace Surging.Core.Zookeeper
             var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             var index = 0;
-            while (childrens.Any())
+            while (childrens.Count()>1)
             {
                 var nodePath = "/" + string.Join("/", childrens);
 
@@ -153,8 +153,8 @@ namespace Surging.Core.Zookeeper
                     var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
                     if (serviceRoute != null)
                     {
-                        route.Address = route.Address.Concat(
-                          serviceRoute.Address.Except(route.Address));
+                        route.Address = serviceRoute.Address.Concat(
+                          route.Address.Except(serviceRoute.Address));
                     }
                 }
             }

@@ -58,8 +58,8 @@ namespace Surging.ApiGateway
             builder.AddMicroService(option =>
             {
                 option.AddServiceRuntime();
-               //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-              option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
+                //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
                 builder.Register(p => new CPlatformContainer(ServiceLocator.Current));

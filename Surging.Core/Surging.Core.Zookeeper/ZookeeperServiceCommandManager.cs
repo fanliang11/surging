@@ -32,6 +32,7 @@ namespace Surging.Core.Zookeeper
             _serializer = serializer;
             _logger = logger;
             CreateZooKeeper().Wait();
+            ClearAsync().Wait();
         }
 
        
@@ -57,7 +58,7 @@ namespace Surging.Core.Zookeeper
             var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             var index = 0;
-            while (childrens.Any())
+            while (childrens.Count() > 1)
             {
                 var nodePath = "/" + string.Join("/", childrens);
 

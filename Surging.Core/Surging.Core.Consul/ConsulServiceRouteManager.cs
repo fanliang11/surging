@@ -75,16 +75,13 @@ namespace Surging.Core.Consul
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
             var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
-            if (serviceRoutes.Count() > 0)
+            foreach (var route in routes)
             {
-                foreach (var route in routes)
+                var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
+                if (serviceRoute != null)
                 {
-                    var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
-                    if (serviceRoute != null)
-                    {
-                        route.Address = route.Address.Concat(
-                            serviceRoute.Address.Except(route.Address));
-                    }
+                    route.Address = serviceRoute.Address.Concat(
+                      route.Address.Except(serviceRoute.Address));
                 }
             }
             await base.SetRoutesAsync(routes);
@@ -181,7 +178,7 @@ namespace Surging.Core.Consul
 
         private async Task EnterRoutes()
         {
-            if (_routes!=null)
+            if (_routes!=null && _routes.Length>0)
                 return;
 
             var watcher = new ChildrenMonitorWatcher(_consul,_manager, _configInfo.RoutePath,

@@ -12,7 +12,7 @@ namespace Surging.Core.CPlatform.Filters.Implementation
     {
         public virtual bool OnAuthorization(ServiceRouteContext context)
         {
-            return context.Route.Address.Any(p => p.Token == context.InvokeMessage.Token);
+            return context.Route.Address.Any(p => p.Token == context.InvokeMessage.Token || p.DisableAuth==true);
         }
 
         public void ExecuteAuthorizationFilterAsync(ServiceRouteContext serviceRouteContext, CancellationToken cancellationToken)

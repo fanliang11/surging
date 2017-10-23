@@ -17,7 +17,7 @@ namespace Surging.Core.ApiGateWay
             var services = builder.Services;
             services.RegisterType<FaultTolerantProvider>().As<IFaultTolerantProvider>().SingleInstance();
             services.RegisterType<DefaultHealthCheckService>().As <IHealthCheckService>().SingleInstance();
-            services.RegisterType<ZookeeperServiceDiscoveryProvider>().As<IServiceDiscoveryProvider>().SingleInstance();
+            services.RegisterType<ServiceDiscoveryProvider>().As<IServiceDiscoveryProvider>().SingleInstance();
             services.RegisterType<ServiceSubscribeProvider>().As<IServiceSubscribeProvider>().SingleInstance();
             return builder;
         }
