@@ -1,6 +1,7 @@
 ﻿using Surging.Core.Caching;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters.Implementation;
+using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Attributes;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Surging.IModuleServices.Common
 {
-    [ServiceBundle]
+    [ServiceBundle("api/{Service}")]
     public interface IUserService
     {
 

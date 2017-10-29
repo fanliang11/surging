@@ -101,7 +101,7 @@ namespace Surging.Core.CPlatform
             descriptor.Metadatas["Date"] = date;
             return descriptor;
         }
-
+        
         /// <summary>
         /// 获取日期
         /// </summary>
@@ -141,6 +141,11 @@ namespace Surging.Core.CPlatform
         /// 服务Id。
         /// </summary>
         public string Id { get; set; }
+
+        /// <summary>
+        /// 路由
+        /// </summary>
+        public string RoutePath { get; set; }
 
         /// <summary>
         /// 元数据。

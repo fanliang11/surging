@@ -132,6 +132,12 @@
   <data name="JSONParseException" xml:space="preserve">
     <value>不能解析JSON文本，行号 '{0}': '{1}'.</value>
   </data>
+  <data name="TemplateRoute_InvalidRouteTemplate" xml:space="preserve">
+    <value>路由模板不能以'/'或'〜'字符开头。</value>
+  </data>
+  <data name="TemplateRoute_MismatchedParameter" xml:space="preserve">
+    <value>路由模板中有一个不完整的参数。 检查每个“{”字符是否具有匹配的'}'字符。</value>
+  </data>
   <data name="UnsupportedJSONToken" xml:space="preserve">
     <value>此'{0}' JSON 令牌不支持，路径'{1}',行'{2}',位置'{3}'</value>
   </data>

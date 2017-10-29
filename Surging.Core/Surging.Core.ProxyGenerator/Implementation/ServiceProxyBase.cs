@@ -70,8 +70,10 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
                 result = invocation.ReturnValue;
             }
-            if (message != null)
+            if (message != null && typeof(T) != typeof(string))
                 result = _typeConvertibleService.Convert(message.Result, typeof(T));
+            else if(typeof(T) == typeof(string))
+                result = _typeConvertibleService.Convert(message.Result.ToString(), typeof(T));
             return (T)result;
         }
 
@@ -104,13 +106,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 await invoker.Invoke(parameters, serviceId, _serviceKey);
             }
         }
-
+       
         private IInvocation GetInvocation(IDictionary<string, object> parameters, string serviceId, Type returnType)
         {
             var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
             return invocation.GetInvocation(this, parameters, serviceId, returnType);
         }
-
+        
         #endregion Protected Method
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
+using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Utilities;
 using System;
@@ -45,22 +46,24 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         /// <returns>服务条目集合。</returns>
         public IEnumerable<ServiceEntry> CreateServiceEntry(Type service)
         {
+            var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>() ;
             foreach (var methodInfo in service.GetTypeInfo().GetMethods())
             {
-                yield return Create(methodInfo);
+                yield return Create(methodInfo,service.Name, routeTemplate.RouteTemplate);
             }
         }
         #endregion Implementation of IClrServiceEntryFactory
 
         #region Private Method
 
-        private ServiceEntry Create(MethodInfo method)
+        private ServiceEntry Create(MethodInfo method,string serviceName,string routeTemplate)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
             var attributes = method.GetCustomAttributes().ToList();
             var serviceDescriptor = new ServiceDescriptor
             {
                 Id = serviceId,
+                RoutePath = RoutePatternParser.Parse(routeTemplate, serviceName, method.Name)
             };
 
             var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
