@@ -51,8 +51,8 @@ namespace Surging.Core.ProxyGenerator.Implementation
         protected async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId)
         {
             object result = default(T);
-            var command =await _commandProvider.GetCommand(serviceId);
-            RemoteInvokeResultMessage message; 
+            var command = await _commandProvider.GetCommand(serviceId);
+            RemoteInvokeResultMessage message;
             if (!command.RequestCacheEnabled)
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
@@ -64,16 +64,14 @@ namespace Surging.Core.ProxyGenerator.Implementation
             }
             else
             {
-                var invocation = GetInvocation(parameters, serviceId,typeof(T));
-                await  _interceptor.Intercept(invocation);
+                var invocation = GetInvocation(parameters, serviceId, typeof(T));
+                await _interceptor.Intercept(invocation);
                 message = invocation.ReturnValue is RemoteInvokeResultMessage
                     ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
                 result = invocation.ReturnValue;
             }
-            if (message != null && typeof(T) != typeof(string))
+            if (message != null)
                 result = _typeConvertibleService.Convert(message.Result, typeof(T));
-            else if(typeof(T) == typeof(string))
-                result = _typeConvertibleService.Convert(message.Result.ToString(), typeof(T));
             return (T)result;
         }
 

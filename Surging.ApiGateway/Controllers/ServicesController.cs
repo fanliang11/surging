@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using Surging.Core.ApiGateWay;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.ProxyGenerator;
+using Surging.Core.ProxyGenerator.Utilitys;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,20 +14,21 @@ namespace Surging.ApiGateway.Controllers
     public class ServicesController : Controller
     {
         private readonly IServiceProxyProvider _serviceProxyProvider;
-        public ServicesController(IServiceProxyProvider serviceProxyProvider)
+
+        public ServicesController()
         {
-            _serviceProxyProvider = serviceProxyProvider;
+            _serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
         }
-        public async Task<string> Path(string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)
+        public async Task<ServiceResult<object>> Path(string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)
         {
-            string result = "";
+            ServiceResult<object> result = ServiceResult<object>.Create(false,null);
             if (!string.IsNullOrEmpty(serviceKey))
             {
-                result = await _serviceProxyProvider.Invoke<string>(model, path, serviceKey);
+                result = ServiceResult<object>.Create(true,await _serviceProxyProvider.Invoke<object>(model, path, serviceKey));
             }
             else
             {
-                result = await _serviceProxyProvider.Invoke<string>(model, path);
+                result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
             }
             return result;
         }

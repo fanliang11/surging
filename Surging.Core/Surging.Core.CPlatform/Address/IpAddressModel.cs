@@ -55,11 +55,10 @@ namespace Surging.Core.CPlatform.Address
             return new IPEndPoint(IPAddress.Parse(Ip), Port);
         }
 
-        /// <summary>Returns a string that represents the current object.</summary>
-        /// <returns>A string that represents the current object.</returns>
+    
         public override string ToString()
         {
-            return $"{Ip}:{Port}";
+             return $"{Ip}{Port}";
         }
 
         #endregion Overrides of AddressModel
