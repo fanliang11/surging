@@ -43,7 +43,16 @@ var host = new ServiceHostBuilder()
                 Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
             }
  ```    
-                
+<br/>
+
+服务路由访问配置：
+<br/>
+
+```c#
+[ServiceBundle("api/{Service}")]
+ ```    
+<br/>           
+
 <br/>
 
 订阅功能：

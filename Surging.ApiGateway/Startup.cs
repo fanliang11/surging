@@ -6,20 +6,19 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 using Surging.Core.ApiGateWay;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
-using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.DotNetty;
+using Surging.Core.ProxyGenerator;
 using Surging.Core.ProxyGenerator.Utilitys;
+using Surging.Core.System.Intercept;
 using Surging.Core.System.Ioc;
-using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace Surging.ApiGateway
 {
@@ -47,7 +46,10 @@ namespace Surging.ApiGateway
 
         private IServiceProvider RegisterAutofac(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options => {
+                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            });
             services.AddLogging();
             var builder = new ContainerBuilder();
             builder.Initialize();
@@ -57,22 +59,16 @@ namespace Surging.ApiGateway
             builder.Populate(services);
             builder.AddMicroService(option =>
             {
-                option.AddServiceRuntime();
+
+                option.AddClient();
+                option.AddClientIntercepted(typeof(CacheProviderInterceptor));
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                 option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
                 builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
             });
-
             ServiceLocator.Current = builder.Build();
-            var serviceHost = ServiceLocator.Current.Resolve<IServiceHost>();
-            Task.Factory.StartNew(async () =>
-            {
-                //启动主机
-                await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 99));
-            }).Wait();
-
             return new AutofacServiceProvider(ServiceLocator.Current);
         }
 
@@ -91,13 +87,17 @@ namespace Surging.ApiGateway
             var myProvider = new FileExtensionContentTypeProvider();
             myProvider.Mappings.Add(".tpl", "text/plain");
             app.UseStaticFiles(new StaticFileOptions() { ContentTypeProvider = myProvider });
-
             app.UseStaticFiles();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+
+                routes.MapRoute(
+                "Path",
+                "{*path}",
+                new { controller = "Services", action = "Path" });
             });
         }
     }

@@ -8,5 +8,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
     [AttributeUsage(AttributeTargets.Interface)]
     public class ServiceBundleAttribute : Attribute
     {
+        public ServiceBundleAttribute(string routeTemplate)
+        {
+            RouteTemplate = routeTemplate;
+        }
+        public string RouteTemplate { get; }
     }
 }
