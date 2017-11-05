@@ -1,4 +1,4 @@
-﻿       {{each entity}}
+﻿       {{each Entity}}
 	<tr>
                             <td class="center">
 								  {{if ($index+1)%2==1 }}
@@ -7,18 +7,18 @@
                                   <span class="badge   badge-success  ">${$index+1}</span>
                                   {{/if}}
                             </td>
-                            <td class="center"> {{= [address.ip,address.port].join(":")}}</td>
+                            <td class="center"> {{= [Address.Ip,Address.Port].join(":")}}</td>
                             <td class="center">已启动</td>
                             <td class="center">
-							      {{if isHealth==true }}
+							      {{if IsHealth==true }}
 								<span class="label label-success arrowed-in arrowed-in-right">正常</span>
 								{{else}}
 										<span class="label label-danger arrowed">异常</span>
 								{{/if}}
 							</td>
-							 <td class="center">${address.token}</td>
+							 <td class="center">${Address.Token}</td>
 							    <td class="center">
-							      {{if address.disableAuth ==true }}
+							      {{if Address.DisableAuth ==true }}
 								<span class="label label-danger arrowed">是</span>
 								{{else}}
 										<span class="label label-success arrowed-in arrowed-in-right">否</span>

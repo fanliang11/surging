@@ -32,7 +32,6 @@ namespace Surging.IModuleServices.Common
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<DateTime> GetUserLastSignInTime(int id);
 
-        [Token]
         [Command(Strategy= StrategyType.Injection,Injection = @"return
 new Surging.IModuleServices.Common.Models.UserModel
          {

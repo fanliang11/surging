@@ -94,8 +94,8 @@ namespace Surging.Core.ApiGateWay
         public string Message { get; set; }
 
         /// <summary>
-        /// 错误码
+        /// 状态码
         /// </summary>
-        public int ErrorCode { get; set; }
+        public int StatusCode { get; set; }
     }
 }

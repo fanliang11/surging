@@ -32,7 +32,7 @@
             $.when(
                 $.post(config.GET_SUBSCRIBER, { queryParam: condition }))
                 .then(function (data) {
-                    if (data.isSucceed) {
+                    if (data.IsSucceed) {
                         var tpl = $.tmpl(self.opts.servicesubscriber_tpl, data);
                         $(def.wrap).html(tpl);
                     }

@@ -141,7 +141,7 @@ namespace Surging.Core.CPlatform
         /// 服务Id。
         /// </summary>
         public string Id { get; set; }
-
+        
         /// <summary>
         /// 路由
         /// </summary>
