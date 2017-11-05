@@ -58,7 +58,7 @@ namespace Surging.Core.CPlatform.Address
     
         public override string ToString()
         {
-             return $"{Ip}{Port}";
+             return $"{Ip}:{Port}";
         }
 
         #endregion Overrides of AddressModel

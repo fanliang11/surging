@@ -72,6 +72,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         public async Task<ServiceRoute> GetRouteByPath(string path)
         {
             ServiceRoute route;
+            path = path.ToLower();
             _concurrent.TryGetValue(path, out route);
             if (route == null)
             {

@@ -46,7 +46,7 @@
             });
             $(def.editFaultTolerant).off("click").bind("click", function () {
                 var $tr = $(this).parents("tr");
-                var serviceId = $.tmplItem($tr).data.entity[$tr.index()].serviceId;
+                var serviceId = $.tmplItem($tr).data.Entity[$tr.index()].ServiceId;
                 self.openDiag(serviceId);
             });
         },
@@ -57,7 +57,7 @@
             $.when(
                 $.post(config.EDIT_FAULTTOLERANT, formData))
                 .then(function (data) {
-                    if (data.isSucceed) {
+                    if (data.IsSucceed) {
                         $(def.modal).modal('hide');
                         self.loadData();
                     }
@@ -69,7 +69,7 @@
             $.when(
                 $.post(config.GET_COMMANDDESCRIPTOR, formData))
                 .then(function (data) {
-                    if (data.isSucceed) {
+                    if (data.IsSucceed) {
                         var tpl = $.tmpl(self.opts.faulttolerant_tpl, data);
                         $(def.wrap).html(tpl);
                         self.initEvent();

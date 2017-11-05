@@ -35,7 +35,7 @@
             $.when(
                 $.post(config.GET_SERVICEDESCRIPTOR, formData))
                 .then(function (data) {
-                    if (data.isSucceed) {
+                    if (data.IsSucceed) {
                         var tpl = $.tmpl(self.opts.servicedescriptor_tpl, data);
                         $(def.wrap).html(tpl);
                     }

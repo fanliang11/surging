@@ -7,10 +7,10 @@
                                   <span class="badge   badge-success  ">${$index+1}</span>
                                   {{/if}}
                             </td>
-                            <td class="center"> {{= [address.ip,address.port].join(":")}}</td>
+                            <td class="center"> {{= [Address.Ip,Address.Port].join(":")}}</td>
                             <td class="center">已启动</td>
                             <td class="center">
-							      {{if isHealth==true }}
+							      {{if IsHealth==true }}
 								<span class="label label-success arrowed-in arrowed-in-right">正常</span>
 								{{else}}
 										<span class="label label-danger arrowed">异常</span>

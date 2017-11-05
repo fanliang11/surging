@@ -17,7 +17,7 @@
         "apps_authmanage":"apps/authmanage/assets/js"
     },
     map: [
-        [/^(.*\.(?:css|js))(.*)$/i, '$1?t=201710225']
+        [/^(.*\.(?:css|js))(.*)$/i, '$1?t=201710245']
     ],
     debug: false,
     base: "/"
