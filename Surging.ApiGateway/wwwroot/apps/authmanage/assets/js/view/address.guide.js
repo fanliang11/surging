@@ -34,15 +34,31 @@
                 });
 
         },
+        bindSubmit: function () {
+            var self = this;
+            var formData = $(def.modalForm).serializeObject();
+            $.when(
+                $.post(config.EDIT_SERVICETOKEN, formData))
+                .then(function (data) {
+                    if (data.IsSucceed) {
+                        $(def.modal).modal('hide');
+                        self.loadData();
+                    }
+                });
+        },
         initEvent: function () {
             var self = this;
             $(def.btnSearch).off("click").bind("click", function () {
                 self.loadData($(def.queryParam).val());
             });
+            $(def.modalForm).off("submit").bind("submit", function () {
+                self.bindSubmit();
+                return false;
+            });
             $(def.editServiceToken).off("click").bind("click", function () {
                 var $tr = $(this).parents("tr");
-                var address = $.tmplItem($tr).data.entity[$tr.index()].address;
-                var serviceAddress = [address.ip, address.port].join(":");
+                var address = $.tmplItem($tr).data.Entity[$tr.index()].Address;
+                var serviceAddress = [address.Ip, address.Port].join(":");
                 self.openDiag(serviceAddress);
             });
         },

@@ -56,7 +56,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
 
         #region Private Method
 
-        private ServiceEntry Create(MethodInfo method,string serviceName,string routeTemplate)
+        private ServiceEntry Create(MethodInfo method, string serviceName, string routeTemplate)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
             var attributes = method.GetCustomAttributes().ToList();
@@ -74,7 +74,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             serviceDescriptor.EnableAuthorization(!serviceDescriptor.EnableAuthorization()
                 ? attributes.Any(p => p is AuthorizationFilterAttribute) :
                 serviceDescriptor.EnableAuthorization());
-            var fastInvoker = FastInvoke.GetMethodInvoker(method);
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
@@ -92,7 +91,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
                  }
-                 var result = fastInvoker(instance, list.ToArray()); //method.Invoke(instance, list.ToArray());
+                 var result = method.Invoke(instance, list.ToArray());
                  return Task.FromResult(result);
              }
             };

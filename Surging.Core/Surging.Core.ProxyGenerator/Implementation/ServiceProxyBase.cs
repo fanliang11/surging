@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform;
+﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -6,6 +7,7 @@ using Surging.Core.CPlatform.Support;
 using Surging.Core.ProxyGenerator.Interceptors;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Surging.Core.ProxyGenerator.Implementation
@@ -70,6 +72,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
                 result = invocation.ReturnValue;
             }
+         
             if (message != null)
                 result = _typeConvertibleService.Convert(message.Result, typeof(T));
             return (T)result;

@@ -39,7 +39,7 @@ namespace Surging.Core.Consul
             _consul = new ConsulClient(config =>
             {
                 config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-             
+
             });
             EnterServiceCommands().Wait();
         }
@@ -98,7 +98,7 @@ namespace Surging.Core.Consul
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
                 _logger.LogInformation("准备添加服务命令。");
-            var serviceCommandIds= serviceCommands.Select(i => i.ServiceId).ToArray();
+            var serviceCommandIds = serviceCommands.Select(i => i.ServiceId).ToArray();
             var newServiceCommands = _serviceCommands.Where(p => !serviceCommandIds.Contains(p.ServiceId)).ToList();
             foreach (var serviceCommand in serviceCommands)
             {
@@ -112,14 +112,14 @@ namespace Surging.Core.Consul
 
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
-            var commands = await GetServiceCommands(serviceCommands.Select(p =>$"{ _configInfo.CommandPath}{ p.ServiceId}"));
+            var commands = await GetServiceCommands(serviceCommands.Select(p => $"{ _configInfo.CommandPath}{ p.ServiceId}"));
             if (commands.Count() == 0)
             {
                 await SetServiceCommandsAsync(serviceCommands);
             }
         }
 
-        private  ServiceCommandDescriptor GetServiceCommand(byte[] data)
+        private ServiceCommandDescriptor GetServiceCommand(byte[] data)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
                 _logger.LogDebug($"准备转换服务命令，配置内容：{Encoding.UTF8.GetString(data)}。");
@@ -142,7 +142,7 @@ namespace Surging.Core.Consul
             return serviceCommands.ToArray();
         }
 
-        private  ServiceCommandDescriptor GetServiceCommandData(string data)
+        private ServiceCommandDescriptor GetServiceCommandData(string data)
         {
             if (data == null)
                 return null;
@@ -154,8 +154,8 @@ namespace Surging.Core.Consul
         private async Task<ServiceCommandDescriptor> GetServiceCommand(string path)
         {
             ServiceCommandDescriptor result = null;
-            var watcher = new NodeMonitorWatcher(_consul, _manager,path,
-                  (oldData, newData) =>  NodeChange(oldData, newData));
+            var watcher = new NodeMonitorWatcher(_consul, _manager, path,
+                  (oldData, newData) => NodeChange(oldData, newData));
             var queryResult = await _consul.KV.Keys(path);
             if (queryResult.Response != null)
             {
@@ -179,7 +179,7 @@ namespace Surging.Core.Consul
             {
                 if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
                     _logger.LogDebug($"准备从节点：{children}中获取服务命令信息。");
-                
+
                 var serviceCommand = await GetServiceCommand(children);
                 if (serviceCommand != null)
                     serviceCommands.Add(serviceCommand);
@@ -216,12 +216,12 @@ namespace Surging.Core.Consul
         /// </summary>
         /// <param name="datas">信息数据集合</param>
         /// <returns>返回路径集合</returns>
-        private  string[] ConvertPaths(string[] datas)
+        private string[] ConvertPaths(string[] datas)
         {
             List<string> paths = new List<string>();
             foreach (var data in datas)
             {
-                var result =  GetServiceCommandData(data);
+                var result = GetServiceCommandData(data);
                 var serviceId = result?.ServiceId;
                 if (string.IsNullOrEmpty(serviceId))
                     paths.Add(serviceId);

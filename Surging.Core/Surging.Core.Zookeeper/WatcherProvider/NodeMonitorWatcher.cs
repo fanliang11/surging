@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper.WatcherProvider
 {
-   internal class NodeMonitorWatcher : WatcherBase
+    internal class NodeMonitorWatcher : WatcherBase
     {
         private readonly ZooKeeper _zooKeeper;
         private readonly Action<byte[], byte[]> _action;
