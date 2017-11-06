@@ -43,7 +43,7 @@ namespace Surging.Services.Server
                     });
                 })
                 .SubscribeAt()
-                .UseServer("127.0.0.1", 198)
+                .UseServer("127.0.0.1", 98)
                 .UseStartup<Startup>()
                 .Build();
 
