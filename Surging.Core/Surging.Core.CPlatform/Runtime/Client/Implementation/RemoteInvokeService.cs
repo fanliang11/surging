@@ -5,7 +5,6 @@ using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform.Transport;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 

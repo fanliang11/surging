@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Surging.Core.ApiGateWay;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ProxyGenerator.Utilitys;
@@ -10,8 +10,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Surging.Core.CPlatform;
-using System.Diagnostics;
 
 namespace Surging.ApiGateway.Controllers
 {

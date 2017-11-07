@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Autofac;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Surging.Core.ServiceHosting.Startup;
-using System.Reflection;
-using Surging.Core.ServiceHosting.Startup.Implementation;
-using System.Runtime.ExceptionServices;
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
 
 namespace Surging.Core.ServiceHosting.Internal.Implementation
 {

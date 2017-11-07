@@ -189,7 +189,7 @@ namespace Surging.Core.Consul
                 var result = await _consul.GetChildrenAsync(_configInfo.RoutePath);
                 var keys = await _consul.KV.Keys(_configInfo.RoutePath);
                 var childrens = result;
-                watcher.SetCurrentData(childrens);
+                watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.RoutePath}{key}").ToArray());
                 _routes = await GetRoutes(keys.Response);
             }
             else

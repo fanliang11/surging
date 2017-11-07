@@ -200,7 +200,7 @@ namespace Surging.Core.Consul
                 var result = await _consul.GetChildrenAsync(_configInfo.CommandPath);
                 var keys = await _consul.KV.Keys(_configInfo.CommandPath);
                 var childrens = result;
-                watcher.SetCurrentData(childrens);
+                watcher.SetCurrentData(ConvertPaths(childrens).Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
                 _serviceCommands = await GetServiceCommands(keys.Response);
             }
             else
@@ -223,7 +223,7 @@ namespace Surging.Core.Consul
             {
                 var result = GetServiceCommandData(data);
                 var serviceId = result?.ServiceId;
-                if (string.IsNullOrEmpty(serviceId))
+                if (!string.IsNullOrEmpty(serviceId))
                     paths.Add(serviceId);
             }
             return paths.ToArray();

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform;
+﻿using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -7,7 +6,6 @@ using Surging.Core.CPlatform.Support;
 using Surging.Core.ProxyGenerator.Interceptors;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Surging.Core.ProxyGenerator.Implementation
