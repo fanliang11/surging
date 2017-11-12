@@ -13,6 +13,7 @@ namespace Surging.Core.CPlatform.Routing
     /// </summary>
     public interface IServiceRouteManager
     {
+
         /// <summary>
         /// 服务路由被创建。
         /// </summary>
@@ -75,7 +76,7 @@ namespace Surging.Core.CPlatform.Routing
             var address = routes.FirstOrDefault();
             return address?.Token;
         }
-        
+
         /// <summary>
         /// 获取地址
         /// </summary>
@@ -83,6 +84,7 @@ namespace Surging.Core.CPlatform.Routing
         public static async Task<IEnumerable<AddressModel>> GetAddressAsync(this IServiceRouteManager serviceRouteManager, string condition = null)
         {
             var routes = await serviceRouteManager.GetRoutesAsync();
+            Dictionary<string, AddressModel> result = new Dictionary<string, AddressModel>();
             if (condition != null)
             {
                 if (!condition.IsIP())
@@ -91,10 +93,12 @@ namespace Surging.Core.CPlatform.Routing
                 }
                 else
                 {
-                    routes = routes.Where(p => p.Address.Any(m => m.ToString()==condition));
+                    routes = routes.Where(p => p.Address.Any(m => m.ToString() == condition));
+                    var addresses = routes.FirstOrDefault().Address;
+                    return addresses.Where(p => p.ToString() == condition);
                 }
             }
-            Dictionary<string, AddressModel> result = new Dictionary<string, AddressModel>();
+
             foreach (var route in routes)
             {
                 var addresses = route.Address;
@@ -107,6 +111,12 @@ namespace Surging.Core.CPlatform.Routing
                 }
             }
             return result.Values;
+        }
+
+        public static async Task<IEnumerable<ServiceRoute>> GetRoutesAsync(this IServiceRouteManager serviceRouteManager, string address)
+        {
+            var routes = await serviceRouteManager.GetRoutesAsync();
+            return routes.Where(p => p.Address.Any(m => m.ToString() == address));
         }
 
         public static async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(this IServiceRouteManager serviceRouteManager, string address, string serviceId = null)

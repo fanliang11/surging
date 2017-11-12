@@ -60,7 +60,7 @@ namespace Surging.Core.Zookeeper
             var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             var index = 0;
-            while (childrens.Count()>1)
+            while (childrens.Count() > 1)
             {
                 var nodePath = "/" + string.Join("/", childrens);
 
@@ -160,7 +160,7 @@ namespace Surging.Core.Zookeeper
             }
             await base.SetRoutesAsync(routes);
         }
-        
+
         private async Task CreateZooKeeper()
         {
             if (_zooKeeper != null)

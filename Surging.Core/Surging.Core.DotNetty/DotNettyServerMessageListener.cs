@@ -10,6 +10,7 @@ using System.Net;
 using DotNetty.Codecs;
 using Surging.Core.DotNetty.Adaper;
 using Microsoft.Extensions.Logging;
+using DotNetty.Buffers;
 
 namespace Surging.Core.DotNetty
 {
@@ -58,14 +59,15 @@ namespace Surging.Core.DotNetty
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
-
-            var bossGroup = new MultithreadEventLoopGroup(1);
-            var workerGroup = new MultithreadEventLoopGroup();
+            
+            var bossGroup = new MultithreadEventLoopGroup();
+            var workerGroup = new MultithreadEventLoopGroup(4);
             var bootstrap = new ServerBootstrap();
-            bootstrap
+                bootstrap
                 .Group(bossGroup, workerGroup)
                 .Channel<TcpServerSocketChannel>()
                 .Option(ChannelOption.SoBacklog, 100)
+                .Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
                 .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
                     var pipeline = channel.Pipeline;

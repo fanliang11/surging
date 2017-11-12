@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Surging.Core.ApiGateWay.ServiceDiscovery;
+using Surging.Core.ApiGateWay.ServiceDiscovery.Implementation;
 using Surging.Core.ApiGateWay.Utilities;
+using Surging.Core.CPlatform.Address;
 using Surging.Core.ProxyGenerator.Utilitys;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,13 @@ namespace Surging.ApiGateway.Controllers
         {
             var list = await ServiceLocator.GetService<IServiceDiscoveryProvider>().GetAddressAsync(address); ;
             return View(list.FirstOrDefault());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditServiceToken(IpAddressModel model)
+        {
+           await ServiceLocator.GetService<IServiceDiscoveryProvider>().EditServiceToken(model);
+            return Json(ServiceResult.Create(true));
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
 {
+
     /// <summary>
     /// 一个抽象的健康检查服务。
     /// </summary>

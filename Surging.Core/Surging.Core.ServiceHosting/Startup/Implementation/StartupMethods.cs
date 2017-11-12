@@ -1,13 +1,10 @@
 ﻿using Autofac;
-using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace Surging.Core.ServiceHosting.Startup.Implementation
 {
-   public class StartupMethods
+    public class StartupMethods
     {
         public StartupMethods(object instance, Action<IContainer> configure, Func<ContainerBuilder, IContainer> configureServices)
         {

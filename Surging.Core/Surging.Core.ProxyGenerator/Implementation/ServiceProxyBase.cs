@@ -70,6 +70,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
                 result = invocation.ReturnValue;
             }
+         
             if (message != null)
                 result = _typeConvertibleService.Convert(message.Result, typeof(T));
             return (T)result;

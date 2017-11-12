@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Surging.Core.Consul.WatcherProvider.Implementation
 {
@@ -29,7 +30,7 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
                     watchers = new HashSet<Watcher>();
                     watches[clientPath] = watchers;
                 }
-               if(! watchers.Contains(watcher))
+               if (!watchers.Any(p => p.GetType() == watcher.GetType()))
                 watchers.Add(watcher);
             }
         }

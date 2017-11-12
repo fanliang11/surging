@@ -30,7 +30,7 @@ namespace Surging.Core.Consul
         public ConsulServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceRouteFactory serviceRouteFactory,
        ILogger<ConsulServiceRouteManager> logger) : base(stringSerializer)
-        {       
+        {
             _configInfo = configInfo;
             _serializer = serializer;
             _stringSerializer = stringSerializer;
@@ -38,9 +38,9 @@ namespace Surging.Core.Consul
             _logger = logger;
             _manager = manager;
             _consul = new ConsulClient(config =>
-             {
-                 config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-             });
+            {
+                config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
+            });
             EnterRoutes().Wait();
         }
 
@@ -105,7 +105,7 @@ namespace Surging.Core.Consul
             {
                 var nodeData = _serializer.Serialize(serviceRoute);
                 var keyValuePair = new KVPair($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}") { Value = nodeData };
-                await  _consul.KV.Put(keyValuePair);
+                await _consul.KV.Put(keyValuePair);
             }
         }
 
@@ -122,12 +122,12 @@ namespace Surging.Core.Consul
             return (await _serviceRouteFactory.CreateServiceRoutesAsync(new[] { descriptor })).First();
         }
 
-        private async Task<ServiceRoute []> GetRouteDatas(string[] routes)
+        private async Task<ServiceRoute[]> GetRouteDatas(string[] routes)
         {
             List<ServiceRoute> serviceRoutes = new List<ServiceRoute>();
-            foreach(var route in routes)
+            foreach (var route in routes)
             {
-               var serviceRoute= await GetRouteData(route);
+                var serviceRoute = await GetRouteData(route);
                 serviceRoutes.Add(serviceRoute);
             }
             return serviceRoutes.ToArray();
@@ -138,13 +138,13 @@ namespace Surging.Core.Consul
             if (data == null)
                 return null;
 
-            var descriptor = _stringSerializer.Deserialize(data, typeof( ServiceRouteDescriptor)) as ServiceRouteDescriptor;
+            var descriptor = _stringSerializer.Deserialize(data, typeof(ServiceRouteDescriptor)) as ServiceRouteDescriptor;
             return (await _serviceRouteFactory.CreateServiceRoutesAsync(new[] { descriptor })).First();
         }
 
         private async Task<ServiceRoute[]> GetRoutes(IEnumerable<string> childrens)
         {
-            
+
             childrens = childrens.ToArray();
             var routes = new List<ServiceRoute>(childrens.Count());
 
@@ -152,7 +152,7 @@ namespace Surging.Core.Consul
             {
                 if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
                     _logger.LogDebug($"准备从节点：{children}中获取路由信息。");
-                 
+
                 var route = await GetRoute(children);
                 if (route != null)
                     routes.Add(route);
@@ -178,18 +178,18 @@ namespace Surging.Core.Consul
 
         private async Task EnterRoutes()
         {
-            if (_routes!=null && _routes.Length>0)
+            if (_routes != null && _routes.Length > 0)
                 return;
 
-            var watcher = new ChildrenMonitorWatcher(_consul,_manager, _configInfo.RoutePath,
+            var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.RoutePath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
-                  (result) =>  ConvertPaths(result).Result);
-            if ( _consul.KV.Keys(_configInfo.RoutePath).Result.Response?.Count()>0)
+                  (result) => ConvertPaths(result).Result);
+            if (_consul.KV.Keys(_configInfo.RoutePath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.RoutePath);
                 var keys = await _consul.KV.Keys(_configInfo.RoutePath);
                 var childrens = result;
-                watcher.SetCurrentData(childrens);
+                watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.RoutePath}{key}").ToArray());
                 _routes = await GetRoutes(keys.Response);
             }
             else
@@ -199,7 +199,7 @@ namespace Surging.Core.Consul
                 _routes = new ServiceRoute[0];
             }
         }
-        
+
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
         {
             if (data1.Count != data2.Count)
@@ -219,9 +219,9 @@ namespace Surging.Core.Consul
         /// </summary>
         /// <param name="datas">信息数据集合</param>
         /// <returns>返回路径集合</returns>
-        private  async  Task<string[]> ConvertPaths(string [] datas)
+        private async Task<string[]> ConvertPaths(string[] datas)
         {
-            List<string> paths=new List<string>();
+            List<string> paths = new List<string>();
             foreach (var data in datas)
             {
                 var result = await GetRouteData(data);

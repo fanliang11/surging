@@ -73,12 +73,12 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         {
             ServiceRoute route;
             path = path.ToLower();
-            _concurrent.TryGetValue(path, out route);
+            _serviceRoute.TryGetValue(path, out route);
             if (route == null)
             {
                 var routes = await _serviceRouteManager.GetRoutesAsync();
                 route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath == path);
-                _concurrent.GetOrAdd(path, route);
+                _serviceRoute.GetOrAdd(path, route);
             }
             if (route == null)
             {
