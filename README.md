@@ -51,8 +51,22 @@ var host = new ServiceHostBuilder()
 ```c#
 [ServiceBundle("api/{Service}")]
  ```    
-<br/>           
+<br/>
 
+JWT验证，接口方法添加以下特性：
+<br/>
+
+```c#
+   [Authorization(AuthType = AuthorizationType.JWTToken)];
+ ```    
+<br/>
+
+AppSecret验证，接口方法添加以下特性：
+<br/>
+
+```c#
+ [Authorization(AuthType = AuthorizationType.AppSecret)];
+ ```    
 <br/>
 
 订阅功能：
