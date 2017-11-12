@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.EventBus.Events;
 using Newtonsoft.Json.Linq;
+using Surging.Core.CPlatform;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -90,6 +91,11 @@ namespace Surging.Modules.Common.Domain
                 return Task.FromResult(new UserModel());
             }
             return Task.FromResult<UserModel>(null);
+        }
+
+        public Task<IdentityUser> Save(IdentityUser requestData)
+        {
+            return Task.FromResult(requestData);
         }
 
         #endregion Implementation of IUserService

@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using System.Threading;
+using Surging.Core.CPlatform;
+using Newtonsoft.Json;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -90,11 +92,15 @@ namespace Surging.Modules.Common.Domain
         {
             if (requestData.UserName == "admin" && requestData.Password == "admin")
             {
-                return Task.FromResult(new UserModel());
+                return Task.FromResult(new UserModel() {  UserId=22,Name="admin"});
             }
             return Task.FromResult<UserModel>(null);
         }
 
+        public Task<IdentityUser> Save(IdentityUser requestData)
+        {
+            return Task.FromResult(requestData);
+        }
         #endregion Implementation of IUserService
     }
 }

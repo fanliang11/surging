@@ -13,19 +13,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
+using System.Reflection;
+
 namespace Surging.ApiGateway.Controllers
 {
     public class ServicesController : Controller
     {
         private readonly IServiceProxyProvider _serviceProxyProvider;
         private readonly IServiceRouteProvider _serviceRouteProvider;
-        private readonly IOAuthAuthorizationServerProvider _authorizationServerProvider;
+        private readonly IAuthorizationServerProvider _authorizationServerProvider;
 
         public ServicesController()
         {
             _serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
             _serviceRouteProvider = ServiceLocator.GetService<IServiceRouteProvider>();
-            _authorizationServerProvider = ServiceLocator.GetService<IOAuthAuthorizationServerProvider>();
+            _authorizationServerProvider = ServiceLocator.GetService<IAuthorizationServerProvider>();
         }
        
         public async Task<ServiceResult<object>> Path(string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)
@@ -72,9 +74,9 @@ namespace Surging.ApiGateway.Controllers
             var route = _serviceRouteProvider.GetRouteByPath(path).Result;
             if (route.ServiceDescriptor.EnableAuthorization())
             {
-                if(route.ServiceDescriptor.AuthType()== AuthorizationType.JWTToken.ToString())
+                if(route.ServiceDescriptor.AuthType()== AuthorizationType.JWT.ToString())
                 {
-                    isSuccess= ValidateJwtAuthentication(route, ref result);
+                    isSuccess= ValidateJwtAuthentication(route,model, ref result);
                 }
                 else
                 {
@@ -85,20 +87,30 @@ namespace Surging.ApiGateway.Controllers
             return isSuccess;
         }
 
-        public bool ValidateJwtAuthentication(ServiceRoute route, ref ServiceResult<object> result)
+        public bool ValidateJwtAuthentication(ServiceRoute route, Dictionary<string, object> model, ref ServiceResult<object> result)
         {
-            bool isSuccess = true;
-            DateTime time;
+            bool isSuccess = true; 
             var author = HttpContext.Request.Headers["Authorization"];
             if (author.Count>0)
             {
                 if (route.Address.Any(p => p.DisableAuth == false))
                 {
                     isSuccess = _authorizationServerProvider.ValidateClientAuthentication(author).Result;
-                    if (!isSuccess )
+                    if (!isSuccess)
                     {
                         result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
-                    } 
+                    }
+                    else
+                    {
+                        var keyValue = model.FirstOrDefault();
+                        if (!(keyValue.Value is IConvertible) || !typeof(IConvertible).GetTypeInfo().IsAssignableFrom(keyValue.Value.GetType()))
+                        {
+                            dynamic instance = keyValue.Value;
+                            instance.Payload = _authorizationServerProvider.GetPayloadString(author);
+                            model.Remove(keyValue.Key);
+                            model.Add(keyValue.Key, instance);
+                        }
+                    }
                 }
             }
             else

@@ -6,7 +6,7 @@ namespace Surging.Core.CPlatform.Filters.Implementation
 {
     public enum AuthorizationType
     {
-        JWTToken,
+        JWT,
         AppSecret
     }
 }
