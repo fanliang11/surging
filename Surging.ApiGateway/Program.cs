@@ -22,11 +22,8 @@ namespace Surging.ApiGateway
 {
     public class Program
     {
-      
         public static void Main(string[] args)
         {
-
-        
             var host = new WebHostBuilder()
                 .UseUrls("http://localhost:729")
                 .UseKestrel(options =>

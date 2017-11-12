@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.EventBus.Events;
+using Newtonsoft.Json.Linq;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -80,6 +81,15 @@ namespace Surging.Modules.Common.Domain
         public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
         {
             await Task.CompletedTask;
+        }
+
+        public Task<UserModel> Authentication(AuthenticationRequestData requestData)
+        {
+            if (requestData.UserName == "admin" && requestData.Password == "admin")
+            {
+                return Task.FromResult(new UserModel());
+            }
+            return Task.FromResult<UserModel>(null);
         }
 
         #endregion Implementation of IUserService

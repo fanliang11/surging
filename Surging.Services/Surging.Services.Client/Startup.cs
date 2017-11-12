@@ -90,8 +90,9 @@ namespace Surging.Services.Server
         {
             Task.Run(async () =>
             {
+
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                await userProxy.GetUserId("user");
+                await userProxy.GetUserId("user"); 
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");

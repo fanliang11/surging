@@ -86,6 +86,15 @@ namespace Surging.Modules.Common.Domain
             await Task.CompletedTask;
         }
 
+        public Task<UserModel> Authentication(AuthenticationRequestData requestData)
+        {
+            if (requestData.UserName == "admin" && requestData.Password == "admin")
+            {
+                return Task.FromResult(new UserModel());
+            }
+            return Task.FromResult<UserModel>(null);
+        }
+
         #endregion Implementation of IUserService
     }
 }

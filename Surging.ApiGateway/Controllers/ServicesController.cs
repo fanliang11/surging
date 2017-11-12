@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Surging.Core.ApiGateWay;
+using Surging.Core.ApiGateWay.OAuth;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ProxyGenerator.Utilitys;
@@ -10,37 +12,55 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
+using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
 namespace Surging.ApiGateway.Controllers
 {
     public class ServicesController : Controller
     {
         private readonly IServiceProxyProvider _serviceProxyProvider;
         private readonly IServiceRouteProvider _serviceRouteProvider;
+        private readonly IOAuthAuthorizationServerProvider _authorizationServerProvider;
 
         public ServicesController()
         {
             _serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
             _serviceRouteProvider = ServiceLocator.GetService<IServiceRouteProvider>();
+            _authorizationServerProvider = ServiceLocator.GetService<IOAuthAuthorizationServerProvider>();
         }
        
         public async Task<ServiceResult<object>> Path(string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)
         {
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
-        
+            path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
+                GateWayAppConfig.AuthorizationRoutePath : path;
             if ( OnAuthorization(path, model,ref result))
             {
-                
-                if (!string.IsNullOrEmpty(serviceKey))
+                if (path == GateWayAppConfig.AuthorizationRoutePath)
                 {
-                    
-                    result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path, serviceKey));
-                    result.StatusCode = (int)ServiceStatusCode.Success;
+                    var token = await _authorizationServerProvider.GenerateTokenCredential(model);
+                    if (token != null)
+                    {
+                        result = ServiceResult<object>.Create(true, token);
+                        result.StatusCode = (int)ServiceStatusCode.Success;
+                    }
+                    else
+                    {
+                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                    }
                 }
                 else
                 {
-                    result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
-                    result.StatusCode = (int)ServiceStatusCode.Success;
+                    if (!string.IsNullOrEmpty(serviceKey))
+                    {
+
+                        result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path, serviceKey));
+                        result.StatusCode = (int)ServiceStatusCode.Success;
+                    }
+                    else
+                    {
+                        result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
+                        result.StatusCode = (int)ServiceStatusCode.Success;
+                    }
                 }
             }
             return result;
@@ -49,27 +69,54 @@ namespace Surging.ApiGateway.Controllers
         private bool OnAuthorization(string path, Dictionary<string, object> model, ref ServiceResult<object> result)
         {
             bool isSuccess = true;
-            var author = HttpContext.Request.Headers["Authorization"];
-            DateTime time;
-            var routes = _serviceRouteProvider.GetRouteByPath(path).Result;
-            if (routes.ServiceDescriptor.EnableAuthorization())
+            var route = _serviceRouteProvider.GetRouteByPath(path).Result;
+            if (route.ServiceDescriptor.EnableAuthorization())
             {
-                if (routes.Address.Any(p => p.DisableAuth == false))
+                if(route.ServiceDescriptor.AuthType()== AuthorizationType.JWTToken.ToString())
                 {
-                    if (!string.IsNullOrEmpty(path) && model.ContainsKey("timeStamp"))
+                    isSuccess= ValidateJwtAuthentication(route, ref result);
+                }
+                else
+                {
+                    isSuccess = ValidateAppSecretAuthentication(route, path, model, ref result);
+                }
+
+            }
+            return isSuccess;
+        }
+
+        public bool ValidateJwtAuthentication(ServiceRoute route, ref ServiceResult<object> result)
+        {
+            bool isSuccess = true;
+            DateTime time;
+            var author = HttpContext.Request.Headers["Authorization"];
+            if (route.Address.Any(p => p.DisableAuth == false))
+            {
+                isSuccess=  _authorizationServerProvider.ValidateClientAuthentication(author).Result;
+                if(!isSuccess)
+                {
+                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };    
+                }
+            }
+            return isSuccess;
+        }
+
+        private bool ValidateAppSecretAuthentication(ServiceRoute route, string path,
+            Dictionary<string, object> model, ref ServiceResult<object> result)
+        {
+            bool isSuccess = true;
+            DateTime time;
+            var author = HttpContext.Request.Headers["Authorization"];
+            if (route.Address.Any(p => p.DisableAuth == false))
+            {
+                if (!string.IsNullOrEmpty(path) && model.ContainsKey("timeStamp"))
+                {
+                    if (DateTime.TryParse(model["timeStamp"].ToString(), out time))
                     {
-                        if (DateTime.TryParse(model["timeStamp"].ToString(), out time))
+                        var seconds = (DateTime.Now - time).TotalSeconds;
+                        if (seconds <= 3560 && seconds >= 0)
                         {
-                            var seconds = (DateTime.Now - time).TotalSeconds;
-                            if (seconds <= 3560 && seconds >= 0)
-                            {
-                                if (!routes.Address.Any(p => GetMD5($"{p.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") == author.ToString()))
-                                {
-                                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
-                                    isSuccess = false;
-                                }
-                            }
-                            else
+                            if (!route.Address.Any(p => GetMD5($"{p.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") == author.ToString()))
                             {
                                 result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
                                 isSuccess = false;
@@ -83,9 +130,14 @@ namespace Surging.ApiGateway.Controllers
                     }
                     else
                     {
-                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
                         isSuccess = false;
                     }
+                }
+                else
+                {
+                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                    isSuccess = false;
                 }
             }
             return isSuccess;

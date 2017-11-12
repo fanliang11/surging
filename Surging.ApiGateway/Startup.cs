@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Surging.Core.ApiGateWay;
+using Surging.Core.ApiGateWay.OAuth.Implementation.Configurations;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
@@ -32,9 +33,11 @@ namespace Surging.ApiGateway
         {
             var builder = new ConfigurationBuilder()
               .SetBasePath(env.ContentRootPath)
-              .AddCacheFile("cacheSettings.json", optional: false)
-              .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-              .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+              .AddCacheFile("Configs/cacheSettings.json", optional: false)
+              .AddJsonFile("Configs/appsettings.json", optional: true, reloadOnChange: true)
+              .AddGatewayFile("Configs/gatewaySettings.json", optional: false)
+              .AddJsonFile($"Configs/appsettings.{env.EnvironmentName}.json", optional: true);
+              
 
             Configuration = builder.Build();
         }

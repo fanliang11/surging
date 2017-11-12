@@ -140,7 +140,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         private  async Task OnAuthorization(ServiceEntry entry, RemoteInvokeMessage remoteInvokeMessage,
             RemoteInvokeResultMessage resultMessage, CancellationTokenSource cancelTokenSource)
         {
-            if (entry.Descriptor.EnableAuthorization())
+            if (entry.Descriptor.EnableAuthorization() && entry.Descriptor.AuthType() ==AuthorizationType.AppSecret.ToString())
             {
                 var route = await _serviceRouteProvider.Locate(entry.Descriptor.Id);
                 var routeContext = new ServiceRouteContext()

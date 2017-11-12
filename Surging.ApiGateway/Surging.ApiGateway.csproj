@@ -43,7 +43,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="cacheSettings.json">
+    <Content Update="Configs\appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Configs\cacheSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Configs\gatewaySettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
