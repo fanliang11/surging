@@ -8,10 +8,10 @@ using Surging.Core.ProxyGenerator;
 using Surging.Core.ProxyGenerator.Utilitys;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
 namespace Surging.ApiGateway.Controllers
 {
@@ -90,13 +90,21 @@ namespace Surging.ApiGateway.Controllers
             bool isSuccess = true;
             DateTime time;
             var author = HttpContext.Request.Headers["Authorization"];
-            if (route.Address.Any(p => p.DisableAuth == false))
+            if (author.Count>0)
             {
-                isSuccess=  _authorizationServerProvider.ValidateClientAuthentication(author).Result;
-                if(!isSuccess)
+                if (route.Address.Any(p => p.DisableAuth == false))
                 {
-                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };    
+                    isSuccess = _authorizationServerProvider.ValidateClientAuthentication(author).Result;
+                    if (!isSuccess )
+                    {
+                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                    } 
                 }
+            }
+            else
+            {
+                result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                isSuccess = false;
             }
             return isSuccess;
         }
@@ -109,7 +117,7 @@ namespace Surging.ApiGateway.Controllers
             var author = HttpContext.Request.Headers["Authorization"];
             if (route.Address.Any(p => p.DisableAuth == false))
             {
-                if (!string.IsNullOrEmpty(path) && model.ContainsKey("timeStamp"))
+                if (!string.IsNullOrEmpty(path) && model.ContainsKey("timeStamp") && author.Count>0)
                 {
                     if (DateTime.TryParse(model["timeStamp"].ToString(), out time))
                     {
