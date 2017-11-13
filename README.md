@@ -57,7 +57,7 @@ JWT验证，接口方法添加以下特性：
 <br/>
 
 ```c#
-   [Authorization(AuthType = AuthorizationType.JWTToken)];
+   [Authorization(AuthType = AuthorizationType.JWT)];
  ```    
 <br/>
 
