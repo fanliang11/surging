@@ -42,22 +42,19 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
 
             if (string.IsNullOrEmpty(context.InvokeMessage.ServiceId))
                 throw new ArgumentException("服务Id不能为空。", nameof(context.InvokeMessage.ServiceId));
-
             var invokeMessage = context.InvokeMessage;
             var address = await _addressResolver.Resolver(invokeMessage.ServiceId);
-
             if (address == null)
                 throw new CPlatformException($"无法解析服务Id：{invokeMessage.ServiceId}的地址信息。");
 
             try
             {
                 var endPoint = address.CreateEndPoint();
-
+                invokeMessage.Token = address.Token;
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
-
                 var client = _transportClientFactory.CreateClient(endPoint);
-                return await client.SendAsync(context.InvokeMessage);
+                return await client.SendAsync(invokeMessage);;
             }
             catch (CommunicationException)
             {

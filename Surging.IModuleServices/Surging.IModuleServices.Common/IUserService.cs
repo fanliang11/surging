@@ -1,5 +1,9 @@
-﻿using Surging.Core.Caching;
+﻿using Newtonsoft.Json.Linq;
+using Surging.Core.Caching;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.Filters.Implementation;
+using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Attributes;
@@ -13,9 +17,10 @@ using System.Threading.Tasks;
 
 namespace Surging.IModuleServices.Common
 {
-    [ServiceBundle]
+    [ServiceBundle("api/{Service}")]
     public interface IUserService
     {
+        Task<UserModel> Authentication(AuthenticationRequestData requestData);
 
         [Service(Date ="2017-8-11",Director ="fanly",Name ="获取用户")]
         Task<string> GetUserName(int id);
@@ -23,6 +28,10 @@ namespace Surging.IModuleServices.Common
         [Service(Date = "2017-8-11", Director = "fanly", Name = "根据id查找用户是否存在")]
         Task<bool> Exists(int id);
 
+        [Authorization(AuthType = AuthorizationType.JWT)]
+        Task<IdentityUser> Save(IdentityUser requestData);
+
+        [Authorization(AuthType = AuthorizationType.JWT)]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<int>  GetUserId(string userName);
 
@@ -39,10 +48,13 @@ new Surging.IModuleServices.Common.Models.UserModel
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType =SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
 
+        [Authorization(AuthType = AuthorizationType.JWT)]
         [Command(Strategy = StrategyType.Failover, RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis)]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<bool> Update(int id, UserModel model);
+
+        Task<bool> Get(List<UserModel> users);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<IDictionary<string, string>> GetDictionary();

@@ -41,7 +41,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             var key = GetCacheKey(context.Descriptor);
             //根据服务id缓存服务地址。
             var addressEntry = _concurrent.GetOrAdd(key, k => new Lazy<AddressEntry>(() => new AddressEntry(context.Address))).Value;
-
             AddressModel addressModel;
             do
             {

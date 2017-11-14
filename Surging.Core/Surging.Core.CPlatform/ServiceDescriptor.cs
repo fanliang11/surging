@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Filters.Implementation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,7 +20,7 @@ namespace Surging.Core.CPlatform
         {
             return descriptor.GetMetadata<string>("GroupName");
         }
-
+        
         /// <summary>
         /// 设置组名称。
         /// </summary>
@@ -58,6 +59,50 @@ namespace Surging.Core.CPlatform
         }
 
         /// <summary>
+        /// 获取是否启用授权
+        /// </summary>
+        /// <param name="descriptor">服务描述符。</param>
+        /// <param name="enable">是否启用</param>
+        /// <returns>服务描述符。</returns>
+        public static ServiceDescriptor EnableAuthorization(this ServiceDescriptor descriptor, bool enable)
+        {
+            descriptor.Metadatas["EnableAuthorization"] = enable;
+            return descriptor;
+        }
+
+        /// <summary>
+        /// 获取是否启用授权
+        /// </summary>
+        /// <param name="descriptor">服务描述符。</param>
+        /// <returns>服务描述符。</returns>
+        public static bool EnableAuthorization(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata("EnableAuthorization", true);
+        }
+
+        /// <summary>
+        /// 获取授权类型
+        /// </summary>
+        /// <param name="descriptor">服务描述符。</param>
+        /// <returns>服务描述符。</returns>
+        public static string AuthType(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata("AuthType", AuthorizationType.AppSecret.ToString());
+        }
+
+        /// <summary>
+        /// 设置授权类型
+        /// </summary>
+        /// <param name="descriptor">服务描述符。</param>
+        /// <param name="authType">授权类型</param>
+        /// <returns>服务描述符。</returns>
+        public static ServiceDescriptor AuthType(this ServiceDescriptor descriptor, AuthorizationType authType)
+        {
+            descriptor.Metadatas["AuthType"] = authType.ToString();
+            return descriptor;
+        }
+
+        /// <summary>
         /// 获取负责人
         /// </summary>
         /// <param name="descriptor">服务描述符。</param>
@@ -66,20 +111,19 @@ namespace Surging.Core.CPlatform
         {
             return descriptor.GetMetadata<string>("Director");
         }
-
-
+        
         /// <summary>
         /// 获取日期
         /// </summary>
         /// <param name="descriptor">服务描述符。</param>
-        /// <param name="waitExecution">日期/param>
+        /// <param name="date">日期</param>
         /// <returns>服务描述符。</returns>
-        public static ServiceDescriptor Date(this ServiceDescriptor descriptor, string Date)
+        public static ServiceDescriptor Date(this ServiceDescriptor descriptor, string date)
         {
-            descriptor.Metadatas["Date"] = Date;
+            descriptor.Metadatas["Date"] = date;
             return descriptor;
         }
-
+        
         /// <summary>
         /// 获取日期
         /// </summary>
@@ -119,6 +163,11 @@ namespace Surging.Core.CPlatform
         /// 服务Id。
         /// </summary>
         public string Id { get; set; }
+        
+        /// <summary>
+        /// 路由
+        /// </summary>
+        public string RoutePath { get; set; }
 
         /// <summary>
         /// 元数据。

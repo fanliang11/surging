@@ -10,7 +10,6 @@
 
 namespace Surging.Core.CPlatform {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -20,7 +19,7 @@ namespace Surging.Core.CPlatform {
     // 类通过类似于 ResGen 或 Visual Studio 的工具自动生成的。
     // 若要添加或移除成员，请编辑 .ResX 文件，然后重新运行 ResGen
     // (以 /str 作为命令选项)，或重新生成 VS 项目。
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class CPlatformResource {
@@ -40,7 +39,7 @@ namespace Surging.Core.CPlatform {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Surging.Core.CPlatform.CPlatformResource", typeof(CPlatformResource).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Surging.Core.CPlatform.CPlatformResource", typeof(CPlatformResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -103,6 +102,24 @@ namespace Surging.Core.CPlatform {
         internal static string JSONParseException {
             get {
                 return ResourceManager.GetString("JSONParseException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 路由模板不能以&apos;/&apos;或&apos;〜&apos;字符开头。 的本地化字符串。
+        /// </summary>
+        internal static string TemplateRoute_InvalidRouteTemplate {
+            get {
+                return ResourceManager.GetString("TemplateRoute_InvalidRouteTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 路由模板中有一个不完整的参数。 检查每个“{”字符是否具有匹配的&apos;}&apos;字符。 的本地化字符串。
+        /// </summary>
+        internal static string TemplateRoute_MismatchedParameter {
+            get {
+                return ResourceManager.GetString("TemplateRoute_MismatchedParameter", resourceCulture);
             }
         }
         

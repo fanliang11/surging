@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.Zookeeper.Configurations;
@@ -47,10 +48,26 @@ namespace Surging.Core.Zookeeper
             });
         }
 
+        public static IServiceBuilder UseZooKeeperServiceSubscribeManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseSubscribeManager(provider =>
+            {
+                var result = new ZooKeeperServiceSubscribeManager(
+                    configInfo,
+                  provider.GetRequiredService<ISerializer<byte[]>>(),
+                    provider.GetRequiredService<ISerializer<string>>(),
+                    provider.GetRequiredService<IServiceSubscriberFactory>(),
+                    provider.GetRequiredService<ILogger<ZooKeeperServiceSubscribeManager>>());
+                return result;
+            });
+        }
+
+
         public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseZooKeeperRouteManager(configInfo)
+                .UseZooKeeperServiceSubscribeManager(configInfo)
                 .UseZooKeeperCommandManager(configInfo);
         }
-    } 
+    }
 }

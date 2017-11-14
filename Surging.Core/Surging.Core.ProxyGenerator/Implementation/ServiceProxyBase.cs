@@ -51,26 +51,26 @@ namespace Surging.Core.ProxyGenerator.Implementation
         protected async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId)
         {
             object result = default(T);
-            var command =await _commandProvider.GetCommand(serviceId);
-            RemoteInvokeResultMessage message; 
+            var command = await _commandProvider.GetCommand(serviceId);
+            RemoteInvokeResultMessage message;
             if (!command.RequestCacheEnabled)
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
                 if (message == null)
                 {
-                   
                     var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
                     return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
                 }
             }
             else
             {
-                var invocation = GetInvocation(parameters, serviceId,typeof(T));
-                await  _interceptor.Intercept(invocation);
+                var invocation = GetInvocation(parameters, serviceId, typeof(T));
+                await _interceptor.Intercept(invocation);
                 message = invocation.ReturnValue is RemoteInvokeResultMessage
                     ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
                 result = invocation.ReturnValue;
             }
+         
             if (message != null)
                 result = _typeConvertibleService.Convert(message.Result, typeof(T));
             return (T)result;
@@ -105,13 +105,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 await invoker.Invoke(parameters, serviceId, _serviceKey);
             }
         }
-
+       
         private IInvocation GetInvocation(IDictionary<string, object> parameters, string serviceId, Type returnType)
         {
             var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
             return invocation.GetInvocation(this, parameters, serviceId, returnType);
         }
-
+        
         #endregion Protected Method
     }
 }

@@ -102,7 +102,7 @@ namespace Surging.Core.Caching
                             Activator.CreateInstance(t));
                 }
             }
-            catch(Exception ex) {}
+            catch {}
         }
 
         public object GetTypedPropertyValue(Property obj)

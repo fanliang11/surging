@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Surging.IModuleServices.Common
 {
-    [ServiceBundle]
+    [ServiceBundle("Api/{Service}")]
     public interface IRoteMangeService
     {
         Task<UserModel> GetServiceById(string serviceId);

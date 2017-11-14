@@ -25,16 +25,17 @@ namespace Surging.Core.Zookeeper
         private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
 
         public ZookeeperServiceCommandManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
-            ISerializer<string> stringSerializer,IServiceEntryManager serviceEntryManager,
+            ISerializer<string> stringSerializer, IServiceEntryManager serviceEntryManager,
             ILogger<ZookeeperServiceCommandManager> logger) : base(stringSerializer, serviceEntryManager)
         {
             _configInfo = configInfo;
             _serializer = serializer;
             _logger = logger;
             CreateZooKeeper().Wait();
+            ClearAsync().Wait();
         }
 
-       
+
         /// <summary>
         /// 获取所有可用的服务命令信息。
         /// </summary>
@@ -57,7 +58,7 @@ namespace Surging.Core.Zookeeper
             var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             var index = 0;
-            while (childrens.Any())
+            while (childrens.Count() > 1)
             {
                 var nodePath = "/" + string.Join("/", childrens);
 
@@ -136,7 +137,7 @@ namespace Surging.Core.Zookeeper
                 await SetServiceCommandsAsync(serviceCommands);
             }
         }
-        
+
         private async Task CreateZooKeeper()
         {
             if (_zooKeeper != null)
@@ -194,7 +195,7 @@ namespace Surging.Core.Zookeeper
         {
             ServiceCommandDescriptor result = null;
             var watcher = new NodeMonitorWatcher(_zooKeeper, path,
-                  (oldData, newData) =>  NodeChange(oldData, newData));
+                  (oldData, newData) => NodeChange(oldData, newData));
             if (await _zooKeeper.existsAsync(path) != null)
             {
                 var data = (await _zooKeeper.getDataAsync(path, watcher)).Data;
@@ -263,21 +264,21 @@ namespace Surging.Core.Zookeeper
             return true;
         }
 
-        public  void NodeChange(byte[] oldData, byte[] newData)
+        public void NodeChange(byte[] oldData, byte[] newData)
         {
             if (DataEquals(oldData, newData))
                 return;
 
-            var newCommand =  GetServiceCommand(newData);
+            var newCommand = GetServiceCommand(newData);
             //得到旧的服务命令。
-            var oldCommand = _serviceCommands.First(i => i.ServiceId == newCommand.ServiceId);
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
 
             lock (_serviceCommands)
             {
                 //删除旧服务命令，并添加上新的服务命令。
                 _serviceCommands =
                     _serviceCommands
-                        .Where(i => i.ServiceId!= newCommand.ServiceId)
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
                         .Concat(new[] { newCommand }).ToArray();
             }
             //触发服务命令变更事件。

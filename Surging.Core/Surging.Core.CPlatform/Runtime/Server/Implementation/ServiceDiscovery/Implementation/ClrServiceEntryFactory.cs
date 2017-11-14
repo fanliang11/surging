@@ -1,14 +1,12 @@
-using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.Convertibles;
+using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
+using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
-using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Implementation
@@ -44,41 +42,49 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         /// <returns>服务条目集合。</returns>
         public IEnumerable<ServiceEntry> CreateServiceEntry(Type service)
         {
+            var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>() ;
             foreach (var methodInfo in service.GetTypeInfo().GetMethods())
             {
-                yield return Create(methodInfo);
+                yield return Create(methodInfo,service.Name, routeTemplate.RouteTemplate);
             }
         }
-
         #endregion Implementation of IClrServiceEntryFactory
 
         #region Private Method
 
-        private ServiceEntry Create(MethodInfo method)
+        private ServiceEntry Create(MethodInfo method, string serviceName, string routeTemplate)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
-
+            var attributes = method.GetCustomAttributes().ToList();
             var serviceDescriptor = new ServiceDescriptor
             {
                 Id = serviceId,
-
+                RoutePath = RoutePatternParser.Parse(routeTemplate, serviceName, method.Name)
             };
+
             var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
             foreach (var descriptorAttribute in descriptorAttributes)
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
-           var fastInvoker = FastInvoke.GetMethodInvoker(method);
+            var authorization = attributes.Where(p => p is AuthorizationFilterAttribute).FirstOrDefault();
+            serviceDescriptor.EnableAuthorization(authorization != null);
+            if (authorization != null)
+            {
+               ;
+               serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)
+                   ??AuthorizationType.AppSecret);
+            }
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
-                Attributes = method.GetCustomAttributes().ToList(),
+                Attributes = attributes,
                 Func = (key, parameters) =>
              {
 
                  var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
-            
+
                  foreach (var parameterInfo in method.GetParameters())
                  {
                      var value = parameters[parameterInfo.Name];
@@ -86,8 +92,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
                  }
-                
-                 var result = fastInvoker(instance, list.ToArray()); //method.Invoke(instance, list.ToArray());
+                 var result = method.Invoke(instance, list.ToArray());
                  return Task.FromResult(result);
              }
             };

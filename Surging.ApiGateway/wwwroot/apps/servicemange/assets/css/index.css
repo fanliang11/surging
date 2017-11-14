@@ -34,11 +34,11 @@
 
 .app-board .app-left-side {
     border: 1px solid #ccc;
-    width: 175px;
+    width: 200px;
 }
 
 .app-board .app-left-side .app-title > i {
-    margin-right: 5px;
+    margin-right: 10px;
 }
 
 .app-board .app-left-side, .app-board .app-right-side {
@@ -49,7 +49,7 @@
     margin-right: 0;
     margin-left: 0;
     padding-bottom: 40px;
-    padding-left: 175px;
+    padding-left: 200px;
     min-height: 100%;
     background-color: #fff;
     box-shadow: none;
@@ -74,10 +74,10 @@
     color: #585858;
 }
 
-.app-board .app-left-nav ul a:hover, .app-board .app-left-nav ul .activate {
-    color: #fff;
-    background-color: #3b75a5;
-}
+    .app-board .app-left-nav ul a:hover, .app-board .app-left-nav ul .active {
+        color: #fff;
+        background-color: #3b75a5;
+    }
 
 .app-board .app-right-side {
     background-color: #3b75a5;
@@ -182,7 +182,10 @@
     text-align: left;
     background-color: #3b75a5;
 }
-
+.app-left-side .app-left-nav .nav-level-span {
+    position: absolute;
+    padding-left: 12px;
+}
 .app-board .app-left-side.menu-min .app-left-nav li a:hover .nav-level-span,
 .app-board .app-left-side.menu-min .app-left-nav li a .nav-level-span:hover {
     display: block;

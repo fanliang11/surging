@@ -15,6 +15,15 @@ namespace Surging.Core.CPlatform.Address
         public abstract EndPoint CreateEndPoint();
 
         /// <summary>
+        /// 访问的令牌
+        /// </summary>
+        public string Token { get; set; }
+
+        /// <summary>
+        /// 是否禁用令牌验证
+        /// </summary>
+        public bool DisableAuth { get; set; }
+        /// <summary>
         /// 重写后的标识。
         /// </summary>
         /// <returns>一个字符串。</returns>

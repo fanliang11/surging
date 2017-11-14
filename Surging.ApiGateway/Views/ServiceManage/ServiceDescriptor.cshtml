@@ -1,5 +1,4 @@
-﻿@using Surging.Core.CPlatform;
-@model List<Surging.Core.CPlatform.ServiceDescriptor>
+﻿
     @{ 
         ViewBag.Title = "服务元数据";
         var isPjax = !string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"]);

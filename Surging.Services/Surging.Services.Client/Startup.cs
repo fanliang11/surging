@@ -42,8 +42,7 @@ namespace Surging.Services.Server
         {
             app.Resolve<ILoggerFactory>()
                     .AddConsole((c, l) => (int)l >= 3);
-            Test(RegisterServiceProx(_builder));
-            TestRabbitMq();
+            RegisterServiceProx(_builder);
         }
 
         #region 私有方法
@@ -91,8 +90,9 @@ namespace Surging.Services.Server
         {
             Task.Run(async () =>
             {
+
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                await userProxy.GetUserId("user");
+                await userProxy.GetUserId("user"); 
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
@@ -100,7 +100,7 @@ namespace Surging.Services.Server
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
-                        await userProxy.GetUser(new UserModel { UserId = 1 });
+                       var a =userProxy.GetUser(new UserModel { UserId = 1 }).Result;
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");

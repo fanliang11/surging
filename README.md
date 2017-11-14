@@ -1,4 +1,8 @@
-# surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper作为surging服务的注册中心，集成了哈希，随机，轮询作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
+# surging 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/surging/blob/master/README.EN.md)
+[![Member project of .NET China Foundation](https://github.com/dotnetcore/Home/blob/master/icons/member-project-of-netchina.png)](https://github.com/dotnetcore)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://mit-license.org/)
+# surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
+
 <br />
 
 启动配置：
@@ -19,17 +23,50 @@ var host = new ServiceHostBuilder()
                     builder.AddMicroService(option =>
                     {
                         option.AddServiceRuntime();//
-                        option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));//使用ZooKeeper管理
+                        // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //使用Zookeeper管理
+                        option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//使用Consul管理
                         option.UseDotNettyTransport();//使用Netty传输
                         option.UseRabbitMQTransport();//使用rabbitmq 传输
                         option.AddRabbitMQAdapt();//基于rabbitmq的消费的服务适配
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//初始化注入容器
                     });
                 })
+                .SubscribeAt()     //消息订阅
+                .UseServer("127.0.0.1", 98)
+              //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
+              //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
                 .UseStartup<Startup>()
                 .Build();
- ```    
                 
+            using (host.Run())
+            {
+                Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
+            }
+ ```    
+<br/>
+
+服务路由访问配置：
+<br/>
+
+```c#
+[ServiceBundle("api/{Service}")]
+ ```    
+<br/>
+
+JWT验证，接口方法添加以下特性：
+<br/>
+
+```c#
+   [Authorization(AuthType = AuthorizationType.JWT)];
+ ```    
+<br/>
+
+AppSecret验证，接口方法添加以下特性：
+<br/>
+
+```c#
+ [Authorization(AuthType = AuthorizationType.AppSecret)];
+ ```    
 <br/>
 
 订阅功能：

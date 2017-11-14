@@ -15,6 +15,7 @@ namespace Surging.Core.ProxyGenerator
         {
             var services = builder.Services;
             services.RegisterType<ServiceProxyGenerater>().As<IServiceProxyGenerater>().SingleInstance();
+            services.RegisterType<ServiceProxyProvider>().As<IServiceProxyProvider>().SingleInstance();
             services.RegisterType<ServiceProxyFactory>().As<IServiceProxyFactory>().SingleInstance();
             return builder;
         }
@@ -26,7 +27,7 @@ namespace Surging.Core.ProxyGenerator
             services.RegisterType<InterceptorProvider>().As <IInterceptorProvider>().SingleInstance();
             return builder;
         }
-
+         
         public static IServiceBuilder AddClient(this ContainerBuilder services)
         {
             return services

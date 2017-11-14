@@ -89,20 +89,20 @@ namespace Surging.Core.CPlatform.Support.Implementation
         /// <returns>服务命令集合。</returns>
         public abstract Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync();
 
-        protected abstract  Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> routes);
+        protected abstract Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> routes);
 
 
         public virtual async Task SetServiceCommandsAsync()
         {
             List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>();
             await Task.Run(() =>
-              {
-                  var commands = (from q in _serviceEntryManager.GetEntries()
-                                  let k = q.Attributes
-                                  select new { ServiceId = q.Descriptor.Id, Command = k.OfType<CommandAttribute>().FirstOrDefault() }).ToList();
-                  commands.ForEach(command => serviceCommands.Add(ConvertServiceCommand(command.ServiceId, command.Command)));
-                   InitServiceCommandsAsync(serviceCommands);
-              });
+            {
+                var commands = (from q in _serviceEntryManager.GetEntries()
+                                let k = q.Attributes
+                                select new { ServiceId = q.Descriptor.Id, Command = k.OfType<CommandAttribute>().FirstOrDefault() }).ToList();
+                commands.ForEach(command => serviceCommands.Add(ConvertServiceCommand(command.ServiceId, command.Command)));
+                InitServiceCommandsAsync(serviceCommands);
+            });
         }
 
         /// <summary>
@@ -147,14 +147,14 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 _removed(this, arg);
         }
 
-        private ServiceCommandDescriptor ConvertServiceCommand(string serviceId,CommandAttribute command)
+        private ServiceCommandDescriptor ConvertServiceCommand(string serviceId, CommandAttribute command)
         {
-            var result = new ServiceCommandDescriptor() { ServiceId=serviceId };
+            var result = new ServiceCommandDescriptor() { ServiceId = serviceId };
             if (command != null)
             {
                 result = new ServiceCommandDescriptor
                 {
-                    ServiceId= serviceId,
+                    ServiceId = serviceId,
                     CircuitBreakerForceOpen = command.CircuitBreakerForceOpen,
                     ExecutionTimeoutInMilliseconds = command.ExecutionTimeoutInMilliseconds,
                     FailoverCluster = command.FailoverCluster,

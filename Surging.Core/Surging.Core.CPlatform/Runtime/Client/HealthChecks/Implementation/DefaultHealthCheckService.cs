@@ -45,6 +45,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             };
         }
 
+
         #region Implementation of IHealthCheckService
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             {
                 var key = address.ToString();
                 MonitorEntry entry;
-                return !_dictionary.TryGetValue(key, out entry) ? Check(address): entry.Health;
+                return !_dictionary.TryGetValue(key, out entry) ? Check(address) : entry.Health;
             });
         }
 

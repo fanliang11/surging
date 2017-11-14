@@ -1,3 +1,6 @@
-﻿{
-  "EventBusConnection": "localhost"
+{
+  "EventBusConnection": "localhost",
+  "EventBusUserName": "guest",
+  "EventBusPassword": "guest"
 }
+

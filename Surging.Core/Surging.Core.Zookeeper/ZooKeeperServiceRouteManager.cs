@@ -25,7 +25,6 @@ namespace Surging.Core.Zookeeper
         private ServiceRoute[] _routes;
         private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
 
-
         public ZooKeeperServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IServiceRouteFactory serviceRouteFactory,
             ILogger<ZooKeeperServiceRouteManager> logger) : base(stringSerializer)
@@ -61,7 +60,7 @@ namespace Surging.Core.Zookeeper
             var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             var index = 0;
-            while (childrens.Any())
+            while (childrens.Count() > 1)
             {
                 var nodePath = "/" + string.Join("/", childrens);
 
@@ -154,16 +153,13 @@ namespace Surging.Core.Zookeeper
                     var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
                     if (serviceRoute != null)
                     {
-                        route.Address = route.Address.Concat(
-                            route.Address.Except(serviceRoute.Address));
+                        route.Address = serviceRoute.Address.Concat(
+                          route.Address.Except(serviceRoute.Address));
                     }
                 }
             }
             await base.SetRoutesAsync(routes);
         }
-
-
-
 
         private async Task CreateZooKeeper()
         {
@@ -299,7 +295,7 @@ namespace Surging.Core.Zookeeper
 
             var newRoute = await GetRoute(newData);
             //得到旧的路由。
-            var oldRoute = _routes.First(i => i.ServiceDescriptor.Id == newRoute.ServiceDescriptor.Id);
+            var oldRoute = _routes.FirstOrDefault(i => i.ServiceDescriptor.Id == newRoute.ServiceDescriptor.Id);
 
             lock (_routes)
             {

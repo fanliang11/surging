@@ -79,5 +79,19 @@ namespace Surging.ApiGateway.Controllers
             var result = ServiceResult<IEnumerable<ServiceCommandDescriptor>>.Create(true, list);
             return Json(result);
         }
+
+        public IActionResult ServiceSubscriber(string serviceId)
+        {
+            ViewBag.ServiceId = serviceId;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetSubscriber(string queryParam)
+        {
+            var list = await ServiceLocator.GetService<IServiceSubscribeProvider>().GetAddressAsync(queryParam);
+            var result = ServiceResult<IEnumerable<ServiceAddressModel>>.Create(true, list);
+            return Json(result);
+        }
     }
 }

@@ -60,6 +60,6 @@ public static class ServiceRouteManagerExtensions
         (this IServiceCommandManager serviceCommandManager, params string[] serviceIds)
     {
         var result = (await serviceCommandManager.GetServiceCommandsAsync());
-        return result.Where(p => serviceIds.Contains(p.ServiceId) );
+        return result.Where(p => serviceIds.Contains(p.ServiceId));
     }
 }
