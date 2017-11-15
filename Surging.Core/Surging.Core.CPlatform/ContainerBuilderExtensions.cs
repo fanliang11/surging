@@ -176,55 +176,27 @@ namespace Surging.Core.CPlatform
         }
 
         #region AddressSelector
-
-        /// <summary>
-        /// 设置服务地址选择器。
-        /// </summary>
-        /// <typeparam name="T">地址选择器实现类型。</typeparam>
-        /// <param name="builder">服务构建者。</param>
-        /// <returns>服务构建者。</returns>
-        public static IServiceBuilder UseAddressSelector<T>(this IServiceBuilder builder) where T : class, IAddressSelector
-        {
-            builder.Services.RegisterType(typeof(T)).As(typeof(IAddressSelector)).SingleInstance();
-            return builder;
-        }
-
-        /// <summary>
-        /// 设置服务地址选择器。
-        /// </summary>
-        /// <param name="builder">服务构建者。</param>
-        /// <param name="factory">服务地址选择器实例工厂。</param>
-        /// <returns>服务构建者。</returns>
-        public static IServiceBuilder UseAddressSelector(this IServiceBuilder builder,
-            Func<IServiceProvider, IAddressSelector> factory)
-        {
-            builder.Services.RegisterAdapter(factory);
-            return builder;
-        }
-
-        /// <summary>
-        /// 设置服务地址选择器。
-        /// </summary>
-        /// <param name="builder">服务构建者。</param>
-        /// <param name="instance">地址选择器实例。</param>
-        /// <returns>服务构建者。</returns>
-        public static IServiceBuilder UseAddressSelector(this IServiceBuilder builder, IAddressSelector instance)
-        {
-            builder.Services.RegisterInstance(instance);
-
-            return builder;
-        }
-
-        #endregion AddressSelector
-
-        /// <summary>
+           /// <summary>
         /// 使用轮询的地址选择器。
         /// </summary>
         /// <param name="builder">服务构建者。</param>
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UsePollingAddressSelector(this IServiceBuilder builder)
         {
-            builder.Services.RegisterType(typeof(PollingAddressSelector)).As(typeof(IAddressSelector)).SingleInstance();
+            builder.Services.RegisterType(typeof(PollingAddressSelector))
+                .Named(AddressSelectorMode.Polling.ToString(), typeof(IAddressSelector));
+            return builder;
+        }
+
+        /// <summary>
+        /// 使用哈希的地址选择器。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseHashAlgorithmAddressSelector(this IServiceBuilder builder)
+        {
+            builder.Services.RegisterType(typeof(HashAlgorithmAdrSelector))
+                .Named(AddressSelectorMode.HashAlgorithm.ToString(), typeof(IAddressSelector)).SingleInstance();
             return builder;
         }
 
@@ -235,9 +207,23 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseRandomAddressSelector(this IServiceBuilder builder)
         {
-            builder.Services.RegisterType(typeof(RandomAddressSelector)).As(typeof(IAddressSelector)).SingleInstance();
+            builder.Services.RegisterType(typeof(RandomAddressSelector))
+                .Named(AddressSelectorMode.Random.ToString(), typeof(IAddressSelector)).SingleInstance();
             return builder;
         }
+
+        /// <summary>
+        /// 设置服务地址选择器。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <param name="instance">地址选择器实例。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseAddressSelector(this IServiceBuilder builder)
+        {
+            return builder.UseRandomAddressSelector().UsePollingAddressSelector().UseHashAlgorithmAddressSelector();
+        }
+
+        #endregion AddressSelector
 
         #region Codec Factory
 
@@ -301,7 +287,7 @@ namespace Surging.Core.CPlatform
             builder.Services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
             builder.Services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
-            return builder.UsePollingAddressSelector().AddRuntime().AddClusterSupport();
+            return builder.UseAddressSelector().AddRuntime().AddClusterSupport();
         }
 
         /// <summary>

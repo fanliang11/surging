@@ -34,7 +34,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             _container = container;
             _serviceRouteManager = serviceRouteManager;
             _logger = logger;
-            _addressSelector = container.GetInstances<IAddressSelector>();
+            _addressSelector = container.GetInstances<IAddressSelector>(AppConfig.LoadBalanceMode.ToString());
             _healthCheckService = healthCheckService;
             serviceRouteManager.Changed += ServiceRouteManager_Removed;
             serviceRouteManager.Removed += ServiceRouteManager_Removed;
@@ -50,7 +50,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         /// <param name="serviceId">服务Id。</param>
         /// <returns>服务地址模型。</returns>
-        public async Task<AddressModel> Resolver(string serviceId)
+        public async Task<AddressModel> Resolver(string serviceId,int hashCode)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务id：{serviceId}，解析可用地址。");
@@ -93,7 +93,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             return await _addressSelector.SelectAsync(new AddressSelectContext
             {
                 Descriptor = descriptor.ServiceDescriptor,
-                Address = address
+                Address = address,
+                HashCode= hashCode
             });
         }
 

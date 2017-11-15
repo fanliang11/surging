@@ -15,6 +15,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         public ServiceDescriptor Descriptor { get; set; }
 
         /// <summary>
+        /// 参数的哈希值
+        /// </summary>
+        public int HashCode { get; set; }
+        /// <summary>
         /// 服务可用地址。
         /// </summary>
         public IEnumerable<AddressModel> Address { get; set; }
