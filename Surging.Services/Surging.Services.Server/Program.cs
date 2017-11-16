@@ -12,6 +12,7 @@ using System.Text;
 using System;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
+using Surging.Core.Codec.ProtoBuffer;
 
 namespace Surging.Services.Server
 {
@@ -39,7 +40,9 @@ namespace Surging.Services.Server
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
                         option.AddRabbitMQAdapt();
+                        option.UseProtoBufferCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+                    
                     });
                 })
                 .SubscribeAt()
