@@ -28,6 +28,7 @@ var host = new ServiceHostBuilder()
                         option.UseDotNettyTransport();//使用Netty传输
                         option.UseRabbitMQTransport();//使用rabbitmq 传输
                         option.AddRabbitMQAdapt();//基于rabbitmq的消费的服务适配
+                        option.UseProtoBufferCodec();//基于protobuf编码传输
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//初始化注入容器
                     });
                 })
