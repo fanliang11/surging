@@ -43,7 +43,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             if (string.IsNullOrEmpty(context.InvokeMessage.ServiceId))
                 throw new ArgumentException("服务Id不能为空。", nameof(context.InvokeMessage.ServiceId));
             var invokeMessage = context.InvokeMessage;
-            var address = await _addressResolver.Resolver(invokeMessage.ServiceId);
+            var hashCode= context.InvokeMessage.Parameters.GetHashCode();
+            var address = await _addressResolver.Resolver(invokeMessage.ServiceId,hashCode);
             if (address == null)
                 throw new CPlatformException($"无法解析服务Id：{invokeMessage.ServiceId}的地址信息。");
 
