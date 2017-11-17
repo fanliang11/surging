@@ -10,6 +10,7 @@ using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
 using System;
+using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.Codec.ProtoBuffer;
@@ -41,6 +42,7 @@ namespace Surging.Services.Server
                         option.UseRabbitMQTransport();
                         option.AddRabbitMQAdapt();
                         option.UseProtoBufferCodec();
+                        //option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     
                     });

@@ -13,8 +13,8 @@ using Surging.Core.System.Intercept;
 using Surging.Core.System.Ioc;
 using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
-using Surging.Services.Server;
 using System.Text;
+using Surging.Core.Codec.MessagePack;
 
 namespace Surging.Services.Client
 {
@@ -42,6 +42,7 @@ namespace Surging.Services.Client
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
                         option.UseProtoBufferCodec();
+                        //option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
