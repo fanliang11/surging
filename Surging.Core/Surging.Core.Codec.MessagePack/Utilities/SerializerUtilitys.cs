@@ -1,9 +1,7 @@
-﻿using MessagePack;
+using MessagePack;
 using MessagePack.Resolvers;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Surging.Core.Codec.MessagePack.Utilities
 {

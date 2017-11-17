@@ -1,4 +1,4 @@
-﻿using MessagePack;
+using MessagePack;
 using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Messages;
 using System;
@@ -42,7 +42,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
 
         [Key(2)]
         public string ContentType { get; set; }
-        
+
         public bool IsInvokeMessage()
         {
             return ContentType == typeof(RemoteInvokeMessage).FullName;
@@ -78,7 +78,6 @@ namespace Surging.Core.Codec.MessagePack.Messages
             {
                 throw new NotSupportedException($"无法支持的消息类型：{ContentType}！");
             }
-
             message.Content = contentObject;
             return message;
         }

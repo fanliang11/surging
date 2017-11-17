@@ -1,10 +1,8 @@
-﻿using MessagePack;
+using MessagePack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Surging.Core.Codec.MessagePack.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -14,8 +12,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         #region Constructor
 
         public DynamicItem()
-        {
-        }
+        { }
 
         public DynamicItem(object value)
         {
@@ -29,6 +26,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 TypeName = valueType.FullName;
             else
                 TypeName = valueType.AssemblyQualifiedName;
+
             if (valueType == typeof(JObject))
                 Content = SerializerUtilitys.Serialize(value.ToString());
             else
@@ -51,6 +49,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         {
             if (Content == null || TypeName == null)
                 return null;
+
             var typeName = Type.GetType(TypeName);
             if (typeName == typeof(JObject))
             {

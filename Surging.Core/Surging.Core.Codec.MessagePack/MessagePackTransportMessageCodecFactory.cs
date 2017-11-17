@@ -1,17 +1,11 @@
 ﻿using Surging.Core.CPlatform.Transport.Codec;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Surging.Core.Codec.MessagePack
 {
-   public sealed class MessagePackTransportMessageCodecFactory : ITransportMessageCodecFactory
+    public sealed class MessagePackTransportMessageCodecFactory : ITransportMessageCodecFactory
     {
         #region Field
-
         private readonly ITransportMessageEncoder _transportMessageEncoder = new MessagePackTransportMessageEncoder();
         private readonly ITransportMessageDecoder _transportMessageDecoder = new MessagePackTransportMessageDecoder();
-
         #endregion Field
 
         #region Implementation of ITransportMessageCodecFactory
@@ -25,8 +19,6 @@ namespace Surging.Core.Codec.MessagePack
         {
             return _transportMessageDecoder;
         }
-
         #endregion Implementation of ITransportMessageCodecFactory
     }
-
 }

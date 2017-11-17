@@ -1,9 +1,7 @@
-﻿using MessagePack;
+using MessagePack;
 using Surging.Core.CPlatform.Messages;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -74,5 +72,4 @@ namespace Surging.Core.Codec.MessagePack.Messages
             };
         }
     }
-   
 }

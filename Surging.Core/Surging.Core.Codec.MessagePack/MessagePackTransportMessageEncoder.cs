@@ -2,9 +2,6 @@
 using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport.Codec;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Surging.Core.Codec.MessagePack
 {
@@ -19,11 +16,8 @@ namespace Surging.Core.Codec.MessagePack
                 Id = message.Id,
                 ContentType = message.ContentType,
             };
-
             return SerializerUtilitys.Serialize(transportMessage);
         }
-
         #endregion Implementation of ITransportMessageEncoder
     }
-
 }
