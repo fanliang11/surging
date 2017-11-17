@@ -10,6 +10,8 @@ using Newtonsoft.Json.Serialization;
 using Surging.Core.ApiGateWay;
 using Surging.Core.ApiGateWay.OAuth.Implementation.Configurations;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.Codec.MessagePack;
+using Surging.Core.Codec.ProtoBuffer;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
@@ -69,6 +71,8 @@ namespace Surging.ApiGateway
                 option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
+                //option.UseProtoBufferCodec();
+                option.UseMessagePackCodec();
                 builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
             });
             ServiceLocator.Current = builder.Build();

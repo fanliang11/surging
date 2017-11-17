@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform;
+﻿using Newtonsoft.Json.Linq;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -55,11 +56,12 @@ namespace Surging.Core.ProxyGenerator.Implementation
             RemoteInvokeResultMessage message;
             if (!command.RequestCacheEnabled)
             {
-                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
+                var v = typeof(T).FullName;
+                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, typeof(T) == typeof(Object));
                 if (message == null)
                 {
                     var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                    return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
+                    return await invoker.Invoke<T>(parameters, serviceId, _serviceKey, typeof(T) == typeof(Object));
                 }
             }
             else
@@ -78,13 +80,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
         public async Task<object> CallInvoke(IDictionary<string, object> parameters, string serviceId)
         {
-            var task =  _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
+            var task =  _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, true);
             task.Wait();
             if (task.Result == null)
             {
                 var command =await _commandProvider.GetCommand(serviceId);
                 var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                return await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
+                return await invoker.Invoke<object>(parameters, serviceId, _serviceKey,true);
             }
             return task.Result;
         }
@@ -97,12 +99,12 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// <returns>调用任务。</returns>
         protected async Task Invoke(IDictionary<string, object> parameters, string serviceId)
         {
-            var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
+            var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey,true);
             if (message == null)
             {
                 var command =await _commandProvider.GetCommand(serviceId);
                 var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                await invoker.Invoke(parameters, serviceId, _serviceKey);
+                await invoker.Invoke(parameters, serviceId, _serviceKey,true);
             }
         }
        

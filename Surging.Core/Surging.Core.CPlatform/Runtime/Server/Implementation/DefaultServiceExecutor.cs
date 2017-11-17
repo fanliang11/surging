@@ -10,6 +10,7 @@ using Surging.Core.CPlatform.Filters;
 using System.Threading;
 using Surging.Core.CPlatform.Routing;
  using Surging.Core.CPlatform;
+using Newtonsoft.Json;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 {
@@ -126,6 +127,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                         var taskType = task.GetType().GetTypeInfo();
                         if (taskType.IsGenericType)
                             resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
+                    }
+                    if( remoteInvokeMessage.DecodeJOject && !(resultMessage.Result is IConvertible && typeof(IConvertible).GetTypeInfo().IsAssignableFrom(resultMessage.Result.GetType())))
+                    {
+                        resultMessage.Result = JsonConvert.SerializeObject(resultMessage.Result);
                     }
                 }
             }

@@ -3,24 +3,24 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Surging.Core.Codec.ProtoBuffer
+namespace Surging.Core.Codec.MessagePack
 {
-   public sealed  class ProtoBufferTransportMessageCodecFactory : ITransportMessageCodecFactory
+   public sealed class MessagePackTransportMessageCodecFactory : ITransportMessageCodecFactory
     {
         #region Field
 
-        private readonly ITransportMessageEncoder _transportMessageEncoder = new ProtoBufferTransportMessageEncoder();
-        private readonly ITransportMessageDecoder _transportMessageDecoder = new ProtoBufferTransportMessageDecoder();
+        private readonly ITransportMessageEncoder _transportMessageEncoder = new MessagePackTransportMessageEncoder();
+        private readonly ITransportMessageDecoder _transportMessageDecoder = new MessagePackTransportMessageDecoder();
 
         #endregion Field
 
         #region Implementation of ITransportMessageCodecFactory
-        
+
         public ITransportMessageEncoder GetEncoder()
         {
             return _transportMessageEncoder;
         }
-        
+
         public ITransportMessageDecoder GetDecoder()
         {
             return _transportMessageDecoder;
@@ -28,5 +28,5 @@ namespace Surging.Core.Codec.ProtoBuffer
 
         #endregion Implementation of ITransportMessageCodecFactory
     }
-}
 
+}

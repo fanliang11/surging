@@ -1,13 +1,13 @@
-﻿using ProtoBuf;
+﻿using MessagePack;
 using Surging.Core.CPlatform.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Surging.Core.Codec.ProtoBuffer.Messages
+namespace Surging.Core.Codec.MessagePack.Messages
 {
-    [ProtoContract]
+    [MessagePackObject]
     public class ParameterItem
     {
         #region Constructor
@@ -24,17 +24,17 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
 
         #endregion Constructor
 
-        [ProtoMember(1)]
+        [Key(0)]
         public string Key { get; set; }
 
-        [ProtoMember(2)]
+        [Key(1)]
         public DynamicItem Value { get; set; }
     }
 
-    [ProtoContract]
-    public class ProtoBufferRemoteInvokeMessage
+    [MessagePackObject]
+    public class MessagePackRemoteInvokeMessage
     {
-        public ProtoBufferRemoteInvokeMessage(RemoteInvokeMessage message)
+        public MessagePackRemoteInvokeMessage(RemoteInvokeMessage message)
         {
             ServiceId = message.ServiceId;
             Token = message.Token;
@@ -43,23 +43,23 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
             Parameters = message.Parameters?.Select(i => new ParameterItem(i)).ToArray();
         }
 
-        public ProtoBufferRemoteInvokeMessage()
+        public MessagePackRemoteInvokeMessage()
         {
         }
 
-        [ProtoMember(1)]
+        [Key(0)]
         public string ServiceId { get; set; }
 
-        [ProtoMember(2)]
+        [Key(1)]
         public string Token { get; set; }
 
-        [ProtoMember(3)]
-        public bool DecodeJOject{ get; set; }
+        [Key(2)]
+        public bool DecodeJOject { get; set; }
 
-        [ProtoMember(4)]
+        [Key(3)]
         public string ServiceKey { get; set; }
 
-        [ProtoMember(5)]
+        [Key(4)]
         public ParameterItem[] Parameters { get; set; }
 
         public RemoteInvokeMessage GetRemoteInvokeMessage()
@@ -74,4 +74,5 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
             };
         }
     }
+   
 }

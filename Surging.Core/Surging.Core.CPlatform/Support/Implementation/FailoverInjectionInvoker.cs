@@ -21,7 +21,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             _typeConvertibleService = typeConvertibleService;
         }
 
-        public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string serviceKey)
+        public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var command = await _serviceCommandProvider.GetCommand(serviceId);
             var result = await _serviceCommandProvider.Run(command.Injection, command.InjectionNamespaces);
@@ -36,7 +36,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
         }
 
-        public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string serviceKey)
+        public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var command =await _serviceCommandProvider.GetCommand(serviceId);
             var injectionResult = await _serviceCommandProvider.Run(command.Injection, command.InjectionNamespaces);

@@ -30,7 +30,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         #endregion Constructor
 
-        public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string _serviceKey)
+        public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string _serviceKey,bool decodeJOject)
         {
             var time = 0;
             T result = default(T);
@@ -38,18 +38,18 @@ namespace Surging.Core.CPlatform.Support.Implementation
             var command =await _commandProvider.GetCommand(serviceId);
             do
             {
-                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey);
+                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
                 if (message != null && message.Result != null)
                     result = (T)_typeConvertibleService.Convert(message.Result, typeof(T));
             } while (message == null && ++time < command.FailoverCluster);
             return result;
         }
 
-        public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string _serviceKey)
+        public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string _serviceKey, bool decodeJOject)
         {
             var time = 0;
             var command =await _commandProvider.GetCommand(serviceId);
-            while (await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey) == null && ++time < command.FailoverCluster) ;
+            while (await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject) == null && ++time < command.FailoverCluster) ;
         }
     }
 

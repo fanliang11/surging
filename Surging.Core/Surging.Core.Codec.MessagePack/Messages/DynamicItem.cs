@@ -1,13 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using MessagePack;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ProtoBuf;
-using Surging.Core.Codec.ProtoBuffer.Utilities;
+using Surging.Core.Codec.MessagePack.Utilities;
 using System;
-using System.Reflection;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Surging.Core.Codec.ProtoBuffer.Messages
+namespace Surging.Core.Codec.MessagePack.Messages
 {
-    [ProtoContract]
+    [MessagePackObject]
     public class DynamicItem
     {
         #region Constructor
@@ -38,9 +39,10 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
 
         #region Property
 
-        [ProtoMember(1)]
+        [Key(0)]
         public string TypeName { get; set; }
-        [ProtoMember(2)]
+
+        [Key(1)]
         public byte[] Content { get; set; }
         #endregion Property
 
@@ -59,7 +61,7 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
             {
                 return SerializerUtilitys.Deserialize(Content, typeName);
             }
-            
+
         }
         #endregion Public Method
     }

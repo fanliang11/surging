@@ -20,7 +20,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             _remoteInvokeService = remoteInvokeService;
         }
 
-        public async Task<RemoteInvokeResultMessage> InvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey)
+        public async Task<RemoteInvokeResultMessage> InvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var serviceInvokeInfos = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             var command =await _commandProvider.GetCommand(serviceId);
@@ -41,7 +41,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 {
                     if (intervalSeconds*1000 > command.BreakeSleepWindowInMilliseconds)
                     {
-                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey);
+                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject);
                     }
                     else
                     {
@@ -51,13 +51,13 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 }
                 else
                 {
-                    return await  MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey);
+                    return await  MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject);
                 }
             }
             throw new NotImplementedException();
         }
 
-        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey)
+        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var serviceInvokeInfo = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             try
@@ -75,7 +75,8 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     {
                         Parameters = parameters,
                         ServiceId = serviceId,
-                        ServiceKey = serviceKey
+                        ServiceKey = serviceKey,
+                         DecodeJOject= decodeJOject,
                     }
                 });
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
