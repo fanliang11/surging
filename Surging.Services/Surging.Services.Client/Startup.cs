@@ -15,7 +15,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace Surging.Services.Server
+namespace Surging.Services.Client
 {
     public class Startup
     {
