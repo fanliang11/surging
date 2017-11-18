@@ -42,7 +42,7 @@ namespace Surging.Services.Server
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
                         option.AddRabbitMQAdapt();
-                       // option.UseProtoBufferCodec();
+                        //option.UseProtoBufferCodec();
                         option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     

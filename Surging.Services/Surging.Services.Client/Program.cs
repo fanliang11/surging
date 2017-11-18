@@ -42,7 +42,7 @@ namespace Surging.Services.Client
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
-                       // option.UseProtoBufferCodec();
+                        //option.UseProtoBufferCodec();
                         option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });

@@ -12,6 +12,7 @@ using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
 using Surging.IModuleServices.Common.Models.Events;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -92,7 +93,7 @@ namespace Surging.Services.Client
             {
 
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                await userProxy.GetUserId("user"); 
+                await userProxy.GetUserId("user");
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
@@ -100,7 +101,7 @@ namespace Surging.Services.Client
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
-                       var a =userProxy.GetUser(new UserModel { UserId = 1 }).Result;
+                        var a = userProxy.GetUser(new UserModel { UserId = 1 }).Result;
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
