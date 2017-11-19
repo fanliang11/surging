@@ -9,52 +9,22 @@ namespace Surging.Core.Codec.MessagePack.Utilities
     {
         static SerializerUtilitys()
         {
-            MessagePackSerializer.SetDefaultResolver(
-            ContractlessStandardResolver.Instance);
+            MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolverAllowPrivate.Instance);
         }
 
         public static byte[] Serialize<T>(T instance)
         {
-            using (var stream = new MemoryStream())
-            {
-               MessagePackSerializer.Serialize(stream, instance);
-                return stream.ToArray();
-            }
-        }
-
-        public static byte[] Serialize(object instance, Type type)
-        {
-            using (var stream = new MemoryStream())
-            {
-                MessagePackSerializer.Serialize(stream, instance);
-                return stream.ToArray();
-            }
+            return MessagePackSerializer.Serialize(instance);
         }
 
         public static object Deserialize(byte[] data, Type type)
         {
-            if (data == null)
-            {
-                return null;
-            }
-
-            using (var stream = new MemoryStream(data))
-            {
-                return MessagePackSerializer.NonGeneric.Deserialize(type, stream);
-            }
+            return data == null ? null : MessagePackSerializer.NonGeneric.Deserialize(type, data);
         }
 
         public static T Deserialize<T>(byte[] data)
         {
-            if (data == null)
-            {
-                return default(T);
-            }
-
-            using (var stream = new MemoryStream(data))
-            {
-                return MessagePackSerializer.Deserialize<T>(stream);
-            }
+            return data == null ? default(T) : MessagePackSerializer.Deserialize<T>(data);
         }
     }
 }
