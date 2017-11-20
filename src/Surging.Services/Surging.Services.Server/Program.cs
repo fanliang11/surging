@@ -14,7 +14,6 @@ using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.Codec.ProtoBuffer;
-using Surging.Core.Codec.MessagePack;
 
 namespace Surging.Services.Server
 {
