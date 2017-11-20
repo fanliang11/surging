@@ -130,7 +130,7 @@ namespace Surging.Core.DotNetty
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError($"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。", exception);
+                    _logger.LogError(exception,$"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
             }
 
             #endregion Overrides of ChannelHandlerAdapter

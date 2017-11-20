@@ -57,7 +57,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<bool> Get(List<UserModel> users);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
-        Task<IDictionary<string, string>> GetDictionary();
+        Task<bool> GetDictionary();
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task TryThrowException();

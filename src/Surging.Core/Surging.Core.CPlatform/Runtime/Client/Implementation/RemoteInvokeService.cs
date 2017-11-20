@@ -64,7 +64,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             }
             catch (Exception exception)
             {
-                _logger.LogError($"发起请求中发生了错误，服务Id：{invokeMessage.ServiceId}。", exception);
+                _logger.LogError(exception,$"发起请求中发生了错误，服务Id：{invokeMessage.ServiceId}。");
                 throw;
             }
         }

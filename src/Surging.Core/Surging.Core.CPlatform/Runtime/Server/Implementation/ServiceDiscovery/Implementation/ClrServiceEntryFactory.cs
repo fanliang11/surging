@@ -1,13 +1,16 @@
 using Surging.Core.CPlatform.Convertibles;
+using Surging.Core.CPlatform.DependencyResolution;
 using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Implementation
 {
@@ -75,14 +78,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)
                    ??AuthorizationType.AppSecret);
             }
+            var fastInvoker = GetHandler(serviceId,method);
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
                 Attributes = attributes,
                 Func = (key, parameters) =>
              {
-
-                 var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
+                var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
 
                  foreach (var parameterInfo in method.GetParameters())
@@ -92,10 +95,21 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
                  }
-                 var result = method.Invoke(instance, list.ToArray());
+                 var result = fastInvoker(instance,  list.ToArray()); 
                  return Task.FromResult(result);
              }
             };
+        }
+
+        private FastInvokeHandler GetHandler(string key, MethodInfo method)
+        {
+            var objInstance = ServiceResolver.Current.GetService(null, key);
+            if (objInstance == null)
+            {
+                objInstance = FastInvoke.GetMethodInvoker(method);
+                ServiceResolver.Current.Register(key, objInstance, null);
+            }
+            return objInstance as FastInvokeHandler;
         }
         #endregion Private Method
     }

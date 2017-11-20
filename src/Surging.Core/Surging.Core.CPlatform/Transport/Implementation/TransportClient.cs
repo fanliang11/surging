@@ -76,7 +76,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             catch (Exception exception)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError("消息发送失败。", exception);
+                    _logger.LogError(exception, "消息发送失败。");
                 throw;
             }
         }
@@ -90,7 +90,6 @@ namespace Surging.Core.CPlatform.Transport.Implementation
         {
             (_messageSender as IDisposable)?.Dispose();
             (_messageListener as IDisposable)?.Dispose();
-
             foreach (var taskCompletionSource in _resultDictionary.Values)
             {
                 taskCompletionSource.TrySetCanceled();

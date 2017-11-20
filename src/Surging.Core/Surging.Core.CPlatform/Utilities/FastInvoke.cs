@@ -10,8 +10,10 @@ namespace Surging.Core.CPlatform.Utilities
     {
         public delegate object FastInvokeHandler(object target, object[] paramters);
 
+
         static object InvokeMethod(FastInvokeHandler invoke, object target, params object[] paramters)
         {
+
             return invoke(null, paramters);
 
         }
