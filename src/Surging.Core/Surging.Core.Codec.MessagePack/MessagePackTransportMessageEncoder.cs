@@ -5,7 +5,7 @@ using Surging.Core.CPlatform.Transport.Codec;
 
 namespace Surging.Core.Codec.MessagePack
 {
-   public sealed   class MessagePackTransportMessageEncoder:ITransportMessageEncoder
+   public sealed class MessagePackTransportMessageEncoder:ITransportMessageEncoder
     {
         #region Implementation of ITransportMessageEncoder
 

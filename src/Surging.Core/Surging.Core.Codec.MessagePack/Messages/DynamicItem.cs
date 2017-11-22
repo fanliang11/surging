@@ -60,7 +60,6 @@ namespace Surging.Core.Codec.MessagePack.Messages
             {
                 return SerializerUtilitys.Deserialize(Content, typeName);
             }
-
         }
         #endregion Public Method
     }

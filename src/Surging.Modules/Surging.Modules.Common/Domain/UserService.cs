@@ -59,7 +59,7 @@ namespace Surging.Modules.Common.Domain
                 Age = 18
             });
         }
-
+        
         public Task<bool> Update(int id, UserModel model)
         {
             return Task.FromResult(true);

@@ -60,15 +60,21 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             {
                 var descriptors = await _serviceRouteManager.GetRoutesAsync();
                 descriptor = descriptors.FirstOrDefault(i => i.ServiceDescriptor.Id == serviceId);
-                _concurrent.GetOrAdd(serviceId, descriptor);
+                if (descriptor != null)
+                {
+                    _concurrent.GetOrAdd(serviceId, descriptor);
+                }
+                else
+                {
+                    if (descriptor == null)
+                    {
+                        if (_logger.IsEnabled(LogLevel.Warning))
+                            _logger.LogWarning($"根据服务id：{serviceId}，找不到相关服务信息。");
+                        return null;
+                    }
+                }
             }
-            if (descriptor == null)
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                    _logger.LogWarning($"根据服务id：{serviceId}，找不到相关服务信息。");
-                return null;
-            }
-
+          
             var address = new List<AddressModel>();
             foreach (var addressModel in descriptor.Address)
             {
@@ -78,9 +84,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 
                 address.Add(addressModel);
             }
-
-            var hasAddress = address.Any();
-            if (!hasAddress)
+            
+            if (address.Count==0)
             {
                 if (_logger.IsEnabled(LogLevel.Warning))
                     _logger.LogWarning($"根据服务id：{serviceId}，找不到可用的地址。");

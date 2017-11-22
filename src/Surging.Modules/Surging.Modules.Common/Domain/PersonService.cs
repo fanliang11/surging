@@ -52,7 +52,7 @@ namespace Surging.Modules.Common.Domain
             });
         }
 
-       public Task<bool> Get(List<UserModel> users)
+        public Task<bool> Get(List<UserModel> users)
         {
             return Task.FromResult(true);
         }

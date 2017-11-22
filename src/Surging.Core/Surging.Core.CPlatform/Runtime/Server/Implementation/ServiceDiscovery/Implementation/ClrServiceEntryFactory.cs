@@ -74,18 +74,18 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             serviceDescriptor.EnableAuthorization(authorization != null);
             if (authorization != null)
             {
-               ;
-               serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)
-                   ??AuthorizationType.AppSecret);
+                ;
+                serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)
+                    ?? AuthorizationType.AppSecret);
             }
-            var fastInvoker = GetHandler(serviceId,method);
+            var fastInvoker = GetHandler(serviceId, method);
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
                 Attributes = attributes,
                 Func = (key, parameters) =>
              {
-                var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
+                 var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
 
                  foreach (var parameterInfo in method.GetParameters())
@@ -95,7 +95,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
                  }
-                 var result = fastInvoker(instance,  list.ToArray()); 
+                 var result = fastInvoker(instance, list.ToArray());
                  return Task.FromResult(result);
              }
             };
