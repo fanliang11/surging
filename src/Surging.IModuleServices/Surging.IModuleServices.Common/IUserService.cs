@@ -43,7 +43,7 @@ new Surging.IModuleServices.Common.Models.UserModel
          {
             Name=""fanly"",
             Age=19
-         };", RequestCacheEnabled =true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
+         };", RequestCacheEnabled =false, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType =SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
@@ -57,7 +57,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<bool> Get(List<UserModel> users);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
-        [Command(Strategy = StrategyType.Injection, Injection = @"return null;", RequestCacheEnabled = true)]
+        [Command(Strategy = StrategyType.Injection, Injection = @"return null;", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<bool> GetDictionary();
 
