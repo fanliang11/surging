@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Surging.Core.Caching\Surging.Core.Caching.csproj" />
-    <ProjectReference Include="..\Surging.Core.Codec.MessagePack\Surging.Core.Codec.MessagePack.csproj" />
     <ProjectReference Include="..\Surging.Core.Common\Surging.Core.Common.csproj" />
     <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />

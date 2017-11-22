@@ -1,10 +1,7 @@
-﻿using Surging.Core.ProxyGenerator.Interceptors;
-using System.Threading.Tasks;
+﻿using Surging.Core.Caching;
+using Surging.Core.ProxyGenerator.Interceptors;
 using System.Linq;
-using Surging.Core.Caching;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Surging.Core.System.Intercept
 {
