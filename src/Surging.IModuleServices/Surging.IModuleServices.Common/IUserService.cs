@@ -57,7 +57,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<bool> Get(List<UserModel> users);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
-        [Command(Strategy = StrategyType.Injection, Injection = @"return null;", RequestCacheEnabled = false)]
+        [Command(Strategy = StrategyType.Injection, ExecutionTimeoutInMilliseconds=2000, Injection = @"return null;", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<bool> GetDictionary();
 
