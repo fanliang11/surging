@@ -62,13 +62,12 @@ namespace Surging.Core.DotNetty
 
             var bossGroup = new MultithreadEventLoopGroup();
             var workerGroup = new MultithreadEventLoopGroup(4);
-
             var bootstrap = new ServerBootstrap();
             bootstrap
             .Group(bossGroup, workerGroup)
             .Channel<TcpServerSocketChannel>()
             .Option(ChannelOption.SoBacklog, 100)
-            .Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+            .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
             .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
             {
                 var pipeline = channel.Pipeline;

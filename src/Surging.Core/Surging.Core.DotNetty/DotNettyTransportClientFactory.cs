@@ -1,4 +1,5 @@
-﻿using DotNetty.Codecs;
+﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
@@ -123,7 +124,8 @@ namespace Surging.Core.DotNetty
             bootstrap
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
-                .Group(new MultithreadEventLoopGroup());
+                .Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+                .Group(new MultithreadEventLoopGroup(1));
 
             return bootstrap;
         }
