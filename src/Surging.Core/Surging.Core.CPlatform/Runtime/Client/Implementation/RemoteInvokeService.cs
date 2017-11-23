@@ -4,6 +4,7 @@ using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform.Transport;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
                 var client = _transportClientFactory.CreateClient(endPoint);
-                return await client.SendAsync(invokeMessage);;
+                return await client.SendAsync(invokeMessage).WithCancellation(cancellationToken);
             }
             catch (CommunicationException)
             {
