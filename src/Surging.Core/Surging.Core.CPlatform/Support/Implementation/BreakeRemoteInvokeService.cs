@@ -28,9 +28,6 @@ namespace Surging.Core.CPlatform.Support.Implementation
         {
             var serviceInvokeInfos = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             var command =await _commandProvider.GetCommand(serviceId);
-            var cts = new CancellationTokenSource(command.ExecutionTimeoutInMilliseconds);
-            cts.Token.Register(() => _logger.LogError("serviceId:{0} 请求超时，serviceKey:{1},时间：{2}",serviceId, 
-                serviceKey, DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")));
             var intervalSeconds = (DateTime.Now - serviceInvokeInfos.FinalRemoteInvokeTime).TotalSeconds;
             bool reachConcurrentRequest() => serviceInvokeInfos.ConcurrentRequests > command.MaxConcurrentRequests;
             bool reachRequestVolumeThreshold() => intervalSeconds <= 10
@@ -48,7 +45,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 {
                     if (intervalSeconds*1000 > command.BreakeSleepWindowInMilliseconds)
                     {
-                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, cts.Token);
+                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds);
                     }
                     else
                     {
@@ -58,13 +55,13 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 }
                 else
                 {
-                    return await  MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, cts.Token);
+                    return await  MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds);
                 }
             }
             throw new NotImplementedException();
         }
 
-        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, CancellationToken cancellationToken)
+        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout)
         {
             var serviceInvokeInfo = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             try
@@ -85,7 +82,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                         ServiceKey = serviceKey,
                          DecodeJOject= decodeJOject,
                     }
-                }, cancellationToken);
+                }, requestTimeout);
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
                 {
                     v.SinceFaultRemoteServiceRequests = 0;

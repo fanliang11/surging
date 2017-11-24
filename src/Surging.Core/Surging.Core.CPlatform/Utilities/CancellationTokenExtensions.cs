@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Utilities
 {
-     public static  class CancellationTokenExtensions
+    public static class CancellationTokenExtensions
     {
         public static Task WhenCanceled(this CancellationToken cancellationToken)
         {
@@ -22,9 +22,16 @@ namespace Surging.Core.CPlatform.Utilities
             using (cancellationToken.Register(
                         s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
                 if (task != await Task.WhenAny(task, tcs.Task))
-                    throw new OperationCanceledException("请求超时",cancellationToken);
+                    throw new OperationCanceledException("请求超时", cancellationToken);
             return await task;
         }
 
+        public static async Task<T> WithCancellation<T>(
+    this Task<T> task, int requestTimeout)
+        {
+            if (task != await Task.WhenAny(task, Task.Delay(requestTimeout)))
+                throw new OperationCanceledException("请求超时");
+            return await task;
+        }
     }
 }

@@ -67,7 +67,6 @@ namespace Surging.Modules.Common.Domain
 
         public Task<bool> GetDictionary()
         {
-            Thread.Sleep(2000);
             return Task.FromResult<bool>(true);
         }
 
