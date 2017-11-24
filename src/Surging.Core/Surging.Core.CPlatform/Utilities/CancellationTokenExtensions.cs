@@ -22,7 +22,7 @@ namespace Surging.Core.CPlatform.Utilities
             using (cancellationToken.Register(
                         s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
                 if (task != await Task.WhenAny(task, tcs.Task))
-                    throw new OperationCanceledException(cancellationToken);
+                    throw new OperationCanceledException("请求超时",cancellationToken);
             return await task;
         }
 
