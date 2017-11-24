@@ -2,7 +2,7 @@
 
 surging is The distributed micro service [open-source](https://github.com/dotnetcore/surging/) framework based on .NET Core provides high-performance RPC Communications. With surging, you can:
 
-* Build web apps °¢ micro services and api gateway 
+* Build web apps „ÄÅ micro services and api gateway 
 * Microservices can be distributed in the cloud.
 * Support load balancing shunt pressure
 * Based on [.NET Core](https://docs.microsoft.com/zh-cn/dotnet/core/) cross-platform can run on Windows, macOS and Linux; can also be ported to other operating systems.
