@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Text;
 
 namespace Surging.Core.CPlatform.Address
 {
@@ -55,10 +56,12 @@ namespace Surging.Core.CPlatform.Address
             return new IPEndPoint(IPAddress.Parse(Ip), Port);
         }
 
-    
+
         public override string ToString()
         {
-             return $"{Ip}:{Port}";
+            var result = new StringBuilder()
+                .AppendFormat(Ip).Append(":").Append(Port);
+            return result.ToString();
         }
 
         #endregion Overrides of AddressModel

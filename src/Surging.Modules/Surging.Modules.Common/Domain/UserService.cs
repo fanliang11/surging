@@ -59,15 +59,15 @@ namespace Surging.Modules.Common.Domain
                 Age = 18
             });
         }
-
+        
         public Task<bool> Update(int id, UserModel model)
         {
             return Task.FromResult(true);
         }
 
-        public Task<IDictionary<string, string>> GetDictionary()
+        public Task<bool> GetDictionary()
         {
-            return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string> { { "key", "value" } });
+            return Task.FromResult<bool>(true);
         }
 
         public async Task Try()

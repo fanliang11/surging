@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Surging.Core.CPlatform.Messages;
 using System.Collections.Concurrent;
 using Surging.Core.CPlatform.Runtime.Client;
+using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
@@ -12,18 +14,23 @@ namespace Surging.Core.CPlatform.Support.Implementation
     {
         private readonly IServiceCommandProvider _commandProvider;
         private readonly IRemoteInvokeService _remoteInvokeService;
+        private readonly ILogger<BreakeRemoteInvokeService> _logger;
         private readonly ConcurrentDictionary<string, ServiceInvokeListenInfo> _serviceInvokeListenInfo = new ConcurrentDictionary<string, ServiceInvokeListenInfo>();
 
-        public BreakeRemoteInvokeService(IServiceCommandProvider commandProvider, IRemoteInvokeService remoteInvokeService)
+        public BreakeRemoteInvokeService(IServiceCommandProvider commandProvider, ILogger<BreakeRemoteInvokeService> logger, IRemoteInvokeService remoteInvokeService)
         {
             _commandProvider = commandProvider;
             _remoteInvokeService = remoteInvokeService;
+            _logger = logger;
         }
 
         public async Task<RemoteInvokeResultMessage> InvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var serviceInvokeInfos = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             var command =await _commandProvider.GetCommand(serviceId);
+            var cts = new CancellationTokenSource(command.ExecutionTimeoutInMilliseconds);
+            cts.Token.Register(() => _logger.LogError("serviceId:{0} 请求超时，serviceKey:{1},时间：{2}",serviceId, 
+                serviceKey, DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")));
             var intervalSeconds = (DateTime.Now - serviceInvokeInfos.FinalRemoteInvokeTime).TotalSeconds;
             bool reachConcurrentRequest() => serviceInvokeInfos.ConcurrentRequests > command.MaxConcurrentRequests;
             bool reachRequestVolumeThreshold() => intervalSeconds <= 10
@@ -41,7 +48,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 {
                     if (intervalSeconds*1000 > command.BreakeSleepWindowInMilliseconds)
                     {
-                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject);
+                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, cts.Token);
                     }
                     else
                     {
@@ -51,13 +58,13 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 }
                 else
                 {
-                    return await  MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject);
+                    return await  MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, cts.Token);
                 }
             }
             throw new NotImplementedException();
         }
 
-        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
+        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, CancellationToken cancellationToken)
         {
             var serviceInvokeInfo = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             try
@@ -78,7 +85,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                         ServiceKey = serviceKey,
                          DecodeJOject= decodeJOject,
                     }
-                });
+                }, cancellationToken);
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
                 {
                     v.SinceFaultRemoteServiceRequests = 0;

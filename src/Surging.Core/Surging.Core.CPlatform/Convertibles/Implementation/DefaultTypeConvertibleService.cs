@@ -65,7 +65,7 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             var exception = new CPlatformException($"无法将实例：{instance}转换为{conversionType}。");
 
             if (_logger.IsEnabled(LogLevel.Error))
-                _logger.LogError($"将 {instance.GetType()} 转换成 {conversionType} 时发生了错误。", exception);
+                _logger.LogError(exception,$"将 {instance.GetType()} 转换成 {conversionType} 时发生了错误。");
             throw exception;
         }
 

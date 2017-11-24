@@ -52,7 +52,7 @@ namespace Surging.Modules.Common.Domain
             });
         }
 
-       public Task<bool> Get(List<UserModel> users)
+        public Task<bool> Get(List<UserModel> users)
         {
             return Task.FromResult(true);
         }
@@ -62,9 +62,9 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
-        public Task<IDictionary<string, string>> GetDictionary()
+        public Task<bool> GetDictionary()
         {
-            return Task.FromResult<IDictionary<string, string>>(new Dictionary<string, string> { { "key", "value" } });
+            return Task.FromResult<bool>(true);
         }
 
         public async Task Try()

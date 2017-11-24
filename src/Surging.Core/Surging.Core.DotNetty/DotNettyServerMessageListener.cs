@@ -59,28 +59,28 @@ namespace Surging.Core.DotNetty
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
-            
+
             var bossGroup = new MultithreadEventLoopGroup();
             var workerGroup = new MultithreadEventLoopGroup(4);
             var bootstrap = new ServerBootstrap();
-                bootstrap
-                .Group(bossGroup, workerGroup)
-                .Channel<TcpServerSocketChannel>()
-                .Option(ChannelOption.SoBacklog, 100)
-                .Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-                .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
+            bootstrap
+            .Group(bossGroup, workerGroup)
+            .Channel<TcpServerSocketChannel>()
+            .Option(ChannelOption.SoBacklog, 100)
+            .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+            .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
+            {
+                var pipeline = channel.Pipeline;
+                pipeline.AddLast(new LengthFieldPrepender(4));
+                pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
+                pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
+                pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
                 {
-                    var pipeline = channel.Pipeline;
-                    pipeline.AddLast(new LengthFieldPrepender(4));
-                    pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
-                    pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
-                    {
-                        var sender = new DotNettyServerMessageSender(_transportMessageEncoder, contenxt);
-                        await OnReceived(sender, message);
-                    }, _logger));
-                }));
-                _channel = await bootstrap.BindAsync(endPoint);
+                    var sender = new DotNettyServerMessageSender(_transportMessageEncoder, contenxt);
+                    await OnReceived(sender, message);
+                }, _logger));
+            }));
+            _channel = await bootstrap.BindAsync(endPoint);
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"服务主机启动成功，监听地址：{endPoint}。");
         }
@@ -130,7 +130,7 @@ namespace Surging.Core.DotNetty
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError($"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。", exception);
+                    _logger.LogError(exception,$"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
             }
 
             #endregion Overrides of ChannelHandlerAdapter

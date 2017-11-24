@@ -15,7 +15,6 @@ using Surging.Core.System.Ioc;
 using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
-using Surging.Core.Codec.MessagePack;
 
 namespace Surging.Services.Client
 {

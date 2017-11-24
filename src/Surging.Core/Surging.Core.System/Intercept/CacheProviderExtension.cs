@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Surging.Core.Caching;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Surging.Core.System.Intercept

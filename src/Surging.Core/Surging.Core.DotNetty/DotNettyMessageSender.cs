@@ -26,8 +26,7 @@ namespace Surging.Core.DotNetty
         {
             var data = _transportMessageEncoder.Encode(message);
             //var buffer = PooledByteBufferAllocator.Default.Buffer();
-            var buffer = Unpooled.Buffer(data.Length, data.Length);
-            return buffer.WriteBytes(data);
+            return Unpooled.WrappedBuffer(data);
         }
     }
 

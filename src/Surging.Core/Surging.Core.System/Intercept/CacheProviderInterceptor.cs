@@ -1,10 +1,7 @@
-﻿using Surging.Core.ProxyGenerator.Interceptors;
-using System.Threading.Tasks;
+﻿using Surging.Core.Caching;
+using Surging.Core.ProxyGenerator.Interceptors;
 using System.Linq;
-using Surging.Core.Caching;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Surging.Core.System.Intercept
 {
@@ -15,7 +12,8 @@ namespace Surging.Core.System.Intercept
             var attribute =
                  invocation.Attributes.Where(p => p is InterceptMethodAttribute)
                  .Select(p => p as InterceptMethodAttribute).FirstOrDefault();
-            var cacheKey = string.Format(attribute.Key, invocation.CacheKey);
+            var cacheKey = invocation.CacheKey==null?attribute.Key:
+                string.Format(attribute.Key, invocation.CacheKey);
             await CacheIntercept(attribute, cacheKey, invocation);
         }
 
@@ -55,9 +53,9 @@ namespace Surging.Core.System.Intercept
                     }
                 default:
                     {
-                        var keys = attribute.CorrespondingKeys.Select(correspondingKey => string.Format(correspondingKey, key)).ToList();
-                        keys.ForEach(cacheProvider.Remove);
                         await invocation.Proceed();
+                        var keys = attribute.CorrespondingKeys.Select(correspondingKey => string.Format(correspondingKey, key)).ToList();
+                        keys.ForEach(cacheProvider.RemoveAsync);
                         break;
                     }
             }
