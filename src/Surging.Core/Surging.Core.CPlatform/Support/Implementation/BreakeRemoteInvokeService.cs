@@ -58,7 +58,6 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds);
                 }
             }
-            throw new NotImplementedException();
         }
 
         private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout)
@@ -88,7 +87,6 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     v.SinceFaultRemoteServiceRequests = 0;
                     --v.ConcurrentRequests; return v;
                 });
-
                 return message;
             }
             catch

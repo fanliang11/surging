@@ -1,15 +1,13 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
-   public abstract class ServiceCommandBase: IServiceCommandProvider
+    public abstract class ServiceCommandBase: IServiceCommandProvider
     { 
-        public abstract Task<ServiceCommand> GetCommand(string serviceId);
+        public abstract ValueTask<ServiceCommand> GetCommand(string serviceId);
         ConcurrentDictionary<string,  object> scripts = new ConcurrentDictionary<string,  object>();
 
         public async Task<object> Run(string text, params string[] InjectionNamespaces)

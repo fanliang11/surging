@@ -21,7 +21,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>健康返回true，否则返回false。</returns>
-        Task<bool> IsHealth(AddressModel address);
+        ValueTask<bool> IsHealth(AddressModel address);
 
         /// <summary>
         /// 标记一个地址为失败的。

@@ -54,9 +54,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务id：{serviceId}，解析可用地址。");
-            ServiceRoute descriptor;
-            _concurrent.TryGetValue(serviceId, out descriptor);
-            if (descriptor == null)
+            _concurrent.TryGetValue(serviceId, out ServiceRoute descriptor);
+            if (descriptor==null)
             {
                 var descriptors = await _serviceRouteManager.GetRoutesAsync();
                 descriptor = descriptors.FirstOrDefault(i => i.ServiceDescriptor.Id == serviceId);

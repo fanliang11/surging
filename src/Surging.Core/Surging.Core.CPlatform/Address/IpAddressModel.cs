@@ -59,9 +59,7 @@ namespace Surging.Core.CPlatform.Address
 
         public override string ToString()
         {
-            var result = new StringBuilder()
-                .AppendFormat(Ip).Append(":").Append(Port);
-            return result.ToString();
+            return string.Concat(new string[] {Ip,":" , Port.ToString() });
         }
 
         #endregion Overrides of AddressModel

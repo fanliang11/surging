@@ -63,14 +63,11 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>健康返回true，否则返回false。</returns>
-        public Task<bool> IsHealth(AddressModel address)
+        public ValueTask<bool> IsHealth(AddressModel address)
         {
-            return Task.Run(() =>
-            {
-                var key = address.ToString();
-                MonitorEntry entry;
-                return !_dictionary.TryGetValue(key, out entry) ? Check(address) : entry.Health;
-            });
+            var key = address.ToString();
+            MonitorEntry entry;
+            return !_dictionary.TryGetValue(key, out entry) ? new ValueTask<bool>(Check(address)) : new ValueTask<bool>(entry.Health);
         }
 
         /// <summary>
