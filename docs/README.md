@@ -17,7 +17,7 @@ surging is The distributed micro service [open-source](https://github.com/dotnet
 * Built-in gateway can be unified external access and management.
 * A lightweight, high-performance, and modular RPC request pipeline.
 * Ability to host on IIS or self-host in your own process.
-* Can run on [.NET Core] (https://docs.microsoft.com/zh-cn/dotnet/core/), Ability to build and run on Windows, macOS, and Linux
+* Can run on [.NET Core](https://docs.microsoft.com/zh-cn/dotnet/core/), Ability to build and run on Windows, macOS, and Linux
 * Simplify the maintenance of cumbersome.
 * Open source based on github platform.
 * Support load balancing shunt pressure.
