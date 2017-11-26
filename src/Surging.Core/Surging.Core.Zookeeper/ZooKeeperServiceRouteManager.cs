@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using org.apache.zookeeper;
+using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Serialization;
@@ -142,6 +143,15 @@ namespace Surging.Core.Zookeeper
                 _logger.LogInformation("服务路由添加成功。");
         }
 
+        public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
+        {
+            var routes = await GetRoutesAsync();
+            foreach (var route in routes)
+            {
+                route.Address = route.Address.Except(Address);
+            }
+            await base.SetRoutesAsync(routes);
+        }
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {

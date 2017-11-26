@@ -15,15 +15,19 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
     {
         private readonly ConcurrentDictionary<string, MonitorEntry> _dictionary =
             new ConcurrentDictionary<string, MonitorEntry>();
-
+        private readonly IServiceRouteManager _serviceRouteManager;
+        private readonly int _timeout = 30000;
         private readonly Timer _timer;
 
         public DefaultHealthCheckService(IServiceRouteManager serviceRouteManager)
         {
             var timeSpan = TimeSpan.FromSeconds(10);
+            
+            _serviceRouteManager = serviceRouteManager;
             _timer = new Timer(s =>
             {
-                Check(_dictionary.ToArray().Select(i => i.Value));
+                Check(_dictionary.ToArray().Select(i => i.Value),_timeout);
+                RemoveUnhealthyAddress(_dictionary.ToArray().Select(i => i.Value).Where(m => m.UnhealthyTimes >= 6));
             }, null, timeSpan, timeSpan);
 
             //去除监控。
@@ -35,13 +39,13 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             serviceRouteManager.Created += (s, e) =>
             {
                 var keys = e.Route.Address.Select(i => i.ToString());
-                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
+                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
             //重新监控。
             serviceRouteManager.Changed += (s, e) =>
             {
                 var keys = e.Route.Address.Select(i => i.ToString());
-                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
+                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
         }
 
@@ -67,7 +71,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         {
             var key = address.ToString();
             MonitorEntry entry;
-            return !_dictionary.TryGetValue(key, out entry) ? new ValueTask<bool>(Check(address)) : new ValueTask<bool>(entry.Health);
+            return !_dictionary.TryGetValue(key, out entry) ? new ValueTask<bool>(Check(address,_timeout)) : new ValueTask<bool>(entry.Health);
         }
 
         /// <summary>
@@ -108,10 +112,25 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             }
         }
 
-        private static bool Check(AddressModel address)
+        private void RemoveUnhealthyAddress(IEnumerable<MonitorEntry> monitorEntry)
+        {
+            if (monitorEntry.Any())
+            {
+                var addresses = monitorEntry.Select(p =>
+                {
+                    var ipEndPoint = p.EndPoint as IPEndPoint;
+                    return new IpAddressModel(ipEndPoint.Address.ToString(), ipEndPoint.Port);
+                }).ToList();
+                _serviceRouteManager.RemveAddressAsync(addresses).Wait();
+                addresses.ForEach(p => _dictionary.TryRemove(p.ToString(), out MonitorEntry value));
+              
+            }
+        }
+
+        private static bool Check(AddressModel address,int timeout)
         {
             bool isHealth = false;
-            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout= timeout })
             {
                 try
                 {
@@ -120,24 +139,27 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                 }
                 catch
                 {
+
                 }
                 return isHealth;
             }
         }
 
-        private static void Check(IEnumerable<MonitorEntry> entrys)
+        private static void Check(IEnumerable<MonitorEntry> entrys, int timeout)
         {
             foreach (var entry in entrys)
             {
-                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout= timeout } )
                 {
                     try
                     {
                         socket.Connect(entry.EndPoint);
+                        entry.UnhealthyTimes = 0;
                         entry.Health = true;
                     }
                     catch
                     {
+                        entry.UnhealthyTimes++;
                         entry.Health = false;
                     }
                 }
@@ -175,7 +197,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             {
                 EndPoint = addressModel.CreateEndPoint();
                 Health = health;
+
             }
+
+            public int UnhealthyTimes { get; set; }
 
             public EndPoint EndPoint { get; set; }
             public bool Health { get; set; }

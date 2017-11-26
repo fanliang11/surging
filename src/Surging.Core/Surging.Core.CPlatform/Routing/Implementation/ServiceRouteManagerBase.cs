@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Serialization;
+﻿using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,6 +111,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
             return SetRoutesAsync(descriptors);
         }
+        public abstract Task RemveAddressAsync(IEnumerable<AddressModel> Address);
 
         /// <summary>
         /// 清空所有的服务路由。
@@ -125,7 +127,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         /// <param name="routes">服务路由集合。</param>
         /// <returns>一个任务。</returns>
         protected abstract Task SetRoutesAsync(IEnumerable<ServiceRouteDescriptor> routes);
-
+        
         protected void OnCreated(params ServiceRouteEventArgs[] args)
         {
             if (_created == null)

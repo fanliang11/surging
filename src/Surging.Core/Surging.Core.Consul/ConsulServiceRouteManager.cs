@@ -13,6 +13,7 @@ using System.Linq;
 using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider.Implementation;
+using Surging.Core.CPlatform.Address;
 
 namespace Surging.Core.Consul
 {
@@ -83,6 +84,23 @@ namespace Surging.Core.Consul
                     route.Address = serviceRoute.Address.Concat(
                       route.Address.Except(serviceRoute.Address));
                 }
+            }
+            await base.SetRoutesAsync(routes);
+        }
+
+        public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
+        {
+            var routes = await GetRoutesAsync();
+            try
+            {
+                foreach (var route in routes)
+                {
+                    route.Address = route.Address.Except(Address);
+                }
+            }
+            catch(Exception ex)
+            {
+                throw ex;
             }
             await base.SetRoutesAsync(routes);
         }
