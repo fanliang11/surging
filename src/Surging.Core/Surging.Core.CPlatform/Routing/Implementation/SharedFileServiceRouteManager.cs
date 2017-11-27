@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Serialization;
 using System;
 using System.Collections.Generic;
@@ -100,6 +101,16 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                     await writer.WriteAsync(_serializer.Serialize(routes));
                 }
             }
+        }
+
+        public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
+        {
+            var routes = await GetRoutesAsync();
+            foreach (var route in routes)
+            {
+                route.Address = route.Address.Except(Address);
+            }
+            await base.SetRoutesAsync(routes);
         }
 
         #endregion Overrides of ServiceRouteManagerBase

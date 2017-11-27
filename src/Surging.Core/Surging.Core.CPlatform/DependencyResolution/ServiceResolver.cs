@@ -18,8 +18,8 @@ namespace Surging.Core.CPlatform.DependencyResolution
     {
         #region 字段
         private static readonly ServiceResolver _defaultInstance = new ServiceResolver();
-        private readonly ConcurrentDictionary<Tuple<Type, string>, object> _initializers =
-            new ConcurrentDictionary<Tuple<Type, string>, object>();
+        private readonly ConcurrentDictionary<ValueTuple<Type, string>, object> _initializers =
+            new ConcurrentDictionary<ValueTuple<Type, string>, object>();
         #endregion
 
         #region 公共方法
@@ -37,18 +37,18 @@ namespace Surging.Core.CPlatform.DependencyResolution
             DebugCheck.NotNull(value);
             // DebugCheck.NotNull(key);
 
-            _initializers.GetOrAdd(Tuple.Create(value.GetType(), key), value);
+            _initializers.GetOrAdd(ValueTuple.Create(value.GetType(), key), value);
             var interFaces = value.GetType().GetTypeInfo().GetInterfaces();
             foreach (var interFace in interFaces)
             {
-                _initializers.GetOrAdd(Tuple.Create(interFace, key), value);
+                _initializers.GetOrAdd(ValueTuple.Create(interFace, key), value);
             }
         }
         
         public virtual void Register(string key, object value,Type type)
         {
             DebugCheck.NotNull(value);
-            _initializers.GetOrAdd(Tuple.Create(type, key), value);
+            _initializers.GetOrAdd(ValueTuple.Create(type, key), value);
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Surging.Core.CPlatform.DependencyResolution
         public virtual object GetService(Type type, object key)
         {
             object result;
-            _initializers.TryGetValue(Tuple.Create(type, key == null ? null : key.ToString()), out result);
+            _initializers.TryGetValue(ValueTuple.Create(type, key == null ? null : key.ToString()), out result);
             return result;
         }
 

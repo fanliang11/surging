@@ -17,7 +17,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         /// <param name="context">地址选择上下文。</param>
         /// <returns>地址模型。</returns>
-        Task<AddressModel> IAddressSelector.SelectAsync(AddressSelectContext context)
+        ValueTask<AddressModel> IAddressSelector.SelectAsync(AddressSelectContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -30,7 +30,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             if (!address.Any())
                 throw new ArgumentException("没有任何地址信息。", nameof(context.Address));
 
-            return address.Length == 1 ? Task.FromResult(address[0]) : SelectAsync(context);
+            return address.Length == 1 ?  new ValueTask<AddressModel>(address[0]) : new ValueTask<AddressModel>(SelectAsync(context));
         }
 
         #endregion Implementation of IAddressSelector

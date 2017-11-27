@@ -42,7 +42,12 @@ namespace Surging.Core.CPlatform.Routing
         /// <returns>一个任务。</returns>
         Task SetRoutesAsync(IEnumerable<ServiceRoute> routes);
 
-
+        /// <summary>
+        /// 移除地址列表
+        /// </summary>
+        /// <param name="routes">地址列表。</param>
+        /// <returns>一个任务。</returns>
+        Task RemveAddressAsync(IEnumerable<AddressModel> Address);
         /// <summary>
         /// 清空所有的服务路由。
         /// </summary>

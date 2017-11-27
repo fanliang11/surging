@@ -15,40 +15,49 @@ namespace Surging.Core.CPlatform.Support.Implementation
         private readonly IServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<string, ServiceCommand> _serviceCommand = new ConcurrentDictionary<string, ServiceCommand>();
 
-        public ServiceCommandProvider(IServiceEntryManager serviceEntryManager,IServiceProvider serviceProvider)
+        public ServiceCommandProvider(IServiceEntryManager serviceEntryManager, IServiceProvider serviceProvider)
         {
             _serviceEntryManager = serviceEntryManager;
             _serviceProvider = serviceProvider;
-            var manager= serviceProvider.GetService<IServiceCommandManager>();
+            var manager = serviceProvider.GetService<IServiceCommandManager>();
             if (manager != null)
             {
                 manager.Changed += ServiceCommandManager_Removed;
                 manager.Removed += ServiceCommandManager_Removed;
             }
         }
-        
-        public override async Task<ServiceCommand> GetCommand(string serviceId)
+
+        public override ValueTask<ServiceCommand> GetCommand(string serviceId)
         {
             var result = _serviceCommand.GetValueOrDefault(serviceId);
             if (result == null)
             {
-                var manager = _serviceProvider.GetService<IServiceCommandManager>();
-                
-                if (manager == null)
-                {
-                   var command = (from q in _serviceEntryManager.GetEntries()
-                                   let k = q.Attributes
-                                   where k.OfType<CommandAttribute>().Count() > 0 && q.Descriptor.Id == serviceId
-                                   select k.OfType<CommandAttribute>().FirstOrDefault()).FirstOrDefault();
-                    result = ConvertServiceCommand(command);
-                }
-                else
-                {
-                    var commands = await  manager.GetServiceCommandsAsync() ;
-                    result = ConvertServiceCommand(commands.Where(p => p.ServiceId == serviceId).FirstOrDefault());
-                }
-                _serviceCommand.AddOrUpdate(serviceId, result, (s, r) => result);
+                return new ValueTask<ServiceCommand>(GetCommandAsync(serviceId));
             }
+            else
+            {
+                return new ValueTask<ServiceCommand>(result);
+            }
+        }
+
+        public async Task<ServiceCommand> GetCommandAsync(string serviceId)
+        {
+            var result = new ServiceCommand();
+            var manager = _serviceProvider.GetService<IServiceCommandManager>();
+            if (manager == null)
+            {
+                var command = (from q in _serviceEntryManager.GetEntries()
+                               let k = q.Attributes
+                               where k.OfType<CommandAttribute>().Count() > 0 && q.Descriptor.Id == serviceId
+                               select k.OfType<CommandAttribute>().FirstOrDefault()).FirstOrDefault();
+                result = ConvertServiceCommand(command);
+            }
+            else
+            {
+                var commands = await manager.GetServiceCommandsAsync();
+                result = ConvertServiceCommand(commands.Where(p => p.ServiceId == serviceId).FirstOrDefault());
+            }
+            _serviceCommand.AddOrUpdate(serviceId, result, (s, r) => result);
             return result;
         }
 
@@ -82,28 +91,28 @@ namespace Surging.Core.CPlatform.Support.Implementation
             return result;
         }
 
-            public ServiceCommand ConvertServiceCommand(ServiceCommandDescriptor command)
+        public ServiceCommand ConvertServiceCommand(ServiceCommandDescriptor command)
+        {
+            var result = new ServiceCommand();
+            if (command != null)
             {
-                var result = new ServiceCommand();
-                if (command != null)
+                result = new ServiceCommand
                 {
-                    result = new ServiceCommand
-                    {
-                        CircuitBreakerForceOpen = command.CircuitBreakerForceOpen,
-                        ExecutionTimeoutInMilliseconds = command.ExecutionTimeoutInMilliseconds,
-                        FailoverCluster = command.FailoverCluster,
-                        Injection = command.Injection,
-                        RequestCacheEnabled = command.RequestCacheEnabled,
-                        Strategy = command.Strategy,
-                        InjectionNamespaces = command.InjectionNamespaces,
-                        BreakeErrorThresholdPercentage = command.BreakeErrorThresholdPercentage,
-                        BreakerForceClosed = command.BreakerForceClosed,
-                        BreakerRequestVolumeThreshold = command.BreakerRequestVolumeThreshold,
-                        BreakeSleepWindowInMilliseconds = command.BreakeSleepWindowInMilliseconds,
-                        MaxConcurrentRequests = command.MaxConcurrentRequests
-                    };
-                }
-                return result;
+                    CircuitBreakerForceOpen = command.CircuitBreakerForceOpen,
+                    ExecutionTimeoutInMilliseconds = command.ExecutionTimeoutInMilliseconds,
+                    FailoverCluster = command.FailoverCluster,
+                    Injection = command.Injection,
+                    RequestCacheEnabled = command.RequestCacheEnabled,
+                    Strategy = command.Strategy,
+                    InjectionNamespaces = command.InjectionNamespaces,
+                    BreakeErrorThresholdPercentage = command.BreakeErrorThresholdPercentage,
+                    BreakerForceClosed = command.BreakerForceClosed,
+                    BreakerRequestVolumeThreshold = command.BreakerRequestVolumeThreshold,
+                    BreakeSleepWindowInMilliseconds = command.BreakeSleepWindowInMilliseconds,
+                    MaxConcurrentRequests = command.MaxConcurrentRequests
+                };
             }
+            return result;
         }
+    }
 }
