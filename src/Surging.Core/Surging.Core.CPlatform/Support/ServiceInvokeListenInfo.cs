@@ -20,11 +20,11 @@ namespace Surging.Core.CPlatform.Support
         /// <summary>
         /// 首次调用时间
         /// </summary>
-        public DateTime FirstInvokeTime { get; set; } =  DateTime.Now;
+        public DateTime FirstInvokeTime { get; set; }
         /// <summary>
         /// 最后一次远程调用时间
         /// </summary>
-        public DateTime FinalRemoteInvokeTime { get; set; } = DateTime.Now;
+        public DateTime FinalRemoteInvokeTime { get; set; } 
         /// <summary>
         /// 失败调用请求数
         /// </summary>

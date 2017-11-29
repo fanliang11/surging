@@ -26,7 +26,9 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         public async Task<RemoteInvokeResultMessage> InvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
-            var serviceInvokeInfos = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
+            var serviceInvokeInfos = _serviceInvokeListenInfo.GetOrAdd(serviceId,
+                new ServiceInvokeListenInfo() { FirstInvokeTime=DateTime.Now,
+                FinalRemoteInvokeTime =DateTime.Now });
             var command = await _commandProvider.GetCommand(serviceId);
             var intervalSeconds = (DateTime.Now - serviceInvokeInfos.FinalRemoteInvokeTime).TotalSeconds;
             bool reachConcurrentRequest() => serviceInvokeInfos.ConcurrentRequests > command.MaxConcurrentRequests;

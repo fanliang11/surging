@@ -84,7 +84,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             }
         }
 
-        private async Task<AddressModel> ResolverAddress(RemoteInvokeContext context)
+        private async ValueTask<AddressModel> ResolverAddress(RemoteInvokeContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
