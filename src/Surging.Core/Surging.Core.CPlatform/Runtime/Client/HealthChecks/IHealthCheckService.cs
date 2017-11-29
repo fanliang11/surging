@@ -14,7 +14,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>一个任务。</returns>
-        Task Monitor(AddressModel address);
+        void Monitor(AddressModel address);
 
         /// <summary>
         /// 判断一个地址是否健康。

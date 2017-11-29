@@ -57,9 +57,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>一个任务。</returns>
-        public Task Monitor(AddressModel address)
+        public void Monitor(AddressModel address)
         {
-            return Task.Run(() => { _dictionary.GetOrAdd(address.ToString(), k => new MonitorEntry(address)); });
+            _dictionary.GetOrAdd(address.ToString(), k => new MonitorEntry(address));
         }
 
         /// <summary>

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Routing.Implementation
 {
-    public class DefaultServiceRouteProvider: IServiceRouteProvider
+    public class DefaultServiceRouteProvider : IServiceRouteProvider
     {
         private readonly ConcurrentDictionary<string, ServiceRoute> _concurrent =
        new ConcurrentDictionary<string, ServiceRoute>();
@@ -20,7 +20,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
         private readonly ILogger<DefaultServiceRouteProvider> _logger;
         private readonly IServiceRouteManager _serviceRouteManager;
-        public DefaultServiceRouteProvider(IServiceRouteManager serviceRouteManager,ILogger<DefaultServiceRouteProvider> logger)
+        public DefaultServiceRouteProvider(IServiceRouteManager serviceRouteManager, ILogger<DefaultServiceRouteProvider> logger)
         {
             _serviceRouteManager = serviceRouteManager;
             serviceRouteManager.Changed += ServiceRouteManager_Removed;
@@ -31,19 +31,18 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
         public async Task<ServiceRoute> Locate(string serviceId)
         {
-            ServiceRoute route;
-            _concurrent.TryGetValue(serviceId, out route);
+            _concurrent.TryGetValue(serviceId, out ServiceRoute route);
             if (route == null)
             {
                 var routes = await _serviceRouteManager.GetRoutesAsync();
                 route = routes.FirstOrDefault(i => i.ServiceDescriptor.Id == serviceId);
-                _concurrent.GetOrAdd(serviceId, route);
-            }
-            if (route == null)
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                    _logger.LogWarning($"根据服务id：{serviceId}，找不到相关服务信息。");
-                return null;
+                if (route == null)
+                {
+                    if (_logger.IsEnabled(LogLevel.Warning))
+                        _logger.LogWarning($"根据服务id：{serviceId}，找不到相关服务信息。");
+                }
+                else
+                    _concurrent.GetOrAdd(serviceId, route);
             }
             return route;
         }
@@ -71,20 +70,19 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
         public async Task<ServiceRoute> GetRouteByPath(string path)
         {
-            ServiceRoute route;
-            path = path.ToLower();
-            _serviceRoute.TryGetValue(path, out route);
+            _serviceRoute.TryGetValue(path.ToLower(), out ServiceRoute route);
             if (route == null)
             {
                 var routes = await _serviceRouteManager.GetRoutesAsync();
                 route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath == path);
-                _serviceRoute.GetOrAdd(path, route);
-            }
-            if (route == null)
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                    _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
-                return null;
+                if (route == null)
+                {
+                    if (_logger.IsEnabled(LogLevel.Warning))
+                        _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
+
+                }
+                else
+                    _serviceRoute.GetOrAdd(path, route);
             }
             return route;
         }

@@ -50,7 +50,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         /// <param name="serviceId">服务Id。</param>
         /// <returns>服务地址模型。</returns>
-        public async Task<AddressModel> Resolver(string serviceId,int hashCode)
+        public async ValueTask<AddressModel> Resolver(string serviceId,int hashCode)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务id：{serviceId}，解析可用地址。");
@@ -77,7 +77,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             var address = new List<AddressModel>();
             foreach (var addressModel in descriptor.Address)
             {
-                await _healthCheckService.Monitor(addressModel);
+                 _healthCheckService.Monitor(addressModel);
                 if (!await _healthCheckService.IsHealth(addressModel))
                     continue;
 

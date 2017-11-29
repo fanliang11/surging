@@ -12,7 +12,7 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// <summary>
         /// 执行委托。
         /// </summary>
-        public  Func<string, IDictionary<string, object>,Task<object>> Func { get; set; }
+        public  Func<string, IDictionary<string, object>, Task<object>> Func { get; set; }
         
         public List<Attribute> Attributes { get; set; }
         /// <summary>
