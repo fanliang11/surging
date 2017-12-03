@@ -9,7 +9,7 @@ Create an interface that inherits IServiceKey:
 [ServiceBundle("api/{Service}")]
 public interface IUserService :Surging.Core.CPlatform.Ioc.IServiceKey
 {
-  Task<string> SayHello(string greeting);
+  Task<string> SayHello(string username);
 }
 ```
 
