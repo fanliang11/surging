@@ -152,6 +152,10 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
+<br/>
+[简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)
+<br/>
+
 IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
 框架：.NET core 2.0
