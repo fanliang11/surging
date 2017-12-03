@@ -11,13 +11,6 @@
  
  ```c#
 var host = new ServiceHostBuilder()
-                .RegisterServices(option=> {
-                    option.Initialize(); //初始化服务
-                    option.RegisterServices();//依赖注入领域服务
-                    option.RegisterRepositories();//依赖注入仓储
-                    option.RegisterModules();//依赖注入第三方模块
-                    option.RegisterServiceBus();//依赖注入ServiceBus
-                })
                 .RegisterServices(builder =>
                 {
                     builder.AddMicroService(option =>
