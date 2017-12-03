@@ -37,7 +37,7 @@
                 "reveal": "silent"
             },
             "args": [
-                "build", "${workspaceRoot}/Surging.Web/Surging.Web.csproj"
+                "build", "${workspaceRoot}/Surging.ApiGateway/Surging.ApiGateway.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
