@@ -11,15 +11,13 @@ using Surging.Core.ApiGateWay;
 using Surging.Core.ApiGateWay.OAuth.Implementation.Configurations;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
-using Surging.Core.Codec.ProtoBuffer;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.ProxyGenerator;
-using Surging.Core.ProxyGenerator.Utilitys;
 using Surging.Core.System.Intercept;
-using Surging.Core.System.Ioc;
 //using Surging.Core.Zookeeper.Configurations;
 using System;
 
@@ -57,10 +55,6 @@ namespace Surging.ApiGateway
             });
             services.AddLogging();
             var builder = new ContainerBuilder();
-            builder.Initialize();
-            builder.RegisterServices();
-            builder.RegisterRepositories();
-            builder.RegisterModules();
             builder.Populate(services);
             builder.AddMicroService(option =>
             {

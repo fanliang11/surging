@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
 using System.Reflection;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.ApiGateway.Controllers
 {

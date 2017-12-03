@@ -1,9 +1,7 @@
 ﻿using Autofac;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Surging.Core.ProxyGenerator.Utilitys
+namespace Surging.Core.CPlatform.Utilities
 {
     public class ServiceLocator
     {

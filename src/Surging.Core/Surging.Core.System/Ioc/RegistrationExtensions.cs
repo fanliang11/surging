@@ -17,6 +17,10 @@ using Surging.Core.CPlatform.EventBus.Events;
 
 namespace Surging.Core.System.Ioc
 {
+
+
+
+    [Obsolete]
     public static class RegistrationExtensions
     {
         private static readonly IEnumerable<Service> EmptyServices = new Service[0];
@@ -26,13 +30,15 @@ namespace Surging.Core.System.Ioc
 
         private static Dictionary<string, Assembly> _referenceAssembly = new Dictionary<string, Assembly>();
 
+        [Obsolete]
         public static List<Assembly> GetReferenceAssembly(this ContainerBuilder builder)
         {
             return _referenceAssembly.Values.ToList();
         }
 
+        [Obsolete]
         public static void Initialize(this ContainerBuilder builder,
-                                      string pattern = "Surging|LogSystem")
+                                      string pattern = "")
         {
             string path = AppContext.BaseDirectory;
             if (_referenceAssembly.Count == 0)
@@ -52,11 +58,13 @@ namespace Surging.Core.System.Ioc
             }
         }
 
+
         /// <summary>
         /// 依赖注入注册wcf相关的程序集
         /// </summary>
         /// <param name="builder">ioc容器</param>
         /// <returns>返回注册模块信息</returns>
+        [Obsolete]
         public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterWcfServices(
             this ContainerBuilder builder)
         {
@@ -81,6 +89,7 @@ namespace Surging.Core.System.Ioc
         /// </summary>
         /// <param name="builder">ioc容器</param>
         /// <returns>返回注册模块信息</returns>
+        [Obsolete]
         public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterServices(
             this ContainerBuilder builder)
         {
@@ -130,6 +139,8 @@ namespace Surging.Core.System.Ioc
             #endregion
             return result;
         }
+
+        [Obsolete]
         public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterServiceBus
             (
             this ContainerBuilder builder)
@@ -150,12 +161,13 @@ namespace Surging.Core.System.Ioc
             }
             return result;
         }
-            /// <summary>
-            ///依赖注入仓储模块程序集
-            /// </summary>
-            /// <param name="builder">IOC容器</param>
-            /// <returns>返回注册模块信息</returns>
-            public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterRepositories
+        /// <summary>
+        ///依赖注入仓储模块程序集
+        /// </summary>
+        /// <param name="builder">IOC容器</param>
+        /// <returns>返回注册模块信息</returns>
+        [Obsolete]
+        public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterRepositories
             (
             this ContainerBuilder builder)
         {
@@ -175,6 +187,7 @@ namespace Surging.Core.System.Ioc
             return result;
         }
 
+        [Obsolete]
         public static IModuleRegistrar RegisterModules(
             this ContainerBuilder builder)
         {
@@ -192,6 +205,7 @@ namespace Surging.Core.System.Ioc
             return result;
         }
 
+        [Obsolete]
         private static IModuleRegistrar RegisterModules(
             this ContainerBuilder builder, Assembly assembly)
         {
@@ -205,6 +219,7 @@ namespace Surging.Core.System.Ioc
             return result;
         }
 
+        [Obsolete]
         public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>
             RegisterBusinessModules(this ContainerBuilder builder)
         {
@@ -222,7 +237,7 @@ namespace Surging.Core.System.Ioc
             return result;
         }
 
-
+        [Obsolete]
         public static void InitializeModule(this ContainerBuilder builder)
         {
             var referenceAssemblies = builder.GetReferenceAssembly();
@@ -263,6 +278,7 @@ namespace Surging.Core.System.Ioc
             return abstractModules;
         }
 
+        [Obsolete]
         public static List<Type> GetInterfaceService(this ContainerBuilder builder)
         {
             var referenceAssemblies = builder.GetReferenceAssembly();
@@ -288,6 +304,7 @@ namespace Surging.Core.System.Ioc
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2015/12/5</para>
         /// </remarks>
+        [Obsolete]
         public static TAttributeType GetTypeCustomAttribute<TAttributeType>(Type type) where TAttributeType : Attribute
         {
             var attributes = type.GetTypeInfo().GetCustomAttributes(typeof(TAttributeType), true);

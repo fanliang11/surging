@@ -1,21 +1,19 @@
-﻿using Surging.Core.System.Ioc;
+﻿
+using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.EventBus.Implementation;
+using Surging.Core.CPlatform.Ioc;
+using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
 using Surging.Modules.Common.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Surging.Core.CPlatform.EventBus.Events;
-using Surging.Core.CPlatform.EventBus.Implementation;
-using System.Threading;
-using Surging.Core.CPlatform;
-using Newtonsoft.Json;
 
 namespace Surging.Modules.Common.Domain
 {
     [ModuleName("User")]
-    public class UserService : IUserService
+    public class UserService : ProxyServiceBase, IUserService
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;

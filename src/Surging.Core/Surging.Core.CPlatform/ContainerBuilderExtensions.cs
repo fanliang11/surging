@@ -1,13 +1,14 @@
 ﻿using Autofac;
-using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Convertibles.Implementation;
+using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
+using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -31,6 +32,8 @@ using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.CPlatform.Transport.Codec.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -72,6 +75,8 @@ namespace Surging.Core.CPlatform
 
     public static class ContainerBuilderExtensions
     {
+        private static List<Assembly> _referenceAssembly = new List<Assembly>();
+
         /// <summary>
         /// 添加Json序列化支持。
         /// </summary>
@@ -176,7 +181,7 @@ namespace Surging.Core.CPlatform
         }
 
         #region AddressSelector
-           /// <summary>
+        /// <summary>
         /// 使用轮询的地址选择器。
         /// </summary>
         /// <param name="builder">服务构建者。</param>
@@ -316,7 +321,7 @@ namespace Surging.Core.CPlatform
         {
             builder.Services.RegisterType(typeof(DefaultServiceEntryLocate)).As(typeof(IServiceEntryLocate)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor)).SingleInstance();
-            return builder.AddRuntime();
+            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().AddRuntime();
         }
 
         /// <summary>
@@ -350,19 +355,17 @@ namespace Surging.Core.CPlatform
 
             builder.Services.Register(provider =>
             {
-
-                var assemblys = AppDomain.CurrentDomain.GetAssemblies();
-
-                var refAssemblies = builder.GetType().GetTypeInfo().Assembly.GetReferencedAssemblies().Select(p => p.FullName).ToList();
-                Regex regex = new Regex("Microsoft.\\w*|System.\\w*", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                var types = assemblys.Where(i => i.IsDynamic == false
-                && !refAssemblies.Contains(i.FullName)
-                && !regex.IsMatch(i.FullName)
-                ).SelectMany(i => i.ExportedTypes).ToArray();
-
-                return new AttributeServiceEntryProvider(types, provider.Resolve<IClrServiceEntryFactory>(),
-                     provider.Resolve<ILogger<AttributeServiceEntryProvider>>());
-
+                try
+                {
+                    var assemblys = GetReferenceAssembly();
+                    var types = assemblys.SelectMany(i => i.ExportedTypes).ToArray();
+                    return new AttributeServiceEntryProvider(types, provider.Resolve<IClrServiceEntryFactory>(),
+                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>());
+                }
+                finally
+                {
+                    _referenceAssembly.Clear();
+                }
             }).As<IServiceEntryProvider>();
             builder.Services.RegisterType(typeof(DefaultServiceEntryManager)).As(typeof(IServiceEntryManager)).SingleInstance();
             return builder;
@@ -373,5 +376,109 @@ namespace Surging.Core.CPlatform
             option.Invoke(builder.AddCoreService());
         }
 
+        /// <summary>.
+        /// 依赖注入业务模块程序集
+        /// </summary>
+        /// <param name="builder">ioc容器</param>
+        /// <returns>返回注册模块信息</returns>
+        public static IServiceBuilder RegisterServices(this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly();
+            foreach (var assembly in referenceAssemblies)
+            {
+                services.RegisterAssemblyTypes(assembly)
+                   .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t))
+                   .AsImplementedInterfaces();
+                services.RegisterAssemblyTypes(assembly)
+             .Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+
+                var types = assembly.GetTypes().Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
+                foreach (var type in types)
+                {
+                    var module = type.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>();
+                    var interfaceObj = type.GetInterfaces()
+                        .FirstOrDefault(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t));
+                    if (interfaceObj != null)
+                    {
+                        services.RegisterType(type).AsImplementedInterfaces().Named(module.ModuleName, interfaceObj);
+                        services.RegisterType(type).Named(module.ModuleName, type);
+                    }
+                }
+
+            }
+            return builder;
+        }
+
+        public static IServiceBuilder RegisterServiceBus
+            (this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly();
+
+            foreach (var assembly in referenceAssemblies)
+            {
+                services.RegisterAssemblyTypes(assembly)
+                 .Where(t => typeof(IIntegrationEventHandler).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().SingleInstance();
+                services.RegisterAssemblyTypes(assembly)
+             .Where(t => typeof(IIntegrationEventHandler).IsAssignableFrom(t)).SingleInstance();
+            }
+            return builder;
+        }
+
+        /// <summary>
+        ///依赖注入仓储模块程序集
+        /// </summary>
+        /// <param name="builder">IOC容器</param>
+        /// <returns>返回注册模块信息</returns>
+        public static IServiceBuilder RegisterRepositories
+         (this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly();
+
+            foreach (var assembly in referenceAssemblies)
+            {
+                services.RegisterAssemblyTypes(assembly)
+                    .Where(t => typeof(BaseRepository).GetTypeInfo().IsAssignableFrom(t));
+            }
+            return builder;
+        }
+
+        public static List<Type> GetInterfaceService(this IServiceBuilder builder)
+        {
+            var types = new List<Type>();
+            var referenceAssemblies = GetReferenceAssembly();
+            referenceAssemblies.ForEach(p =>
+            {
+                types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t)));
+            });
+            return types;
+        }
+
+        private static List<Assembly> GetReferenceAssembly()
+        {
+            string path = AppContext.BaseDirectory;
+            var result = _referenceAssembly;
+            if (!result.Any())
+            {
+                var assemblyNames = GetAllAssemblyFiles(path);
+                foreach (var referencedAssemblyName in assemblyNames)
+                {
+                    var referencedAssembly = Assembly.Load(new AssemblyName(referencedAssemblyName));
+                    _referenceAssembly.Add(referencedAssembly);
+                }
+                result = _referenceAssembly;
+            }
+            return result;
+        }
+
+        private static List<string> GetAllAssemblyFiles(string parentDir)
+        { 
+                Regex regex = new Regex("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                return
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFileNameWithoutExtension).Where(
+                        a => !regex.IsMatch(a)).ToList();
+        }
     }
 }
