@@ -35,7 +35,7 @@ namespace Surging.ApiGateway.Controllers
         {
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
             path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
-                GateWayAppConfig.AuthorizationRoutePath : path;
+                GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
             if ( OnAuthorization(path, model,ref result))
             {
                 if (path == GateWayAppConfig.AuthorizationRoutePath)
