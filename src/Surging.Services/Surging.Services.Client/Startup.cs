@@ -89,19 +89,24 @@ namespace Surging.Services.Client
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
-                    Console.ReadLine();
+                    Console.WriteLine("Press any key to continue, q to exit the loop...");
+                    var key = Console.ReadLine();
+                    if (key.ToLower() == "q")
+                        break;
                 } while (true);
             }).Wait();
         }
 
-        public static void TestRabbitMq()
+        public static void TestRabbitMq(IServiceProxyFactory serviceProxyFactory)
         {
-            ServiceLocator.GetService<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
+            serviceProxyFactory.CreateProxy<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
             {
                 Age = "18",
                 Name = "fanly",
                 UserId = "1"
             });
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadLine();
         }
         #endregion
 
