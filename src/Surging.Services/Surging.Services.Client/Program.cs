@@ -44,7 +44,7 @@ namespace Surging.Services.Client
             using (host.Run())
             {
                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
-                Startup.TestRabbitMq();
+                Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
             }
         }
     }
