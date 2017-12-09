@@ -1,54 +1,73 @@
-surging is based on .net core language high-performance distributed microservices framework,It can be deployed in clusters without complex operations
-It was created by individuals for building microservices, which are deployed in the cloud and subsequently move the code to dotnetcore
+Surging is a distributed microservices framework that uses Zookeeper and Consul as premium service registries to provide high-performance RPC remote service invocations. 
+It integrates hashing, randomization and polling as a load-balancing algorithm. RPC integration uses the netty framework with asynchronous transfer. 
+Use json.net, protobuf, messagepack for serialization Codec
 
-Code Examples
+Server how to configure
 =============
 
-Create an interface that inherits IServiceKey:
+Add the following configuration to main program "main":
 ```c#
-[ServiceBundle("api/{Service}")]
-public interface IUserService :Surging.Core.CPlatform.Ioc.IServiceKey
-{
-  Task<string> SayHello(string username);
-}
+//If do not add UseProtoBufferCodec or UseMessagePackCodec, the default json.net
+var host = new ServiceHostBuilder()
+			.RegisterServices(builder =>
+			{
+				builder.AddMicroService(option =>
+				{
+					option.AddServiceRuntime();//
+					//option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //Use Zookeeper Manage
+					option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//Use Consul Manage
+					option.UseDotNettyTransport();//Use DotNetty Transport
+					option.UseRabbitMQTransport();//Use Rabbitmq Transport
+					option.AddRabbitMQAdapt();//Based on rabbitmq consumer service  adapter
+					//option.UseProtoBufferCodec();//Based on protobuf serialization codec
+					option.UseMessagePackCodec();//Based on messagepack serialization codec
+					builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//Initialize the injection container
+				});
+			})
+			.SubscribeAt()     //News subscription
+            .UseServer("127.0.0.1", 98)
+          //.UseServer("127.0.0.1", 98，“true”) //Token automatically generated
+          //.UseServer("127.0.0.1", 98，“123456789”) //Fixed password token
+            .UseStartup<Startup>()
+            .Build();
+               
+			using (host.Run())
+			{
+				Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
+			}
+```
+Client how to configure
+=============
+```c#
+//If do not add UseProtoBufferCodec or UseMessagePackCodec, the default json.net
+var host = new ServiceHostBuilder()
+            .RegisterServices(builder =>
+            {
+                builder.AddMicroService(option =>
+                {
+                    option.AddClient();
+                    option.AddClientIntercepted(typeof(CacheProviderInterceptor)); //Set the cache interceptor "CacheProviderInterceptor"
+                    //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));//Use Zookeeper Manage
+                    option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//Use Consul Manage
+                    option.UseDotNettyTransport();//Use DotNetty Transport
+                    option.UseRabbitMQTransport();//Use Rabbitmq Transport
+                    //option.UseProtoBufferCodec();//Based on protobuf serialization codec
+                    option.UseMessagePackCodec();//Based on messagepack serialization codec
+                    builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//Initialize the injection container
+                });
+            })
+            .UseClient()
+            .UseStartup<Startup>()
+            .Build();
+
+            using (host.Run())
+            {
+              
+            }
 ```
 
-To provide the implementation of this interface, you must inherit ServiceBase or ProxyServiceBase:
-```c#
-[ModuleName("User")]
-public class UserService : ProxyServiceBase, IUserService
-{
-    public PersonService(UserRepository repository)
-    {
-        this._repository = repository;
-    }
-
-	Task<string> SayHello(string username)
-	{
-	return Task.FromResult($"'{username}', Hello!");
-	}
-}
-```
-
-Dependency injection Repository, you must inherit BaseRepository:
-```c#
- public class UserRepository: BaseRepository
-{
-}
-```
-
-Call in the following way:
-```c#
-// Get  a reference to the IUserService with instance ID "user".
-var user = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<IUserService>("User");
-
-// Send request and await the response.
-Console.WriteLine(await user.SayHello("fanly"));
-```
 
 ## Next steps
 
-* [How to configure microservices]()
-* [How to use the cache]()
-* [How to set service fuse protection]()
-* [How to set up gateway access]()
+* [How to configure service routing address mapping]()
+* [How to configure authentication]()
