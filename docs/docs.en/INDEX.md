@@ -18,10 +18,22 @@ To provide the implementation of this interface, you must inherit ServiceBase or
 [ModuleName("User")]
 public class UserService : ProxyServiceBase, IUserService
 {
-  Task<string> SayHello(string username)
-  {
-    return Task.FromResult($"'{username}', Hello!");
-  }
+    public PersonService(UserRepository repository)
+    {
+        this._repository = repository;
+    }
+
+	Task<string> SayHello(string username)
+	{
+	return Task.FromResult($"'{username}', Hello!");
+	}
+}
+```
+
+Dependency injection Repository, you must inherit BaseRepository:
+```c#
+ public class UserRepository: BaseRepository
+{
 }
 ```
 
@@ -35,3 +47,8 @@ Console.WriteLine(await user.SayHello("fanly"));
 ```
 
 ## Next steps
+
+* [How to configure microservices]()
+* [How to use the cache]()
+* [How to set service fuse protection]()
+* [How to set up gateway access]()

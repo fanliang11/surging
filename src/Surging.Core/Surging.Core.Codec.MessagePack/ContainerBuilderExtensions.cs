@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform;
+
 namespace Surging.Core.Codec.MessagePack
 {
     public static class ContainerBuilderExtensions
