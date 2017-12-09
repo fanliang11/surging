@@ -18,15 +18,15 @@ To provide the implementation of this interface, you must inherit ServiceBase or
 [ModuleName("User")]
 public class UserService : ProxyServiceBase, IUserService
 {
-    public PersonService(UserRepository repository)
+    public UserService(UserRepository repository)
     {
         this._repository = repository;
     }
-
-	Task<string> SayHello(string username)
-	{
+	
+    Task<string> SayHello(string username)
+    {
 	return Task.FromResult($"'{username}', Hello!");
-	}
+    }
 }
 ```
 
