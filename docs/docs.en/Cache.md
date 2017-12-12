@@ -57,7 +57,7 @@ Clients enable caching through the following configuration:
 * Configuration section "Properties" property "defaultExpireTime" value of 120 is the cache default lost effective time is 120 seconds
 * Configuration section "Properties" property "connectTimeout" value of 120 is connection cache server Timeout time is 120 seconds
 * Configuration section "Properties" property "minSize" value of 1 is the minimum thread pool is 1
-* Configuration section "Properties" property "maxSize" value of 10 is the maximum thread pool is 1
+* Configuration section "Properties" property "maxSize" value of 10 is the maximum thread pool is 10
 
 Open the cache can be In the interface method attribute "Command" property RequestCacheEnabled is set to true:
 ```c#
