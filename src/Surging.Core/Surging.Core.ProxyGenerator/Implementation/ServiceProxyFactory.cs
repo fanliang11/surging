@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Support;
+using System.Collections.Generic;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -25,11 +26,19 @@ namespace Surging.Core.ProxyGenerator.Implementation
         #region Constructor
 
         public ServiceProxyFactory(IRemoteInvokeService remoteInvokeService, ITypeConvertibleService typeConvertibleService,
-            IServiceProvider serviceProvider)
+           IServiceProvider serviceProvider):this(remoteInvokeService, typeConvertibleService, serviceProvider,null)
+        {
+
+        }
+
+        public ServiceProxyFactory(IRemoteInvokeService remoteInvokeService, ITypeConvertibleService typeConvertibleService,
+            IServiceProvider serviceProvider, IEnumerable<Type> types)
         {
             _remoteInvokeService = remoteInvokeService;
             _typeConvertibleService = typeConvertibleService;
             _serviceProvider = serviceProvider;
+            if (types != null)
+                _serviceTypes = _serviceProvider.GetService<IServiceProxyGenerater>().GenerateProxys(types).ToArray();
         }
 
         #endregion Constructor

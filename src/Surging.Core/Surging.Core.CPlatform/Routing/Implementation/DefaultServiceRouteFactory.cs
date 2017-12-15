@@ -13,6 +13,8 @@ namespace Surging.Core.CPlatform.Routing.Implementation
     public class DefaultServiceRouteFactory : IServiceRouteFactory
     {
         private readonly ISerializer<string> _serializer;
+         private readonly Dictionary<string, AddressModel> _addressModel =
+                new Dictionary<string, AddressModel>();
 
         public DefaultServiceRouteFactory(ISerializer<string> serializer)
         {
@@ -33,8 +35,10 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
             descriptors = descriptors.ToArray();
             var routes = new List<ServiceRoute>(descriptors.Count());
+
             routes.AddRange(descriptors.Select(descriptor => new ServiceRoute
             {
+               
                 Address = CreateAddress(descriptor.AddressDescriptors),
                 ServiceDescriptor = descriptor.ServiceDescriptor
             }));
@@ -51,8 +55,14 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
             foreach (var descriptor in descriptors)
             {
-                var addressType = Type.GetType(descriptor.Type);
-                yield return (AddressModel)_serializer.Deserialize(descriptor.Value, addressType);
+                _addressModel.TryGetValue(descriptor.Value, out AddressModel address);
+                if (address == null)
+                {
+                    var addressType = Type.GetType(descriptor.Type);
+                    address = (AddressModel)_serializer.Deserialize(descriptor.Value, addressType);
+                    _addressModel.Add(descriptor.Value, address);
+                }
+                yield return address;
             }
         }
     }

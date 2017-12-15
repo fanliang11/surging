@@ -10,13 +10,6 @@ Start configuration：
  
  ```c#
 var host = new ServiceHostBuilder()
-                .RegisterServices(option=> {
-                    option.Initialize(); //Initiate Service
-                    option.RegisterServices();//Dependency injection field service
-                    option.RegisterRepositories();//Dependency injection storage
-                    option.RegisterModules();//Dependency injection third-party modules
-                    option.RegisterServiceBus();//IOC ServiceBus
-                })
                 .RegisterServices(builder =>
                 {
                     builder.AddMicroService(option =>

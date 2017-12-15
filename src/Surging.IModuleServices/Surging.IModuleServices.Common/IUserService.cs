@@ -3,6 +3,7 @@ using Surging.Core.Caching;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters.Implementation;
+using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Support;
@@ -18,7 +19,7 @@ using System.Threading.Tasks;
 namespace Surging.IModuleServices.Common
 {
     [ServiceBundle("api/{Service}")]
-    public interface IUserService
+    public interface IUserService: IServiceKey
     {
         Task<UserModel> Authentication(AuthenticationRequestData requestData);
 

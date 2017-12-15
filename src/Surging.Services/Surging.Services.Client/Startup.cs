@@ -4,15 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.ProxyGenerator;
-using Surging.Core.ProxyGenerator.Utilitys;
-using Surging.Core.System.Ioc;
 using Surging.IModuleServices.Common;
-using Surging.IModuleServices.Common.Models;
 using Surging.IModuleServices.Common.Models.Events;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -43,7 +40,6 @@ namespace Surging.Services.Client
         {
             app.Resolve<ILoggerFactory>()
                     .AddConsole((c, l) => (int)l >= 3);
-            RegisterServiceProx(_builder);
         }
 
         #region 私有方法
@@ -70,19 +66,7 @@ namespace Surging.Services.Client
             build
               .AddCacheFile("cacheSettings.json", optional: false);
         }
-
-        /// <summary>
-        /// 配置服务代理
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <returns></returns>
-        public static IServiceProxyFactory RegisterServiceProx(ContainerBuilder builder)
-        {
-            var serviceProxyFactory = ServiceLocator.GetService<IServiceProxyFactory>();
-            serviceProxyFactory.RegisterProxType(builder.GetInterfaceService().ToArray());
-            return serviceProxyFactory;
-        }
-
+        
         /// <summary>
         /// 测试
         /// </summary>
@@ -105,19 +89,24 @@ namespace Surging.Services.Client
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
-                    Console.ReadLine();
+                    Console.WriteLine("Press any key to continue, q to exit the loop...");
+                    var key = Console.ReadLine();
+                    if (key.ToLower() == "q")
+                        break;
                 } while (true);
             }).Wait();
         }
 
-        public static void TestRabbitMq()
+        public static void TestRabbitMq(IServiceProxyFactory serviceProxyFactory)
         {
-            ServiceLocator.GetService<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
+            serviceProxyFactory.CreateProxy<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
             {
                 Age = "18",
                 Name = "fanly",
                 UserId = "1"
             });
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadLine();
         }
         #endregion
 

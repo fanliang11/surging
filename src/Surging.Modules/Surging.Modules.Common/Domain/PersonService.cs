@@ -1,6 +1,4 @@
-﻿using Surging.Core.System;
-using Surging.Core.System.Ioc;
-using Surging.IModuleServices.Common;
+﻿using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
 using Surging.Modules.Common.Repositories;
 using System;
@@ -10,11 +8,13 @@ using System.Threading.Tasks;
 using Surging.Core.CPlatform.EventBus.Events;
 using Newtonsoft.Json.Linq;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Ioc;
+using Surging.Core.ProxyGenerator;
 
 namespace Surging.Modules.Common.Domain
 {
     [ModuleName("Person")]
-    public class PersonService : ServiceBase,IUserService
+    public class PersonService : ProxyServiceBase, IUserService
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
