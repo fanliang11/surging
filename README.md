@@ -30,6 +30,8 @@ var host = new ServiceHostBuilder()
                 .UseServer("127.0.0.1", 98)
               //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
               //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
+                .UseLog4net("Configs/log4net.config") //使用log4net记录日志
+                .UseLog4net()  //使用log4net记录日志
                 .UseStartup<Startup>()
                 .Build();
                 
