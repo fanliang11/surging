@@ -11,14 +11,15 @@ using Surging.Core.ApiGateWay;
 using Surging.Core.ApiGateWay.OAuth.Implementation.Configurations;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
-using Surging.Core.Consul;
-using Surging.Core.Consul.Configurations;
+//using Surging.Core.Consul;
+//using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.System.Intercept;
-//using Surging.Core.Zookeeper.Configurations;
+using Surging.Core.Zookeeper;
+using Surging.Core.Zookeeper.Configurations;
 using System;
 
 namespace Surging.ApiGateway
@@ -61,8 +62,8 @@ namespace Surging.ApiGateway
 
                 option.AddClient();
                 option.AddClientIntercepted(typeof(CacheProviderInterceptor));
-                //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
+                option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                //option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
                 //option.UseProtoBufferCodec();
