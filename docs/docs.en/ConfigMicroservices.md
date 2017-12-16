@@ -26,6 +26,8 @@ var host = new ServiceHostBuilder()
             .UseServer("127.0.0.1", 98)
 	    //.UseServer("127.0.0.1", 98，“true”) //Token automatically generated
 	    //.UseServer("127.0.0.1", 98，“123456789”) //Fixed password token
+	      .UseLog4net("Configs/log4net.config") //Use log4net to generate the log
+              .UseLog4net()  //Use log4net to generate the log
             .UseStartup<Startup>()
             .Build();
                
@@ -56,6 +58,8 @@ var host = new ServiceHostBuilder()
                 });
             })
             .UseClient()
+	    .UseLog4net("Configs/log4net.config") //Use log4net to generate the log
+            .UseLog4net()  //Use log4net to generate the log
             .UseStartup<Startup>()
             .Build();
 
