@@ -12,6 +12,7 @@ using System;
 using Surging.Core.Zookeeper.Configurations;
 using System.Text;
 using Surging.Core.Zookeeper;
+using Surging.Core.Log4net;
 
 namespace Surging.Services.Server
 {
@@ -37,6 +38,7 @@ namespace Surging.Services.Server
                     });
                 })
                 .SubscribeAt()
+                .UseLog4net("Configs/log4net.config")
                 .UseServer("127.0.0.1", 98)
                 .UseStartup<Startup>()
                 .Build();
