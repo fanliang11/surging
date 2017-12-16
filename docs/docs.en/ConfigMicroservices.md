@@ -24,10 +24,10 @@ var host = new ServiceHostBuilder()
             })
 	    .SubscribeAt() //News subscription
             .UseServer("127.0.0.1", 98)
-	    //.UseServer("127.0.0.1", 98，“true”) //Token automatically generated
-	    //.UseServer("127.0.0.1", 98，“123456789”) //Fixed password token
-	      .UseLog4net("Configs/log4net.config") //Use log4net to generate the log
-              .UseLog4net()  //Use log4net to generate the log
+	  //.UseServer("127.0.0.1", 98，“true”) //Token automatically generated
+	  //.UseServer("127.0.0.1", 98，“123456789”) //Fixed password token
+	    .UseLog4net("Configs/log4net.config") //Use log4net to generate the log
+            .UseLog4net()  //Use log4net to generate the log
             .UseStartup<Startup>()
             .Build();
                
