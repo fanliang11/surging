@@ -10,12 +10,12 @@ using System.Xml;
 
 namespace Surging.Core.Log4net
 {
-   public class Log4NetLogger : Microsoft.Extensions.Logging.ILogger
+    public class Log4NetLogger : Microsoft.Extensions.Logging.ILogger
     {
         private readonly string _name;
         private readonly XmlElement _xmlElement;
         private readonly ILog _log;
-        private ILoggerRepository _loggerRepository;
+        private ILoggerRepository _loggerRepository; 
         public Log4NetLogger(string name, XmlElement xmlElement)
         {
             _name = name;
@@ -50,7 +50,7 @@ namespace Surging.Core.Log4net
                     throw new ArgumentOutOfRangeException(nameof(logLevel));
             }
         }
-        
+
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
             Exception exception, Func<TState, Exception, string> formatter)
         {
@@ -80,7 +80,7 @@ namespace Surging.Core.Log4net
                         _log.Debug(message);
                         break;
                     case LogLevel.Error:
-                        _log.Error(message,exception);
+                        _log.Error(message, exception);
                         break;
                     case LogLevel.Information:
                         _log.Info(message);
@@ -89,13 +89,12 @@ namespace Surging.Core.Log4net
                         _log.Warn(message);
                         break;
                     default:
-                        _log.Warn($"Encountered unknown log level {logLevel}, writing out as Info.");
+                        _log.Warn($"遇到未知日志级别{logLevel}");
                         _log.Info(message, exception);
                         break;
                 }
             }
         }
-        
     }
 }
 
