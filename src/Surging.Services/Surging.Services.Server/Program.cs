@@ -34,7 +34,7 @@ namespace Surging.Services.Server
                         option.UseRabbitMQTransport();
                         option.AddRabbitMQAdapt();
                         //option.UseProtoBufferCodec();
-                        option.UseMessagePackCodec();
+                        //option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })

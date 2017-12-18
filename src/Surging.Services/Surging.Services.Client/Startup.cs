@@ -10,6 +10,7 @@ using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models.Events;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -105,6 +106,24 @@ namespace Surging.Services.Client
                 Name = "fanly",
                 UserId = "1"
             });
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadLine();
+        }
+
+        public static void TestForRoutePath(IServiceProxyProvider serviceProxyProvider)
+        {
+            Dictionary<string, object> model = new Dictionary<string, object>();
+            model.Add("user",  new
+            {
+                Name = "fanly",
+                Age = 18,
+                UserId = 1
+            });
+            string path = "api/user/getuser";
+            string serviceKey = "User";
+
+            var userProxy = serviceProxyProvider.Invoke<object>(model, path, serviceKey);
+            var s = userProxy.Result;
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
         }
