@@ -99,7 +99,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// <returns>调用任务。</returns>
         protected async Task Invoke(IDictionary<string, object> parameters, string serviceId)
         {
-            var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey,true);
+            var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey,false);
             if (message == null)
             {
                 var command =await _commandProvider.GetCommand(serviceId);
