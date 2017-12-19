@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
@@ -113,12 +114,12 @@ namespace Surging.Services.Client
         public static void TestForRoutePath(IServiceProxyProvider serviceProxyProvider)
         {
             Dictionary<string, object> model = new Dictionary<string, object>();
-            model.Add("user",  new
+            model.Add("user", JsonConvert.SerializeObject( new
             {
                 Name = "fanly",
                 Age = 18,
                 UserId = 1
-            });
+            }));
             string path = "api/user/getuser";
             string serviceKey = "User";
 

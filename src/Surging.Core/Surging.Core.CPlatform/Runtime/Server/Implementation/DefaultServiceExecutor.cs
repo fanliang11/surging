@@ -123,7 +123,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                     }
                     else
                     {
-                        await task;
+                        task.Wait();
                         var taskType = task.GetType().GetTypeInfo();
                         if (taskType.IsGenericType)
                             resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
