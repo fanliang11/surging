@@ -54,10 +54,11 @@ namespace Surging.Core.ProxyGenerator.Implementation
             object result = default(T);
             var command = await _commandProvider.GetCommand(serviceId);
             RemoteInvokeResultMessage message;
-            if (!command.RequestCacheEnabled)
+            var decodeJOject = typeof(T) == typeof(Object);
+            if (!command.RequestCacheEnabled || decodeJOject)
             {
                 var v = typeof(T).FullName;
-                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, typeof(T) == typeof(Object));
+                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
                 if (message == null)
                 {
                     var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
