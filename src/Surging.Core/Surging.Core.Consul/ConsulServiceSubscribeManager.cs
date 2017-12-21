@@ -38,7 +38,7 @@ namespace Surging.Core.Consul
             _consul = new ConsulClient(config =>
             {
                 config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-            });
+            },null, h => { h.UseProxy = false; h.Proxy = null; }); 
             EnterSubscribers().Wait();
         }
 
@@ -147,7 +147,10 @@ namespace Surging.Core.Consul
             if (queryResult.Response != null)
             {
                 var data = (await _consul.GetDataAsync(path));
-                result = await GetSubscriber(data);
+                if (data != null)
+                {
+                    result = await GetSubscriber(data);
+                }
             }
             return result;
         }

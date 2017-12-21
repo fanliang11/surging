@@ -3,6 +3,8 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Surging.Core.Consul.Utilitys
 {
@@ -10,20 +12,28 @@ namespace Surging.Core.Consul.Utilitys
     {
         public static async Task<string[]> GetChildrenAsync(this ConsulClient client, string path)
         {
-            var host = client.Config.Address.Host;
-            var port = client.Config.Address.Port;
-            client.Config.Address = new Uri($"http://{host}:{port}");
-            string clientPath = path;
-            var queryResult = await client.KV.List(path);
-            return  queryResult.Response?.Select(p=> Encoding.UTF8.GetString(p.Value)).ToArray();
+            try
+            {
+                var queryResult = await client.KV.List(path);
+                return queryResult.Response?.Select(p => Encoding.UTF8.GetString(p.Value)).ToArray();
+            }
+            catch (HttpRequestException)
+            {
+                return null;
+            }
         }
 
         public static async Task<byte[]> GetDataAsync(this ConsulClient client, string path)
         {
-            var host = client.Config.Address.Host;
-            var port = client.Config.Address.Port;
-            var queryResult = await client.KV.Get(path);
-            return queryResult.Response?.Value;
+            try
+            {
+                var queryResult = await client.KV.Get(path);
+                return queryResult.Response?.Value;
+            }
+            catch (HttpRequestException)
+            {
+                return null;
+            }
         }
     }
 }
