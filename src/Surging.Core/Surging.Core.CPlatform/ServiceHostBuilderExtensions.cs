@@ -12,6 +12,7 @@ using System.Net.NetworkInformation;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Runtime.Client;
 using System;
+using Surging.Core.CPlatform.Configurations;
 
 namespace Surging.Core.CPlatform
 {
@@ -68,6 +69,14 @@ namespace Surging.Core.CPlatform
                     await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse(_ip), port));
                 }).Wait();
             });
+        }
+
+        public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, Action<SurgingServerOptions> options)
+        {
+            var serverOptions = new SurgingServerOptions();
+            options.Invoke(serverOptions);
+            AppConfig.ServerOptions = serverOptions;
+            return hostBuilder.UseServer(serverOptions.Ip,serverOptions.Port,serverOptions.token);
         }
 
         public static IServiceHostBuilder UseClient(this IServiceHostBuilder hostBuilder)
