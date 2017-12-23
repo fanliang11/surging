@@ -6,11 +6,13 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;
+using Surging.Core.Log4net;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
 using Surging.Core.System.Intercept;
 using Surging.Core.System.Ioc;
+//using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
 
@@ -37,14 +39,16 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
+                .UseLog4net()
                 .UseClient()
                 .UseStartup<Startup>()
                 .Build();
 
             using (host.Run())
             {
-                Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
-                Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
+                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
+                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
+                // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
             }
         }
     }

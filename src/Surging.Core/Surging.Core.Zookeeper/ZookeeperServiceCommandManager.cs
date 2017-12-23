@@ -32,7 +32,7 @@ namespace Surging.Core.Zookeeper
             _serializer = serializer;
             _logger = logger;
             CreateZooKeeper().Wait();
-            ClearAsync().Wait();
+            EnterServiceCommands().Wait();
         }
 
 

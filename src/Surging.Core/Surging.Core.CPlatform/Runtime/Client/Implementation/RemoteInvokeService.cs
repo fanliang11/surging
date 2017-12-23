@@ -29,9 +29,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
 
         #region Implementation of IRemoteInvokeService
 
-        public Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context)
+        public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context)
         {
-            return InvokeAsync(context, Task.Factory.CancellationToken);
+            return await InvokeAsync(context, Task.Factory.CancellationToken);
         }
 
         public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context, CancellationToken cancellationToken)
