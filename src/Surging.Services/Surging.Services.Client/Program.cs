@@ -11,7 +11,6 @@ using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
 using Surging.Core.System.Intercept;
-using Surging.Core.System.Ioc;
 //using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
@@ -46,8 +45,8 @@ namespace Surging.Services.Client
 
             using (host.Run())
             {
-                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
-                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
+                Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
+                //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
             }
         }
