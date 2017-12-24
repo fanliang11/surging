@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.DependencyResolution;
 using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using Surging.Core.CPlatform.Utilities;
@@ -13,9 +14,13 @@ namespace Surging.Core.CPlatform
 {
    public class AppConfig
     {
-        internal static IConfigurationRoot Configuration { get; set; }
-        
+        #region 字段
         private static AddressSelectorMode _loadBalanceMode=AddressSelectorMode.Polling;
+        private static SurgingServerOptions _serverOptions=new SurgingServerOptions();
+        #endregion
+
+        internal static IConfigurationRoot Configuration { get; set; }
+
         public static AddressSelectorMode LoadBalanceMode
         {
             get
@@ -32,6 +37,18 @@ namespace Surging.Core.CPlatform
             internal set
             {
                 _loadBalanceMode = value;
+            }
+        }
+
+        public static SurgingServerOptions ServerOptions
+        {
+            get
+            {
+                return _serverOptions;
+            }
+            internal set
+            {
+                _serverOptions = value;
             }
         }
     }

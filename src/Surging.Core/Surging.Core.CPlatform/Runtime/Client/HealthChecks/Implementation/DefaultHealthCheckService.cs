@@ -24,9 +24,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             var timeSpan = TimeSpan.FromSeconds(10);
             
             _serviceRouteManager = serviceRouteManager;
-            _timer = new Timer(s =>
+            _timer = new Timer(async s =>
             {
-                Check(_dictionary.ToArray().Select(i => i.Value),_timeout);
+                await Check(_dictionary.ToArray().Select(i => i.Value),_timeout);
                 RemoveUnhealthyAddress(_dictionary.ToArray().Select(i => i.Value).Where(m => m.UnhealthyTimes >= 6));
             }, null, timeSpan, timeSpan);
 
@@ -36,16 +36,16 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                 Remove(e.Route.Address);
             };
             //重新监控。
-            serviceRouteManager.Created += (s, e) =>
+            serviceRouteManager.Created += async (s, e) =>
             {
                 var keys = e.Route.Address.Select(i => i.ToString());
-                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
+                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
             //重新监控。
-            serviceRouteManager.Changed += (s, e) =>
+            serviceRouteManager.Changed +=async (s, e) =>
             {
                 var keys = e.Route.Address.Select(i => i.ToString());
-                Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
+                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
         }
 
@@ -127,14 +127,14 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             }
         }
 
-        private static bool Check(AddressModel address,int timeout)
+        private static async Task<bool> Check(AddressModel address,int timeout)
         {
             bool isHealth = false;
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout= timeout })
             {
                 try
                 {
-                    socket.Connect(address.CreateEndPoint());
+                    await socket.ConnectAsync(address.CreateEndPoint());
                     isHealth = true;
                 }
                 catch
@@ -145,15 +145,15 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             }
         }
 
-        private static void Check(IEnumerable<MonitorEntry> entrys, int timeout)
+        private static async Task Check(IEnumerable<MonitorEntry> entrys, int timeout)
         {
             foreach (var entry in entrys)
             {
-                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout= timeout } )
+                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { SendTimeout = timeout })
                 {
                     try
                     {
-                        socket.Connect(entry.EndPoint);
+                        await socket.ConnectAsync(entry.EndPoint);
                         entry.UnhealthyTimes = 0;
                         entry.Health = true;
                     }
@@ -164,27 +164,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                     }
                 }
             }
-            /*foreach (var entry in entrys)
-            {
-                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                var socketAsyncEventArgs = new SocketAsyncEventArgs
-                {
-                    RemoteEndPoint = entry.EndPoint,
-                    UserToken = new KeyValuePair<MonitorEntry, Socket>(entry, socket)
-                };
-                socketAsyncEventArgs.Completed += (sender, e) =>
-                {
-                    var isHealth = e.SocketError == SocketError.Success;
-
-                    var token = (KeyValuePair<MonitorEntry, Socket>)e.UserToken;
-                    token.Key.Health = isHealth;
-
-                    e.Dispose();
-                    token.Value.Dispose();
-                };
-
-                socket.ConnectAsync(socketAsyncEventArgs);
-            }*/
         }
 
         #endregion Private Method
