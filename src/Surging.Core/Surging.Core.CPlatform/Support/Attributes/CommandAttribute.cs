@@ -8,6 +8,24 @@ namespace Surging.Core.CPlatform.Support.Attributes
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public class CommandAttribute : Attribute
     {
+        public CommandAttribute()
+        {
+            if (AppConfig.ServerOptions != null)
+            {
+                FailoverCluster = AppConfig.ServerOptions.FailoverCluster;
+                CircuitBreakerForceOpen = AppConfig.ServerOptions.CircuitBreakerForceOpen;
+                Strategy = AppConfig.ServerOptions.Strategy;
+                ExecutionTimeoutInMilliseconds = AppConfig.ServerOptions.ExecutionTimeoutInMilliseconds;
+                RequestCacheEnabled = AppConfig.ServerOptions.RequestCacheEnabled;
+                Injection = AppConfig.ServerOptions.Injection;
+                InjectionNamespaces = AppConfig.ServerOptions.InjectionNamespaces;
+                BreakeErrorThresholdPercentage = AppConfig.ServerOptions.BreakeErrorThresholdPercentage;
+                BreakeSleepWindowInMilliseconds = AppConfig.ServerOptions.BreakeSleepWindowInMilliseconds;
+                BreakerForceClosed = AppConfig.ServerOptions.BreakerForceClosed;
+                BreakerRequestVolumeThreshold = AppConfig.ServerOptions.BreakerRequestVolumeThreshold;
+                MaxConcurrentRequests = AppConfig.ServerOptions.MaxConcurrentRequests;
+            }
+        }
         /// <summary>
         /// 故障转移次数
         /// </summary>

@@ -9,8 +9,11 @@ using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
 using System;
+//using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
+using Surging.Core.Log4net;
+
 
 namespace Surging.Services.Server
 {
@@ -36,7 +39,15 @@ namespace Surging.Services.Server
                     });
                 })
                 .SubscribeAt()
-                .UseServer("127.0.0.1", 98)
+                .UseLog4net("Configs/log4net.config")
+                //.UseServer("127.0.0.1", 98)
+                //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
+                //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
+                .UseServer(options=> {
+                    options.Ip = "127.0.0.1";
+                    options.Port = 98;
+                    options.ExecutionTimeoutInMilliseconds = 30000;
+                })
                 .UseStartup<Startup>()
                 .Build();
 

@@ -41,7 +41,7 @@ namespace Surging.Core.CPlatform.Messages
         /// <returns>如果是则返回true，否则返回false。</returns>
         public bool IsInvokeMessage()
         {
-            return ContentType == typeof(RemoteInvokeMessage).FullName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Surging.Core.CPlatform.Messages
         /// <returns>如果是则返回true，否则返回false。</returns>
         public bool IsInvokeResultMessage()
         {
-            return ContentType == typeof(RemoteInvokeResultMessage).FullName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
         }
 
         /// <summary>

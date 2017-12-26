@@ -6,8 +6,26 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Support
 {
-   public class ServiceCommand
+    public class ServiceCommand
     {
+        public ServiceCommand()
+        {
+            if (AppConfig.ServerOptions != null)
+            {
+                FailoverCluster = AppConfig.ServerOptions.FailoverCluster;
+                CircuitBreakerForceOpen = AppConfig.ServerOptions.CircuitBreakerForceOpen;
+                Strategy = AppConfig.ServerOptions.Strategy;
+                ExecutionTimeoutInMilliseconds = AppConfig.ServerOptions.ExecutionTimeoutInMilliseconds;
+                RequestCacheEnabled = AppConfig.ServerOptions.RequestCacheEnabled;
+                Injection = AppConfig.ServerOptions.Injection;
+                InjectionNamespaces = AppConfig.ServerOptions.InjectionNamespaces;
+                BreakeErrorThresholdPercentage = AppConfig.ServerOptions.BreakeErrorThresholdPercentage;
+                BreakeSleepWindowInMilliseconds = AppConfig.ServerOptions.BreakeSleepWindowInMilliseconds;
+                BreakerForceClosed = AppConfig.ServerOptions.BreakerForceClosed;
+                BreakerRequestVolumeThreshold = AppConfig.ServerOptions.BreakerRequestVolumeThreshold;
+                MaxConcurrentRequests = AppConfig.ServerOptions.MaxConcurrentRequests;
+            }
+        }
         public int FailoverCluster { get; set; } = 3;
         public bool CircuitBreakerForceOpen { get; set; }
         /// <summary>
