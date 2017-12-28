@@ -1,6 +1,7 @@
 ﻿using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Serialization;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,8 +14,8 @@ namespace Surging.Core.CPlatform.Routing.Implementation
     public class DefaultServiceRouteFactory : IServiceRouteFactory
     {
         private readonly ISerializer<string> _serializer;
-         private readonly Dictionary<string, AddressModel> _addressModel =
-                new Dictionary<string, AddressModel>();
+         private readonly ConcurrentDictionary<string, AddressModel> _addressModel =
+                new ConcurrentDictionary<string, AddressModel>();
 
         public DefaultServiceRouteFactory(ISerializer<string> serializer)
         {
@@ -60,7 +61,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                 {
                     var addressType = Type.GetType(descriptor.Type);
                     address = (AddressModel)_serializer.Deserialize(descriptor.Value, addressType);
-                    _addressModel.Add(descriptor.Value, address);
+                    _addressModel.TryAdd(descriptor.Value, address);
                 }
                 yield return address;
             }

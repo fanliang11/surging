@@ -41,7 +41,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<DateTime> GetUserLastSignInTime(int id)
         {
-            return Task.FromResult(DateTime.Now);
+            return Task.FromResult(new DateTime(DateTime.Now.Ticks, DateTimeKind.Utc));
         }
 
         public Task<bool> Get(List<UserModel> users)
