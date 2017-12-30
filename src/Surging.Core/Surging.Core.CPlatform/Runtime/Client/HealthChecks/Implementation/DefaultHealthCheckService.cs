@@ -26,7 +26,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             _serviceRouteManager = serviceRouteManager;
             _timer = new Timer(async s =>
             {
-                await Check(_dictionary.ToArray().Select(i => i.Value),_timeout);
+                await Check(_dictionary.ToArray().Select(i => i.Value), _timeout);
                 RemoveUnhealthyAddress(_dictionary.ToArray().Select(i => i.Value).Where(m => m.UnhealthyTimes >= 6));
             }, null, timeSpan, timeSpan);
 
@@ -39,13 +39,13 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             serviceRouteManager.Created += async (s, e) =>
             {
                 var keys = e.Route.Address.Select(i => i.ToString());
-                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
+                await  Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
             //重新监控。
             serviceRouteManager.Changed +=async (s, e) =>
             {
                 var keys = e.Route.Address.Select(i => i.ToString());
-                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
+                await  Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
         }
 
@@ -134,7 +134,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             {
                 try
                 {
-                    await socket.ConnectAsync(address.CreateEndPoint());
+                    await  socket.ConnectAsync(address.CreateEndPoint());
                     isHealth = true;
                 }
                 catch
@@ -153,7 +153,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                 {
                     try
                     {
-                        await socket.ConnectAsync(entry.EndPoint);
+                         await socket.ConnectAsync(entry.EndPoint);
                         entry.UnhealthyTimes = 0;
                         entry.Health = true;
                     }
