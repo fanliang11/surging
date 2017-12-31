@@ -51,16 +51,14 @@ namespace Surging.Services.Client
 
             using (host.Run())
             {
-
-
                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
                 /// test Parallel
-                //var connectionCount = 200000;
-                //StartRequest(connectionCount);
+                //var connectionCount = 250000;
+                //var requestThread = new Thread(() => StartRequest(connectionCount)) { IsBackground = true };
+                //requestThread.Start();
                 //Console.ReadLine();
-
             }
         }
 
@@ -81,8 +79,7 @@ namespace Surging.Services.Client
             var a = userProxy.GetDictionary().Result;
             IncreaseSuccessConnection(connectionCount);
         }
-
-
+        
         private static void IncreaseSuccessConnection(int connectionCount)
         {
             Interlocked.Increment(ref _endedConnenctionCount);
