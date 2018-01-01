@@ -49,7 +49,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Codec.MessageP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Log4net", "Surging.Core\Surging.Core.Log4net\Surging.Core.Log4net.csproj", "{9A8C2055-997D-4F95-8FA3-5F01F0402923}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Kafka", "Surging.Core\Surging.Core.Kafka\Surging.Core.Kafka.csproj", "{AEA7262C-FC77-4D31-A5D6-28B0C82F5591}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.EventBusKafka", "Surging.Core\Surging.Core.EventBusKafka\Surging.Core.EventBusKafka.csproj", "{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,10 +133,10 @@ Global
 		{9A8C2055-997D-4F95-8FA3-5F01F0402923}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A8C2055-997D-4F95-8FA3-5F01F0402923}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A8C2055-997D-4F95-8FA3-5F01F0402923}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AEA7262C-FC77-4D31-A5D6-28B0C82F5591}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AEA7262C-FC77-4D31-A5D6-28B0C82F5591}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AEA7262C-FC77-4D31-A5D6-28B0C82F5591}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AEA7262C-FC77-4D31-A5D6-28B0C82F5591}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -160,7 +160,7 @@ Global
 		{50BA075B-6DD7-419E-B3AD-4876BE930BD5} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{1059AE4E-7391-4AC9-AECE-4B4FBE3AA243} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{9A8C2055-997D-4F95-8FA3-5F01F0402923} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
-		{AEA7262C-FC77-4D31-A5D6-28B0C82F5591} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
