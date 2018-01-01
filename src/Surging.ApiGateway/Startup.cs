@@ -41,13 +41,14 @@ namespace Surging.ApiGateway
             Configuration = builder.Build();
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-             RegisterAutofac(services);
+            return RegisterAutofac(services);
         }
 
-        private void RegisterAutofac(IServiceCollection services)
+        private IServiceProvider RegisterAutofac(IServiceCollection services)
         {
+           
             services.AddMvc(options => {
                 options.Filters.Add(typeof(CustomExceptionFilterAttribute));
             }).AddJsonOptions(options => {
@@ -55,6 +56,23 @@ namespace Surging.ApiGateway
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver();
             });
             services.AddLogging();
+            var builder = new ContainerBuilder();
+            builder.Populate(services); 
+            builder.AddMicroService(option =>
+            {
+                option.AddClient();
+                option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+                //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
+                option.UseDotNettyTransport();
+                option.AddApiGateWay();
+                //option.UseProtoBufferCodec();
+                option.UseMessagePackCodec();
+                builder.Register(m => new CPlatformContainer(ServiceLocator.Current));
+            });
+            ServiceLocator.Current = builder.Build();
+            return new AutofacServiceProvider(ServiceLocator.Current);
+
         }
         
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

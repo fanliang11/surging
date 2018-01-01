@@ -33,25 +33,6 @@ namespace Surging.ApiGateway
                     options.Limits.MinResponseDataRate =
                         new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
                 })
-                .ConfigureServices(p =>
-                {
-                    p.AddAutofac();
-                    var builder = new ContainerBuilder();
-                    builder.Populate(p);
-                    builder.AddMicroService(option =>
-                    {
-                        option.AddClient();
-                        option.AddClientIntercepted(typeof(CacheProviderInterceptor));
-                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
-                        option.UseDotNettyTransport();
-                        option.AddApiGateWay();
-                        //option.UseProtoBufferCodec();
-                        option.UseMessagePackCodec();
-                        builder.Register(m => new CPlatformContainer(ServiceLocator.Current));
-                    });
-                    ServiceLocator.Current = builder.Build();
-                })
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
