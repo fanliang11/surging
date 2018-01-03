@@ -67,7 +67,7 @@ namespace Surging.Services.Client
 
             var service = ServiceLocator.GetService<IServiceProxyFactory>();
             var userProxy = service.CreateProxy<IUserService>("User");
-            Parallel.For(0, connectionCount /1000, u =>
+            Parallel.For(0, connectionCount /1000, new ParallelOptions() { MaxDegreeOfParallelism = 10 },u =>
              {
                  for (var i = 0; i < 1000; i++)
                      Test(userProxy, connectionCount);

@@ -69,7 +69,7 @@ namespace Surging.Core.CPlatform.Support
         /// <summary>
         /// 信号量最大并发度
         /// </summary>
-        public int MaxConcurrentRequests { get; set; } = 10;
+        public int MaxConcurrentRequests { get; set; } = 200;
 
     }
 }
