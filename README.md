@@ -180,3 +180,4 @@ IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
 框架：.NET core 2.0
 <br/>
+[文档](http://docs.dotnet-china.org/surging/)
