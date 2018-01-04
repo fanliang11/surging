@@ -12,7 +12,7 @@ namespace Surging.Core.CPlatform
    public class CPlatformContainer
     {
         private readonly IComponentContext _container;
-
+         
         public CPlatformContainer(IComponentContext container)
         {
             this._container = container;

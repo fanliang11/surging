@@ -325,6 +325,20 @@ namespace Surging.Core.CPlatform
         }
 
         /// <summary>
+        /// 添加关联服务运行时 
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder AddRelateServiceRuntime(this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            builder.Services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
+            builder.Services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
+            builder.Services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
+            return builder.UseAddressSelector().AddClusterSupport();
+        }
+
+        /// <summary>
         /// 添加核心服务。
         /// </summary>
         /// <param name="services">服务集合。</param>
@@ -360,7 +374,7 @@ namespace Surging.Core.CPlatform
                     var assemblys = GetReferenceAssembly();
                     var types = assemblys.SelectMany(i => i.ExportedTypes).ToArray();
                     return new AttributeServiceEntryProvider(types, provider.Resolve<IClrServiceEntryFactory>(),
-                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>());
+                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>(),provider.Resolve<CPlatformContainer>());
                 }
                 finally
                 {
