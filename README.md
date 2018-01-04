@@ -16,6 +16,7 @@ var host = new ServiceHostBuilder()
                     builder.AddMicroService(option =>
                     {
                         option.AddServiceRuntime();//
+                        option.AddRelateService();//添加支持服务代理远程调用
                         // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //使用Zookeeper管理
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//使用Consul管理
                         option.UseDotNettyTransport();//使用Netty传输
