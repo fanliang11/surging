@@ -1,6 +1,7 @@
 ﻿using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Utilities;
 using System;
+using Autofac;
 
 namespace Surging.Core.ProxyGenerator
 {
@@ -32,43 +33,36 @@ namespace Surging.Core.ProxyGenerator
 
         public override T GetService<T>(string key) 
         {
-     
-            var result = base.GetService<T>(key);
-            if(result==null)
-            {
-                  result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
-            }
-            return result;
+           if( ServiceLocator.Current.IsRegisteredWithKey<T>(key))
+                 return  base.GetService<T>(key); 
+            else 
+                 return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
         }
 
         public override T GetService<T>()
         {
-            var result = base.GetService<T>();
-            if (result == null)
-            {
-                result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
-            }
-            return result;
+            if (ServiceLocator.Current.IsRegistered<T>())
+                return base.GetService<T>();
+            else 
+              return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
+
         }
 
         public override object GetService(Type type)
         {
-            var result = base.GetService(type);
-            if (result == null)
-            {
-                result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(type);
-            }
-            return result;
+            if (ServiceLocator.Current.IsRegistered(type))
+               return base.GetService(type);
+             else
+                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(type);
         }
 
         public override object GetService(string key, Type type)
         {
-            var result = base.GetService(type);
-            if (result == null)
-            {
-                result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key,type);
-            }
-            return result;
+            if (ServiceLocator.Current.IsRegisteredWithKey(key,type))
+                return base.GetService(key,type);
+            else
+                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key,type);
+           
         }
     }
 }
