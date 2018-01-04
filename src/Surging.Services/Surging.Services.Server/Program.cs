@@ -46,6 +46,7 @@ namespace Surging.Services.Server
                 .UseServer(options=> {
                     options.Ip = "127.0.0.1";
                     options.Port = 98;
+                    options.Token = "True";
                     options.ExecutionTimeoutInMilliseconds = 30000;
                     options.MaxConcurrentRequests = 200;
                 })

@@ -32,6 +32,7 @@ namespace Surging.Core.ProxyGenerator
 
         public override T GetService<T>(string key) 
         {
+     
             var result = base.GetService<T>(key);
             if(result==null)
             {
