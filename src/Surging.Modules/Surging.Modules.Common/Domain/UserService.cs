@@ -66,7 +66,7 @@ namespace Surging.Modules.Common.Domain
 
         public async Task<bool> GetDictionary()
         {
-             var hello= await  GetService<IManagerService>().SayHello("fanly");
+            var hello = await GetService<IManagerService>().SayHello("fanly");
             return await Task.FromResult<bool>(true);
         }
 

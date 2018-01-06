@@ -44,6 +44,7 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
+                .UseProxy()
                 .UseLog4net()
                 .UseClient()
                 .UseStartup<Startup>()
