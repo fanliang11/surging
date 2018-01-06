@@ -47,6 +47,7 @@ var host = new ServiceHostBuilder()
                 })
                 .UseLog4net("Configs/log4net.config") //使用log4net记录日志
                 .UseLog4net()  //使用log4net记录日志
+                .UseProxy() //使用Proxy
                 .UseStartup<Startup>()
                 .Build();
                 
