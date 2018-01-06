@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.4.8</Version>
+    <Version>0.5.1</Version>
     <Product>surging Micro Service Framework</Product>
     <Company />
     <Authors>fanly</Authors>

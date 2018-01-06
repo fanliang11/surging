@@ -85,9 +85,9 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddJsonSerialization(this IServiceBuilder builder)
         {
             var services = builder.Services;
-            builder.Services.RegisterType(typeof(JsonSerializer)).As(typeof(ISerializer<string>)).SingleInstance();
-            builder.Services.RegisterType(typeof(StringByteArraySerializer)).As(typeof(ISerializer<byte[]>)).SingleInstance();
-            builder.Services.RegisterType(typeof(StringObjectSerializer)).As(typeof(ISerializer<object>)).SingleInstance();
+            services.RegisterType(typeof(JsonSerializer)).As(typeof(ISerializer<string>)).SingleInstance();
+            services.RegisterType(typeof(StringByteArraySerializer)).As(typeof(ISerializer<byte[]>)).SingleInstance();
+            services.RegisterType(typeof(StringObjectSerializer)).As(typeof(ISerializer<object>)).SingleInstance();
             return builder;
         }
         #region RouteManager
@@ -241,7 +241,6 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder UseCodec(this IServiceBuilder builder, ITransportMessageCodecFactory codecFactory)
         {
             builder.Services.RegisterInstance(codecFactory);
-
             return builder;
         }
 
@@ -289,9 +288,9 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddClientRuntime(this IServiceBuilder builder)
         {
             var services = builder.Services;
-            builder.Services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
-            builder.Services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
-            builder.Services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
+            services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
+            services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
+            services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
             return builder.UseAddressSelector().AddRuntime().AddClusterSupport();
         }
 
@@ -302,12 +301,12 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder AddClusterSupport(this IServiceBuilder builder)
         {
-
-            builder.Services.RegisterType(typeof(ServiceCommandProvider)).As(typeof(IServiceCommandProvider)).SingleInstance();
-            builder.Services.RegisterType(typeof(BreakeRemoteInvokeService)).As(typeof(IBreakeRemoteInvokeService)).SingleInstance();
-            builder.Services.RegisterType(typeof(FailoverInjectionInvoker)).AsImplementedInterfaces()
+            var services = builder.Services;
+            services.RegisterType(typeof(ServiceCommandProvider)).As(typeof(IServiceCommandProvider)).SingleInstance();
+            services.RegisterType(typeof(BreakeRemoteInvokeService)).As(typeof(IBreakeRemoteInvokeService)).SingleInstance();
+            services.RegisterType(typeof(FailoverInjectionInvoker)).AsImplementedInterfaces()
                 .Named(StrategyType.Injection.ToString(), typeof(IClusterInvoker)).SingleInstance();
-            builder.Services.RegisterType(typeof(FailoverHandoverInvoker)).AsImplementedInterfaces()
+            services.RegisterType(typeof(FailoverHandoverInvoker)).AsImplementedInterfaces()
             .Named(StrategyType.Failover.ToString(), typeof(IClusterInvoker)).SingleInstance();
             return builder;
         }
@@ -332,9 +331,9 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddRelateServiceRuntime(this IServiceBuilder builder)
         {
             var services = builder.Services;
-            builder.Services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
-            builder.Services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
-            builder.Services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
+            services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
+            services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
+            services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
             return builder.UseAddressSelector().AddClusterSupport();
         }
 
@@ -365,9 +364,9 @@ namespace Surging.Core.CPlatform
         {
             var services = builder.Services;
 
-            builder.Services.RegisterType(typeof(ClrServiceEntryFactory)).As(typeof(IClrServiceEntryFactory)).SingleInstance();
+            services.RegisterType(typeof(ClrServiceEntryFactory)).As(typeof(IClrServiceEntryFactory)).SingleInstance();
 
-            builder.Services.Register(provider =>
+            services.Register(provider =>
             {
                 try
                 {

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.4.9</Version>
+    <Version>0.5.1</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
@@ -11,9 +11,13 @@
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.4.9.0</AssemblyVersion>
-    <FileVersion>0.4.9.0</FileVersion>
-    <Description>Fix using messagepack can not Publish message</Description>
+    <AssemblyVersion>0.5.1.0</AssemblyVersion>
+    <FileVersion>0.5.1.0</FileVersion>
+    <Description>1.Fixed concurrency block 
+2.Add UseProxy
+3.Fix getservice create proxy remote calls 
+4.Interfaces that do not implement domain services are not registered
+5.Fixed a problem with non-proxy calls that enabled cache crashes</Description>
   </PropertyGroup>
 
   <ItemGroup>

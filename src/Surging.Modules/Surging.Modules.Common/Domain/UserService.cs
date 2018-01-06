@@ -19,12 +19,10 @@ namespace Surging.Modules.Common.Domain
         #region Implementation of IUserService
         private readonly UserRepository _repository;
         private readonly IEventBus _eventBus;
-        private readonly IManagerService _managerService;
         public UserService(UserRepository repository, IEventBus eventBus)
         {
             this._repository = repository;
             this._eventBus = eventBus;
-            _managerService = GetService<IManagerService>();
         }
 
         public Task<string> GetUserName(int id)
@@ -66,10 +64,9 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
-        public async Task<bool> GetDictionary()
+        public   Task<bool> GetDictionary()
         {
-            var hello = await _managerService.SayHello("fanly");
-            return await Task.FromResult<bool>(true);
+            return  Task.FromResult<bool>(true);
         }
 
         public async Task Try()

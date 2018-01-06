@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <PackageId>Surging.Core.ServiceHosting</PackageId>
     <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
-    <Version>0.4.8</Version>
+    <Version>0.5.1</Version>
     <Authors>fanly</Authors>
     <Company />
     <Product>surging Micro Service Framework</Product>
@@ -12,6 +12,11 @@
     <PackageTags>MicroService surging</PackageTags>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
+    <Description>1.Fixed concurrency block 
+2.Add UseProxy
+3.Fix getservice create proxy remote calls 
+4.Interfaces that do not implement domain services are not registered
+5.Fixed a problem with non-proxy calls that enabled cache crashes</Description>
   </PropertyGroup>
 
   <ItemGroup>
