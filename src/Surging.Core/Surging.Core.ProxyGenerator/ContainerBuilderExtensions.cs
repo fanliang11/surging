@@ -47,7 +47,7 @@ namespace Surging.Core.ProxyGenerator
         {
             return builder.AddRelateServiceRuntime().AddClientProxy();
         }
-
+        
         public static IServiceBuilder AddClient(this IServiceBuilder builder)
         {
             return builder

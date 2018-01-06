@@ -85,10 +85,10 @@ namespace Surging.Services.Client
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
                     //1w次调用
                     var watch = Stopwatch.StartNew();
-                    for (var i = 0; i < 10000; i++)
-                    {
+                    //for (var i = 0; i < 10000; i++)
+                    //{
                         var a = userProxy.GetDictionary().Result;
-                    }
+                    //}
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
                     Console.WriteLine("Press any key to continue, q to exit the loop...");

@@ -402,7 +402,7 @@ namespace Surging.Core.CPlatform
             foreach (var assembly in referenceAssemblies)
             {
                 services.RegisterAssemblyTypes(assembly)
-                   .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t))
+                   .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface)
                    .AsImplementedInterfaces();
                 services.RegisterAssemblyTypes(assembly)
              .Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
@@ -465,7 +465,7 @@ namespace Surging.Core.CPlatform
             var referenceAssemblies = GetReferenceAssembly();
             referenceAssemblies.ForEach(p =>
             {
-                types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t)));
+                types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface));
             });
             return types;
         }

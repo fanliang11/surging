@@ -8,6 +8,7 @@ using Surging.Core.ProxyGenerator.Interceptors;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Autofac;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -37,6 +38,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             _serviceProvider = serviceProvider;
             _commandProvider = serviceProvider.GetInstances<IServiceCommandProvider>();
             _breakeRemoteInvokeService = serviceProvider.GetInstances<IBreakeRemoteInvokeService>();
+            if(serviceProvider.Current.IsRegistered<IInterceptor>())
             _interceptor= serviceProvider.GetInstances<IInterceptor>();
         }
         #endregion Constructor

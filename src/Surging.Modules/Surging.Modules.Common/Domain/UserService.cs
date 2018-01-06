@@ -5,6 +5,7 @@ using Surging.Core.CPlatform.Ioc;
 using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
+using Surging.IModuleServices.User;
 using Surging.Modules.Common.Repositories;
 using System;
 using System.Collections.Generic;
@@ -63,9 +64,10 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
-        public Task<bool> GetDictionary()
+        public async Task<bool> GetDictionary()
         {
-            return Task.FromResult<bool>(true);
+             var hello= await  GetService<IManagerService>().SayHello("fanly");
+            return await Task.FromResult<bool>(true);
         }
 
         public async Task Try()
