@@ -1,3 +1,17 @@
+#### Surging.Core.Zookeeper 0.5.1 January 17 2017
+- Fix problems registered on different servers based on zookeeper and consul
+
+#### Surging.Core.Consul 0.5.1 January 17 2017
+- Fix If consul crash, the service runs as usual
+- Fix problems registered on different servers based on zookeeper and consul
+
+#### surging 0.5.1 January 17 2017
+- Fixed concurrency block
+- Add UseProxy
+- Fix getservice create proxy remote calls 
+- Interfaces that do not implement domain services are not registered
+- Fixed a problem with non-proxy calls that enabled cache crashes
+
 #### Surging.Core.Log4net 0.4.8 December 17 2017
 - Add logs based on log4net
 
