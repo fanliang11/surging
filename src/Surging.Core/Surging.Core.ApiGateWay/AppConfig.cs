@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -68,6 +70,19 @@ namespace Surging.Core.ApiGateWay
             {
                 _tokenEndpointPath = value;
             }
+        }
+
+        public static Register Register
+        {
+            get
+            {
+                var result = new Register();
+                var section= Configuration.GetSection("Register");
+                if (section != null)
+                    result=  section.Get<Register>();
+                return result;
+            }
+
         }
 
         private static string _cacheMode = "MemoryCache";

@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Surging.Core.ApiGateWay;
+using Surging.Core.ApiGateWay.Configurations;
 using Surging.Core.ApiGateWay.OAuth.Implementation.Configurations;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
@@ -18,9 +19,11 @@ using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.System.Intercept;
+using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper;
-//using Surging.Core.Zookeeper.Configurations;
+using ZookeeperConfigInfo =  Surging.Core.Zookeeper.Configurations.ConfigInfo;
 using System;
+using ApiGateWayConfig = Surging.Core.ApiGateWay.AppConfig;
 
 namespace Surging.ApiGateway
 {
@@ -48,7 +51,7 @@ namespace Surging.ApiGateway
 
         private IServiceProvider RegisterAutofac(IServiceCollection services)
         {
-           
+            var registerConfig = ApiGateWayConfig.Register;
             services.AddMvc(options => {
                 options.Filters.Add(typeof(CustomExceptionFilterAttribute));
             }).AddJsonOptions(options => {
@@ -62,8 +65,12 @@ namespace Surging.ApiGateway
             {
                 option.AddClient();
                 option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
+               if(registerConfig.Provider== RegisterProvider.Consul)
+                option.UseConsulManager(new ConfigInfo(registerConfig.Address));
+               else if(registerConfig.Provider == RegisterProvider.Zookeeper)
+                    option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
                 //option.UseProtoBufferCodec();

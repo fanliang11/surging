@@ -22,7 +22,7 @@ namespace Surging.ApiGateway
         public static void Main(string[] args)
         {
             var host = new WebHostBuilder()
-                .UseUrls("http://localhost:729")
+                .UseUrls("http://*:729")
                 .UseKestrel(options =>
                 {
                     options.Limits.MaxConcurrentConnections =100;
