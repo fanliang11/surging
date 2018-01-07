@@ -76,7 +76,7 @@ namespace Surging.Core.CPlatform
             var serverOptions = new SurgingServerOptions();
             options.Invoke(serverOptions);
             AppConfig.ServerOptions = serverOptions;
-            return hostBuilder.UseServer(serverOptions.Ip,serverOptions.Port,serverOptions.token);
+            return hostBuilder.UseServer(serverOptions.Ip,serverOptions.Port,serverOptions.Token);
         }
 
         public static IServiceHostBuilder UseClient(this IServiceHostBuilder hostBuilder)

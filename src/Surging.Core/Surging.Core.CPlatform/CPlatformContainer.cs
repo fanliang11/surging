@@ -1,17 +1,14 @@
 ﻿using Autofac;
-using Autofac.Core;
 using Surging.Core.CPlatform.DependencyResolution;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace Surging.Core.CPlatform
 {
-   public class CPlatformContainer
+    public class CPlatformContainer
     {
         private readonly IComponentContext _container;
+
+        public IComponentContext Current => _container;
 
         public CPlatformContainer(IComponentContext container)
         {

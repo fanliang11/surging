@@ -13,7 +13,7 @@ using System;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
 using Surging.Core.Log4net;
-
+using Surging.Core.ProxyGenerator;
 
 namespace Surging.Services.Server
 {
@@ -28,6 +28,7 @@ namespace Surging.Services.Server
                     builder.AddMicroService(option =>
                     {
                         option.AddServiceRuntime();
+                        option.AddRelateService();
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
@@ -46,8 +47,11 @@ namespace Surging.Services.Server
                 .UseServer(options=> {
                     options.Ip = "127.0.0.1";
                     options.Port = 98;
+                    options.Token = "True";
                     options.ExecutionTimeoutInMilliseconds = 30000;
+                    options.MaxConcurrentRequests = 200;
                 })
+                .UseProxy()
                 .UseStartup<Startup>()
                 .Build();
 

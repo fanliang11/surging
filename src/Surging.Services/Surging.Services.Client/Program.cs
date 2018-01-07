@@ -44,6 +44,7 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
+                .UseProxy()
                 .UseLog4net()
                 .UseClient()
                 .UseStartup<Startup>()
@@ -51,16 +52,14 @@ namespace Surging.Services.Client
 
             using (host.Run())
             {
-
-
-                Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
+                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
                 /// test Parallel
-                //var connectionCount = 200000;
-                //StartRequest(connectionCount);
+                //var connectionCount = 250000;
+                //var requestThread = new Thread(() => StartRequest(connectionCount)) { IsBackground = true };
+                //requestThread.Start();
                 //Console.ReadLine();
-
             }
         }
 
@@ -69,7 +68,7 @@ namespace Surging.Services.Client
 
             var service = ServiceLocator.GetService<IServiceProxyFactory>();
             var userProxy = service.CreateProxy<IUserService>("User");
-            Parallel.For(0, connectionCount /1000, u =>
+            Parallel.For(0, connectionCount /1000, new ParallelOptions() { MaxDegreeOfParallelism = 10 },u =>
              {
                  for (var i = 0; i < 1000; i++)
                      Test(userProxy, connectionCount);
@@ -81,8 +80,7 @@ namespace Surging.Services.Client
             var a = userProxy.GetDictionary().Result;
             IncreaseSuccessConnection(connectionCount);
         }
-
-
+        
         private static void IncreaseSuccessConnection(int connectionCount)
         {
             Interlocked.Increment(ref _endedConnenctionCount);

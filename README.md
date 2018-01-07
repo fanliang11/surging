@@ -5,10 +5,18 @@
 
 <br />
 
-启动配置：
+## 名字由来
 
- <br/>
- 
+英文名：surging
+
+中文名：滔滔
+
+中文名来自周星驰的经典台词
+
+我对阁下的景仰犹如滔滔江水,连绵不绝,犹如黄河泛滥,一发而不可收拾，而取名英文的含义也希望此框架能流行起来，也能像《.net core surging》这句英文语句含义一样，.net core技术风起云涌,冲击整个软件生态系统。
+
+## 配置：
+
  ```c#
 var host = new ServiceHostBuilder()
                 .RegisterServices(builder =>
@@ -16,6 +24,7 @@ var host = new ServiceHostBuilder()
                     builder.AddMicroService(option =>
                     {
                         option.AddServiceRuntime();//
+                        option.AddRelateService();//添加支持服务代理远程调用
                         // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //使用Zookeeper管理
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//使用Consul管理
                         option.UseDotNettyTransport();//使用Netty传输
@@ -46,6 +55,7 @@ var host = new ServiceHostBuilder()
                 })
                 .UseLog4net("Configs/log4net.config") //使用log4net记录日志
                 .UseLog4net()  //使用log4net记录日志
+                .UseProxy() //使用Proxy
                 .UseStartup<Startup>()
                 .Build();
                 
@@ -180,3 +190,4 @@ IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
 框架：.NET core 2.0
 <br/>
+[文档](http://docs.dotnet-china.org/surging/)

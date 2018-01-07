@@ -85,6 +85,7 @@ namespace Surging.Core.Consul
                       route.Address.Except(serviceRoute.Address));
                 }
             }
+            await RemoveExceptRoutesAsync(routes);
             await base.SetRoutesAsync(routes);
         }
 
@@ -104,8 +105,21 @@ namespace Surging.Core.Consul
             }
             await base.SetRoutesAsync(routes);
         }
-
+        
         protected override async Task SetRoutesAsync(IEnumerable<ServiceRouteDescriptor> routes)
+        {
+           
+            foreach (var serviceRoute in routes)
+            {
+                var nodeData = _serializer.Serialize(serviceRoute);
+                var keyValuePair = new KVPair($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}") { Value = nodeData };
+                await _consul.KV.Put(keyValuePair);
+            }
+        }
+
+        #region 私有方法
+
+        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
             routes = routes.ToArray();
 
@@ -116,18 +130,16 @@ namespace Surging.Core.Consul
                 var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
                 foreach (var deletedRouteId in deletedRouteIds)
                 {
-                    await _consul.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
+                   var addresses=  _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p=>p.Address).FirstOrDefault();
+                    foreach (var address in addresses)
+                    {
+                        if (routes.Any(p => p.Address.Select(a=>a.ToString()).Contains(address.ToString())))
+                            await _consul.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
+                    }
                 }
-            }
-            foreach (var serviceRoute in routes)
-            {
-                var nodeData = _serializer.Serialize(serviceRoute);
-                var keyValuePair = new KVPair($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}") { Value = nodeData };
-                await _consul.KV.Put(keyValuePair);
             }
         }
 
-        #region 私有方法
         private async Task<ServiceRoute> GetRoute(byte[] data)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))

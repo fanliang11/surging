@@ -28,5 +28,5 @@ surging is The distributed micro service [open-source](https://github.com/dotnet
 For more information, see the following resources:
 
 * [Chinese document]()
-* [English document]()
+* [English document](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)
 

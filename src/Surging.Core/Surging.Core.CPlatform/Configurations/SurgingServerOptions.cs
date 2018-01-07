@@ -11,6 +11,6 @@ namespace Surging.Core.CPlatform.Configurations
 
         public int Port { get; set; }
 
-        public string token { get; set; } = "True";
+        public string Token { get; set; } = "True";
     }
 }
