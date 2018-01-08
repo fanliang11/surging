@@ -1,0 +1,45 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [{
+            "taskName": "ClientBuild",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "args": [
+                "build", "${workspaceRoot}/Surging.Services/Surging.Services.Client/Surging.Services.Client.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "ServerBuild",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "args": [
+                "build", "${workspaceRoot}/Surging.Services/Surging.Services.Server/Surging.Services.Server.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "Webbuild",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "args": [
+                "build", "${workspaceRoot}/Surging.ApiGateway/Surging.ApiGateway.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

@@ -1,0 +1,63 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Server",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "ServerBuild",
+            "program": "${workspaceRoot}/Surging.Services/Surging.Services.Server/bin/Debug/netcoreapp2.0/Surging.Services.Server.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/Surging.Services/Surging.Services.Server",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Client",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "ClientBuild",
+            "program": "${workspaceRoot}/Surging.Services/Surging.Services.Client/bin/Debug/netcoreapp2.0/Surging.Services.Client.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/Surging.Services/Surging.Services.Client",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Web",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Webbuild",
+            "program": "${workspaceRoot}/Surging.ApiGateway/bin/Debug/netcoreapp2.0/Surging.ApiGateway.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/Surging.ApiGateway",
+            "stopAtEntry": false,
+            "launchBrowser": {
+                "enabled": true,
+                "args": "${auto-detect-url}",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start ${auto-detect-url}"
+                },
+                "osx": {
+                    "command": "open"
+                },
+                "linux": {
+                    "command": "xdg-open"
+                }
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceRoot}/Views"
+            }
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}

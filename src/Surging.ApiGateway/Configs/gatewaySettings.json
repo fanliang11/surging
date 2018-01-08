@@ -1,0 +1,6 @@
+{
+  "AccessTokenExpireTimeSpan": "30",
+  "AuthorizationRoutePath": "api/user/authentication",
+  "AuthorizationServiceKey": "User",
+  "TokenEndpointPath": "api/oauth2/token"
+}
