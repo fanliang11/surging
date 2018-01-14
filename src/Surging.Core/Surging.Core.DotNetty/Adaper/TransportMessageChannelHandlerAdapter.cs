@@ -1,4 +1,5 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
@@ -21,21 +22,11 @@ namespace Surging.Core.DotNetty.Adaper
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
             var buffer = (IByteBuffer)message;
-            try
-            {
-                try
-                {
-                    var data = new byte[buffer.ReadableBytes];
-                    buffer.ReadBytes(data); 
-                    var transportMessage = _transportMessageDecoder.Decode(data);
-                    context.FireChannelRead(transportMessage);
-                }
-                catch(Exception ex)
-                {
-                    throw ex;
-                }
-            }
-            finally { buffer.Release(); }
+            var data = new byte[buffer.ReadableBytes];
+            buffer.ReadBytes(data);
+            var transportMessage = _transportMessageDecoder.Decode(data);
+            context.FireChannelRead(transportMessage);
+            ReferenceCountUtil.Release(buffer);
         }
 
         #endregion Overrides of ChannelHandlerAdapter
