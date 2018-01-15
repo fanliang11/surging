@@ -51,6 +51,7 @@ namespace Surging.Services.Server
                     options.ExecutionTimeoutInMilliseconds = 30000;
                     options.MaxConcurrentRequests = 200;
                 })
+                .UseProxy()
                 .UseStartup<Startup>()
                 .Build();
 
