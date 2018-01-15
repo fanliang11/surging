@@ -33,7 +33,6 @@ var host = new ServiceHostBuilder()
                       //  option.UseProtoBufferCodec();//基于protobuf序列化
                         option.UseMessagePackCodec();//基于MessagePack序列化
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//初始化注入容器
-                        options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                     });
                 })
                 .SubscribeAt()     //消息订阅
@@ -53,6 +52,7 @@ var host = new ServiceHostBuilder()
                     options.BreakerForceClosed=false;   //是否强制关闭熔断
                     options.BreakerRequestVolumeThreshold = 20;//10秒钟内至少多少请求失败，熔断器才发挥起作用
                     options.MaxConcurrentRequests== 100000;//支持最大并发
+                     options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                 })
                 .UseLog4net("Configs/log4net.config") //使用log4net记录日志
                 .UseLog4net()  //使用log4net记录日志
