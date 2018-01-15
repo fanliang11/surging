@@ -5,12 +5,14 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Configurations
 {
-    public  class SurgingServerOptions: ServiceCommand
+    public  partial class SurgingServerOptions: ServiceCommand
     {
         public string Ip { get; set; }
 
         public int Port { get; set; }
 
         public string Token { get; set; } = "True";
+
+        public string NotRelatedAssemblyFiles { get; set; }
     }
 }

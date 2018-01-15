@@ -373,7 +373,7 @@ namespace Surging.Core.CPlatform
                     var assemblys = GetReferenceAssembly();
                     var types = assemblys.SelectMany(i => i.ExportedTypes).ToArray();
                     return new AttributeServiceEntryProvider(types, provider.Resolve<IClrServiceEntryFactory>(),
-                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>(),provider.Resolve<CPlatformContainer>());
+                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>(), provider.Resolve<CPlatformContainer>());
                 }
                 finally
                 {
@@ -475,10 +475,10 @@ namespace Surging.Core.CPlatform
             var result = _referenceAssembly;
             if (!result.Any())
             {
-                var assemblyNames = GetAllAssemblyFiles(path);
-                foreach (var referencedAssemblyName in assemblyNames)
+                var assemblyFiles = GetAllAssemblyFiles(path);
+                foreach (var referencedAssemblyFile in assemblyFiles)
                 {
-                    var referencedAssembly = Assembly.Load(new AssemblyName(referencedAssemblyName));
+                    var referencedAssembly = Assembly.LoadFile(referencedAssemblyFile);
                     _referenceAssembly.Add(referencedAssembly);
                 }
                 result = _referenceAssembly;
@@ -487,11 +487,14 @@ namespace Surging.Core.CPlatform
         }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)
-        { 
-                Regex regex = new Regex("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
-                return
-                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFileNameWithoutExtension).Where(
-                        a => !regex.IsMatch(a)).ToList();
+        {
+            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var pattern = string.Format("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*{0}",
+               string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
+            Regex regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            return
+                Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                    a => !regex.IsMatch(a)).ToList();
         }
     }
 }
