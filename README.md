@@ -33,6 +33,7 @@ var host = new ServiceHostBuilder()
                       //  option.UseProtoBufferCodec();//基于protobuf序列化
                         option.UseMessagePackCodec();//基于MessagePack序列化
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));//初始化注入容器
+                        options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                     });
                 })
                 .SubscribeAt()     //消息订阅
