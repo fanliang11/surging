@@ -59,6 +59,12 @@ namespace Surging.Core.ProxyGenerator.Implementation
             var assemblys = DependencyContext.Default.RuntimeLibraries.SelectMany(i => i.GetDefaultAssemblyNames(DependencyContext.Default).Select(z => Assembly.Load(new AssemblyName(z.Name))));
 #endif
             assemblys = assemblys.Where(i => i.IsDynamic == false).ToArray();
+            var types = assemblys.Select(p => p.GetType());
+            types = interfacTypes.Except(types);
+            foreach (var t in types)
+            {
+                assemblys = assemblys.Append(t.Assembly);
+            }
             var trees = interfacTypes.Select(p=>GenerateProxyTree(p)).ToList();
             var stream = CompilationUtilitys.CompileClientProxy(trees,
                 assemblys
