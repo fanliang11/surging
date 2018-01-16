@@ -478,7 +478,7 @@ namespace Surging.Core.CPlatform
                 var assemblyFiles = GetAllAssemblyFiles(path);
                 foreach (var referencedAssemblyFile in assemblyFiles)
                 {
-                    var referencedAssembly = Assembly.LoadFile(referencedAssemblyFile);
+                    var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
                     _referenceAssembly.Add(referencedAssembly);
                 }
                 result = _referenceAssembly;
