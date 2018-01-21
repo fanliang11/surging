@@ -9,11 +9,18 @@ namespace Surging.Core.System.MongoProvider
 {
     public class MongoModule : SystemModule
     {
+        /// <summary>
+        ///  Function module initialization,trigger when the module starts loading
+        /// </summary>
         public override void Initialize()
         {
             base.Initialize();
         }
 
+        /// <summary>
+        /// Inject dependent third-party components
+        /// </summary>
+        /// <param name="builder"></param>
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);

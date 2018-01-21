@@ -9,7 +9,7 @@ using MongoDB.Driver;
 
 namespace Surging.Core.System.MongoProvider.Repositories
 {
-    interface IMongoRepository<T> where T : IEntity
+   public  interface IMongoRepository<T> where T : IEntity
     {
         IMongoCollection<T> Collection { get; }
         T GetById(string id);

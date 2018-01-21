@@ -6,14 +6,14 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;
+using Surging.Core.Log4net;
+using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
 using System;
 //using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
-using Surging.Core.Log4net;
-using Surging.Core.ProxyGenerator;
 
 namespace Surging.Services.Server
 {
@@ -51,7 +51,7 @@ namespace Surging.Services.Server
                 options.ExecutionTimeoutInMilliseconds = 30000;
                 options.MaxConcurrentRequests = 200;
                 options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*";
-                    options.RelatedAssemblyFiles = "Surging.Core.System";
+                options.RelatedAssemblyFiles = "Surging.Core.System";
                 })
                 .UseProxy()
                 .UseStartup<Startup>()

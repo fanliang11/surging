@@ -100,19 +100,16 @@ namespace Surging.Core.System.MongoProvider.Repositories
 
         public async Task<bool> AddAsync(T entity)
         {
-            return await Task.Run(async () =>
+            var result = true;
+            try
             {
-                var result = true;
-                try
-                {
-                    await _collection.InsertOneAsync(entity);
-                }
-                catch
-                {
-                    result = false;
-                }
-                return result;
-            });
+                await _collection.InsertOneAsync(entity);
+            }
+            catch
+            {
+                result = false;
+            }
+            return result;
         }
 
         public bool Add(IEnumerable<T> entities)
@@ -131,19 +128,16 @@ namespace Surging.Core.System.MongoProvider.Repositories
 
         public async Task<bool> AddManyAsync(IEnumerable<T> entities)
         {
-            return await Task.Run(() =>
+            var result = true;
+            try
             {
-                var result = true;
-                try
-                {
-                    _collection.InsertManyAsync(entities);
-                }
-                catch
-                {
-                    result = false;
-                }
-                return result;
-            });
+                await _collection.InsertManyAsync(entities);
+            }
+            catch
+            {
+                result = false;
+            }
+            return result;
         }
 
         public UpdateResult Update(FilterDefinition<T> filter, UpdateDefinition<T> entity)
