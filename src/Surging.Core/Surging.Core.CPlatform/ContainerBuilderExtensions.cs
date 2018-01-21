@@ -493,18 +493,7 @@ namespace Surging.Core.CPlatform
             });
             return types;
         }
-
-        public static void RegisterModuleProvider(this ContainerBuilder builder)
-        {
-            var types = new List<Type>();
-            var referenceAssemblies = GetReferenceAssembly();
-            if (builder == null) throw new ArgumentNullException("builder");
-            foreach (var moduleAssembly in referenceAssemblies)
-            {
-                GetAbstractModules(moduleAssembly).ForEach(p => p.Initialize());
-            }
-        }
-
+        
         private static List<Assembly> GetReferenceAssembly()
         {
             string path = AppContext.BaseDirectory;
@@ -527,7 +516,7 @@ namespace Surging.Core.CPlatform
             var abstractModules = new List<AbstractModule>();
             Type[] arrayModule =
                 assembly.GetTypes().Where(
-                    t => t.IsSubclassOf(typeof(AbstractModule)) && t.Name.EndsWith("Module")).ToArray();
+                    t => t.IsSubclassOf(typeof(AbstractModule))).ToArray();
             foreach (var moduleType in arrayModule)
             {
                 var abstractModule = (AbstractModule)Activator.CreateInstance(moduleType);
