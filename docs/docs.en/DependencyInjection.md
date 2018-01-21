@@ -1,5 +1,4 @@
-The DI framework used by surging is IServiceCollection and autofac,such as the need to inject other components in the project, how to operate.
-Here are three ways to introduce how to inject third-party components.
+The DI framework used for surging is IServiceCollection and autofac, what to do if you need to inject other components in the project. Here are three ways to inject third-party components.
 
 1.How to injection
 =============
