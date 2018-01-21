@@ -18,11 +18,9 @@ namespace Surging.Modules.Common.Domain
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
-        private readonly IEventBus _eventBus;
-        public UserService(UserRepository repository, IEventBus eventBus)
+        public UserService(UserRepository repository)
         {
             this._repository = repository;
-            this._eventBus = eventBus;
         }
 
         public Task<string> GetUserName(int id)
@@ -83,7 +81,7 @@ namespace Surging.Modules.Common.Domain
 
         public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
         {
-            _eventBus.Publish(evt);
+            Publish(evt);
             await Task.CompletedTask;
         }
 
