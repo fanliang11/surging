@@ -51,6 +51,7 @@ namespace Surging.Services.Server
                 options.ExecutionTimeoutInMilliseconds = 30000;
                 options.MaxConcurrentRequests = 200;
                 options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*";
+                    options.RelatedAssemblyFiles = "Surging.Core.System";
                 })
                 .UseProxy()
                 .UseStartup<Startup>()

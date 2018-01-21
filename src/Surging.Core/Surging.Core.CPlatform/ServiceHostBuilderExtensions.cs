@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Runtime.Client;
 using System;
 using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.Module;
 
 namespace Surging.Core.CPlatform
 {
@@ -63,6 +64,7 @@ namespace Surging.Core.CPlatform
                     ServiceDescriptor = i.Descriptor
                 }).ToList();
                 mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
+                mapper.Resolve<IModuleProvider>().Initialize();
                 var serviceHost = mapper.Resolve<Runtime.Server.IServiceHost>();
                 Task.Factory.StartNew(async () =>
                 {

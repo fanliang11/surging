@@ -14,5 +14,7 @@ namespace Surging.Core.CPlatform.Configurations
         public string Token { get; set; } = "True";
 
         public string NotRelatedAssemblyFiles { get; set; }
+
+        public string RelatedAssemblyFiles { get; set; }
     }
 }

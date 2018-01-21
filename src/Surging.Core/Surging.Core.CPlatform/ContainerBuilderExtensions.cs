@@ -1,4 +1,7 @@
 ﻿using Autofac;
+using Autofac.Builder;
+using Autofac.Core.Registration;
+using Autofac.Features.Scanning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Convertibles;
@@ -9,6 +12,7 @@ using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Ioc;
+using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -320,7 +324,7 @@ namespace Surging.Core.CPlatform
         {
             builder.Services.RegisterType(typeof(DefaultServiceEntryLocate)).As(typeof(IServiceEntryLocate)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor)).SingleInstance();
-            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().AddRuntime();
+            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().AddRuntime();
         }
 
         /// <summary>
@@ -458,6 +462,27 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
+        public static IServiceBuilder RegisterModules(
+      this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly();
+            if (builder == null) throw new ArgumentNullException("builder");
+            List<AbstractModule> modules = new List<AbstractModule>();
+            foreach (var moduleAssembly in referenceAssemblies)
+            {
+                GetAbstractModules(moduleAssembly).ForEach(p =>
+                {
+                    services.RegisterModule(p);
+                    modules.Add(p);
+                });
+            }
+            builder.Services.Register(provider => new ModuleProvider(
+               modules
+                )).As<IModuleProvider>().SingleInstance();
+            return builder;
+        }
+
         public static List<Type> GetInterfaceService(this IServiceBuilder builder)
         {
             var types = new List<Type>();
@@ -467,6 +492,17 @@ namespace Surging.Core.CPlatform
                 types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface));
             });
             return types;
+        }
+
+        public static void RegisterModuleProvider(this ContainerBuilder builder)
+        {
+            var types = new List<Type>();
+            var referenceAssemblies = GetReferenceAssembly();
+            if (builder == null) throw new ArgumentNullException("builder");
+            foreach (var moduleAssembly in referenceAssemblies)
+            {
+                GetAbstractModules(moduleAssembly).ForEach(p => p.Initialize());
+            }
         }
 
         private static List<Assembly> GetReferenceAssembly()
@@ -485,16 +521,32 @@ namespace Surging.Core.CPlatform
             }
             return result;
         }
-
+        
+        private static List<AbstractModule> GetAbstractModules(Assembly assembly)
+        {
+            var abstractModules = new List<AbstractModule>();
+            Type[] arrayModule =
+                assembly.GetTypes().Where(
+                    t => t.IsSubclassOf(typeof(AbstractModule)) && t.Name.EndsWith("Module")).ToArray();
+            foreach (var moduleType in arrayModule)
+            {
+                var abstractModule = (AbstractModule)Activator.CreateInstance(moduleType);
+                abstractModules.Add(abstractModule);
+            }
+            return abstractModules;
+        }
+        
         private static List<string> GetAllAssemblyFiles(string parentDir)
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+              var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
             var pattern = string.Format("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
-            Regex regex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             return
                 Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
-                    a => !regex.IsMatch(a)).ToList();
+                    a => !notRelatedRegex.IsMatch(a) || relatedRegex.IsMatch(a)).ToList();
         }
     }
 }
