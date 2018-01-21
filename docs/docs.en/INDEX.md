@@ -49,6 +49,7 @@ Console.WriteLine(await user.SayHello("fanly"));
 ## Next steps
 
 * [How to configure microservices](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/ConfigMicroservices.md)
+* [How to Dependency injection](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/DependencyInjection.md)
 * [How to use the cache]()
 * [How to set service fuse protection]()
 * [How to set up gateway access]()
