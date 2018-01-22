@@ -11,6 +11,7 @@ using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
 using System;
+using System.Net;
 //using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
@@ -45,8 +46,7 @@ namespace Surging.Services.Server
                 //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
                 //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
                 .UseServer(options => {
-                options.Ip = "127.0.0.1";
-                options.Port = 98;
+                 options.IpEndpoint = new IPEndPoint(IPAddress.Any, 98);
                 options.Token = "True";
                 options.ExecutionTimeoutInMilliseconds = 30000;
                 options.MaxConcurrentRequests = 200;

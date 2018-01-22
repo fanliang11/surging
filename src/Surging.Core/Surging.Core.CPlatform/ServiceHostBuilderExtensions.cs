@@ -27,13 +27,16 @@ namespace Surging.Core.CPlatform
                 var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
                 bool enableToken;
                 string serviceToken;
+                int _port = port;
                 string _ip = ip;
-                if (ip.IndexOf(".") < 0 || ip == "" || ip == "0.0.0.0")
+                _port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
+                _ip = AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
+                if (_ip.IndexOf(".") < 0 || _ip == "" || _ip == "0.0.0.0")
                 {
                     NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
                     foreach (NetworkInterface adapter in nics)
                     {
-                        if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet && (ip == "" || ip == "0.0.0.0" || ip == adapter.Name))
+                        if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet && (_ip == "" || _ip == "0.0.0.0" || _ip == adapter.Name))
                         {
                             IPInterfaceProperties ipxx = adapter.GetIPProperties();
                             UnicastIPAddressInformationCollection ipCollection = ipxx.UnicastAddresses;
@@ -47,7 +50,7 @@ namespace Surging.Core.CPlatform
                         }
                     }
                 }
-
+                
                 if (!bool.TryParse(token,out enableToken))
                 {
                       serviceToken= token;
@@ -60,7 +63,7 @@ namespace Surging.Core.CPlatform
                 var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                 new ServiceRoute
                 {
-                    Address = new[] { new IpAddressModel { Ip = _ip, Port = port, Token= serviceToken } },
+                    Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, Token= serviceToken } },
                     ServiceDescriptor = i.Descriptor
                 }).ToList();
                 mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
@@ -68,7 +71,7 @@ namespace Surging.Core.CPlatform
                 var serviceHost = mapper.Resolve<Runtime.Server.IServiceHost>();
                 Task.Factory.StartNew(async () =>
                 {
-                    await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse(_ip), port));
+                    await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse(_ip), _port));
                 }).Wait();
             });
         }
