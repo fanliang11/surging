@@ -22,7 +22,7 @@ namespace Surging.Modules.Common.Domain
         {
             this._repository = repository;
         }
-        
+
         public Task<string> GetUserName(int id)
         {
             return GetService<IUserService>("User").GetUserName(id);

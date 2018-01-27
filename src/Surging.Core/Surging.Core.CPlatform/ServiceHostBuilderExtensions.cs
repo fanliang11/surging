@@ -25,8 +25,7 @@ namespace Surging.Core.CPlatform
             {
                 mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
-                bool enableToken;
-                string serviceToken;
+                string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
                 int _port = port;
                 string _ip = ip;
                 _port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
@@ -51,15 +50,6 @@ namespace Surging.Core.CPlatform
                     }
                 }
                 
-                if (!bool.TryParse(token,out enableToken))
-                {
-                      serviceToken= token;
-                }
-                else
-                {
-                    if(enableToken) serviceToken = Guid.NewGuid().ToString("N");
-                    else serviceToken = null;
-                }
                 var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                 new ServiceRoute
                 {

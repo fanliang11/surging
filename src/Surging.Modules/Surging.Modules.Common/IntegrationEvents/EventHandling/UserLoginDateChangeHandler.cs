@@ -18,10 +18,10 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
         }
         public async Task Handle(UserEvent @event)
         {
-            await _userService.Update( int.Parse(@event.UserId),new UserModel()
-            {
+            //await _userService.Update( int.Parse(@event.UserId),new UserModel()
+            //{
 
-            });
+            //});
         }
     }
 }

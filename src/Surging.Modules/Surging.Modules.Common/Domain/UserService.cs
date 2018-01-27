@@ -56,15 +56,15 @@ namespace Surging.Modules.Common.Domain
                 Age = 18
             });
         }
-        
+
         public Task<bool> Update(int id, UserModel model)
         {
             return Task.FromResult(true);
         }
 
-        public   Task<bool> GetDictionary()
+        public Task<bool> GetDictionary()
         {
-            return  Task.FromResult<bool>(true);
+            return Task.FromResult<bool>(true);
         }
 
         public async Task Try()
@@ -89,7 +89,7 @@ namespace Surging.Modules.Common.Domain
         {
             if (requestData.UserName == "admin" && requestData.Password == "admin")
             {
-                return Task.FromResult(new UserModel() {  UserId=22,Name="admin"});
+                return Task.FromResult(new UserModel() { UserId = 22, Name = "admin" });
             }
             return Task.FromResult<UserModel>(null);
         }

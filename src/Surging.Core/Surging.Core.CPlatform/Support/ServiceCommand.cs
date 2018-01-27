@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -45,6 +46,12 @@ namespace Surging.Core.CPlatform.Support
         /// 注入
         /// </summary>
         public string Injection { get; set; } = "return null";
+
+        /// <summary>
+        /// 负载分流策略
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public AddressSelectorMode ShuntStrategy { get; set; } = AddressSelectorMode.Polling;
 
         public string[] InjectionNamespaces { get; set; }
 

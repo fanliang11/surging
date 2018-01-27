@@ -9,6 +9,7 @@ using Surging.Core.CPlatform.Convertibles.Implementation;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Filters.Implementation;
+using Surging.Core.CPlatform.HashAlgorithms;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Ioc;
@@ -358,6 +359,8 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceRouteFactory)).As(typeof(IServiceRouteFactory)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
+            services.RegisterType(typeof(ServiceTokenGenerator)).As(typeof(IServiceTokenGenerator)).SingleInstance();
+            services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();

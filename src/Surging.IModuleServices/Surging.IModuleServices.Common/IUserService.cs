@@ -23,7 +23,7 @@ namespace Surging.IModuleServices.Common
     {
         Task<UserModel> Authentication(AuthenticationRequestData requestData);
 
-        [Service(Date ="2017-8-11",Director ="fanly",Name ="获取用户")]
+        [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<string> GetUserName(int id);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "根据id查找用户是否存在")]
@@ -34,19 +34,19 @@ namespace Surging.IModuleServices.Common
 
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
-        Task<int>  GetUserId(string userName);
+        Task<int> GetUserId(string userName);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<DateTime> GetUserLastSignInTime(int id);
 
-        [Command(Strategy= StrategyType.Injection,Injection = @"return
+        [Command(Strategy = StrategyType.Injection, Injection = @"return
 new Surging.IModuleServices.Common.Models.UserModel
          {
             Name=""fanly"",
             Age=19
-         };", RequestCacheEnabled =false, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
+         };", RequestCacheEnabled = false, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
-        [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType =SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+        [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
 
         [Authorization(AuthType = AuthorizationType.JWT)]
@@ -58,7 +58,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<bool> Get(List<UserModel> users);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
-        [Command(Strategy = StrategyType.Injection, ExecutionTimeoutInMilliseconds=1500, BreakerRequestVolumeThreshold=3, Injection = @"return false;", RequestCacheEnabled = false)]
+        [Command(Strategy = StrategyType.Injection, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return false;", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<bool> GetDictionary();
 
