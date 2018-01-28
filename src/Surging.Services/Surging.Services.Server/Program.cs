@@ -3,6 +3,7 @@ using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;

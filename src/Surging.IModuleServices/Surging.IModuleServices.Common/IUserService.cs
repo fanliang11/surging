@@ -5,6 +5,7 @@ using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Routing.Implementation;
+using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Attributes;
@@ -34,6 +35,7 @@ namespace Surging.IModuleServices.Common
 
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
+        [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
         Task<int> GetUserId(string userName);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
@@ -58,7 +60,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<bool> Get(List<UserModel> users);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
-        [Command(Strategy = StrategyType.Injection, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return false;", RequestCacheEnabled = false)]
+        [Command(Strategy = StrategyType.Injection,ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return false;", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<bool> GetDictionary();
 
