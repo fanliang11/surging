@@ -33,12 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="TMatrix.Platform.ShareCenter.MemberApi.Models">
-      <HintPath>TMatrix.Platform.ShareCenter.MemberApi.Models.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="cacheSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
