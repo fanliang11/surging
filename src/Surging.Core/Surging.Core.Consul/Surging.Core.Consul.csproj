@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Consul" Version="0.7.2.3" />
+    <PackageReference Include="Consul" Version="0.7.2.4" />
   </ItemGroup>
 
   <ItemGroup>

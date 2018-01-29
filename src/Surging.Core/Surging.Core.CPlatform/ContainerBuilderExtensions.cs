@@ -384,7 +384,8 @@ namespace Surging.Core.CPlatform
                 }
                 finally
                 {
-                    _referenceAssembly.Clear();
+                     _referenceAssembly.Clear();
+                    builder = null;
                 }
             }).As<IServiceEntryProvider>();
             builder.Services.RegisterType(typeof(DefaultServiceEntryManager)).As(typeof(IServiceEntryManager)).SingleInstance();
@@ -527,18 +528,27 @@ namespace Surging.Core.CPlatform
             }
             return abstractModules;
         }
-        
+
         private static List<string> GetAllAssemblyFiles(string parentDir)
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
-              var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
+            var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
             var pattern = string.Format("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            return
-                Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
-                    a => !notRelatedRegex.IsMatch(a) || relatedRegex.IsMatch(a)).ToList();
+            if (!string.IsNullOrEmpty(relatedFile))
+            {
+                return
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a) || relatedRegex.IsMatch(a)).ToList();
+            }
+            else
+            {
+                return
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a)).ToList();
+            }
         }
     }
 }

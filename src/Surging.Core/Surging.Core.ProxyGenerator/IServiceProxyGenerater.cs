@@ -7,7 +7,7 @@ namespace Surging.Core.ProxyGenerator
     /// <summary>
     /// 一个抽象的服务代理生成器。
     /// </summary>
-    public interface IServiceProxyGenerater
+    public interface IServiceProxyGenerater:IDisposable
     {
         /// <summary>
         /// 生成服务代理。

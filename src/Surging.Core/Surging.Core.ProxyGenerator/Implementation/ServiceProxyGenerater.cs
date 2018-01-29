@@ -25,7 +25,7 @@ using Surging.Core.CPlatform;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
-    public class ServiceProxyGenerater : IServiceProxyGenerater
+    public class ServiceProxyGenerater : IServiceProxyGenerater,IDisposable
     {
         #region Field
 
@@ -82,8 +82,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
 #else
                 var assembly = AssemblyLoadContext.Default.LoadFromStream(stream);
 #endif
-
-                return assembly.GetExportedTypes();
+               return assembly.GetExportedTypes();
             }
         }
 
@@ -368,6 +367,11 @@ namespace Surging.Core.ProxyGenerator.Implementation
                             SingletonList(statementSyntax)));
 
             return declaration;
+        }
+
+        public void Dispose()
+        { 
+            GC.SuppressFinalize(this);
         }
 
         #endregion Private Method

@@ -39,7 +39,9 @@ namespace Surging.Core.ProxyGenerator.Implementation
             _typeConvertibleService = typeConvertibleService;
             _serviceProvider = serviceProvider;
             if (types != null)
-                _serviceTypes = _serviceProvider.GetService<IServiceProxyGenerater>().GenerateProxys(types).ToArray();
+            {
+               RegisterProxType(types.ToArray());
+            }
         }
 
         #endregion Constructor
@@ -94,7 +96,9 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
         public void RegisterProxType(params Type[] types)
         {
-            _serviceTypes = _serviceProvider.GetService<IServiceProxyGenerater>().GenerateProxys(types).ToArray();
+            var proxyGenerater = _serviceProvider.GetService<IServiceProxyGenerater>();
+            _serviceTypes = proxyGenerater.GenerateProxys(types).ToArray();
+            proxyGenerater.Dispose();
         }
 
         #endregion Implementation of IServiceProxyFactory

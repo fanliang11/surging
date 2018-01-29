@@ -79,7 +79,7 @@ namespace Surging.Core.CPlatform.Messages
         /// <returns>调用传输消息。</returns>
         public static TransportMessage CreateInvokeMessage(RemoteInvokeMessage invokeMessage)
         {
-            return new TransportMessage(invokeMessage,typeof(RemoteInvokeMessage).FullName)
+            return new TransportMessage(invokeMessage,  typeof(RemoteInvokeMessage).FullName)
             {
                 Id = Guid.NewGuid().ToString("N")
             };
@@ -93,7 +93,7 @@ namespace Surging.Core.CPlatform.Messages
         /// <returns>调用结果传输消息。</returns>
         public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
         {
-            return new TransportMessage(invokeResultMessage,typeof(RemoteInvokeResultMessage).FullName)
+            return new TransportMessage(invokeResultMessage, typeof(RemoteInvokeResultMessage).FullName)
             {
                 Id = id
             };
