@@ -2,6 +2,8 @@
 using Surging.Core.CPlatform.Utilities;
 using System;
 using Autofac;
+using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.EventBus.Implementation;
 
 namespace Surging.Core.ProxyGenerator
 {
@@ -63,6 +65,11 @@ namespace Surging.Core.ProxyGenerator
             else
                 return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key,type);
            
+        }
+
+        public void Publish(IntegrationEvent @event)
+        {
+            GetService<IEventBus>().Publish(@event);
         }
     }
 }

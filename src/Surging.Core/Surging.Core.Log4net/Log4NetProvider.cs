@@ -36,7 +36,9 @@ namespace Surging.Core.Log4net
         private static XmlElement Parselog4NetConfigFile(string filename)
         {
             XmlDocument log4netConfig = new XmlDocument();
-            log4netConfig.Load(File.OpenRead(filename));
+            var stream= File.OpenRead(filename);
+            log4netConfig.Load(stream);
+            stream.Close();
             return log4netConfig["log4net"];
         }
     }
