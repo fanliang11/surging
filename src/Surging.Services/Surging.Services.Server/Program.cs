@@ -3,9 +3,9 @@ using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
-using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
+//using Surging.Core.EventBusKafka;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.Log4net;
 using Surging.Core.ProxyGenerator;
@@ -37,6 +37,15 @@ namespace Surging.Services.Server
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
                         option.AddRabbitMQAdapt();
+                        //option.UseKafkaMQTransport(kafkaOption =>
+                        //{
+                        //    kafkaOption.Servers = "127.0.0.1";
+                        //    kafkaOption.LogConnectionClose = false;
+                        //    kafkaOption.MaxQueueBuffering = 10;
+                        //    kafkaOption.MaxSocketBlocking = 10;
+                        //    kafkaOption.EnableAutoCommit = false;
+                        //});
+                        //option.AddKafkaMQAdapt();
                         //option.UseProtoBufferCodec();
                         option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Surging.Core.EventBusRabbitMQ.Configurations
+namespace Surging.Core.EventBusKafka.Configurations
 {
     public static class EventBusConfigurationExtensions
     {

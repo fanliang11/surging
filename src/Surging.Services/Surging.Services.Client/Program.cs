@@ -5,6 +5,7 @@ using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
+using Surging.Core.EventBusKafka;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.Log4net;
 using Surging.Core.ProxyGenerator;
@@ -39,6 +40,10 @@ namespace Surging.Services.Client
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
+                        //option.UseKafkaMQTransport(kafkaOption =>
+                        //{
+                        //    kafkaOption.Servers = "127.0.0.1";
+                        //});
                         //option.UseProtoBufferCodec();
                         option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
