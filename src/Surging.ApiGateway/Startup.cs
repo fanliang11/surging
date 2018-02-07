@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Surging.Core.ApiGateWay;
+using Surging.Core.ApiGateWay.Configurations;
 using Surging.Core.ApiGateWay.OAuth.Implementation.Configurations;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
@@ -18,8 +19,11 @@ using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.System.Intercept;
-//using Surging.Core.Zookeeper.Configurations;
+using Surging.Core.Zookeeper;
+//using Surging.Core.Zookeeper;
+using ZookeeperConfigInfo =  Surging.Core.Zookeeper.Configurations.ConfigInfo;
 using System;
+using ApiGateWayConfig = Surging.Core.ApiGateWay.AppConfig;
 
 namespace Surging.ApiGateway
 {
@@ -37,8 +41,6 @@ namespace Surging.ApiGateway
               .AddJsonFile("Configs/appsettings.json", optional: true, reloadOnChange: true)
               .AddGatewayFile("Configs/gatewaySettings.json", optional: false)
               .AddJsonFile($"Configs/appsettings.{env.EnvironmentName}.json", optional: true);
-              
-
             Configuration = builder.Build();
         }
 
@@ -49,30 +51,37 @@ namespace Surging.ApiGateway
 
         private IServiceProvider RegisterAutofac(IServiceCollection services)
         {
-            services.AddMvc().AddJsonOptions(options => {
+            var registerConfig = ApiGateWayConfig.Register;
+            services.AddMvc(options => {
+                options.Filters.Add(typeof(CustomExceptionFilterAttribute));
+            }).AddJsonOptions(options => {
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver();
             });
             services.AddLogging();
             var builder = new ContainerBuilder();
-            builder.Populate(services);
+            builder.Populate(services); 
             builder.AddMicroService(option =>
             {
-
                 option.AddClient();
                 option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
+               if(registerConfig.Provider== RegisterProvider.Consul)
+                option.UseConsulManager(new ConfigInfo(registerConfig.Address));
+               else if(registerConfig.Provider == RegisterProvider.Zookeeper)
+                    option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
                 //option.UseProtoBufferCodec();
                 option.UseMessagePackCodec();
-                builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
+                builder.Register(m => new CPlatformContainer(ServiceLocator.Current));
             });
             ServiceLocator.Current = builder.Build();
             return new AutofacServiceProvider(ServiceLocator.Current);
-        }
 
+        }
+        
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole();

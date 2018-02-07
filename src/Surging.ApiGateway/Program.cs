@@ -1,22 +1,19 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Surging.Core.ServiceHosting.Internal.Implementation;
-using Surging.Core.System.Ioc;
-using Surging.Core.CPlatform;
-using Surging.Core.ProxyGenerator;
-using Surging.Core.System.Intercept;
-using Surging.Core.Consul.Configurations;
-using Surging.Core.DotNetty;
-using Surging.Core.Consul;
-using Autofac;
-using Surging.Core.ProxyGenerator.Utilitys;
-using Surging.Core.ServiceHosting;
-using Surging.Core.ServiceHosting.Internal;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using System.Net;
+using Surging.Core.ApiGateWay;
+using Surging.Core.Codec.MessagePack;
+using Surging.Core.Consul;
+using Surging.Core.Consul.Configurations;
+using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Utilities;
+using Surging.Core.DotNetty;
+using Surging.Core.ProxyGenerator;
+using Surging.Core.ServiceHosting;
+using Surging.Core.System.Intercept;
 using System;
+using System.IO;
 
 namespace Surging.ApiGateway
 {
@@ -25,7 +22,7 @@ namespace Surging.ApiGateway
         public static void Main(string[] args)
         {
             var host = new WebHostBuilder()
-                .UseUrls("http://localhost:729")
+                .UseUrls("http://*:729")
                 .UseKestrel(options =>
                 {
                     options.Limits.MaxConcurrentConnections =100;

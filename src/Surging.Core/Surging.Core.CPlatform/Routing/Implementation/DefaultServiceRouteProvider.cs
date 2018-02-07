@@ -47,6 +47,20 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
+
+        public ValueTask<ServiceRoute> GetRouteByPath(string path)
+        {
+            _serviceRoute.TryGetValue(path.ToLower(), out ServiceRoute route);
+            if (route == null)
+            {
+                return new ValueTask<ServiceRoute>(GetRouteByPathAsync(path));
+            }
+            else
+            {
+                return new ValueTask<ServiceRoute>(route);
+            }
+        }
+
         #region 私有方法
         private static string GetCacheKey(ServiceDescriptor descriptor)
         {
@@ -68,22 +82,18 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             _serviceRoute.GetOrAdd(e.Route.ServiceDescriptor.RoutePath, e.Route);
         }
 
-        public async Task<ServiceRoute> GetRouteByPath(string path)
+
+        private async Task<ServiceRoute> GetRouteByPathAsync(string path)
         {
-            _serviceRoute.TryGetValue(path.ToLower(), out ServiceRoute route);
+            var routes = await _serviceRouteManager.GetRoutesAsync();
+            var  route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath == path);
             if (route == null)
             {
-                var routes = await _serviceRouteManager.GetRoutesAsync();
-                route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath == path);
-                if (route == null)
-                {
-                    if (_logger.IsEnabled(LogLevel.Warning))
-                        _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
-
-                }
-                else
-                    _serviceRoute.GetOrAdd(path, route);
+                if (_logger.IsEnabled(LogLevel.Warning))
+                    _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
             }
+            else
+                _serviceRoute.GetOrAdd(path, route);
             return route;
         }
         #endregion

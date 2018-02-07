@@ -6,12 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.1" />
+    <PackageReference Include="Autofac" Version="4.6.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,7 +22,9 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Consul\Surging.Core.Consul.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DotNetty\Surging.Core.DotNetty.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusKafka\Surging.Core.EventBusKafka.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusRabbitMQ\Surging.Core.EventBusRabbitMQ.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Log4net\Surging.Core.Log4net.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.System\Surging.Core.System.csproj" />
@@ -36,6 +38,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="eventBusSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configs\log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

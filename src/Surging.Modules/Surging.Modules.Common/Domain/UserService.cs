@@ -5,6 +5,7 @@ using Surging.Core.CPlatform.Ioc;
 using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
+using Surging.IModuleServices.User;
 using Surging.Modules.Common.Repositories;
 using System;
 using System.Collections.Generic;
@@ -17,11 +18,9 @@ namespace Surging.Modules.Common.Domain
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
-        private readonly IEventBus _eventBus;
-        public UserService(UserRepository repository, IEventBus eventBus)
+        public UserService(UserRepository repository)
         {
             this._repository = repository;
-            this._eventBus = eventBus;
         }
 
         public Task<string> GetUserName(int id)
@@ -41,7 +40,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<DateTime> GetUserLastSignInTime(int id)
         {
-            return Task.FromResult(DateTime.Now);
+            return Task.FromResult(new DateTime(DateTime.Now.Ticks, DateTimeKind.Utc));
         }
 
         public Task<bool> Get(List<UserModel> users)
@@ -57,7 +56,7 @@ namespace Surging.Modules.Common.Domain
                 Age = 18
             });
         }
-        
+
         public Task<bool> Update(int id, UserModel model)
         {
             return Task.FromResult(true);
@@ -82,7 +81,7 @@ namespace Surging.Modules.Common.Domain
 
         public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
         {
-            _eventBus.Publish(evt);
+            Publish(evt);
             await Task.CompletedTask;
         }
 
@@ -90,7 +89,7 @@ namespace Surging.Modules.Common.Domain
         {
             if (requestData.UserName == "admin" && requestData.Password == "admin")
             {
-                return Task.FromResult(new UserModel() {  UserId=22,Name="admin"});
+                return Task.FromResult(new UserModel() { UserId = 22, Name = "admin" });
             }
             return Task.FromResult<UserModel>(null);
         }

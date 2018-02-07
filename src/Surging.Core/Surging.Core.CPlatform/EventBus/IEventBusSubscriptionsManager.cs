@@ -8,6 +8,7 @@ namespace Surging.Core.CPlatform.EventBus
    public interface IEventBusSubscriptionsManager
     {
         bool IsEmpty { get; }
+
         event EventHandler<string> OnEventRemoved;
         void AddSubscription<T, TH>(Func<TH> handler)
            where TH : IIntegrationEventHandler<T>;

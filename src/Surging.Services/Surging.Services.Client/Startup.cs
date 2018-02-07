@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
@@ -10,6 +11,7 @@ using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models.Events;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -75,9 +77,10 @@ namespace Surging.Services.Client
         {
             Task.Run(async () =>
             {
-
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                await userProxy.GetUserId("user");
+               await userProxy.GetUserId("user");
+               await userProxy.GetDictionary();
+                var serviceProxyProvider=  ServiceLocator.GetService<IServiceProxyProvider>();
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
@@ -86,6 +89,7 @@ namespace Surging.Services.Client
                     for (var i = 0; i < 10000; i++)
                     {
                         var a = userProxy.GetDictionary().Result;
+                        //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
@@ -105,6 +109,24 @@ namespace Surging.Services.Client
                 Name = "fanly",
                 UserId = "1"
             });
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadLine();
+        }
+
+        public static void TestForRoutePath(IServiceProxyProvider serviceProxyProvider)
+        {
+            Dictionary<string, object> model = new Dictionary<string, object>();
+            model.Add("user", JsonConvert.SerializeObject( new
+            {
+                Name = "fanly",
+                Age = 18,
+                UserId = 1
+            }));
+            string path = "api/user/getuser";
+            string serviceKey = "User";
+
+            var userProxy = serviceProxyProvider.Invoke<object>(model, path, serviceKey);
+            var s = userProxy.Result;
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();
         }

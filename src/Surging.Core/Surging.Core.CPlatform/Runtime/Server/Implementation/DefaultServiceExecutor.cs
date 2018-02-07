@@ -128,7 +128,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                         if (taskType.IsGenericType)
                             resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
                     }
-                    if( remoteInvokeMessage.DecodeJOject && !(resultMessage.Result is IConvertible && typeof(IConvertible).GetTypeInfo().IsAssignableFrom(resultMessage.Result.GetType())))
+                 
+                    if(remoteInvokeMessage.DecodeJOject && !(resultMessage.Result is IConvertible && typeof(IConvertible).GetTypeInfo().IsAssignableFrom(resultMessage.Result.GetType())))
                     {
                         resultMessage.Result = JsonConvert.SerializeObject(resultMessage.Result);
                     }

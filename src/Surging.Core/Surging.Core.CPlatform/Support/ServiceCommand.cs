@@ -1,13 +1,32 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Surging.Core.CPlatform.Support
 {
-   public class ServiceCommand
+    public class ServiceCommand
     {
+        public ServiceCommand()
+        {
+            if (AppConfig.ServerOptions != null)
+            {
+                FailoverCluster = AppConfig.ServerOptions.FailoverCluster;
+                CircuitBreakerForceOpen = AppConfig.ServerOptions.CircuitBreakerForceOpen;
+                Strategy = AppConfig.ServerOptions.Strategy;
+                ExecutionTimeoutInMilliseconds = AppConfig.ServerOptions.ExecutionTimeoutInMilliseconds;
+                RequestCacheEnabled = AppConfig.ServerOptions.RequestCacheEnabled;
+                Injection = AppConfig.ServerOptions.Injection;
+                InjectionNamespaces = AppConfig.ServerOptions.InjectionNamespaces;
+                BreakeErrorThresholdPercentage = AppConfig.ServerOptions.BreakeErrorThresholdPercentage;
+                BreakeSleepWindowInMilliseconds = AppConfig.ServerOptions.BreakeSleepWindowInMilliseconds;
+                BreakerForceClosed = AppConfig.ServerOptions.BreakerForceClosed;
+                BreakerRequestVolumeThreshold = AppConfig.ServerOptions.BreakerRequestVolumeThreshold;
+                MaxConcurrentRequests = AppConfig.ServerOptions.MaxConcurrentRequests;
+            }
+        }
         public int FailoverCluster { get; set; } = 3;
         public bool CircuitBreakerForceOpen { get; set; }
         /// <summary>
@@ -27,6 +46,12 @@ namespace Surging.Core.CPlatform.Support
         /// 注入
         /// </summary>
         public string Injection { get; set; } = "return null";
+
+        /// <summary>
+        /// 负载分流策略
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public AddressSelectorMode ShuntStrategy { get; set; } = AddressSelectorMode.Polling;
 
         public string[] InjectionNamespaces { get; set; }
 
@@ -51,7 +76,7 @@ namespace Surging.Core.CPlatform.Support
         /// <summary>
         /// 信号量最大并发度
         /// </summary>
-        public int MaxConcurrentRequests { get; set; } = 10;
+        public int MaxConcurrentRequests { get; set; } = 200;
 
     }
 }

@@ -16,8 +16,6 @@ namespace Surging.Core.ServiceHosting
     {
         public static IServiceHostBuilder UseStartup(this IServiceHostBuilder hostBuilder, Type startupType)
         {
-            var startupAssemblyName = startupType.GetTypeInfo().Assembly.GetName().Name;
-
             return hostBuilder
                 .ConfigureServices(services =>
                 {

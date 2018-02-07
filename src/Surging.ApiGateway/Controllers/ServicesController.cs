@@ -24,11 +24,14 @@ namespace Surging.ApiGateway.Controllers
         private readonly IServiceRouteProvider _serviceRouteProvider;
         private readonly IAuthorizationServerProvider _authorizationServerProvider;
 
-        public ServicesController()
+     
+        public ServicesController(IServiceProxyProvider serviceProxyProvider, 
+            IServiceRouteProvider serviceRouteProvider,
+            IAuthorizationServerProvider authorizationServerProvider)
         {
-            _serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
-            _serviceRouteProvider = ServiceLocator.GetService<IServiceRouteProvider>();
-            _authorizationServerProvider = ServiceLocator.GetService<IAuthorizationServerProvider>();
+            _serviceProxyProvider = serviceProxyProvider;
+            _serviceRouteProvider = serviceRouteProvider;
+            _authorizationServerProvider = authorizationServerProvider;
         }
        
         public async Task<ServiceResult<object>> Path(string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)

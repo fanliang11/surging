@@ -2,11 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Version>0.5.5</Version>
+    <Authors>fanly</Authors>
+    <Product>surging Micro Service Framework</Product>
+    <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
+    <Company />
+    <PackageReleaseNotes>1.Add IpEndpoint to configure non-loopback IP address
+2.Fix the name of the module file without constraint
+3.Add third-party dependency injection
+4.Fixed RelatedAssemblyFiles not set throw BUG
+5.Refactor this.Publish () call</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageTags>MicroService surging</PackageTags>
+    <AssemblyVersion>0.5.5.0</AssemblyVersion>
+    <FileVersion>0.5.5.0</FileVersion>
+    <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.3.1" />
+    <PackageReference Include="Autofac" Version="4.6.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.6.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>

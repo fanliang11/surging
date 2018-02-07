@@ -45,12 +45,12 @@ namespace Surging.Core.Codec.MessagePack.Messages
 
         public bool IsInvokeMessage()
         {
-            return ContentType == typeof(RemoteInvokeMessage).FullName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
         }
 
         public bool IsInvokeResultMessage()
         {
-            return ContentType == typeof(RemoteInvokeResultMessage).FullName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
         }
 
         public TransportMessage GetTransportMessage()

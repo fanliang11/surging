@@ -43,12 +43,18 @@ namespace Surging.Core.ProxyGenerator
                 .AddClientProxy();
         }
 
+       public  static IServiceBuilder AddRelateService(this IServiceBuilder builder)
+        {
+            return builder.AddRelateServiceRuntime().AddClientProxy();
+        }
+        
         public static IServiceBuilder AddClient(this IServiceBuilder builder)
         {
             return builder
                 .RegisterServices()
                 .RegisterRepositories()
                 .RegisterServiceBus()
+                .RegisterModules()
                 .AddClientRuntime()
                 .AddClientProxy();
         }

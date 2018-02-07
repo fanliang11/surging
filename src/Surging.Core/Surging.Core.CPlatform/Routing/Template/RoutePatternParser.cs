@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -20,7 +21,7 @@ namespace Surging.Core.CPlatform.Routing.Template
                 }
                 else if (service.EndsWith(param))
                 {
-                    result.Append(service.TrimStart('I').Substring(0, service.Length-param.Length-1));
+                    result.Append(service.TrimStart('I').Substring(0, service.Length - param.Length - 1));
                 }
                 else if (param == "Method")
                 {

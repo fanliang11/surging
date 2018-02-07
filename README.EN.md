@@ -27,6 +27,8 @@ var host = new ServiceHostBuilder()
                 .UseServer("127.0.0.1", 98)
               //.UseServer("127.0.0.1", 98，“true”) //Automatically generate Token
               //.UseServer("127.0.0.1", 98，“123456789”) //Fixed password Token
+                .UseLog4net("Configs/log4net.config") //Use log4net to generate the log
+                .UseLog4net()  //Use log4net to generate the log
                 .UseStartup<Startup>()
                 .Build();
                 
@@ -130,6 +132,6 @@ IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
 The framework：.NET core 2.0
 <br/>
-如有任何问题可以加入QQ群：615562965 Gitter:not room
+如有任何问题可以加入QQ群：542283494 Gitter:not room
 <br/>
 [Blog]:https://www.cnblogs.com/fanliang11

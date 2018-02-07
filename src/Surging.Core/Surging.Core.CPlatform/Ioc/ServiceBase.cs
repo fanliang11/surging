@@ -7,22 +7,22 @@ namespace Surging.Core.CPlatform.Ioc
 {
     public abstract class ServiceBase
     {
-        public T GetService<T>()
+        public virtual T GetService<T>() where T : class
         {
             return ServiceLocator.GetService<T>();
         }
 
-        public T GetService<T>(string key)
+        public virtual T GetService<T>(string key) where T : class
         {
             return ServiceLocator.GetService<T>(key);
         }
 
-        public object GetService(Type type)
+        public virtual object GetService(Type type)
         {
             return ServiceLocator.GetService(type);
         }
 
-        public object GetService(string key, Type type)
+        public virtual object GetService(string key, Type type)
         {
             return ServiceLocator.GetService(key, type);
         }

@@ -26,11 +26,11 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             if (context.Address == null)
                 throw new ArgumentNullException(nameof(context.Address));
 
-            var address = context.Address.ToArray();
-            if (!address.Any())
+            //  var address = context.Address.ToArray();
+            if (context.Address.Count() == 0)
                 throw new ArgumentException("没有任何地址信息。", nameof(context.Address));
 
-            return address.Length == 1 ?  new ValueTask<AddressModel>(address[0]) : new ValueTask<AddressModel>(SelectAsync(context));
+            return context.Address.Count() == 1 ? new ValueTask<AddressModel>(context.Address.First()) : new ValueTask<AddressModel>(SelectAsync(context));
         }
 
         #endregion Implementation of IAddressSelector

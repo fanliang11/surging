@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Common", "Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj", "{F9B2DBAE-34D5-4CF0-9CBB-67A87580BB6A}"
 EndProject
@@ -47,10 +47,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Codec.ProtoBuf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Codec.MessagePack", "Surging.Core\Surging.Core.Codec.MessagePack\Surging.Core.Codec.MessagePack.csproj", "{1059AE4E-7391-4AC9-AECE-4B4FBE3AA243}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Log4net", "Surging.Core\Surging.Core.Log4net\Surging.Core.Log4net.csproj", "{9A8C2055-997D-4F95-8FA3-5F01F0402923}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.EventBusKafka", "Surging.Core\Surging.Core.EventBusKafka\Surging.Core.EventBusKafka.csproj", "{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Modules.Manager", "Surging.Modules\Surging.Modules.Manager\Surging.Modules.Manager.csproj", "{AF8FAB5B-029E-438F-AD57-B46681046D3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.IModuleServices.Manager", "Surging.IModuleServices\Surging.IModuleServices.Manger\Surging.IModuleServices.Manager.csproj", "{78F64412-7403-449C-8AC4-C5C0A58E4A0E}"
+EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -128,6 +133,22 @@ Global
 		{1059AE4E-7391-4AC9-AECE-4B4FBE3AA243}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1059AE4E-7391-4AC9-AECE-4B4FBE3AA243}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1059AE4E-7391-4AC9-AECE-4B4FBE3AA243}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A8C2055-997D-4F95-8FA3-5F01F0402923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A8C2055-997D-4F95-8FA3-5F01F0402923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A8C2055-997D-4F95-8FA3-5F01F0402923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A8C2055-997D-4F95-8FA3-5F01F0402923}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF8FAB5B-029E-438F-AD57-B46681046D3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF8FAB5B-029E-438F-AD57-B46681046D3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF8FAB5B-029E-438F-AD57-B46681046D3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF8FAB5B-029E-438F-AD57-B46681046D3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78F64412-7403-449C-8AC4-C5C0A58E4A0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78F64412-7403-449C-8AC4-C5C0A58E4A0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78F64412-7403-449C-8AC4-C5C0A58E4A0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78F64412-7403-449C-8AC4-C5C0A58E4A0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -150,9 +171,28 @@ Global
 		{F467EA55-5779-46B6-87E4-00476DE2C401} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{50BA075B-6DD7-419E-B3AD-4876BE930BD5} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{1059AE4E-7391-4AC9-AECE-4B4FBE3AA243} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{9A8C2055-997D-4F95-8FA3-5F01F0402923} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{A93EE1A1-A939-425C-A074-5DAD39BE9EE0} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{AF8FAB5B-029E-438F-AD57-B46681046D3F} = {CAC2EAD5-5AC7-44A2-9705-F2D8D3012A6F}
+		{78F64412-7403-449C-8AC4-C5C0A58E4A0E} = {F65BE227-30B5-4217-AEC8-AD7F96411702}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
