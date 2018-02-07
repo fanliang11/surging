@@ -437,6 +437,12 @@ namespace Surging.Core.Caching.RedisCache
             return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
         }
 
+        public bool Connection(CacheEndpoint endpoint)
+        { 
+            return CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString())
+                  .Connection(endpoint, ConnectTimeout).IsConnected;
+        }
+
         #endregion
 
 

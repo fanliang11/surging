@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Surging.Core.Caching;
 using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
@@ -49,6 +50,7 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
+                .UseServiceCache()
                 .UseProxy()
                 .UseLog4net()
                 .UseClient()
