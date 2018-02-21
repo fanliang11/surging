@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Cache;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,7 +12,7 @@ namespace Surging.Core.Caching.HashAlgorithms
     /// 	<para>创建：范亮</para>
     /// 	<para>日期：2016/4/2</para>
     /// </remarks>
-    public class ConsistentHashNode
+    public class ConsistentHashNode: CacheEndpoint
     {
         /// <summary>
         /// 缓存目标类型
@@ -33,7 +34,7 @@ namespace Surging.Core.Caching.HashAlgorithms
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public string Host { get; set; }
+        public new string Host { get; set; }
 
         /// <summary>
         /// 端口
@@ -42,7 +43,7 @@ namespace Surging.Core.Caching.HashAlgorithms
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public string Port { get; set; }
+        public new string Port { get; set; }
 
         /// <summary>
         /// 用户名
@@ -100,6 +101,11 @@ namespace Surging.Core.Caching.HashAlgorithms
                     _minSize = value;
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return string.Concat(new string[] { Host, ":", Port.ToString() });
         }
     }
 }

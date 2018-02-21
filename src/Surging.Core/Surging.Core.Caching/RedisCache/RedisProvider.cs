@@ -1,6 +1,7 @@
 ﻿using StackExchange.Redis;
 using Surging.Core.Caching.HashAlgorithms;
 using Surging.Core.Caching.Interfaces;
+using Surging.Core.CPlatform.Cache;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,16 +19,26 @@ namespace Surging.Core.Caching.RedisCache
         private const double ExpireTime = 60D;
         private string _keySuffix;
         private Lazy<int> _connectTimeout;
+        private readonly ICacheClient<IDatabase> _cacheClient;
         #endregion
 
         #region 构造函数
 
         public RedisProvider(string appName)
         {
-            _context = new Lazy<RedisContext>(() => CacheContainer.GetInstances<RedisContext>(appName));
+            _context = new Lazy<RedisContext>(() => {
+                if (CacheContainer.IsRegistered<RedisContext>(CacheTargetType.Redis.ToString()))
+                   return CacheContainer.GetService<RedisContext>(appName);
+                else
+                  return  CacheContainer.GetInstances<RedisContext>(appName);
+            });
             _keySuffix = appName;
             _defaultExpireTime = new Lazy<long>(() => long.Parse(_context.Value._defaultExpireTime));
             _connectTimeout = new Lazy<int>(() => int.Parse(_context.Value._connectTimeout));
+            if (CacheContainer.IsRegistered<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()))
+                _cacheClient = CacheContainer.GetService<ICacheClient<IDatabase>>();
+            else
+            _cacheClient = CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString());
         }
 
         public RedisProvider()
@@ -406,7 +417,7 @@ namespace Surging.Core.Caching.RedisCache
         private IDatabase GetRedisClient(CacheEndpoint info)
         {
             return
-                CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString())
+                _cacheClient
                     .GetClient(info, ConnectTimeout);
         }
 
@@ -437,10 +448,11 @@ namespace Surging.Core.Caching.RedisCache
             return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
         }
 
-        public bool Connection(CacheEndpoint endpoint)
+        public async Task<bool> ConnectionAsync(CacheEndpoint endpoint)
         { 
-            return CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString())
-                  .Connection(endpoint, ConnectTimeout).IsConnected;
+            var connection=await _cacheClient
+                  .ConnectionAsync(endpoint, ConnectTimeout);
+            return connection;
         }
 
         #endregion

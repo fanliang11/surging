@@ -1,7 +1,9 @@
 ﻿using StackExchange.Redis;
+using Surging.Core.CPlatform.Cache;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.Interfaces
 {
@@ -9,6 +11,7 @@ namespace Surging.Core.Caching.Interfaces
     {
         T GetClient(CacheEndpoint info, int connectTimeout);
 
-        ConnectionMultiplexer Connection(CacheEndpoint endpoint, int connectTimeout);
+        Task<bool> ConnectionAsync(CacheEndpoint endpoint, int connectTimeout);
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Surging.Core.Caching.Interfaces;
 using Surging.Core.Caching.RedisCache;
+using Surging.Core.CPlatform.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -140,6 +141,11 @@ namespace Surging.Core.Caching.NetCache
             await Task.Run(() => MemoryCache.Remove(GetKeySuffix(key)));
         }
 
+        public Task<bool> ConnectionAsync(CacheEndpoint endpoint)
+        {
+            return Task.FromResult<bool>(true);
+        }
+
         #endregion
 
         #region 属性
@@ -180,11 +186,6 @@ namespace Surging.Core.Caching.NetCache
         private string GetKeySuffix(string key)
         {
             return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
-        }
-
-        public bool Connection(CacheEndpoint endpoint)
-        {
-            return true;
         }
         #endregion
 

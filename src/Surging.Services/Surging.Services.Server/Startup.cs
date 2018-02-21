@@ -12,10 +12,8 @@ namespace Surging.Services.Server
 {
     public class Startup
     {
-        public Startup()
-        {
-            var config = new ConfigurationBuilder()
-           .SetBasePath(AppContext.BaseDirectory);
+        public Startup(IConfigurationBuilder config)
+        { 
             ConfigureEventBus(config);
             ConfigureCache(config);
         }

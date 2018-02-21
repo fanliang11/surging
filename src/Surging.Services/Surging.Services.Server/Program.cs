@@ -1,10 +1,13 @@
 ﻿using Autofac;
+using Surging.Core.Caching;
+using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
+using Surging.Core.EventBusKafka.Configurations;
 //using Surging.Core.EventBusKafka;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.Log4net;
@@ -37,6 +40,7 @@ namespace Surging.Services.Server
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
                         option.AddRabbitMQAdapt();
+                        // option.AddCache();
                         //option.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";
@@ -46,13 +50,12 @@ namespace Surging.Services.Server
                         //    kafkaOption.EnableAutoCommit = false;
                         //});
                         //option.AddKafkaMQAdapt();
-                        //option.UseProtoBufferCodec();
+                        //option.UseProtoBufferCodec(); 
                         option.UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
                 .SubscribeAt()
-                .UseLog4net("Configs/log4net.config")
                 //.UseServer("127.0.0.1", 98)
                 //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
                 //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
@@ -66,6 +69,12 @@ namespace Surging.Services.Server
                     options.MaxConcurrentRequests = 200;
                     options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*";
                 })
+                .UseServiceCache()
+                .ConfigureServices(build =>
+                build.AddEventBusFile("eventBusSettings.json", optional: false))
+                .ConfigureServices(build =>
+                build.AddCacheFile("cacheSettings.json", optional: false))
+                .UseLog4net("Configs/log4net.config")
                 .UseProxy()
                 .UseStartup<Startup>()
                 .Build();

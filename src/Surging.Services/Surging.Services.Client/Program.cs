@@ -50,9 +50,9 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-                .UseServiceCache()
-                .UseProxy()
                 .UseLog4net()
+                .UseServiceCache()
+                .UseProxy() 
                 .UseClient()
                 .UseStartup<Startup>()
                 .Build();

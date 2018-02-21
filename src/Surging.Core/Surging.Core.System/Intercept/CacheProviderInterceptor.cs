@@ -1,4 +1,5 @@
 ﻿using Surging.Core.Caching;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.ProxyGenerator.Interceptors;
 using System.Linq;
 using System.Threading.Tasks;

@@ -1,4 +1,5 @@
 ﻿using Surging.Core.Caching.Interfaces;
+using Surging.Core.CPlatform.Cache;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.HealthChecks

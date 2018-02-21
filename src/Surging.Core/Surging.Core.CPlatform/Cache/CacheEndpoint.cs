@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Text;
 
-namespace Surging.Core.Caching.Interfaces
+namespace Surging.Core.CPlatform.Cache
 {
     public abstract class CacheEndpoint
     {
@@ -32,7 +31,7 @@ namespace Surging.Core.Caching.Interfaces
             get;
             set;
         }
-        
+
         public abstract override string ToString();
 
         #region Equality members

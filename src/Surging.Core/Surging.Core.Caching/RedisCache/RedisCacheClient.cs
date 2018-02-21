@@ -1,8 +1,10 @@
 ﻿using StackExchange.Redis;
 using Surging.Core.Caching.Interfaces;
 using Surging.Core.Caching.Utilities;
+using Surging.Core.CPlatform.Cache;
 using System;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.RedisCache
 {
@@ -12,19 +14,20 @@ namespace Surging.Core.Caching.RedisCache
         private static readonly ConcurrentDictionary<string, ObjectPool<IDatabase>> _pool =
             new ConcurrentDictionary<string, ObjectPool<IDatabase>>();
 
-        public ConnectionMultiplexer Connection(CacheEndpoint endpoint, int connectTimeout)
+        public async Task<bool> ConnectionAsync(CacheEndpoint endpoint, int connectTimeout)
         {
             try
             {
                 var info = endpoint as RedisEndpoint;
                 var point = string.Format("{0}:{1}", info.Host, info.Port);
-                return ConnectionMultiplexer.Connect(new ConfigurationOptions()
+                var conn= await ConnectionMultiplexer.ConnectAsync(new ConfigurationOptions()
                 {
                     EndPoints = { { point } },
                     ServiceName = point,
                     Password = info.Password,
                     ConnectTimeout = connectTimeout
                 });
+                return conn.IsConnected;
             }
             catch (Exception e)
             {
