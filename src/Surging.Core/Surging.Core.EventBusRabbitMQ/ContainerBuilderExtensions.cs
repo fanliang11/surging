@@ -38,6 +38,7 @@ namespace Surging.Core.EventBusRabbitMQ
                     UserName = rabbitUserName,
                     Password = rabbitPassword
                 };
+                factory.RequestedHeartbeat = 60;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();
             return builder;
