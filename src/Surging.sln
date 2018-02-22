@@ -51,7 +51,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Log4net", "Sur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.EventBusKafka", "Surging.Core\Surging.Core.EventBusKafka\Surging.Core.EventBusKafka.csproj", "{A93EE1A1-A939-425C-A074-5DAD39BE9EE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Modules.Manager", "Surging.Modules\Surging.Modules.Manager\Surging.Modules.Manager.csproj", "{AF8FAB5B-029E-438F-AD57-B46681046D3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Modules.Manager", "Surging.Modules\Surging.Modules.Manager\Surging.Modules.Manager.csproj", "{AF8FAB5B-029E-438F-AD57-B46681046D3F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.IModuleServices.Manager", "Surging.IModuleServices\Surging.IModuleServices.Manger\Surging.IModuleServices.Manager.csproj", "{78F64412-7403-449C-8AC4-C5C0A58E4A0E}"
 EndProject
@@ -178,6 +178,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

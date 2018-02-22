@@ -77,9 +77,10 @@ namespace Surging.Services.Client
         {
             Task.Run(async () =>
             {
-
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                await userProxy.GetUserId("user");
+               await userProxy.GetUserId("user");
+               await userProxy.GetDictionary();
+                var serviceProxyProvider=  ServiceLocator.GetService<IServiceProxyProvider>();
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
@@ -88,6 +89,7 @@ namespace Surging.Services.Client
                     for (var i = 0; i < 10000; i++)
                     {
                         var a = userProxy.GetDictionary().Result;
+                        //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");

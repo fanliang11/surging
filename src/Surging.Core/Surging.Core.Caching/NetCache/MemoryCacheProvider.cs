@@ -1,4 +1,5 @@
-﻿using Surging.Core.Caching.RedisCache;
+﻿using Surging.Core.Caching.Interfaces;
+using Surging.Core.Caching.RedisCache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -179,6 +180,11 @@ namespace Surging.Core.Caching.NetCache
         private string GetKeySuffix(string key)
         {
             return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
+        }
+
+        public bool Connection(CacheEndpoint endpoint)
+        {
+            return true;
         }
         #endregion
 

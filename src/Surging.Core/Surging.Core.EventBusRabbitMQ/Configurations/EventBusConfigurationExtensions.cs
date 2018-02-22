@@ -8,42 +8,42 @@ using System.Text;
 
 namespace Surging.Core.EventBusRabbitMQ.Configurations
 {
-   public static class EventBusConfigurationExtensions
-    { 
-    public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, string path)
+    public static class EventBusConfigurationExtensions
     {
-        return AddEventBusFile(builder, provider: null, path: path, optional: false, reloadOnChange: false);
-    }
-
-    public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, string path, bool optional)
-    {
-        return AddEventBusFile(builder, provider: null, path: path, optional: optional, reloadOnChange: false);
-    }
-
-    public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
-    {
-        return AddEventBusFile(builder, provider: null, path: path, optional: optional, reloadOnChange: reloadOnChange);
-    }
-
-    public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, IFileProvider provider, string path, bool optional, bool reloadOnChange)
-    {
-        Check.NotNull(builder, "builder");
-        Check.CheckCondition(() => string.IsNullOrEmpty(path), "path");
-        if (provider == null && Path.IsPathRooted(path))
+        public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, string path)
         {
-            provider = new PhysicalFileProvider(Path.GetDirectoryName(path));
-            path = Path.GetFileName(path);
+            return AddEventBusFile(builder, provider: null, path: path, optional: false, reloadOnChange: false);
         }
-        var source = new EventBusConfigurationSource
+
+        public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, string path, bool optional)
         {
-            FileProvider = provider,
-            Path = path,
-            Optional = optional,
-            ReloadOnChange = reloadOnChange
-        };
-        builder.Add(source);
-        AppConfig.Configuration = builder.Build();
-        return builder;
+            return AddEventBusFile(builder, provider: null, path: path, optional: optional, reloadOnChange: false);
+        }
+
+        public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
+        {
+            return AddEventBusFile(builder, provider: null, path: path, optional: optional, reloadOnChange: reloadOnChange);
+        }
+
+        public static IConfigurationBuilder AddEventBusFile(this IConfigurationBuilder builder, IFileProvider provider, string path, bool optional, bool reloadOnChange)
+        {
+            Check.NotNull(builder, "builder");
+            Check.CheckCondition(() => string.IsNullOrEmpty(path), "path");
+            if (provider == null && Path.IsPathRooted(path))
+            {
+                provider = new PhysicalFileProvider(Path.GetDirectoryName(path));
+                path = Path.GetFileName(path);
+            }
+            var source = new EventBusConfigurationSource
+            {
+                FileProvider = provider,
+                Path = path,
+                Optional = optional,
+                ReloadOnChange = reloadOnChange
+            };
+            builder.Add(source);
+            AppConfig.Configuration = builder.Build();
+            return builder;
+        }
     }
-}
 }

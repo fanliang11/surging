@@ -9,7 +9,7 @@ using Surging.IModuleServices.Common.Models;
 
 namespace Surging.Modules.Common.IntegrationEvents.EventHandling
 {
-  public  class UserLoginDateChangeHandler : IIntegrationEventHandler<UserEvent>
+     public  class UserLoginDateChangeHandler : IIntegrationEventHandler<UserEvent>
     {
         private readonly IUserService _userService;
         public UserLoginDateChangeHandler(IUserService userService)
@@ -18,10 +18,10 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
         }
         public async Task Handle(UserEvent @event)
         {
-            await _userService.Update( int.Parse(@event.UserId),new UserModel()
-            {
+            //await _userService.Update( int.Parse(@event.UserId),new UserModel()
+            //{
 
-            });
+            //});
         }
     }
 }

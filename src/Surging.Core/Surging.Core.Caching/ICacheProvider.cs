@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.Caching.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ namespace Surging.Core.Caching
 {
     public interface ICacheProvider
     {
+        bool Connection(CacheEndpoint endpoint);
         void Add(string key, object value);
         void AddAsync(string key, object value);
         void Add(string key, object value, bool defaultExpire);

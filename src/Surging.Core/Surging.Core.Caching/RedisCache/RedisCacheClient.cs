@@ -12,6 +12,26 @@ namespace Surging.Core.Caching.RedisCache
         private static readonly ConcurrentDictionary<string, ObjectPool<IDatabase>> _pool =
             new ConcurrentDictionary<string, ObjectPool<IDatabase>>();
 
+        public ConnectionMultiplexer Connection(CacheEndpoint endpoint, int connectTimeout)
+        {
+            try
+            {
+                var info = endpoint as RedisEndpoint;
+                var point = string.Format("{0}:{1}", info.Host, info.Port);
+                return ConnectionMultiplexer.Connect(new ConfigurationOptions()
+                {
+                    EndPoints = { { point } },
+                    ServiceName = point,
+                    Password = info.Password,
+                    ConnectTimeout = connectTimeout
+                });
+            }
+            catch (Exception e)
+            {
+                throw new CacheException(e.Message);
+            }
+        }
+
         public IDatabase GetClient(CacheEndpoint endpoint, int connectTimeout)
         {
             try

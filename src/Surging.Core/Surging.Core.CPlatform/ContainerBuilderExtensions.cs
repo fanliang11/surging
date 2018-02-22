@@ -1,4 +1,7 @@
 ﻿using Autofac;
+using Autofac.Builder;
+using Autofac.Core.Registration;
+using Autofac.Features.Scanning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Convertibles;
@@ -6,9 +9,11 @@ using Surging.Core.CPlatform.Convertibles.Implementation;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Filters.Implementation;
+using Surging.Core.CPlatform.HashAlgorithms;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Ioc;
+using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -320,7 +325,7 @@ namespace Surging.Core.CPlatform
         {
             builder.Services.RegisterType(typeof(DefaultServiceEntryLocate)).As(typeof(IServiceEntryLocate)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor)).SingleInstance();
-            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().AddRuntime();
+            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().AddRuntime();
         }
 
         /// <summary>
@@ -354,6 +359,8 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceRouteFactory)).As(typeof(IServiceRouteFactory)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
+            services.RegisterType(typeof(ServiceTokenGenerator)).As(typeof(IServiceTokenGenerator)).SingleInstance();
+            services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
@@ -373,11 +380,12 @@ namespace Surging.Core.CPlatform
                     var assemblys = GetReferenceAssembly();
                     var types = assemblys.SelectMany(i => i.ExportedTypes).ToArray();
                     return new AttributeServiceEntryProvider(types, provider.Resolve<IClrServiceEntryFactory>(),
-                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>(),provider.Resolve<CPlatformContainer>());
+                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>(), provider.Resolve<CPlatformContainer>());
                 }
                 finally
                 {
-                    _referenceAssembly.Clear();
+                     _referenceAssembly.Clear();
+                    builder = null;
                 }
             }).As<IServiceEntryProvider>();
             builder.Services.RegisterType(typeof(DefaultServiceEntryManager)).As(typeof(IServiceEntryManager)).SingleInstance();
@@ -458,6 +466,27 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
+        public static IServiceBuilder RegisterModules(
+      this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly();
+            if (builder == null) throw new ArgumentNullException("builder");
+            List<AbstractModule> modules = new List<AbstractModule>();
+            foreach (var moduleAssembly in referenceAssemblies)
+            {
+                GetAbstractModules(moduleAssembly).ForEach(p =>
+                {
+                    services.RegisterModule(p);
+                    modules.Add(p);
+                });
+            }
+            builder.Services.Register(provider => new ModuleProvider(
+               modules
+                )).As<IModuleProvider>().SingleInstance();
+            return builder;
+        }
+
         public static List<Type> GetInterfaceService(this IServiceBuilder builder)
         {
             var types = new List<Type>();
@@ -468,30 +497,58 @@ namespace Surging.Core.CPlatform
             });
             return types;
         }
-
+        
         private static List<Assembly> GetReferenceAssembly()
         {
             string path = AppContext.BaseDirectory;
             var result = _referenceAssembly;
             if (!result.Any())
             {
-                var assemblyNames = GetAllAssemblyFiles(path);
-                foreach (var referencedAssemblyName in assemblyNames)
+                var assemblyFiles = GetAllAssemblyFiles(path);
+                foreach (var referencedAssemblyFile in assemblyFiles)
                 {
-                    var referencedAssembly = Assembly.Load(new AssemblyName(referencedAssemblyName));
+                    var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
                     _referenceAssembly.Add(referencedAssembly);
                 }
                 result = _referenceAssembly;
             }
             return result;
         }
+        
+        private static List<AbstractModule> GetAbstractModules(Assembly assembly)
+        {
+            var abstractModules = new List<AbstractModule>();
+            Type[] arrayModule =
+                assembly.GetTypes().Where(
+                    t => t.IsSubclassOf(typeof(AbstractModule))).ToArray();
+            foreach (var moduleType in arrayModule)
+            {
+                var abstractModule = (AbstractModule)Activator.CreateInstance(moduleType);
+                abstractModules.Add(abstractModule);
+            }
+            return abstractModules;
+        }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)
-        { 
-                Regex regex = new Regex("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        {
+            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
+            var pattern = string.Format("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*{0}",
+               string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
+            Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (!string.IsNullOrEmpty(relatedFile))
+            {
                 return
-                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFileNameWithoutExtension).Where(
-                        a => !regex.IsMatch(a)).ToList();
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a) || relatedRegex.IsMatch(a)).ToList();
+            }
+            else
+            {
+                return
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a)).ToList();
+            }
         }
     }
 }

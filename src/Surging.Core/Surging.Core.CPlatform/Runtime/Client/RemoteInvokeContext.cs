@@ -11,5 +11,7 @@ namespace Surging.Core.CPlatform.Runtime.Client
         /// 远程调用消息。
         /// </summary>
         public RemoteInvokeMessage InvokeMessage { get; set; }
+
+        public int HashCode { get; set; }
     }
 }

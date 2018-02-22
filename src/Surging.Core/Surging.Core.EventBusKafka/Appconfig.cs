@@ -15,21 +15,13 @@ namespace Surging.Core.EventBusKafka
 
         public static IEnumerable<KeyValuePair<string, object>> KafkaConfig
         {
-
             get
             {
-                if (_kafkaConfig == null)
-                {
-                    _kafkaConfig = new Dictionary<string, object>()
-                    {
-                        {"bootstrap.servers","127.0.0.1"},
-                        { "queue.buffering.max.ms","10" },
-                         {"socket.blocking.max.ms","10"},
-                        { "enable.auto.commit","false"},
-                        {"log.connection.close","false"}
-                    }.AsEnumerable();
-                }
                 return _kafkaConfig;
+            }
+            internal set
+            {
+                _kafkaConfig = value;
             }
         }
     }
