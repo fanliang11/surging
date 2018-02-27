@@ -40,7 +40,7 @@ namespace Surging.Services.Server
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
                         option.AddRabbitMQAdapt();
-                        // option.AddCache();
+                        option.AddCache();
                         //option.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";

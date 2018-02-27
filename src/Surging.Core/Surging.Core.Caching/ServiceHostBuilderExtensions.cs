@@ -15,8 +15,11 @@ namespace Surging.Core.Caching
     {
         public static IServiceHostBuilder UseServiceCache(this IServiceHostBuilder hostBuilder)
         {
-            return hostBuilder.MapServices(builder =>
-            { 
+            return hostBuilder.MapServices(mapper =>
+            {
+                var serviceCacheProvider = mapper.Resolve<ICacheNodeProvider>();
+                var addressDescriptors = serviceCacheProvider.GetServiceCaches().ToList();
+                mapper.Resolve<IServiceCacheManager>().SetCachesAsync(addressDescriptors);
             });
         }
     }

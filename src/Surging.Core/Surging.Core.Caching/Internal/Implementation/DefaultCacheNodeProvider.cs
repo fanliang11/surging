@@ -9,10 +9,10 @@ using System.Text;
 
 namespace Surging.Core.Caching.Internal.Implementation
 {
-    public class DefaultServiceCacheProvider : IServiceCacheProvider
+    public class DefaultCacheNodeProvider : ICacheNodeProvider
     {
         private readonly CPlatformContainer _serviceProvider;
-        public DefaultServiceCacheProvider(CPlatformContainer serviceProvider)
+        public DefaultCacheNodeProvider(CPlatformContainer serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }

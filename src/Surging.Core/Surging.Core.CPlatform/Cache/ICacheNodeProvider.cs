@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Cache
 {
-   public  interface IServiceCacheProvider
+   public  interface ICacheNodeProvider
     {
         IEnumerable<ServiceCache> GetServiceCaches();
     }

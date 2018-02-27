@@ -145,7 +145,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             {
                 _consumerChannel.Dispose();
             }
-
+            
             _subsManager.Clear();
         }
 

@@ -4,6 +4,7 @@ using Autofac.Core.Registration;
 using Autofac.Features.Scanning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Convertibles.Implementation;
 using Surging.Core.CPlatform.EventBus.Events;
@@ -140,6 +141,18 @@ namespace Surging.Core.CPlatform
         /// <param name="factory">服务命令管理者实例工厂。</param>
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseCommandManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCommandManager> factory)
+        {
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
+        /// <summary>
+        /// 设置缓存管理者。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <param name="factory">缓存管理者实例工厂。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseCacheManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCacheManager> factory)
         {
             builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
             return builder;
