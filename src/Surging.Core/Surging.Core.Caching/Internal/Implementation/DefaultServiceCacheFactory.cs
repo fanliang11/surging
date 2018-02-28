@@ -3,6 +3,7 @@ using Surging.Core.CPlatform.Serialization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,8 +22,21 @@ namespace Surging.Core.Caching.Internal.Implementation
 
         public Task<IEnumerable<ServiceCache>> CreateServiceCachesAsync(IEnumerable<ServiceCacheDescriptor> descriptors)
         {
-            throw new NotImplementedException();
+            if (descriptors == null)
+                throw new ArgumentNullException(nameof(descriptors));
+
+            descriptors = descriptors.ToArray();
+            var routes = new List<ServiceCache>(descriptors.Count());
+
+            routes.AddRange(descriptors.Select(descriptor => new ServiceCache
+            {
+                 CacheEndpoint = CreateAddress(descriptor.AddressDescriptors),
+                 CacheDescriptor = descriptor.CacheDescriptor
+            }));
+
+            return Task.FromResult(routes.AsEnumerable());
         }
+   
 
         private IEnumerable<CacheEndpoint> CreateAddress(IEnumerable<CacheEndpointDescriptor> descriptors)
         {

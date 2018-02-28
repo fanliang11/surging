@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,11 +16,43 @@ namespace Surging.Core.Caching.HealthChecks.Implementation
         private readonly ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry> _dictionary =
     new ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry>();
         private readonly ICacheProvider _cacheProvider;
+        private readonly IServiceCacheManager _serviceCacheManager;
 
-        public HealthCheckService(ICacheProvider cacheProvider)
+
+        public HealthCheckService(ICacheProvider cacheProvider, IServiceCacheManager serviceCacheManager)
         {
             var timeSpan = TimeSpan.FromSeconds(10);
             _cacheProvider = cacheProvider;
+            _serviceCacheManager = serviceCacheManager;
+            _timer = new Timer(async s =>
+            {
+                await Check(_dictionary.ToArray().Select(i => i.Value));
+                RemoveUnhealthyAddress(_dictionary.ToArray().Select(i => i.Value).Where(m => m.UnhealthyTimes >= 6));
+            }, null, timeSpan, timeSpan);
+
+            //去除监控。
+            _serviceCacheManager.Removed += (s, e) =>
+            {
+                Remove(e.Cache.CacheEndpoint);
+            };
+            //重新监控。
+            _serviceCacheManager.Created += async (s, e) =>
+            {
+                var keys = e.Cache.CacheEndpoint.Select(cacheEndpoint =>
+                {
+                    return new ValueTuple<string, int>(cacheEndpoint.Host, cacheEndpoint.Port);
+                });
+                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
+            };
+            //重新监控。
+            _serviceCacheManager.Changed += async (s, e) =>
+            {
+                var keys = e.Cache.CacheEndpoint.Select(cacheEndpoint =>
+                {
+                    return new ValueTuple<string, int>(cacheEndpoint.Host, cacheEndpoint.Port);
+                });
+                await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value));
+            };
         }
 
         public ValueTask<bool> IsHealth(CacheEndpoint address)
@@ -52,7 +85,7 @@ namespace Surging.Core.Caching.HealthChecks.Implementation
             return await _cacheProvider.ConnectionAsync(address);
         }
 
-        private  async Task Check(IEnumerable<MonitorEntry> entrys, int timeout)
+        private  async Task Check(IEnumerable<MonitorEntry> entrys)
         {
             foreach (var entry in entrys)
             {
@@ -67,6 +100,29 @@ namespace Surging.Core.Caching.HealthChecks.Implementation
                     entry.UnhealthyTimes++;
                     entry.Health = false;
                 }
+            }
+        }
+
+        private void Remove(IEnumerable<CacheEndpoint> cacheEndpoints)
+        {
+            foreach (var cacheEndpoint in cacheEndpoints)
+            {
+                MonitorEntry value; 
+                _dictionary.TryRemove(new ValueTuple<string, int>(cacheEndpoint.Host, cacheEndpoint.Port), out value);
+            }
+        }
+
+        private void RemoveUnhealthyAddress(IEnumerable<MonitorEntry> monitorEntry)
+        {
+            if (monitorEntry.Any())
+            {
+                var addresses = monitorEntry.Select(p =>p.EndPoint).ToList();
+                _serviceCacheManager.RemveAddressAsync(addresses).Wait();
+                addresses.ForEach(p => {
+                     
+                    _dictionary.TryRemove(new ValueTuple<string, int>(p.Host, p.Port), out MonitorEntry value);
+                });
+
             }
         }
 

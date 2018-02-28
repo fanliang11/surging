@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Configuration;
 using Surging.Core.Caching.HashAlgorithms;
+using Surging.Core.Caching.HealthChecks;
+using Surging.Core.Caching.HealthChecks.Implementation;
 using Surging.Core.Caching.Interfaces;
 using Surging.Core.Caching.Internal.Implementation;
 using Surging.Core.Caching.Models;
@@ -24,6 +26,7 @@ namespace Surging.Core.Caching
             var services = builder.Services;
             RegisterConfigInstance(services);
             RegisterLocalInstance("ICacheClient`1", services);
+            services.RegisterType(typeof(HealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
             services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceCacheFactory)).As(typeof(IServiceCacheFactory)).SingleInstance();
             services.RegisterType(typeof(DefaultCacheNodeProvider)).As(typeof(ICacheNodeProvider)).SingleInstance();

@@ -29,7 +29,7 @@ namespace Surging.Core.Caching.Internal.Implementation
                 {
                     var cacheDescriptor = new CacheDescriptor
                     {
-                        Id = setting.Id,
+                        Id = $"{setting.Id}.{type.ToString()}",
                         Type=type
                     };
                     int.TryParse(context.DefaultExpireTime, out int defaultExpireTime);
