@@ -142,7 +142,8 @@ namespace Surging.Core.Caching.HashAlgorithms
             for (var i = 0; i < _virtualNodeReplicationFactor; i++)
             {
                 var hashOfVirtualNode = _hashAlgorithm.Hash(node.GetHashCode().ToString() + i);
-                _ring.Remove(hashOfVirtualNode);
+                if (_ring.ContainsKey(hashOfVirtualNode))
+                    _ring.Remove(hashOfVirtualNode);
             }
         }
 
