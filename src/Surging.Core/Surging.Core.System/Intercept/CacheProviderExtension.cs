@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Surging.Core.Caching;
+using Surging.Core.CPlatform.Cache;
 using System;
 using System.Threading.Tasks;
 

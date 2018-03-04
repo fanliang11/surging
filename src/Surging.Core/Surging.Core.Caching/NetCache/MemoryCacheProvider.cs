@@ -1,5 +1,6 @@
 ﻿using Surging.Core.Caching.Interfaces;
 using Surging.Core.Caching.RedisCache;
+using Surging.Core.CPlatform.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,12 +35,18 @@ namespace Surging.Core.Caching.NetCache
         private string _keySuffix;
 
         #endregion
-        
+
         #region 构造函数
 
         public MemoryCacheProvider(string appName)
         {
-            _context = new Lazy<RedisContext>(() => CacheContainer.GetInstances<RedisContext>(appName));
+            _context = new Lazy<RedisContext>(() => {
+                if (CacheContainer.IsRegistered<RedisContext>(CacheTargetType.Redis.ToString()))
+                    return CacheContainer.GetService<RedisContext>(appName);
+                else
+                    return CacheContainer.GetInstances<RedisContext>(appName);
+            });
+
             _keySuffix = appName;
             _defaultExpireTime = new Lazy<long>(() => long.Parse(_context.Value._defaultExpireTime));
         }
@@ -62,7 +69,7 @@ namespace Surging.Core.Caching.NetCache
 
         public void Add(string key, object value, bool defaultExpire)
         {
-            MemoryCache.Set(GetKeySuffix(key), value,  defaultExpire ? DefaultExpireTime: ExpireTime);
+            MemoryCache.Set(GetKeySuffix(key), value, defaultExpire ? DefaultExpireTime : ExpireTime);
         }
 
         public async void AddAsync(string key, object value, bool defaultExpire)
@@ -103,18 +110,18 @@ namespace Surging.Core.Caching.NetCache
             return result;
         }
 
-        public  object Get(string key)
+        public object Get(string key)
         {
-            return  MemoryCache.Get(GetKeySuffix(key));
+            return MemoryCache.Get(GetKeySuffix(key));
         }
 
-        public  async Task<object> GetAsync(string key)
+        public async Task<object> GetAsync(string key)
         {
             var result = await Task.Run(() => MemoryCache.Get(GetKeySuffix(key)));
             return result;
         }
 
-        public  T Get<T>(string key)
+        public T Get<T>(string key)
         {
             return MemoryCache.Get<T>(GetKeySuffix(key));
         }
@@ -138,6 +145,11 @@ namespace Surging.Core.Caching.NetCache
         public async void RemoveAsync(string key)
         {
             await Task.Run(() => MemoryCache.Remove(GetKeySuffix(key)));
+        }
+
+        public Task<bool> ConnectionAsync(CacheEndpoint endpoint)
+        {
+            return Task.FromResult<bool>(true);
         }
 
         #endregion
@@ -180,11 +192,6 @@ namespace Surging.Core.Caching.NetCache
         private string GetKeySuffix(string key)
         {
             return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
-        }
-
-        public bool Connection(CacheEndpoint endpoint)
-        {
-            return true;
         }
         #endregion
 

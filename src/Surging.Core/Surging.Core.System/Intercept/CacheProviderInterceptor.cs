@@ -1,4 +1,5 @@
 ﻿using Surging.Core.Caching;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.ProxyGenerator.Interceptors;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,13 +25,13 @@ namespace Surging.Core.System.Intercept
             {
                 case CacheTargetType.Redis:
                     {
-                        cacheProvider = CacheContainer.GetInstances<ICacheProvider>(string.Format("{0}.{1}",
+                        cacheProvider = CacheContainer.GetService<ICacheProvider>(string.Format("{0}.{1}",
                            attribute.CacheSectionType.ToString(), CacheTargetType.Redis.ToString()));
                         break;
                     }
                 case CacheTargetType.MemoryCache:
                     {
-                        cacheProvider = CacheContainer.GetInstances<ICacheProvider>(CacheTargetType.MemoryCache.ToString());
+                        cacheProvider = CacheContainer.GetService<ICacheProvider>(CacheTargetType.MemoryCache.ToString());
                         break;
                     }
             }

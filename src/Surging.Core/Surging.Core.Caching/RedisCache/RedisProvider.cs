@@ -1,6 +1,8 @@
 ﻿using StackExchange.Redis;
+using Surging.Core.Caching.AddressResolvers;
 using Surging.Core.Caching.HashAlgorithms;
 using Surging.Core.Caching.Interfaces;
+using Surging.Core.CPlatform.Cache;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,16 +20,30 @@ namespace Surging.Core.Caching.RedisCache
         private const double ExpireTime = 60D;
         private string _keySuffix;
         private Lazy<int> _connectTimeout;
+        private readonly Lazy<ICacheClient<IDatabase>> _cacheClient;
+        private readonly IAddressResolver addressResolver;
         #endregion
 
         #region 构造函数
 
         public RedisProvider(string appName)
         {
-            _context = new Lazy<RedisContext>(() => CacheContainer.GetInstances<RedisContext>(appName));
+            _context = new Lazy<RedisContext>(() => {
+                if (CacheContainer.IsRegistered<RedisContext>(appName))
+                    return CacheContainer.GetService<RedisContext>(appName);
+                else
+                    return CacheContainer.GetInstances<RedisContext>(appName);
+            });
             _keySuffix = appName;
             _defaultExpireTime = new Lazy<long>(() => long.Parse(_context.Value._defaultExpireTime));
             _connectTimeout = new Lazy<int>(() => int.Parse(_context.Value._connectTimeout));
+            if (CacheContainer.IsRegistered<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()))
+            {
+                addressResolver = CacheContainer.GetService<IAddressResolver>();
+                _cacheClient = new Lazy<ICacheClient<IDatabase>>(() => CacheContainer.GetService<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()));
+            }
+            else
+                _cacheClient = new Lazy<ICacheClient<IDatabase>>(() => CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()));
         }
 
         public RedisProvider()
@@ -193,7 +209,7 @@ namespace Surging.Core.Caching.RedisCache
                     MinSize = int.Parse(node.MinSize),
                     MaxSize = int.Parse(node.MaxSize),
                 });
-                result.Add(key,  redis.Get<T>(key));
+                result.Add(key, redis.Get<T>(key));
             }
             return result;
         }
@@ -406,15 +422,22 @@ namespace Surging.Core.Caching.RedisCache
         private IDatabase GetRedisClient(CacheEndpoint info)
         {
             return
-                CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString())
+                _cacheClient.Value
                     .GetClient(info, ConnectTimeout);
         }
 
         private ConsistentHashNode GetRedisNode(string item)
         {
-            ConsistentHash<ConsistentHashNode> hash;
-            _context.Value.dicHash.TryGetValue(CacheTargetType.Redis.ToString(), out hash);
-            return hash != null ? hash.GetItemNode(item) : default(ConsistentHashNode);
+            if (addressResolver != null)
+            {
+                return addressResolver.Resolver($"{KeySuffix}.{CacheTargetType.Redis.ToString()}", item).Result;
+            }
+            else
+            {
+                ConsistentHash<ConsistentHashNode> hash;
+                _context.Value.dicHash.TryGetValue(CacheTargetType.Redis.ToString(), out hash);
+                return hash != null ? hash.GetItemNode(item) : default(ConsistentHashNode);
+            }
         }
 
         private async Task<T> GetTaskAsync<T>(string key)
@@ -437,10 +460,11 @@ namespace Surging.Core.Caching.RedisCache
             return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
         }
 
-        public bool Connection(CacheEndpoint endpoint)
-        { 
-            return CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString())
-                  .Connection(endpoint, ConnectTimeout).IsConnected;
+        public async Task<bool> ConnectionAsync(CacheEndpoint endpoint)
+        {
+            var connection = await _cacheClient
+                 .Value.ConnectionAsync(endpoint, ConnectTimeout);
+            return connection;
         }
 
         #endregion

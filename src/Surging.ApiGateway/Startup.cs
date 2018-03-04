@@ -24,6 +24,7 @@ using Surging.Core.Zookeeper;
 using ZookeeperConfigInfo =  Surging.Core.Zookeeper.Configurations.ConfigInfo;
 using System;
 using ApiGateWayConfig = Surging.Core.ApiGateWay.AppConfig;
+using Surging.Core.Caching;
 
 namespace Surging.ApiGateway
 {
@@ -64,6 +65,7 @@ namespace Surging.ApiGateway
             builder.AddMicroService(option =>
             {
                 option.AddClient();
+                option.AddCache();
                 option.AddClientIntercepted(typeof(CacheProviderInterceptor));
 
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));

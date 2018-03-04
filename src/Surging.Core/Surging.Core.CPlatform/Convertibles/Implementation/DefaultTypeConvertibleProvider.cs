@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Serialization;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -43,7 +44,7 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
 
         private static object SimpleTypeConvert(object instance, Type conversionType)
         {
-            if (instance is IConvertible && typeof(IConvertible).GetTypeInfo().IsAssignableFrom(conversionType))
+            if (instance is IConvertible && UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(conversionType))
                 return Convert.ChangeType(instance, conversionType);
             return null;
         }

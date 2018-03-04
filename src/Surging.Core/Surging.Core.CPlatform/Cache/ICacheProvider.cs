@@ -1,14 +1,13 @@
-﻿using Surging.Core.Caching.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Surging.Core.Caching
+namespace Surging.Core.CPlatform.Cache
 {
     public interface ICacheProvider
     {
-        bool Connection(CacheEndpoint endpoint);
+        Task<bool> ConnectionAsync(CacheEndpoint endpoint);
         void Add(string key, object value);
         void AddAsync(string key, object value);
         void Add(string key, object value, bool defaultExpire);
@@ -17,7 +16,7 @@ namespace Surging.Core.Caching
         void AddAsync(string key, object value, long numOfMinutes);
         void Add(string key, object value, TimeSpan timeSpan);
         void AddAsync(string key, object value, TimeSpan timeSpan);
-    
+
         IDictionary<string, T> Get<T>(IEnumerable<string> keys);
         Task<IDictionary<string, T>> GetAsync<T>(IEnumerable<string> keys);
         object Get(string key);
@@ -31,4 +30,5 @@ namespace Surging.Core.Caching
         string KeySuffix { get; set; }
     }
 }
+
 

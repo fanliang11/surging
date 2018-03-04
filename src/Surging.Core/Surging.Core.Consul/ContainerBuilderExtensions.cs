@@ -5,6 +5,7 @@ using Surging.Core.Consul.Configurations;
 using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -18,7 +19,7 @@ namespace Surging.Core.Consul
     public static class ContainerBuilderExtensions
     {
         /// <summary>
-        /// 设置共享文件路由管理者。
+        /// 设置服务路由管理者。
         /// </summary>
         /// <param name="builder">Rpc服务构建者。</param>
         /// <param name="configInfo">ZooKeeper设置信息。</param>
@@ -33,6 +34,18 @@ namespace Surging.Core.Consul
                 provider.GetRequiredService<IClientWatchManager>(),
                 provider.GetRequiredService<IServiceRouteFactory>(),
                 provider.GetRequiredService<ILogger<ConsulServiceRouteManager>>()));
+        }
+
+        public static IServiceBuilder UseConsulCacheManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseCacheManager(provider =>
+             new ConsulServiceCacheManager(
+                configInfo,
+              provider.GetRequiredService<ISerializer<byte[]>>(),
+                provider.GetRequiredService<ISerializer<string>>(),
+                provider.GetRequiredService<IClientWatchManager>(),
+                provider.GetRequiredService<IServiceCacheFactory>(),
+                provider.GetRequiredService<ILogger<ConsulServiceCacheManager>>()));
         }
 
         /// <summary>
@@ -89,7 +102,8 @@ namespace Surging.Core.Consul
         {
             return builder.UseConsulRouteManager(configInfo)
                 .UseConsulServiceSubscribeManager(configInfo)
-               .UseConsulCommandManager(configInfo).UseConsulWatch(configInfo);
+               .UseConsulCommandManager(configInfo)
+               .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
         }
     }
 }

@@ -3,6 +3,7 @@ using Surging.Core.ApiGateWay.ServiceDiscovery;
 using Surging.Core.ApiGateWay.ServiceDiscovery.Implementation;
 using Surging.Core.ApiGateWay.Utilities;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Utilities;
 using System.Collections.Generic;
@@ -78,6 +79,33 @@ namespace Surging.ApiGateway.Controllers
             var result = ServiceResult<IEnumerable<ServiceCommandDescriptor>>.Create(true, list);
             return Json(result);
         }
+
+        public IActionResult ServiceCache()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetServiceCache(string queryParam)
+        {
+            var list = await ServiceLocator.GetService<IServiceCacheProvider>().GetServiceDescriptorAsync();
+            var result = ServiceResult<IEnumerable<CacheDescriptor>>.Create(true, list);
+            return Json(result);
+        }
+
+        public  IActionResult ServiceCacheEndpoint(string cacheId)
+        {
+            ViewBag.CacheId = cacheId;
+            return View();
+        }
+
+        public async Task<IActionResult> GetCacheEndpoint(string cacheId)
+        {
+            var list = await ServiceLocator.GetService<IServiceCacheProvider>().GetCacheEndpointAsync(cacheId);
+            var result = ServiceResult<IEnumerable<CacheEndpoint>>.Create(true, list);
+            return Json(result);
+        }
+
 
         public IActionResult ServiceSubscriber(string serviceId)
         {

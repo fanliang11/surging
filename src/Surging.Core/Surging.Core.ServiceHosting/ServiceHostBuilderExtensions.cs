@@ -9,6 +9,7 @@ using Surging.Core.ServiceHosting.Startup.Implementation;
 using Autofac.Extensions.DependencyInjection;
 using Surging.Core.ServiceHosting.Internal.Implementation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace Surging.Core.ServiceHosting
 {
@@ -26,8 +27,9 @@ namespace Surging.Core.ServiceHosting
                     else
                     {
                         services.AddSingleton(typeof(IStartup), sp =>
-                        { 
-                            return new ConventionBasedStartup(StartupLoader.LoadMethods(sp, startupType, ""));
+                        {
+                            var config= sp.GetService<IConfigurationBuilder>();
+                            return new ConventionBasedStartup(StartupLoader.LoadMethods(sp, config, startupType, ""));
                         });
                        
                     }

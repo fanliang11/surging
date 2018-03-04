@@ -20,10 +20,8 @@ namespace Surging.Services.Client
     public class Startup
     {
         private ContainerBuilder _builder;
-        public Startup()
+        public Startup(IConfigurationBuilder config)
         {
-            var config = new ConfigurationBuilder()
-           .SetBasePath(AppContext.BaseDirectory);
             ConfigureEventBus(config);
             ConfigureCache(config);
         }

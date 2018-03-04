@@ -1,4 +1,5 @@
 ﻿using Surging.Core.Caching.Interfaces;
+using Surging.Core.CPlatform.Cache;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.HealthChecks
@@ -10,20 +11,20 @@ namespace Surging.Core.Caching.HealthChecks
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>一个任务。</returns>
-        void Monitor(CacheEndpoint address);
+        void Monitor(CacheEndpoint address, string cacheId);
 
         /// <summary>
         /// 判断一个地址是否健康。
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>健康返回true，否则返回false。</returns>
-        ValueTask<bool> IsHealth(CacheEndpoint address);
+        ValueTask<bool> IsHealth(CacheEndpoint address, string cacheId);
 
         /// <summary>
         /// 标记一个地址为失败的。
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>一个任务。</returns>
-        Task MarkFailure(CacheEndpoint address);
+        Task MarkFailure(CacheEndpoint address, string cacheId);
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Autofac;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.ServiceHosting.Startup.Implementation;
 using System;
@@ -13,7 +14,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
 {
     public class StartupLoader
     {
-        public static StartupMethods LoadMethods(IServiceProvider hostingServiceProvider, Type startupType, string environmentName)
+        public static StartupMethods LoadMethods(IServiceProvider hostingServiceProvider, IConfigurationBuilder config, Type startupType, string environmentName)
         {
             var configureMethod = FindConfigureDelegate(startupType, environmentName);
             var servicesMethod = FindConfigureServicesDelegate(startupType, environmentName);
@@ -22,7 +23,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             object instance = null;
             if (!configureMethod.MethodInfo.IsStatic || (servicesMethod != null && !servicesMethod.MethodInfo.IsStatic))
             {
-                instance = ActivatorUtilities.GetServiceOrCreateInstance(hostingServiceProvider, startupType);
+                instance = ActivatorUtilities.CreateInstance(hostingServiceProvider, startupType,config);
             }
 
             var configureServicesCallback = servicesMethod.Build(instance);

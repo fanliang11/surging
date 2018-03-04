@@ -2,6 +2,7 @@ using MessagePack;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Surging.Core.Codec.MessagePack.Utilities;
+using Surging.Core.CPlatform.Utilities;
 using System;
 
 namespace Surging.Core.Codec.MessagePack.Messages
@@ -27,7 +28,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
             else
                 TypeName = valueType.AssemblyQualifiedName;
 
-            if (valueType == typeof(JObject))
+            if (valueType == UtilityType.JObjectType)
                 Content = SerializerUtilitys.Serialize(value.ToString());
             else
                 Content = SerializerUtilitys.Serialize(value);
@@ -51,7 +52,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 return null;
 
             var typeName = Type.GetType(TypeName);
-            if (typeName == typeof(JObject))
+            if (typeName == UtilityType.JObjectType)
             {
                 var content = SerializerUtilitys.Deserialize<string>(Content);
                 return JsonConvert.DeserializeObject<JObject>(content);
