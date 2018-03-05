@@ -13,8 +13,8 @@ namespace Surging.Core.System.Intercept
             var attribute =
                  invocation.Attributes.Where(p => p is InterceptMethodAttribute)
                  .Select(p => p as InterceptMethodAttribute).FirstOrDefault();
-            var cacheKey = invocation.CacheKey==null?attribute.Key:
-                string.Format(attribute.Key, invocation.CacheKey);
+            var cacheKey = invocation.CacheKey == null ? attribute.Key :
+                string.Format(attribute.Key ?? "", invocation.CacheKey);
             await CacheIntercept(attribute, cacheKey, invocation);
         }
 
@@ -38,13 +38,13 @@ namespace Surging.Core.System.Intercept
             if (cacheProvider != null) await Invoke(cacheProvider, attribute, key, invocation);
         }
 
-        private async Task Invoke(ICacheProvider cacheProvider,InterceptMethodAttribute attribute, string key, IInvocation invocation)
+        private async Task Invoke(ICacheProvider cacheProvider, InterceptMethodAttribute attribute, string key, IInvocation invocation)
         {
             switch (attribute.Method)
             {
                 case CachingMethod.Get:
                     {
-                        var retrunValue = await cacheProvider.GetFromCacheFirst(key, async() =>
+                        var retrunValue = await cacheProvider.GetFromCacheFirst(key, async () =>
                         {
                             await invocation.Proceed();
                             return invocation.ReturnValue;
@@ -55,7 +55,7 @@ namespace Surging.Core.System.Intercept
                 default:
                     {
                         await invocation.Proceed();
-                        var keys = attribute.CorrespondingKeys.Select(correspondingKey => string.Format(correspondingKey, key)).ToList();
+                        var keys = attribute.CorrespondingKeys.Select(correspondingKey => string.Format(correspondingKey, invocation.CacheKey)).ToList();
                         keys.ForEach(cacheProvider.RemoveAsync);
                         break;
                     }
