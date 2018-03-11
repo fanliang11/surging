@@ -29,6 +29,8 @@ namespace Surging.Core.Consul.Configurations
         /// <param name="sessionTimeout">会话超时时间。</param>
         /// <param name="commandPath">服务命令配置命令。</param>
         /// <param name="subscriberPath">订阅者配置命令。</param>
+        /// <param name="routePath">路由路径配置路径</param>
+        /// <param name="cachePath">缓存中心配置路径</param>
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout,
             string routePath = "services/serviceRoutes/",
              string subscriberPath = "services/serviceSubscribers/",
