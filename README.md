@@ -59,6 +59,10 @@ var host = new ServiceHostBuilder()
                 })
                 .UseLog4net("Configs/log4net.config") //使用log4net记录日志
                 .UseLog4net()  //使用log4net记录日志
+                .ConfigureServices(build =>
+                build.AddEventBusFile("eventBusSettings.json", optional: false))//使用eventBusSettings.json文件进行配置
+                .ConfigureServices(build =>
+                 build.AddCacheFile("cacheSettings.json", optional: false))//使用cacheSettings.json文件进行配置
                 .UseProxy() //使用Proxy
                 .UseStartup<Startup>()
                 .Build();
