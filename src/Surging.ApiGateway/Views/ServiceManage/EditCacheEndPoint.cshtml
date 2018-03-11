@@ -1,0 +1,51 @@
+﻿@using Surging.Core.Caching.HashAlgorithms;
+@model ConsistentHashNode
+@{
+
+    Layout = null;
+}
+<div class="modal-body" style="width: 680px;">
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>地址</label>
+        <div class="col-sm-9 control-sm">
+            @Html.TextBoxFor(p => p.Host, new { autocomplete = "off", placeholder = "地址", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>端口</label>
+        <div class="col-sm-9 control-sm">
+            @Html.TextBoxFor(p => p.Port, new { autocomplete = "off", placeholder = "端口", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>用户名</label>
+        <div class="col-sm-9 control-sm">
+            @Html.TextBoxFor(p => p.UserName, new { autocomplete = "off", placeholder = "用户名", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>密码</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.Password, new { autocomplete = "off", placeholder = "密码", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>库名</label>
+        <div class="col-sm-9 control-sm">
+            @Html.TextBoxFor(p => p.Db, new { autocomplete = "off", placeholder = "库名", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>最大连接池</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.MaxSize, new { autocomplete = "off", placeholder = "最大连接池", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>最小连接池</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.MinSize, new { autocomplete = "off", placeholder = "最小连接池", @class = "form-control" })
+        </div>
+    </div>
+   @Html.Hidden("Type",Model.Type)
+</div>

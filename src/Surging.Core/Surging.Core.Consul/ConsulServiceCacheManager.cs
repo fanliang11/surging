@@ -102,7 +102,7 @@ namespace Surging.Core.Consul
             await base.SetCachesAsync(caches);
         }
 
-        protected override async Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors)
+        public override async Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors)
         {
             foreach (var cacheDescriptor in cacheDescriptors)
             {

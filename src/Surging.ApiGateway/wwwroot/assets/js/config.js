@@ -8,7 +8,8 @@
         "ace": "common/plugins/ace.min.js",
         "jquerytmpl": "common/plugins/jquery.tmpl.min.js",
         "jqueryPjax": "common/plugins/jquery.pjax_n.js",
-        "pjaxEvent": "common/modules/dt.pjax.event.js"
+        "pjaxEvent": "common/modules/dt.pjax.event.js",
+        "bootbox": "common/plugins/bootbox.min.js",
     },
     paths: {
         "common": "assets/js",
@@ -17,7 +18,7 @@
         "apps_authmanage":"apps/authmanage/assets/js"
     },
     map: [
-        [/^(.*\.(?:css|js))(.*)$/i, '$1?t=201802283']
+        [/^(.*\.(?:css|js))(.*)$/i, '$1?t=201803113']
     ],
     debug: false,
     base: "/"

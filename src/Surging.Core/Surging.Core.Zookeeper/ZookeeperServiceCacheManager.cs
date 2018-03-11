@@ -82,7 +82,7 @@ namespace Surging.Core.Zookeeper
 
         public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)
         {
-            var serviceCaches = await GetCaches(caches.Select(p => $"{ _configInfo.CachePath}{p.CacheDescriptor.Id}"));
+            var serviceCaches = await GetCaches(caches.Select(p => p.CacheDescriptor.Id));
             foreach (var cache in caches)
             {
                 var serviceCache = serviceCaches.Where(p => p.CacheDescriptor.Id == cache.CacheDescriptor.Id).FirstOrDefault();
@@ -119,7 +119,7 @@ namespace Surging.Core.Zookeeper
             await base.SetCachesAsync(caches);
         }
 
-        protected override async Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors)
+        public override async Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors)
         {
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("准备添加服务命令。");

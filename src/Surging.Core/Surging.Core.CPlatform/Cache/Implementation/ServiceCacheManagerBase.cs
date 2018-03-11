@@ -80,7 +80,7 @@ namespace Surging.Core.CPlatform.Cache.Implementation
             return SetCachesAsync(descriptors);
         }
 
-        protected abstract Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors);
+        public abstract Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors);
 
         protected void OnCreated(params ServiceCacheEventArgs[] args)
         {

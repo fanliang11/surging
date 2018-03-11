@@ -20,6 +20,8 @@ namespace Surging.Core.CPlatform.Cache
 
         Task SetCachesAsync(IEnumerable<ServiceCache> caches);
 
+        Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors);
+
         Task RemveAddressAsync(IEnumerable<CacheEndpoint> endpoints);
 
         Task ClearAsync();
@@ -45,6 +47,14 @@ namespace Surging.Core.CPlatform.Cache
         {
             var caches = await serviceCacheManager.GetCachesAsync();
             return caches.Where(p => p.CacheDescriptor.Id == cacheId).Select(p => p.CacheEndpoint).FirstOrDefault();
+        }
+
+
+        public static async Task<CacheEndpoint> GetCacheEndpointAsync(this IServiceCacheManager serviceCacheManager, string cacheId,string endpoint)
+        {
+            var caches = await serviceCacheManager.GetCachesAsync();
+            var cache= caches.Where(p => p.CacheDescriptor.Id == cacheId).Select(p => p.CacheEndpoint).FirstOrDefault();
+            return cache.Where(p => p.ToString() == endpoint).FirstOrDefault();
         }
     }
 }

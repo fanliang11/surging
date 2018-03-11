@@ -9,5 +9,7 @@
         GET_SERVICECACHE: "/ServiceManage/GetServiceCache",
         EDIT_FAULTTOLERANT: "/ServiceManage/EditFaultTolerant",
         GET_CACHEENDPOINT: "/ServiceManage/GetCacheEndpoint", 
+        EDIT_CACHEENDPOINT: "/ServiceManage/EditCacheEndpoint", 
+        DEL_CACHEENDPOINT:"/ServiceManage/DelCacheEndpoint"
     }
 });

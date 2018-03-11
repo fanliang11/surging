@@ -11,5 +11,11 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery
         Task<IEnumerable<CacheDescriptor>> GetServiceDescriptorAsync();
 
         Task<IEnumerable<CacheEndpoint>> GetCacheEndpointAsync(string cacheId);
+
+        Task<CacheEndpoint> GetCacheEndpointAsync(string cacheId,string endpoint);
+
+        Task  DelCacheEndpointAsync(string cacheId, string endpoint);
+
+        Task SetCacheEndpointByEndpoint(string cacheId, string endpoint, CacheEndpoint cacheEndpoint);
     }
 }

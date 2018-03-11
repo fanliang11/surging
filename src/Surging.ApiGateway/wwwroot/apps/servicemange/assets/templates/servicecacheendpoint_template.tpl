@@ -14,7 +14,8 @@
                             <td class="center"> ${MaxSize}</td>
 							  <td class="center"> ${MinSize}</td>
 						     <td class="center"><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
-                    <a href="javascript:void(0)" class="grey editFaultTolerant"><i class="icon-lightbulb  bigger-120"></i>编辑</a>
+                    <a href="javascript:void(0)" class="grey editCacheEndpoint"><i class="icon-lightbulb  bigger-120"></i>编辑</a>
+					<a href="javascript:void(0);" class="red delCacheEndpoint"><i class="icon-trash bigger-120"></i>删除</a>
                     </div></td>
                         </tr>
 						  {{/each}}
