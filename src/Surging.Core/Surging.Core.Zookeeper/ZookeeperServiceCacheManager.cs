@@ -14,9 +14,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper
 {
-   public class ZookeeperServiceCacheManager : ServiceCacheManagerBase, IDisposable
+    public class ZookeeperServiceCacheManager : ServiceCacheManagerBase, IDisposable
     {
-        private  ZooKeeper _zooKeeper;
+        private ZooKeeper _zooKeeper;
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly ILogger<ZookeeperServiceCacheManager> _logger;
@@ -26,7 +26,7 @@ namespace Surging.Core.Zookeeper
         private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
 
         public ZookeeperServiceCacheManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
-        ISerializer<string> stringSerializer,  IServiceCacheFactory serviceCacheFactory,
+        ISerializer<string> stringSerializer, IServiceCacheFactory serviceCacheFactory,
         ILogger<ZookeeperServiceCacheManager> logger) : base(stringSerializer)
         {
             _configInfo = configInfo;
@@ -126,7 +126,7 @@ namespace Surging.Core.Zookeeper
             var path = _configInfo.CachePath;
             await CreateSubdirectory(path);
 
-  
+
             if (!path.EndsWith("/"))
                 path += "/";
 
@@ -177,20 +177,23 @@ namespace Surging.Core.Zookeeper
 
         private async Task<ServiceCache[]> GetCaches(IEnumerable<string> childrens)
         {
+            var rootPath = _configInfo.CachePath;
+            if (!rootPath.EndsWith("/"))
+                rootPath += "/";
 
             childrens = childrens.ToArray();
             var caches = new List<ServiceCache>(childrens.Count());
 
             foreach (var children in childrens)
             {
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"准备从节点：{children}中获取缓存信息。");
 
-                var cache = await GetCache(children);
+                var nodePath = $"{rootPath}{children}";
+                var cache = await GetCache(nodePath);
                 if (cache != null)
                     caches.Add(cache);
             }
-
             return caches.ToArray();
         }
 
@@ -219,7 +222,7 @@ namespace Surging.Core.Zookeeper
 
         private async Task<ServiceCache> GetCache(string path)
         {
-            ServiceCache result = null; 
+            ServiceCache result = null;
             var watcher = new NodeMonitorWatcher(_zooKeeper, path,
                  async (oldData, newData) => await NodeChange(oldData, newData));
             if (await _zooKeeper.existsAsync(path) != null)
@@ -235,7 +238,7 @@ namespace Surging.Core.Zookeeper
 
         private async Task RemoveExceptCachesAsync(IEnumerable<ServiceCache> caches)
         {
-            
+
 
             var path = _configInfo.CachePath;
             if (!path.EndsWith("/"))

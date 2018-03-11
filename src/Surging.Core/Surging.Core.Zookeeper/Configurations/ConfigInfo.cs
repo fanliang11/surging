@@ -18,8 +18,8 @@ namespace Surging.Core.Zookeeper.Configurations
         public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
-            string cachePath = "services/serviceCaches/",
-            string chRoot = null) : this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath, commandPath, chRoot, cachePath)
+            string cachePath = "/services/serviceCaches",
+            string chRoot = null) : this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath, commandPath,cachePath, chRoot )
         {
         }
 
@@ -36,7 +36,7 @@ namespace Surging.Core.Zookeeper.Configurations
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
-            string cachePath = "services/serviceCaches/",
+            string cachePath = "/services/serviceCaches",
             string chRoot = null)
         {
             CachePath = cachePath;
