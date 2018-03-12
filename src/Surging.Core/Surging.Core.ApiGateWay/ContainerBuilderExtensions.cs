@@ -22,6 +22,7 @@ namespace Surging.Core.ApiGateWay
             services.RegisterType<DefaultHealthCheckService>().As<IHealthCheckService>().SingleInstance();
             services.RegisterType<ServiceDiscoveryProvider>().As<IServiceDiscoveryProvider>().SingleInstance();
             services.RegisterType<ServiceSubscribeProvider>().As<IServiceSubscribeProvider>().SingleInstance();
+            services.RegisterType<ServiceCacheProvider>().As<IServiceCacheProvider>().SingleInstance();
             if (config != null)
             {
                 AppConfig.AccessTokenExpireTimeSpan = config.AccessTokenExpireTimeSpan;
@@ -34,7 +35,7 @@ namespace Surging.Core.ApiGateWay
                 var serviceRouteProvider = provider.Resolve<IServiceRouteProvider>();
                 var serviceProvider = provider.Resolve<CPlatformContainer>();
                 return new AuthorizationServerProvider(config, serviceProxyProvider, serviceRouteProvider, serviceProvider);
-            }).As<IAuthorizationServerProvider>();
+            }).As<IAuthorizationServerProvider>().SingleInstance();
             return builder;
         }
     }

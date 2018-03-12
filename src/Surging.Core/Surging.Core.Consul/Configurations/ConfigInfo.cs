@@ -13,10 +13,12 @@ namespace Surging.Core.Consul.Configurations
         /// <param name="commandPath">服务命令配置路径</param>
         /// <param name="routePath">路由路径配置路径</param>
         /// <param name="subscriberPath">订阅者配置路径</param>
+        /// <param name="cachePath">缓存中心配置路径</param>
         public ConfigInfo(string connectionString,string routePath = "services/serviceRoutes/",
              string subscriberPath = "services/serviceSubscribers/",
-            string commandPath = "services/serviceCommands/") :
-            this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath,commandPath)
+            string commandPath = "services/serviceCommands/",
+            string cachePath="services/serviceCaches/") :
+            this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath,commandPath, cachePath)
         {
         }
 
@@ -27,12 +29,15 @@ namespace Surging.Core.Consul.Configurations
         /// <param name="sessionTimeout">会话超时时间。</param>
         /// <param name="commandPath">服务命令配置命令。</param>
         /// <param name="subscriberPath">订阅者配置命令。</param>
+        /// <param name="routePath">路由路径配置路径</param>
+        /// <param name="cachePath">缓存中心配置路径</param>
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout,
             string routePath = "services/serviceRoutes/",
              string subscriberPath = "services/serviceSubscribers/",
-            string commandPath = "services/serviceCommands/")
+            string commandPath = "services/serviceCommands/",
+            string cachePath= "services/serviceCaches/")
         {
-            
+            CachePath = cachePath;
             SessionTimeout = sessionTimeout;
             RoutePath = routePath;
             SubscriberPath = subscriberPath;
@@ -77,6 +82,11 @@ namespace Surging.Core.Consul.Configurations
         /// 路由配置路径。
         /// </summary>
         public string RoutePath { get; set; }
+
+        /// <summary>
+        /// 缓存中心配置中心
+        /// </summary>
+        public string CachePath { get; set; }
 
         public string Host { get; set; }
 

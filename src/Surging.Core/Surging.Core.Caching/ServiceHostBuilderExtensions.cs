@@ -1,7 +1,13 @@
-﻿using Surging.Core.ServiceHosting.Internal;
+﻿using Microsoft.Extensions.Configuration;
+using Surging.Core.Caching.Models;
+using Surging.Core.ServiceHosting.Internal;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using Autofac;
+using System.Reflection;
+using Surging.Core.Caching.Interfaces;
+using Surging.Core.CPlatform.Cache;
 
 namespace Surging.Core.Caching
 {
@@ -9,9 +15,11 @@ namespace Surging.Core.Caching
     {
         public static IServiceHostBuilder UseServiceCache(this IServiceHostBuilder hostBuilder)
         {
-            return hostBuilder.RegisterServices(mapper =>
+            return hostBuilder.MapServices(mapper =>
             {
-                
+                var serviceCacheProvider = mapper.Resolve<ICacheNodeProvider>();
+                var addressDescriptors = serviceCacheProvider.GetServiceCaches().ToList();
+                mapper.Resolve<IServiceCacheManager>().SetCachesAsync(addressDescriptors);
             });
         }
     }

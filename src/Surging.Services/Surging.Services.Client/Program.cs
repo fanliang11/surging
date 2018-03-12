@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Surging.Core.Caching;
+using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
@@ -8,6 +9,7 @@ using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusKafka;
 using Surging.Core.EventBusRabbitMQ;
+using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.Log4net;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
@@ -41,6 +43,7 @@ namespace Surging.Services.Client
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
                         option.UseRabbitMQTransport();
+                        option.AddCache();
                         //option.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";
@@ -50,9 +53,13 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-                .UseServiceCache()
-                .UseProxy()
+                  .ConfigureServices(build =>
+                build.AddEventBusFile("eventBusSettings.json", optional: false))
+                .ConfigureServices(build =>
+                build.AddCacheFile("cacheSettings.json", optional: false))
                 .UseLog4net()
+                .UseServiceCache()
+                .UseProxy() 
                 .UseClient()
                 .UseStartup<Startup>()
                 .Build();

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Autofac;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -56,7 +57,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             object result = default(T);
             var command = await _commandProvider.GetCommand(serviceId);
             RemoteInvokeResultMessage message;
-            var decodeJOject = typeof(T) == typeof(Object);
+            var decodeJOject = typeof(T) == UtilityType.ObjectType;
             if (!command.RequestCacheEnabled || decodeJOject)
             {
                 var v = typeof(T).FullName;
@@ -64,7 +65,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 if (message == null)
                 {
                     var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                    return await invoker.Invoke<T>(parameters, serviceId, _serviceKey, typeof(T) == typeof(Object));
+                    return await invoker.Invoke<T>(parameters, serviceId, _serviceKey, typeof(T) == UtilityType.ObjectType);
                 }
             }
             else
@@ -81,17 +82,16 @@ namespace Surging.Core.ProxyGenerator.Implementation
             return (T)result;
         }
 
-        public async Task<object> CallInvoke(IDictionary<string, object> parameters, string serviceId)
+        public async Task<object> CallInvoke(IDictionary<string, object> parameters, string serviceId, Type type)
         {
-            var task = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, true);
-            task.Wait();
-            if (task.Result == null)
+            var message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, true);
+            if (message == null)
             {
                 var command = await _commandProvider.GetCommand(serviceId);
                 var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
                 return await invoker.Invoke<object>(parameters, serviceId, _serviceKey, true);
             }
-            return task.Result;
+            return _typeConvertibleService.Convert(message.Result, type);
         }
 
         /// <summary>

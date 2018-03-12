@@ -59,6 +59,10 @@ var host = new ServiceHostBuilder()
                 })
                 .UseLog4net("Configs/log4net.config") //使用log4net记录日志
                 .UseLog4net()  //使用log4net记录日志
+                .ConfigureServices(build =>
+                build.AddEventBusFile("eventBusSettings.json", optional: false))//使用eventBusSettings.json文件进行配置
+                .ConfigureServices(build =>
+                 build.AddCacheFile("cacheSettings.json", optional: false))//使用cacheSettings.json文件进行配置
                 .UseProxy() //使用Proxy
                 .UseStartup<Startup>()
                 .Build();
@@ -182,16 +186,10 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
-<br/>
-
-[简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)
-
-
-<br/>
-
-
 IDE:Visual Studio 2017 15.3 Preview ,vscode
 <br/>
 框架：.NET core 2.0
 <br/>
-[文档](http://docs.dotnet-china.org/surging/)
+* [Demo](https://github.com/billyang/SurgingDemo)
+* [文档](http://docs.dotnet-china.org/surging/)
+* [简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)

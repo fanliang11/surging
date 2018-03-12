@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Surging.ApiGateway.Models;
 using Surging.Core.ApiGateWay.ServiceDiscovery;
 using Surging.Core.ApiGateWay.ServiceDiscovery.Implementation;
 using Surging.Core.ApiGateWay.Utilities;
+using Surging.Core.Caching.HashAlgorithms;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Utilities;
 using System.Collections.Generic;
@@ -50,12 +53,32 @@ namespace Surging.ApiGateway.Controllers
             return View();
         }
 
+        public async Task<IActionResult> EditCacheEndPoint(string cacheId,string endpoint)
+        {
+            var model = await ServiceLocator.GetService<IServiceCacheProvider>().GetCacheEndpointAsync(cacheId, endpoint);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DelCacheEndPoint(string cacheId, string endpoint)
+        {
+            await ServiceLocator.GetService<IServiceCacheProvider>().DelCacheEndpointAsync(cacheId, endpoint);
+            return Json(ServiceResult.Create(true));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditCacheEndPoint(CacheEndpointParam param)
+        {
+          await ServiceLocator.GetService<IServiceCacheProvider>().SetCacheEndpointByEndpoint(param.CacheId, param.Endpoint, param.CacheEndpoint);
+            return Json(ServiceResult.Create(true));
+        }
+
         public async Task<IActionResult> EditFaultTolerant(string serviceId)
         {
            var  list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptor(serviceId);
             return View(list.FirstOrDefault());
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> EditFaultTolerant(ServiceCommandDescriptor model)
         {
@@ -78,6 +101,33 @@ namespace Surging.ApiGateway.Controllers
             var result = ServiceResult<IEnumerable<ServiceCommandDescriptor>>.Create(true, list);
             return Json(result);
         }
+
+        public IActionResult ServiceCache()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetServiceCache(string queryParam)
+        {
+            var list = await ServiceLocator.GetService<IServiceCacheProvider>().GetServiceDescriptorAsync();
+            var result = ServiceResult<IEnumerable<CacheDescriptor>>.Create(true, list);
+            return Json(result);
+        }
+
+        public  IActionResult ServiceCacheEndpoint(string cacheId)
+        {
+            ViewBag.CacheId = cacheId;
+            return View();
+        }
+
+        public async Task<IActionResult> GetCacheEndpoint(string cacheId)
+        {
+            var list = await ServiceLocator.GetService<IServiceCacheProvider>().GetCacheEndpointAsync(cacheId);
+            var result = ServiceResult<IEnumerable<CacheEndpoint>>.Create(true, list);
+            return Json(result);
+        }
+
 
         public IActionResult ServiceSubscriber(string serviceId)
         {

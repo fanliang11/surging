@@ -50,7 +50,7 @@ namespace Surging.Core.CPlatform.Support
 /// <summary>
 /// 服务命令管理者扩展方法。
 /// </summary>
-public static class ServiceRouteManagerExtensions
+public static class ServiceCommandManagerExtensions
 {
     /// <summary>
     /// 获取所有可用的服务命令信息。
