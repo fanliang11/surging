@@ -4,7 +4,7 @@
   "AuthorizationServiceKey": "User",
   "TokenEndpointPath": "api/oauth2/token",
   "Register": {
-    "Provider": "Zookeeper",
-    "Address": "127.0.0.1:2181"
+    "Provider": "Consul",
+    "Address": "127.0.0.1:8500"
   }
 }

@@ -8,11 +8,10 @@
     <Authors>fanly</Authors>
     <Company />
     <Product>surging Micro Service Framework</Product>
-    <PackageReleaseNotes>1.Add IpEndpoint to configure non-loopback IP address
-2.Fix the name of the module file without constraint
-3.Add third-party dependency injection
-4.Fixed RelatedAssemblyFiles not set throw BUG
-5.Refactor this.Publish () call</PackageReleaseNotes>
+    <PackageReleaseNotes>1.Add distributed cache
+2.Fixed client Get service Entries collection
+3.Optimize memory usage
+4.Service Command Add Load balancing Shunt Strategy</PackageReleaseNotes>
     <PackageTags>MicroService surging</PackageTags>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>

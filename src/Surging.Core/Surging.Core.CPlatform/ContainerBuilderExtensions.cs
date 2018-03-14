@@ -417,31 +417,44 @@ namespace Surging.Core.CPlatform
         /// <returns>返回注册模块信息</returns>
         public static IServiceBuilder RegisterServices(this IServiceBuilder builder)
         {
-            var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly();
-            foreach (var assembly in referenceAssemblies)
+            try
             {
-                services.RegisterAssemblyTypes(assembly)
-                   .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface)
-                   .AsImplementedInterfaces();
-                services.RegisterAssemblyTypes(assembly)
-             .Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
-
-                var types = assembly.GetTypes().Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
-                foreach (var type in types)
+                var services = builder.Services;
+                var referenceAssemblies = GetReferenceAssembly();
+                foreach (var assembly in referenceAssemblies)
                 {
-                    var module = type.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>();
-                    var interfaceObj = type.GetInterfaces()
-                        .FirstOrDefault(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t));
-                    if (interfaceObj != null)
-                    {
-                        services.RegisterType(type).AsImplementedInterfaces().Named(module.ModuleName, interfaceObj);
-                        services.RegisterType(type).Named(module.ModuleName, type);
-                    }
-                }
+                    services.RegisterAssemblyTypes(assembly)
+                       .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface)
+                       .AsImplementedInterfaces();
+                    services.RegisterAssemblyTypes(assembly)
+                 .Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
 
+                    var types = assembly.GetTypes().Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
+                    foreach (var type in types)
+                    {
+                        var module = type.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>();
+                        var interfaceObj = type.GetInterfaces()
+                            .FirstOrDefault(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t));
+                        if (interfaceObj != null)
+                        {
+                            services.RegisterType(type).AsImplementedInterfaces().Named(module.ModuleName, interfaceObj);
+                            services.RegisterType(type).Named(module.ModuleName, type);
+                        }
+                    }
+
+                }
+                return builder;
             }
-            return builder;
+            catch(Exception ex)
+            {
+                if (ex is System.Reflection.ReflectionTypeLoadException)
+                {
+                    var typeLoadException = ex as ReflectionTypeLoadException;
+                    var loaderExceptions = typeLoadException.LoaderExceptions;
+                    throw loaderExceptions[0];
+                }
+                throw ex; 
+            }
         }
 
         public static IServiceBuilder RegisterServiceBus
@@ -554,7 +567,7 @@ namespace Surging.Core.CPlatform
             {
                 return
                     Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
-                        a => !notRelatedRegex.IsMatch(a) || relatedRegex.IsMatch(a)).ToList();
+                        a => !notRelatedRegex.IsMatch(a) && relatedRegex.IsMatch(a)).ToList();
             }
             else
             {
