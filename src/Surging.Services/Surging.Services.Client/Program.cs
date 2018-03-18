@@ -53,10 +53,10 @@ namespace Surging.Services.Client
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-                  .ConfigureServices(build =>
+                  .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
-                .ConfigureServices(build =>
-                build.AddCacheFile("cacheSettings.json", optional: false))
+                .Configure(build =>
+                build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
                 .UseLog4net()
                 .UseServiceCache()
                 .UseProxy() 

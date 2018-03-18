@@ -5,6 +5,8 @@ using Autofac.Features.Scanning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Cache;
+using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.Configurations.Watch;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Convertibles.Implementation;
 using Surging.Core.CPlatform.EventBus.Events;
@@ -247,6 +249,16 @@ namespace Surging.Core.CPlatform
         }
 
         #endregion AddressSelector
+
+        #region Configuration Watch
+
+        public static IServiceBuilder AddConfigurationWatch(this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            services.RegisterType(typeof(ConfigurationWatchManager)).As(typeof(IConfigurationWatchManager)).SingleInstance();
+            return builder;
+        }
+        #endregion
 
         #region Codec Factory
 

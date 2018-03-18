@@ -15,7 +15,7 @@ namespace Surging.Core.ServiceHosting.Internal
 
         IServiceHostBuilder ConfigureServices(Action<IServiceCollection> configureServices);
 
-        IServiceHostBuilder ConfigureServices(Action<IConfigurationBuilder> builder);
+        IServiceHostBuilder Configure(Action<IConfigurationBuilder> builder);
 
         IServiceHostBuilder MapServices(Action<IContainer> mapper);
     }

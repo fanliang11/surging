@@ -35,6 +35,7 @@ namespace Surging.Services.Server
                     {
                         option.AddServiceRuntime();
                         option.AddRelateService();
+                        option.AddConfigurationWatch();
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
                         option.UseDotNettyTransport();
@@ -71,10 +72,10 @@ namespace Surging.Services.Server
                    
                 })
                 .UseServiceCache()
-                .ConfigureServices(build =>
+                .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
-                .ConfigureServices(build =>
-                build.AddCacheFile("cacheSettings.json", optional: false))
+                .Configure(build =>
+                build.AddCacheFile("cacheSettings.json", optional: false,reloadOnChange:true))
                 .UseLog4net("Configs/log4net.config")
                 .UseProxy()
                 .UseStartup<Startup>()
