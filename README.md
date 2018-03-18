@@ -25,6 +25,7 @@ var host = new ServiceHostBuilder()
                     {
                         option.AddServiceRuntime();//
                         option.AddRelateService();//添加支持服务代理远程调用
+                         option.AddConfigurationWatch();//添加同步更新配置文件的监听处理
                         // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //使用Zookeeper管理
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//使用Consul管理
                         option.UseDotNettyTransport();//使用Netty传输
@@ -59,9 +60,9 @@ var host = new ServiceHostBuilder()
                 })
                 .UseLog4net("Configs/log4net.config") //使用log4net记录日志
                 .UseLog4net()  //使用log4net记录日志
-                .ConfigureServices(build =>
+                .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))//使用eventBusSettings.json文件进行配置
-                .ConfigureServices(build =>
+                .Configure(build =>
                  build.AddCacheFile("cacheSettings.json", optional: false))//使用cacheSettings.json文件进行配置
                 .UseProxy() //使用Proxy
                 .UseStartup<Startup>()
