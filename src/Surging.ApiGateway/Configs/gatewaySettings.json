@@ -1,0 +1,10 @@
+{
+  "AccessTokenExpireTimeSpan": "30",
+  "AuthorizationRoutePath": "api/user/authentication",
+  "AuthorizationServiceKey": "User",
+  "TokenEndpointPath": "api/oauth2/token",
+  "Register": {
+    "Provider": "Consul",
+    "Address": "127.0.0.1:8500"
+  }
+}

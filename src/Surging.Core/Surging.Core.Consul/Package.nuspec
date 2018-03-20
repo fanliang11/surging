@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Surging.Core.DotNetty</id>
+    <version>0.4.7</version>
+    <authors>surging</authors>
+    <owners>fanly</owners>
+    <licenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/dotnetcore/surging</projectUrl>
+    <iconUrl>https://github.com/dotnetcore/surging/blob/master/logo.jpg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>MicroService surging</tags>
+    <dependencies>
+      <dependency id="surging" version="0.4.7" />
+      <dependency id="Autofac" version="4.6.1" />
+      <dependency id="DotNetty.Codecs" version="0.4.7" />
+    </dependencies>
+  </metadata>
+</package>
