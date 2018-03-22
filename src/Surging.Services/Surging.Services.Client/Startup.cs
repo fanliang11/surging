@@ -76,6 +76,11 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+                 await userProxy.PublishThroughEventBusAsync(new UserEvent
+                {
+                     UserId="1",
+                     Name="fanly"
+                });
                await userProxy.GetUserId("user");
                await userProxy.GetDictionary();
                 var serviceProxyProvider=  ServiceLocator.GetService<IServiceProxyProvider>();

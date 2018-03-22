@@ -6,22 +6,23 @@ using Surging.IModuleServices.Common.Models.Events;
 using System.Threading.Tasks;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Modules.Common.IntegrationEvents.EventHandling
 {
      public  class UserLoginDateChangeHandler : IIntegrationEventHandler<UserEvent>
     {
         private readonly IUserService _userService;
-        public UserLoginDateChangeHandler(IUserService userService)
+        public UserLoginDateChangeHandler()
         {
-            _userService = userService;
+            _userService = ServiceLocator.GetService<IUserService>("User");
         }
         public async Task Handle(UserEvent @event)
         {
-            //await _userService.Update( int.Parse(@event.UserId),new UserModel()
-            //{
+            await _userService.Update(int.Parse(@event.UserId), new UserModel()
+            {
 
-            //});
+            });
         }
     }
 }
