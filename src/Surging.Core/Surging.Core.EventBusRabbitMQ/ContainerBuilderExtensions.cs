@@ -32,11 +32,13 @@ namespace Surging.Core.EventBusRabbitMQ
                 var HostName = AppConfig.Configuration["EventBusConnection"];
                 var rabbitUserName= AppConfig.Configuration["EventBusUserName"]??"guest";;
                 var rabbitPassword= AppConfig.Configuration["EventBusPassword"] ??"guest";
+                var virtualHost = AppConfig.Configuration["VirtualHost"] ?? "/";
                 var factory = new ConnectionFactory()
                 {
                     HostName = HostName,
                     UserName = rabbitUserName,
-                    Password = rabbitPassword
+                    Password = rabbitPassword,
+                    VirtualHost= virtualHost,
                 };
                 factory.RequestedHeartbeat = 60;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);

@@ -1,6 +1,7 @@
 {
   "EventBusConnection": "localhost",
   "EventBusUserName": "guest",
-  "EventBusPassword": "guest"
+  "EventBusPassword": "guest",
+  "VirtualHost": "/"
 }
 
