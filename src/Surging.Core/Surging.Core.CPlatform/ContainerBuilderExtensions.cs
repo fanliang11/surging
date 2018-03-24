@@ -214,6 +214,18 @@ namespace Surging.Core.CPlatform
         }
 
         /// <summary>
+        /// 使用压力最小优先分配轮询的地址选择器。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseFairPollingAddressSelector(this IServiceBuilder builder)
+        {
+            builder.Services.RegisterType(typeof(FairPollingAdrSelector))
+                .Named(AddressSelectorMode.FairPolling.ToString(), typeof(IAddressSelector)).SingleInstance();
+            return builder;
+        }
+
+        /// <summary>
         /// 使用哈希的地址选择器。
         /// </summary>
         /// <param name="builder">服务构建者。</param>
@@ -245,7 +257,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseAddressSelector(this IServiceBuilder builder)
         {
-            return builder.UseRandomAddressSelector().UsePollingAddressSelector().UseHashAlgorithmAddressSelector();
+            return builder.UseRandomAddressSelector().UsePollingAddressSelector().UseFairPollingAddressSelector().UseHashAlgorithmAddressSelector();
         }
 
         #endregion AddressSelector

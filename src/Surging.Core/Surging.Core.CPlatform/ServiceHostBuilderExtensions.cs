@@ -14,6 +14,7 @@ using Surging.Core.CPlatform.Runtime.Client;
 using System;
 using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Module;
+using System.Diagnostics;
 
 namespace Surging.Core.CPlatform
 {
@@ -53,7 +54,7 @@ namespace Surging.Core.CPlatform
                 var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                 new ServiceRoute
                 {
-                    Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, Token= serviceToken } },
+                    Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, ProcessorTime= Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds, Token = serviceToken } },
                     ServiceDescriptor = i.Descriptor
                 }).ToList();
                 mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);

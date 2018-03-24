@@ -6,6 +6,7 @@ using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Sel
 using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform.Support;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         private readonly ILogger<DefaultAddressResolver> _logger;
         private readonly IHealthCheckService _healthCheckService;
         private readonly CPlatformContainer _container;
-        private readonly IAddressSelector _addressSelector;
+        private readonly ConcurrentDictionary<string, IAddressSelector> _addressSelectors=new
+            ConcurrentDictionary<string, IAddressSelector>();
         private readonly IServiceCommandProvider _commandProvider;
         private readonly ConcurrentDictionary<string, ServiceRoute> _concurrent =
   new ConcurrentDictionary<string, ServiceRoute>();
@@ -34,11 +36,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 
         public DefaultAddressResolver(IServiceCommandProvider commandProvider, IServiceRouteManager serviceRouteManager, ILogger<DefaultAddressResolver> logger, CPlatformContainer container, IHealthCheckService healthCheckService)
         {
-            
             _container = container;
             _serviceRouteManager = serviceRouteManager;
             _logger = logger;
-            _addressSelector = _container.GetInstances<IAddressSelector>(AddressSelectorMode.Polling.ToString());
+            LoadAddressSelectors();
             _commandProvider = commandProvider;
             _healthCheckService = healthCheckService;
             serviceRouteManager.Changed += ServiceRouteManager_Removed;
@@ -59,7 +60,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备为服务id：{serviceId}，解析可用地址。");
-            var addressSelector = _addressSelector;
+
             _concurrent.TryGetValue(serviceId, out ServiceRoute descriptor);
             if (descriptor == null)
             {
@@ -99,12 +100,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation($"根据服务id：{serviceId}，找到以下可用地址：{string.Join(",", address.Select(i => i.ToString()))}。");
-
-            if (hashCode != 0)
-            {
-                var command = await _commandProvider.GetCommand(serviceId);
-                addressSelector = _container.GetInstances<IAddressSelector>(command.ShuntStrategy.ToString());
-            }
+            var command = await _commandProvider.GetCommand(serviceId);
+            var addressSelector = _addressSelectors[command.ShuntStrategy.ToString()];
             return await addressSelector.SelectAsync(new AddressSelectContext
             {
                 Descriptor = descriptor.ServiceDescriptor,
@@ -129,6 +126,14 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         {
             var key = GetCacheKey(e.Route.ServiceDescriptor);
             _concurrent.GetOrAdd(key, e.Route);
+        }
+
+        private void LoadAddressSelectors()
+        {
+            foreach (AddressSelectorMode item in Enum.GetValues(typeof(AddressSelectorMode)))
+            {
+               _addressSelectors.TryAdd( item.ToString(), _container.GetInstances<IAddressSelector>(item.ToString()));
+            }
         }
 
         #endregion Implementation of IAddressResolver

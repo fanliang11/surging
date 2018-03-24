@@ -7,6 +7,7 @@ using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using System;
+using System.Diagnostics;
 
 namespace Surging.Services.Server
 {
