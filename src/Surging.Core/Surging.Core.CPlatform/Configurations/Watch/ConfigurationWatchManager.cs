@@ -14,7 +14,7 @@ namespace Surging.Core.CPlatform.Configurations.Watch
 
         public ConfigurationWatchManager()
         {
-            var timeSpan = TimeSpan.FromSeconds(10);
+            var timeSpan = TimeSpan.FromSeconds(AppConfig.ServerOptions.WatchInterval);
             _timer = new Timer(async s =>
             {
                 await Watching();

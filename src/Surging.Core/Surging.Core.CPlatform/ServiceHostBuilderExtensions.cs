@@ -50,14 +50,18 @@ namespace Surging.Core.CPlatform
                         }
                     }
                 }
-                
-                var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-                new ServiceRoute
+
+                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(), serviceEntryManager, () =>
                 {
-                    Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, ProcessorTime= Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds, Token = serviceToken } },
-                    ServiceDescriptor = i.Descriptor
-                }).ToList();
-                mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
+                    var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
+                    new ServiceRoute
+                    {
+                        Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, ProcessorTime = Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds, Token = serviceToken } },
+                        ServiceDescriptor = i.Descriptor
+                    }).ToList();
+                    mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
+                });
+
                 mapper.Resolve<IModuleProvider>().Initialize();
                 var serviceHost = mapper.Resolve<Runtime.Server.IServiceHost>();
                 Task.Factory.StartNew(async () =>
