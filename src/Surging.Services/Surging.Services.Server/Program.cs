@@ -5,6 +5,7 @@ using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusKafka.Configurations;
@@ -62,20 +63,18 @@ namespace Surging.Services.Server
                 //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
                 .UseServer(options =>
                 {
-                    // options.IpEndpoint = new IPEndPoint(IPAddress.Any, 98);
-                    options.Ip = "127.0.0.1";
-                    options.Port = 98;
+                    // options.IpEndpoint = new IPEndPoint(IPAddress.Any, 98);  
                     options.Token = "True";
                     options.ExecutionTimeoutInMilliseconds = 30000;
                     options.MaxConcurrentRequests = 200;
-
-                   
                 })
                 .UseServiceCache()
                 .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
                 .Configure(build =>
                 build.AddCacheFile("cacheSettings.json", optional: false,reloadOnChange:true))
+                  .Configure(build =>
+                build.AddCPlatformFile("surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseLog4net("Configs/log4net.config")
                 .UseProxy()
                 .UseStartup<Startup>()
