@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.6.1</Version>
+    <Version>0.6.3</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Company />
@@ -11,12 +11,11 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
-    <FileVersion>0.6.1.0</FileVersion>
-    <PackageReleaseNotes>1.Add distributed cache
-2.Fixed client Get service Entries collection
-3.Optimize memory usage
-4.Service Command Add Load balancing Shunt Strategy</PackageReleaseNotes>
+    <AssemblyVersion>0.6.3.0</AssemblyVersion>
+    <FileVersion>0.6.3.0</FileVersion>
+    <PackageReleaseNotes>1.Add Distributed Cache Profile Synchronization Updates 
+2.Add load balancing FairPolling Algorithm  
+3.Add configuration file to define running parameters</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
