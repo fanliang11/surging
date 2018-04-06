@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Logging;
 using Surging.Core.Caching;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
@@ -57,7 +58,7 @@ namespace Surging.Services.Client
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
                 .Configure(build =>
                 build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
-                .UseLog4net()
+                .UseLog4net(LogLevel.Error)
                 .UseServiceCache()
                 .UseProxy() 
                 .UseClient()
