@@ -8,7 +8,6 @@ using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
-using Surging.Core.EventBusKafka;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.Log4net;
