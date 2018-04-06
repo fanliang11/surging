@@ -38,7 +38,8 @@ namespace Surging.Services.Client
 
         public void Configure(IContainer app)
         {
-           
+            app.Resolve<ILoggerFactory>()
+                    .AddConsole((c, l) => (int)l >= 3);
         }
 
         #region 私有方法
