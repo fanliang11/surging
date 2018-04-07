@@ -2,6 +2,7 @@
   "EventBusConnection": "localhost",
   "EventBusUserName": "guest",
   "EventBusPassword": "guest",
-  "VirtualHost": "/"
+  "VirtualHost": "/",
+  "BrokerName": "surging_demo"
 }
 
