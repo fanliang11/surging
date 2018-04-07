@@ -59,7 +59,8 @@ var host = new ServiceHostBuilder()
                     options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                 })
                 .UseLog4net("Configs/log4net.config") //使用log4net记录日志
-                .UseLog4net()  //使用log4net记录日志
+                //.UseLog4net(LogLevel.Error) //使用log4net记录日志
+                //.UseLog4net()  //使用log4net记录日志
                 .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))//使用eventBusSettings.json文件进行配置
                 .Configure(build =>
