@@ -583,7 +583,7 @@ namespace Surging.Core.CPlatform
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*{0}",
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac.\\w*|Surging.Core.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
