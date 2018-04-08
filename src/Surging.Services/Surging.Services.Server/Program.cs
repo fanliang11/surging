@@ -66,7 +66,6 @@ namespace Surging.Services.Server
                     options.Token = "True";
                     options.ExecutionTimeoutInMilliseconds = 30000;
                     options.MaxConcurrentRequests = 200;
-                    options.RelatedAssemblyFiles = "Zrl.System.Core\\w*"; //排除无需依赖注册
                 })
                 .UseServiceCache()
                 .Configure(build =>
