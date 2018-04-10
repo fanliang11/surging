@@ -64,8 +64,16 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
                 if (message == null)
                 {
-                    var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                    return await invoker.Invoke<T>(parameters, serviceId, _serviceKey, typeof(T) == UtilityType.ObjectType);
+                    if (_serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
+                    {
+                        var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
+                        return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
+                    }
+                    else
+                    {
+                        var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
+                        return await invoker.Invoke<T>(parameters, serviceId, _serviceKey, typeof(T) == UtilityType.ObjectType);
+                    }
                 }
             }
             else
@@ -88,8 +96,16 @@ namespace Surging.Core.ProxyGenerator.Implementation
             if (message == null)
             {
                 var command = await _commandProvider.GetCommand(serviceId);
-                var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                return await invoker.Invoke<object>(parameters, serviceId, _serviceKey, true);
+                if (_serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy==StrategyType.FallBack)
+                {
+                    var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
+                    return await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
+                }
+                else
+                {
+                    var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
+                    return await invoker.Invoke<object>(parameters, serviceId, _serviceKey, true);
+                }
             }
             return _typeConvertibleService.Convert(message.Result, type);
         }
@@ -102,12 +118,20 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// <returns>调用任务。</returns>
         protected async Task Invoke(IDictionary<string, object> parameters, string serviceId)
         {
-            var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey,false);
+            var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, false);
             if (message == null)
             {
-                var command =await _commandProvider.GetCommand(serviceId);
-                var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
-                await invoker.Invoke(parameters, serviceId, _serviceKey,true);
+                var command = await _commandProvider.GetCommand(serviceId);
+                if (_serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
+                {
+                     var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
+                     await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
+                }
+                else
+                {
+                    var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
+                    await invoker.Invoke(parameters, serviceId, _serviceKey, true);
+                }
             }
         }
        

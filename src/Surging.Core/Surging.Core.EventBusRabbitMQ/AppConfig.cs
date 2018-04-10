@@ -13,7 +13,7 @@ namespace Surging.Core.EventBusRabbitMQ
 
         public static string RabbitUserName => Configuration != null ? Configuration["EventBusUserName"] ?? "guest" : "guest";
 
-        public static string RabbitPassword =>Configuration != null ? Configuration["EventBusUserName"] ?? "guest" : "guest";
+        public static string RabbitPassword =>Configuration != null ? Configuration["RabbitPassword"] ?? "guest" : "guest";
 
         public static string VirtualHost => Configuration !=null? Configuration["VirtualHost"] ?? "/": "/";
 

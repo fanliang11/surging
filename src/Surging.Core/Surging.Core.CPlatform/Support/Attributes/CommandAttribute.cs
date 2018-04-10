@@ -25,6 +25,7 @@ namespace Surging.Core.CPlatform.Support.Attributes
                 BreakerForceClosed = AppConfig.ServerOptions.BreakerForceClosed;
                 BreakerRequestVolumeThreshold = AppConfig.ServerOptions.BreakerRequestVolumeThreshold;
                 MaxConcurrentRequests = AppConfig.ServerOptions.MaxConcurrentRequests;
+                FallBackName = AppConfig.ServerOptions.FallBackName;
             }
         }
         /// <summary>
@@ -71,6 +72,12 @@ namespace Surging.Core.CPlatform.Support.Attributes
         /// 负载分流策略
         /// </summary>
         public AddressSelectorMode ShuntStrategy { get; set; } = AddressSelectorMode.Polling;
+        
+        /// <summary>
+        /// IFallbackInvoker 实例名称
+        /// </summary>
+        public string FallBackName { get; set; }
+        /// <summary>
 
         /// <summary>
         ///    10秒钟内至少多少请求失败，熔断器才发挥起作用

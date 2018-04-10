@@ -20,6 +20,11 @@ namespace Surging.Core.CPlatform
             return _container.IsRegistered<T>();
         }
 
+        public bool IsRegistered<T>(object serviceKey)
+        {
+            return _container.IsRegisteredWithKey<T>(serviceKey);
+        }
+
         public  T GetInstances<T>(string name) where T : class
         {
      
