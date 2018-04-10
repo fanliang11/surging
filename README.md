@@ -188,9 +188,9 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
-IDE:Visual Studio 2017 15.3 Preview ,vscode
+IDE:Visual Studio 2017 15.5,vscode
 <br/>
-框架：.NET core 2.0
+框架：.NET core 2.1
 <br/>
 * [Demo](https://github.com/billyang/SurgingDemo)
 * [文档](http://docs.dotnet-china.org/surging/)
