@@ -48,6 +48,16 @@ namespace Surging.Core.CPlatform.Support
         public string Injection { get; set; } = "return null";
 
         /// <summary>
+        /// 是否启用CircuitBreaker 
+        /// </summary>
+
+        public bool EnableCircuitBreaker { get; set; } = false;
+
+        /// <summary>
+        /// IFallbackInvoker 实例名称
+        /// </summary>
+        public string FallBackModule { get; set; }
+        /// <summary>
         /// 负载分流策略
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]

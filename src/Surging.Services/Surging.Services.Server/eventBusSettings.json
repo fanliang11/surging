@@ -3,6 +3,7 @@
   "EventBusUserName": "guest",
   "EventBusPassword": "guest",
   "VirtualHost": "/",
-  "BrokerName": "surging_demo"
+  "BrokerName": "surging_demo",
+  "Port": "5672"
 }
 

@@ -7,9 +7,7 @@
     <Product>surging Micro Service Framework</Product>
     <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
     <Company />
-    <PackageReleaseNotes>1.Add Distributed Cache Profile Synchronization Updates 
-2.Add load balancing FairPolling Algorithm  
-3.Add configuration file to define running parameters</PackageReleaseNotes>
+    <PackageReleaseNotes>1.Fixed assembly file name regular expression error</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>MicroService surging</PackageTags>

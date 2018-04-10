@@ -35,6 +35,7 @@ namespace Surging.Core.EventBusRabbitMQ
                     UserName =  AppConfig.RabbitUserName,
                     Password = AppConfig.RabbitPassword,
                     VirtualHost= AppConfig.VirtualHost,
+                    Port = int.Parse(AppConfig.Port),
                 };
                 factory.RequestedHeartbeat = 60;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
