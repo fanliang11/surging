@@ -85,6 +85,15 @@ namespace Surging.Core.DotNetty
                 _logger.LogDebug($"服务主机启动成功，监听地址：{endPoint}。");
         }
 
+        public void CloseAsync()
+        {
+            Task.Run(async () =>
+            {
+                await _channel.EventLoop.ShutdownGracefullyAsync();
+                await _channel.CloseAsync();
+            }).Wait();
+        }
+
         #region Implementation of IDisposable
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>

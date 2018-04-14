@@ -13,6 +13,7 @@ using Surging.Core.EventBusKafka.Configurations;
 //using Surging.Core.EventBusKafka;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.Log4net;
+using Surging.Core.Nlog;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
@@ -58,7 +59,8 @@ namespace Surging.Services.Server
                     });
                 })
                 .SubscribeAt() 
-                .UseLog4net(LogLevel.Error, "Configs/log4net.config")
+               // .UseLog4net(LogLevel.Error, "Configs/log4net.config")
+                .UseNLog(LogLevel.Error, "Configs/NLog.config")
                 //.UseServer("127.0.0.1", 98)
                 //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
                 //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
