@@ -58,7 +58,8 @@ var host = new ServiceHostBuilder()
                     options.ShuntStrategy=AddressSelectorMode.Polling; //使用轮询负载分流策略
                     options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                 })
-                .UseLog4net("Configs/log4net.config") //使用log4net记录日志
+                //.UseLog4net("Configs/log4net.config") //使用log4net记录日志
+                .UseNLog(LogLevel.Error, "Configs/NLog.config")// 使用NLog 记录日志
                 //.UseLog4net(LogLevel.Error) //使用log4net记录日志
                 //.UseLog4net()  //使用log4net记录日志
                 .Configure(build =>
