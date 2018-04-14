@@ -9,7 +9,7 @@ namespace Surging.Core.Nlog
 {
    public static class ServiceHostBuilderExtensions
     {
-        public static IServiceHostBuilder UseNLog(this IServiceHostBuilder hostBuilder, string log4NetConfigFile = "log4net.config")
+        public static IServiceHostBuilder UseNLog(this IServiceHostBuilder hostBuilder, string log4NetConfigFile = "nLog.config")
         {
             return hostBuilder.MapServices(mapper =>
             {
@@ -19,7 +19,7 @@ namespace Surging.Core.Nlog
             });
         }
 
-        public static IServiceHostBuilder UseNLog(this IServiceHostBuilder hostBuilder, LogLevel minLevel, string log4NetConfigFile = "log4net.config")
+        public static IServiceHostBuilder UseNLog(this IServiceHostBuilder hostBuilder, LogLevel minLevel, string log4NetConfigFile = "nLog.config")
         {
             return hostBuilder.MapServices(mapper =>
             {

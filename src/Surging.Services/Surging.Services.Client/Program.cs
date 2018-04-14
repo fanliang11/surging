@@ -11,6 +11,7 @@ using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.Log4net;
+using Surging.Core.Nlog;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
@@ -57,7 +58,8 @@ namespace Surging.Services.Client
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
                 .Configure(build =>
                 build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
-                .UseLog4net(LogLevel.Error)
+                .UseNLog(LogLevel.Error)
+               // .UseLog4net(LogLevel.Error)
                 .UseServiceCache()
                 .UseProxy() 
                 .UseClient()
