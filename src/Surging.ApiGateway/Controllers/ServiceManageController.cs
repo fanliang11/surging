@@ -25,17 +25,17 @@ namespace Surging.ApiGateway.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetAddress(string queryParam)
+        public async Task<IActionResult> GetAddress([FromServices]IServiceDiscoveryProvider serviceDiscoveryProvider, string queryParam)
         {
-            var list = await ServiceLocator.GetService<IServiceDiscoveryProvider>().GetAddressAsync(queryParam);
+            var list = await serviceDiscoveryProvider.GetAddressAsync(queryParam);
             var result = ServiceResult<IEnumerable<ServiceAddressModel>>.Create(true, list);
             return Json(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetServiceDescriptor(string address, string queryParam)
+        public async Task<IActionResult> GetServiceDescriptor([FromServices]IServiceDiscoveryProvider serviceDiscoveryProvider, string address, string queryParam)
         {
-            var list = await ServiceLocator.GetService<IServiceDiscoveryProvider>().GetServiceDescriptorAsync(address, queryParam);
+            var list = await serviceDiscoveryProvider.GetServiceDescriptorAsync(address, queryParam);
             var result = ServiceResult<IEnumerable<ServiceDescriptor>>.Create(true, list);
             return Json(result);
         }
@@ -53,50 +53,51 @@ namespace Surging.ApiGateway.Controllers
             return View();
         }
 
-        public async Task<IActionResult> EditCacheEndPoint(string cacheId,string endpoint)
+        public async Task<IActionResult> EditCacheEndPoint([FromServices]IServiceCacheProvider serviceCacheProvider, string cacheId,string endpoint)
         {
-            var model = await ServiceLocator.GetService<IServiceCacheProvider>().GetCacheEndpointAsync(cacheId, endpoint);
+            var model = await serviceCacheProvider.GetCacheEndpointAsync(cacheId, endpoint);
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> DelCacheEndPoint(string cacheId, string endpoint)
+        public async Task<IActionResult> DelCacheEndPoint([FromServices]IServiceCacheProvider serviceCacheProvider, string cacheId, string endpoint)
         {
-            await ServiceLocator.GetService<IServiceCacheProvider>().DelCacheEndpointAsync(cacheId, endpoint);
+            await serviceCacheProvider.DelCacheEndpointAsync(cacheId, endpoint);
             return Json(ServiceResult.Create(true));
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditCacheEndPoint(CacheEndpointParam param)
+        public async Task<IActionResult> EditCacheEndPoint([FromServices]IServiceCacheProvider serviceCacheProvider, CacheEndpointParam param)
         {
-          await ServiceLocator.GetService<IServiceCacheProvider>().SetCacheEndpointByEndpoint(param.CacheId, param.Endpoint, param.CacheEndpoint);
+          await serviceCacheProvider.SetCacheEndpointByEndpoint(param.CacheId, param.Endpoint, param.CacheEndpoint);
             return Json(ServiceResult.Create(true));
         }
 
-        public async Task<IActionResult> EditFaultTolerant(string serviceId)
+        public async Task<IActionResult> EditFaultTolerant([FromServices]IFaultTolerantProvider faultTolerantProvider,string serviceId)
         {
-           var  list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptor(serviceId);
+           var  list = await faultTolerantProvider.GetCommandDescriptor(serviceId);
             return View(list.FirstOrDefault());
         }
         
         [HttpPost]
-        public async Task<IActionResult> EditFaultTolerant(ServiceCommandDescriptor model)
+        public async Task<IActionResult> EditFaultTolerant([FromServices]IFaultTolerantProvider faultTolerantProvider, ServiceCommandDescriptor model)
         {
-              await ServiceLocator.GetService<IFaultTolerantProvider>().SetCommandDescriptorByAddress(model);
+              await faultTolerantProvider.SetCommandDescriptorByAddress(model);
             return Json(ServiceResult.Create(true));
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetCommandDescriptor(string serviceId, string address)
+        public async Task<IActionResult> GetCommandDescriptor([FromServices]IFaultTolerantProvider faultTolerantProvider, 
+            string serviceId, string address)
         {
             IEnumerable<ServiceCommandDescriptor> list = null;
             if (!string.IsNullOrEmpty(serviceId))
             {
-                list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptor(serviceId);
+                list = await faultTolerantProvider.GetCommandDescriptor(serviceId);
             }
             else if (!string.IsNullOrEmpty(address))
             {
-                list = await ServiceLocator.GetService<IFaultTolerantProvider>().GetCommandDescriptorByAddress(address);
+                list = await faultTolerantProvider.GetCommandDescriptorByAddress(address);
             }
             var result = ServiceResult<IEnumerable<ServiceCommandDescriptor>>.Create(true, list);
             return Json(result);
@@ -108,9 +109,9 @@ namespace Surging.ApiGateway.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetServiceCache(string queryParam)
+        public async Task<IActionResult> GetServiceCache([FromServices]IServiceCacheProvider serviceCacheProvider, string queryParam)
         {
-            var list = await ServiceLocator.GetService<IServiceCacheProvider>().GetServiceDescriptorAsync();
+            var list = await serviceCacheProvider.GetServiceDescriptorAsync();
             var result = ServiceResult<IEnumerable<CacheDescriptor>>.Create(true, list);
             return Json(result);
         }
@@ -121,9 +122,10 @@ namespace Surging.ApiGateway.Controllers
             return View();
         }
 
-        public async Task<IActionResult> GetCacheEndpoint(string cacheId)
+        public async Task<IActionResult> GetCacheEndpoint([FromServices]IServiceCacheProvider serviceCacheProvider, 
+            string cacheId)
         {
-            var list = await ServiceLocator.GetService<IServiceCacheProvider>().GetCacheEndpointAsync(cacheId);
+            var list = await serviceCacheProvider.GetCacheEndpointAsync(cacheId);
             var result = ServiceResult<IEnumerable<CacheEndpoint>>.Create(true, list);
             return Json(result);
         }
@@ -136,9 +138,10 @@ namespace Surging.ApiGateway.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GetSubscriber(string queryParam)
+        public async Task<IActionResult> GetSubscriber([FromServices]IServiceSubscribeProvider serviceSubscribeProvider, 
+            string queryParam)
         {
-            var list = await ServiceLocator.GetService<IServiceSubscribeProvider>().GetAddressAsync(queryParam);
+            var list = await serviceSubscribeProvider.GetAddressAsync(queryParam);
             var result = ServiceResult<IEnumerable<ServiceAddressModel>>.Create(true, list);
             return Json(result);
         }

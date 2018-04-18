@@ -15,16 +15,16 @@ namespace Surging.ApiGateway.Controllers
             return View();
         }
 
-        public async Task<IActionResult> EditServiceToken(string address)
+        public async Task<IActionResult> EditServiceToken([FromServices]IServiceDiscoveryProvider serviceDiscoveryProvider, string address)
         {
-            var list = await ServiceLocator.GetService<IServiceDiscoveryProvider>().GetAddressAsync(address); ;
+            var list = await serviceDiscoveryProvider.GetAddressAsync(address); ;
             return View(list.FirstOrDefault());
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditServiceToken(IpAddressModel model)
+        public async Task<IActionResult> EditServiceToken([FromServices]IServiceDiscoveryProvider serviceDiscoveryProvider, IpAddressModel model)
         {
-           await ServiceLocator.GetService<IServiceDiscoveryProvider>().EditServiceToken(model);
+           await serviceDiscoveryProvider.EditServiceToken(model);
             return Json(ServiceResult.Create(true));
         }
     }
