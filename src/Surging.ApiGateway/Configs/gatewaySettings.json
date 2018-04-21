@@ -6,5 +6,27 @@
   "Register": {
     "Provider": "Consul",
     "Address": "127.0.0.1:8500"
+  },
+  "ServicePart": {
+    "MainPath": "part/service/aggregation",
+    "Services": [
+      {
+        "ServiceAggregation": [
+          {
+            "RoutePath": "api/user/getuser",
+            "ServiceKey": "User",
+            "Params": { "UserId": 1 },
+            "Key": "Users"
+          },
+          {
+            "RoutePath": "api/user/getroles",
+            "ServiceKey": "User",
+            "Params": { "UserId": 1 },
+            "Key": "Roles"
+          }
+        ],
+        "UrlMapping": "part/user/getuserrole"
+      }
+    ]
   }
 }
