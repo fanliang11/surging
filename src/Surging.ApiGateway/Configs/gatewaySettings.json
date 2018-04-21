@@ -15,13 +15,11 @@
           {
             "RoutePath": "api/user/getuser",
             "ServiceKey": "User",
-            "Params": { "UserId": 1 },
             "Key": "Users"
           },
           {
             "RoutePath": "api/user/getroles",
             "ServiceKey": "User",
-            "Params": { "UserId": 1 },
             "Key": "Roles"
           }
         ],
