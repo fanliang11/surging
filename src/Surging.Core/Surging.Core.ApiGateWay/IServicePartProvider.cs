@@ -9,6 +9,6 @@ namespace Surging.Core.ApiGateWay
     {
         bool IsPart(string routhPath);
 
-        Task<T> Merge<T>(string routhPath, Dictionary<string, object> param);
+        Task<object> Merge(string routhPath, Dictionary<string, object> param);
     }
 }

@@ -9,16 +9,17 @@
   },
   "ServicePart": {
     "MainPath": "part/service/aggregation",
+    "EnableAuthorization": false,
     "Services": [
       {
         "ServiceAggregation": [
           {
-            "RoutePath": "api/user/getuser",
+            "RoutePath": "api/user/GetUserName",
             "ServiceKey": "User",
             "Key": "Users"
           },
           {
-            "RoutePath": "api/user/getroles",
+            "RoutePath": "api/user/GetUserName",
             "ServiceKey": "User",
             "Key": "Roles"
           }

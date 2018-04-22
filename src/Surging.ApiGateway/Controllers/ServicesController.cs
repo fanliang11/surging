@@ -34,11 +34,17 @@ namespace Surging.ApiGateway.Controllers
             _authorizationServerProvider = authorizationServerProvider;
         }
        
-        public async Task<ServiceResult<object>> Path(string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)
+        public async Task<ServiceResult<object>> Path([FromServices]IServicePartProvider servicePartProvider, string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)
         {
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
             path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
+            if(servicePartProvider.IsPart(path))
+            {
+                result = ServiceResult<object>.Create(true, await servicePartProvider.Merge(path, model));
+                result.StatusCode = (int)ServiceStatusCode.Success;
+            }
+            else
             if ( OnAuthorization(path, model,ref result))
             {
                 if (path == GateWayAppConfig.AuthorizationRoutePath)

@@ -8,6 +8,8 @@ namespace Surging.Core.ApiGateWay.Configurations
     {
         public string MainPath { get; set; } = "part/service/aggregation";
 
-       public Services Services { get; set; }
+        public bool EnableAuthorization { get; set; }
+
+       public List<Services> Services { get; set; }
     }
 }
