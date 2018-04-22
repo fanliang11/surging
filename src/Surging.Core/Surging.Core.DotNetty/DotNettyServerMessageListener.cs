@@ -57,8 +57,8 @@ namespace Surging.Core.DotNetty
 
         public async Task StartAsync(EndPoint endPoint)
         {
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation($"Start with following setting:{endPoint}");
 
             var bossGroup = new MultithreadEventLoopGroup();
             var workerGroup = new MultithreadEventLoopGroup(4);
@@ -81,8 +81,8 @@ namespace Surging.Core.DotNetty
                 }, _logger));
             }));
             _channel = await bootstrap.BindAsync(endPoint);
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"服务主机启动成功，监听地址：{endPoint}。");
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation($"Started at:{endPoint}");
         }
 
         public void CloseAsync()
