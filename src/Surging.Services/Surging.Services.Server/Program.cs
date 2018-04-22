@@ -84,7 +84,7 @@ namespace Surging.Services.Server
 
             using (host.Run())
             {
-                Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
+                Console.WriteLine($"Server startup.{DateTime.Now}");
             }
         }
     }
