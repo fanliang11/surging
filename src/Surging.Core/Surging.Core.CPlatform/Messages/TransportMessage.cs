@@ -7,6 +7,7 @@ namespace Surging.Core.CPlatform.Messages
     /// </summary>
     public class TransportMessage
     {
+
         public TransportMessage()
         {
         }
@@ -18,6 +19,15 @@ namespace Surging.Core.CPlatform.Messages
 
             Content = content;
             ContentType = content.GetType().FullName;
+        }
+
+        public TransportMessage(object content, string fullName)
+        {
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
+
+            Content = content;
+            ContentType = fullName;
         }
 
         /// <summary>
@@ -70,7 +80,7 @@ namespace Surging.Core.CPlatform.Messages
         /// <returns>调用传输消息。</returns>
         public static TransportMessage CreateInvokeMessage(RemoteInvokeMessage invokeMessage)
         {
-            return new TransportMessage(invokeMessage)
+            return new TransportMessage(invokeMessage, MessagePackTransportMessageType.remoteInvokeMessageTypeName)
             {
                 Id = Guid.NewGuid().ToString("N")
             };
@@ -84,7 +94,7 @@ namespace Surging.Core.CPlatform.Messages
         /// <returns>调用结果传输消息。</returns>
         public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
         {
-            return new TransportMessage(invokeResultMessage)
+            return new TransportMessage(invokeResultMessage, MessagePackTransportMessageType.remoteInvokeResultMessageTypeName)
             {
                 Id = id
             };

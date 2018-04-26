@@ -161,6 +161,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     Injection = command.Injection,
                     RequestCacheEnabled = command.RequestCacheEnabled,
                     Strategy = command.Strategy,
+                    ShuntStrategy=command.ShuntStrategy,
                     InjectionNamespaces = command.InjectionNamespaces,
                     BreakeErrorThresholdPercentage = command.BreakeErrorThresholdPercentage,
                     BreakerForceClosed = command.BreakerForceClosed,

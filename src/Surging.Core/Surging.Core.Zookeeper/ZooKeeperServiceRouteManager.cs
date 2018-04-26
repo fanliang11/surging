@@ -105,19 +105,7 @@ namespace Surging.Core.Zookeeper
                 path += "/";
 
             routes = routes.ToArray();
-
-            if (_routes != null)
-            {
-                var oldRouteIds = _routes.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var newRouteIds = routes.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
-                foreach (var deletedRouteId in deletedRouteIds)
-                {
-                    var nodePath = $"{path}{deletedRouteId}";
-                    await _zooKeeper.deleteAsync(nodePath);
-                }
-            }
-
+            
             foreach (var serviceRoute in routes)
             {
                 var nodePath = $"{path}{serviceRoute.ServiceDescriptor.Id}";
@@ -168,7 +156,32 @@ namespace Surging.Core.Zookeeper
                     }
                 }
             }
+            await RemoveExceptRoutesAsync(routes);
             await base.SetRoutesAsync(routes);
+        }
+
+        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes)
+        {
+            var path = _configInfo.RoutePath;
+            if (!path.EndsWith("/"))
+                path += "/";
+            routes = routes.ToArray();
+            if (_routes != null)
+            {
+                var oldRouteIds = _routes.Select(i => i.ServiceDescriptor.Id).ToArray();
+                var newRouteIds = routes.Select(i => i.ServiceDescriptor.Id).ToArray();
+                var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
+                foreach (var deletedRouteId in deletedRouteIds)
+                {
+                    var addresses = _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p => p.Address).FirstOrDefault();
+                        var nodePath = $"{path}{deletedRouteId}";
+                    foreach (var address in addresses)
+                    {
+                        if (routes.Any(p => p.Address.Select(a => a.ToString()).Contains(address.ToString())))
+                         await _zooKeeper.deleteAsync(nodePath);
+                    }
+                }
+            }
         }
 
         private async Task CreateZooKeeper()

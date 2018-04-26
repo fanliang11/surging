@@ -42,6 +42,7 @@ namespace Surging.Core.Caching.Configurations
                 ReloadOnChange = reloadOnChange
             };
             builder.Add(source);
+            AppConfig.Path = path;
             AppConfig.Configuration = builder.Build();
             return builder;
         }

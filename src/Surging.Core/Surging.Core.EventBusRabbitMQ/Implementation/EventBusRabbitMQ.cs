@@ -19,7 +19,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
 {
     public class EventBusRabbitMQ : IEventBus, IDisposable
     {
-        const string BROKER_NAME = "eshop_event_bus";
+        private readonly string BROKER_NAME;
 
         private readonly IRabbitMQPersistentConnection _persistentConnection;
         private readonly ILogger<EventBusRabbitMQ> _logger;
@@ -31,6 +31,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
 
         public EventBusRabbitMQ(IRabbitMQPersistentConnection persistentConnection, ILogger<EventBusRabbitMQ> logger, IEventBusSubscriptionsManager subsManager)
         {
+            BROKER_NAME = AppConfig.BrokerName;
             _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
@@ -145,7 +146,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             {
                 _consumerChannel.Dispose();
             }
-
+            
             _subsManager.Clear();
         }
 

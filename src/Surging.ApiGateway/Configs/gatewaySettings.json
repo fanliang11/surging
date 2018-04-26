@@ -2,5 +2,30 @@
   "AccessTokenExpireTimeSpan": "30",
   "AuthorizationRoutePath": "api/user/authentication",
   "AuthorizationServiceKey": "User",
-  "TokenEndpointPath": "api/oauth2/token"
+  "TokenEndpointPath": "api/oauth2/token",
+  "Register": {
+    "Provider": "Consul",
+    "Address": "127.0.0.1:8500"
+  },
+  "ServicePart": {
+    "MainPath": "part/service/aggregation",
+    "EnableAuthorization": false,
+    "Services": [
+      {
+        "ServiceAggregation": [
+          {
+            "RoutePath": "api/user/GetUserName",
+            "ServiceKey": "User",
+            "Key": "Users"
+          },
+          {
+            "RoutePath": "api/user/GetUserName",
+            "ServiceKey": "User",
+            "Key": "Roles"
+          }
+        ],
+        "UrlMapping": "part/user/getuserrole"
+      }
+    ]
+  }
 }

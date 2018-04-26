@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Surging.Core.ApiGateWay.Configurations;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -67,6 +70,31 @@ namespace Surging.Core.ApiGateWay
             internal set
             {
                 _tokenEndpointPath = value;
+            }
+        }
+
+        public static Register Register
+        {
+            get
+            {
+                var result = new Register();
+                var section= Configuration.GetSection("Register");
+                if (section != null)
+                    result=  section.Get<Register>();
+                return result;
+            }
+
+        }
+
+        public static ServicePart ServicePart
+        {
+            get
+            {
+                var result = new ServicePart();
+                var section = Configuration.GetSection("ServicePart");
+                if (section != null)
+                    result = section.Get<ServicePart>();
+                return result;
             }
         }
 

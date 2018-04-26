@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Support;
 using System.Collections.Generic;
+using Surging.Core.CPlatform.DependencyResolution;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -38,36 +39,53 @@ namespace Surging.Core.ProxyGenerator.Implementation
             _typeConvertibleService = typeConvertibleService;
             _serviceProvider = serviceProvider;
             if (types != null)
-                _serviceTypes = _serviceProvider.GetService<IServiceProxyGenerater>().GenerateProxys(types).ToArray();
+            {
+               RegisterProxType(types.ToArray());
+            }
         }
 
         #endregion Constructor
 
         #region Implementation of IServiceProxyFactory
 
-  
+
         public object CreateProxy(Type type)
         {
-            var proxyType = _serviceTypes.Single(type.GetTypeInfo().IsAssignableFrom);
-            var instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService, null,
+            var instance = ServiceResolver.Current.GetService(type);
+            if (instance == null)
+            {
+                var proxyType = _serviceTypes.Single(type.GetTypeInfo().IsAssignableFrom);
+                instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService, null,
              _serviceProvider.GetService<CPlatformContainer>()});
+                ServiceResolver.Current.Register(null, instance, type);
+            }
             return instance;
         }
         
         public object CreateProxy(string key,Type type)
         {
-            var proxyType = _serviceTypes.Single(type.GetTypeInfo().IsAssignableFrom);
-            var instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService, key,
+            var instance = ServiceResolver.Current.GetService(type,key);
+            if (instance == null)
+            {
+                var proxyType = _serviceTypes.Single(type.GetTypeInfo().IsAssignableFrom);
+                 instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService, key,
              _serviceProvider.GetService<CPlatformContainer>()});
+                ServiceResolver.Current.Register(key, instance, type);
+            }
             return instance;
         }
 
         public T CreateProxy<T>(string key) where T:class
         {
-            var proxyType = _serviceTypes.Single(typeof(T).GetTypeInfo().IsAssignableFrom);
-          
-            var instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService,key,
+            var instanceType = typeof(T);
+            var instance = ServiceResolver.Current.GetService(instanceType, key);
+            if (instance == null)
+            {
+                var proxyType = _serviceTypes.Single(typeof(T).GetTypeInfo().IsAssignableFrom);
+                 instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService,key,
                 _serviceProvider.GetService<CPlatformContainer>() });
+                ServiceResolver.Current.Register(key, instance, instanceType);
+            }
             return instance as T;
         }
 
@@ -78,7 +96,9 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
         public void RegisterProxType(params Type[] types)
         {
-            _serviceTypes = _serviceProvider.GetService<IServiceProxyGenerater>().GenerateProxys(types).ToArray();
+            var proxyGenerater = _serviceProvider.GetService<IServiceProxyGenerater>();
+            _serviceTypes = proxyGenerater.GenerateProxys(types).ToArray();
+            proxyGenerater.Dispose();
         }
 
         #endregion Implementation of IServiceProxyFactory

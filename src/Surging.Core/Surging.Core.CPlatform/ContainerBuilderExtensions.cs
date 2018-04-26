@@ -1,14 +1,22 @@
 ﻿using Autofac;
+using Autofac.Builder;
+using Autofac.Core.Registration;
+using Autofac.Features.Scanning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Cache;
+using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.Configurations.Watch;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Convertibles.Implementation;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Filters.Implementation;
+using Surging.Core.CPlatform.HashAlgorithms;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Ioc;
+using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -85,9 +93,9 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddJsonSerialization(this IServiceBuilder builder)
         {
             var services = builder.Services;
-            builder.Services.RegisterType(typeof(JsonSerializer)).As(typeof(ISerializer<string>)).SingleInstance();
-            builder.Services.RegisterType(typeof(StringByteArraySerializer)).As(typeof(ISerializer<byte[]>)).SingleInstance();
-            builder.Services.RegisterType(typeof(StringObjectSerializer)).As(typeof(ISerializer<object>)).SingleInstance();
+            services.RegisterType(typeof(JsonSerializer)).As(typeof(ISerializer<string>)).SingleInstance();
+            services.RegisterType(typeof(StringByteArraySerializer)).As(typeof(ISerializer<byte[]>)).SingleInstance();
+            services.RegisterType(typeof(StringObjectSerializer)).As(typeof(ISerializer<object>)).SingleInstance();
             return builder;
         }
         #region RouteManager
@@ -135,6 +143,18 @@ namespace Surging.Core.CPlatform
         /// <param name="factory">服务命令管理者实例工厂。</param>
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseCommandManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCommandManager> factory)
+        {
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
+        /// <summary>
+        /// 设置缓存管理者。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <param name="factory">缓存管理者实例工厂。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseCacheManager(this IServiceBuilder builder, Func<IServiceProvider, IServiceCacheManager> factory)
         {
             builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
             return builder;
@@ -189,7 +209,19 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder UsePollingAddressSelector(this IServiceBuilder builder)
         {
             builder.Services.RegisterType(typeof(PollingAddressSelector))
-                .Named(AddressSelectorMode.Polling.ToString(), typeof(IAddressSelector));
+                .Named(AddressSelectorMode.Polling.ToString(), typeof(IAddressSelector)).SingleInstance();
+            return builder;
+        }
+
+        /// <summary>
+        /// 使用压力最小优先分配轮询的地址选择器。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseFairPollingAddressSelector(this IServiceBuilder builder)
+        {
+            builder.Services.RegisterType(typeof(FairPollingAdrSelector))
+                .Named(AddressSelectorMode.FairPolling.ToString(), typeof(IAddressSelector)).SingleInstance();
             return builder;
         }
 
@@ -225,10 +257,20 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseAddressSelector(this IServiceBuilder builder)
         {
-            return builder.UseRandomAddressSelector().UsePollingAddressSelector().UseHashAlgorithmAddressSelector();
+            return builder.UseRandomAddressSelector().UsePollingAddressSelector().UseFairPollingAddressSelector().UseHashAlgorithmAddressSelector();
         }
 
         #endregion AddressSelector
+
+        #region Configuration Watch
+
+        public static IServiceBuilder AddConfigurationWatch(this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            services.RegisterType(typeof(ConfigurationWatchManager)).As(typeof(IConfigurationWatchManager)).SingleInstance();
+            return builder;
+        }
+        #endregion
 
         #region Codec Factory
 
@@ -240,8 +282,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseCodec(this IServiceBuilder builder, ITransportMessageCodecFactory codecFactory)
         {
-            builder.Services.RegisterInstance(codecFactory);
-
+            builder.Services.RegisterInstance(codecFactory).SingleInstance();
             return builder;
         }
 
@@ -265,7 +306,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseCodec(this IServiceBuilder builder, Func<IServiceProvider, ITransportMessageCodecFactory> codecFactory)
         {
-            builder.Services.RegisterAdapter(codecFactory);
+            builder.Services.RegisterAdapter(codecFactory).SingleInstance();
             return builder;
         }
 
@@ -289,9 +330,9 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddClientRuntime(this IServiceBuilder builder)
         {
             var services = builder.Services;
-            builder.Services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
-            builder.Services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
-            builder.Services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
+            services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
+            services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
+            services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
             return builder.UseAddressSelector().AddRuntime().AddClusterSupport();
         }
 
@@ -302,12 +343,12 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder AddClusterSupport(this IServiceBuilder builder)
         {
-
-            builder.Services.RegisterType(typeof(ServiceCommandProvider)).As(typeof(IServiceCommandProvider)).SingleInstance();
-            builder.Services.RegisterType(typeof(BreakeRemoteInvokeService)).As(typeof(IBreakeRemoteInvokeService)).SingleInstance();
-            builder.Services.RegisterType(typeof(FailoverInjectionInvoker)).AsImplementedInterfaces()
+            var services = builder.Services;
+            services.RegisterType(typeof(ServiceCommandProvider)).As(typeof(IServiceCommandProvider)).SingleInstance();
+            services.RegisterType(typeof(BreakeRemoteInvokeService)).As(typeof(IBreakeRemoteInvokeService)).SingleInstance();
+            services.RegisterType(typeof(FailoverInjectionInvoker)).AsImplementedInterfaces()
                 .Named(StrategyType.Injection.ToString(), typeof(IClusterInvoker)).SingleInstance();
-            builder.Services.RegisterType(typeof(FailoverHandoverInvoker)).AsImplementedInterfaces()
+            services.RegisterType(typeof(FailoverHandoverInvoker)).AsImplementedInterfaces()
             .Named(StrategyType.Failover.ToString(), typeof(IClusterInvoker)).SingleInstance();
             return builder;
         }
@@ -321,7 +362,21 @@ namespace Surging.Core.CPlatform
         {
             builder.Services.RegisterType(typeof(DefaultServiceEntryLocate)).As(typeof(IServiceEntryLocate)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor)).SingleInstance();
-            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().AddRuntime();
+            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().AddRuntime();
+        }
+
+        /// <summary>
+        /// 添加关联服务运行时 
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder AddRelateServiceRuntime(this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            services.RegisterType(typeof(DefaultHealthCheckService)).As(typeof(IHealthCheckService)).SingleInstance();
+            services.RegisterType(typeof(DefaultAddressResolver)).As(typeof(IAddressResolver)).SingleInstance();
+            services.RegisterType(typeof(RemoteInvokeService)).As(typeof(IRemoteInvokeService)).SingleInstance();
+            return builder.UseAddressSelector().AddClusterSupport();
         }
 
         /// <summary>
@@ -341,6 +396,8 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceRouteFactory)).As(typeof(IServiceRouteFactory)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
+            services.RegisterType(typeof(ServiceTokenGenerator)).As(typeof(IServiceTokenGenerator)).SingleInstance();
+            services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
@@ -351,20 +408,21 @@ namespace Surging.Core.CPlatform
         {
             var services = builder.Services;
 
-            builder.Services.RegisterType(typeof(ClrServiceEntryFactory)).As(typeof(IClrServiceEntryFactory)).SingleInstance();
+            services.RegisterType(typeof(ClrServiceEntryFactory)).As(typeof(IClrServiceEntryFactory)).SingleInstance();
 
-            builder.Services.Register(provider =>
+            services.Register(provider =>
             {
                 try
                 {
                     var assemblys = GetReferenceAssembly();
                     var types = assemblys.SelectMany(i => i.ExportedTypes).ToArray();
                     return new AttributeServiceEntryProvider(types, provider.Resolve<IClrServiceEntryFactory>(),
-                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>());
+                         provider.Resolve<ILogger<AttributeServiceEntryProvider>>(), provider.Resolve<CPlatformContainer>());
                 }
                 finally
                 {
-                    _referenceAssembly.Clear();
+                     _referenceAssembly.Clear();
+                    builder = null;
                 }
             }).As<IServiceEntryProvider>();
             builder.Services.RegisterType(typeof(DefaultServiceEntryManager)).As(typeof(IServiceEntryManager)).SingleInstance();
@@ -383,31 +441,44 @@ namespace Surging.Core.CPlatform
         /// <returns>返回注册模块信息</returns>
         public static IServiceBuilder RegisterServices(this IServiceBuilder builder)
         {
-            var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly();
-            foreach (var assembly in referenceAssemblies)
+            try
             {
-                services.RegisterAssemblyTypes(assembly)
-                   .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t))
-                   .AsImplementedInterfaces();
-                services.RegisterAssemblyTypes(assembly)
-             .Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
-
-                var types = assembly.GetTypes().Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
-                foreach (var type in types)
+                var services = builder.Services;
+                var referenceAssemblies = GetReferenceAssembly();
+                foreach (var assembly in referenceAssemblies)
                 {
-                    var module = type.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>();
-                    var interfaceObj = type.GetInterfaces()
-                        .FirstOrDefault(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t));
-                    if (interfaceObj != null)
-                    {
-                        services.RegisterType(type).AsImplementedInterfaces().Named(module.ModuleName, interfaceObj);
-                        services.RegisterType(type).Named(module.ModuleName, type);
-                    }
-                }
+                    services.RegisterAssemblyTypes(assembly)
+                       .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface)
+                       .AsImplementedInterfaces();
+                    services.RegisterAssemblyTypes(assembly)
+                 .Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
 
+                    var types = assembly.GetTypes().Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
+                    foreach (var type in types)
+                    {
+                        var module = type.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>();
+                        var interfaceObj = type.GetInterfaces()
+                            .FirstOrDefault(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t));
+                        if (interfaceObj != null)
+                        {
+                            services.RegisterType(type).AsImplementedInterfaces().Named(module.ModuleName, interfaceObj);
+                            services.RegisterType(type).Named(module.ModuleName, type);
+                        }
+                    }
+
+                }
+                return builder;
             }
-            return builder;
+            catch(Exception ex)
+            {
+                if (ex is System.Reflection.ReflectionTypeLoadException)
+                {
+                    var typeLoadException = ex as ReflectionTypeLoadException;
+                    var loaderExceptions = typeLoadException.LoaderExceptions;
+                    throw loaderExceptions[0];
+                }
+                throw ex; 
+            }
         }
 
         public static IServiceBuilder RegisterServiceBus
@@ -445,40 +516,89 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
+        public static IServiceBuilder RegisterModules(
+      this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly();
+            if (builder == null) throw new ArgumentNullException("builder");
+            List<AbstractModule> modules = new List<AbstractModule>();
+            foreach (var moduleAssembly in referenceAssemblies)
+            {
+                GetAbstractModules(moduleAssembly).ForEach(p =>
+                {
+                    services.RegisterModule(p);
+                    modules.Add(p);
+                });
+            }
+            builder.Services.Register(provider => new ModuleProvider(
+               modules
+                )).As<IModuleProvider>().SingleInstance();
+            return builder;
+        }
+
         public static List<Type> GetInterfaceService(this IServiceBuilder builder)
         {
             var types = new List<Type>();
             var referenceAssemblies = GetReferenceAssembly();
             referenceAssemblies.ForEach(p =>
             {
-                types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t)));
+                types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface));
             });
             return types;
         }
-
+        
         private static List<Assembly> GetReferenceAssembly()
         {
             string path = AppContext.BaseDirectory;
             var result = _referenceAssembly;
             if (!result.Any())
             {
-                var assemblyNames = GetAllAssemblyFiles(path);
-                foreach (var referencedAssemblyName in assemblyNames)
+                var assemblyFiles = GetAllAssemblyFiles(path);
+                foreach (var referencedAssemblyFile in assemblyFiles)
                 {
-                    var referencedAssembly = Assembly.Load(new AssemblyName(referencedAssemblyName));
+                    var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
                     _referenceAssembly.Add(referencedAssembly);
                 }
                 result = _referenceAssembly;
             }
             return result;
         }
+        
+        private static List<AbstractModule> GetAbstractModules(Assembly assembly)
+        {
+            var abstractModules = new List<AbstractModule>();
+            Type[] arrayModule =
+                assembly.GetTypes().Where(
+                    t => t.IsSubclassOf(typeof(AbstractModule))).ToArray();
+            foreach (var moduleType in arrayModule)
+            {
+                var abstractModule = (AbstractModule)Activator.CreateInstance(moduleType);
+                abstractModules.Add(abstractModule);
+            }
+            return abstractModules;
+        }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)
-        { 
-                Regex regex = new Regex("Microsoft.\\w*|System.\\w*|Netty.\\w*|Autofac.\\w*|Surging.Core.\\w*", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        {
+            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac.\\w*|Surging.Core.\\w*{0}",
+               string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
+            Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (!string.IsNullOrEmpty(relatedFile))
+            {
                 return
-                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFileNameWithoutExtension).Where(
-                        a => !regex.IsMatch(a)).ToList();
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a) && relatedRegex.IsMatch(a)).ToList();
+            }
+            else
+            {
+                return
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a)).ToList();
+            }
         }
     }
 }

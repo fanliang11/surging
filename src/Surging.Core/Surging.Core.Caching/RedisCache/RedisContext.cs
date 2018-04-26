@@ -19,6 +19,7 @@ namespace Surging.Core.Caching.RedisCache
     /// </remarks>
     public class RedisContext
     {
+        private readonly IHashAlgorithm _hashAlgorithm;
         /// <summary>
         /// 缓存对象集合容器池
         /// </summary>
@@ -96,6 +97,10 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public RedisContext(string rule, params object[] args)
         {
+            if (CacheContainer.IsRegistered<IHashAlgorithm>())
+                _hashAlgorithm = CacheContainer.GetService<IHashAlgorithm>();
+            else
+                _hashAlgorithm = CacheContainer.GetInstances<IHashAlgorithm>();
             foreach (var arg in args)
             {
                 var properties = arg.GetType().GetProperties();
@@ -140,6 +145,22 @@ namespace Surging.Core.Caching.RedisCache
         #endregion
 
         #region 属性
+
+        public string ConnectTimeout
+        {
+            get
+            {
+                return _connectTimeout;
+            }
+        }
+
+        public string DefaultExpireTime
+        {
+            get
+            {
+                return _defaultExpireTime;
+            }
+        }
         /// <summary>
         /// 缓存对象集合容器池
         /// </summary>
@@ -169,7 +190,7 @@ namespace Surging.Core.Caching.RedisCache
                 CacheTargetType targetType;
                 if (!Enum.TryParse(dataContext.Key, true, out targetType)) continue;
                 var hash =
-                    new ConsistentHash<ConsistentHashNode>(ServiceResolver.Current.GetService<IHashAlgorithm>());
+                    new ConsistentHash<ConsistentHashNode>(_hashAlgorithm);
 
                 dataContext.Value.ForEach(v =>
                 {

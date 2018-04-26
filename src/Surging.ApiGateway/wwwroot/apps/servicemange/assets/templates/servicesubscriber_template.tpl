@@ -1,4 +1,4 @@
-﻿       {{each entity}}
+﻿       {{each Entity}}
 	<tr>
                             <td class="center">
 								  {{if ($index+1)%2==1 }}

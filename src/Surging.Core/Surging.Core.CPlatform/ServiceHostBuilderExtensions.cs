@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Runtime.Client;
 using System;
 using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.Module;
+using System.Diagnostics;
 
 namespace Surging.Core.CPlatform
 {
@@ -24,15 +26,18 @@ namespace Surging.Core.CPlatform
             {
                 mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
-                bool enableToken;
-                string serviceToken;
-                string _ip = ip;
-                if (ip.IndexOf(".") < 0 || ip == "" || ip == "0.0.0.0")
+                string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
+                int _port = AppConfig.ServerOptions.Port==0? port: AppConfig.ServerOptions.Port;
+                string _ip = AppConfig.ServerOptions.Ip??ip;
+                _port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
+                _ip = AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
+                
+                if (_ip.IndexOf(".") < 0 || _ip == "" || _ip == "0.0.0.0")
                 {
                     NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
                     foreach (NetworkInterface adapter in nics)
                     {
-                        if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet && (ip == "" || ip == "0.0.0.0" || ip == adapter.Name))
+                        if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet && (_ip == "" || _ip == "0.0.0.0" || _ip == adapter.Name))
                         {
                             IPInterfaceProperties ipxx = adapter.GetIPProperties();
                             UnicastIPAddressInformationCollection ipCollection = ipxx.UnicastAddresses;
@@ -47,26 +52,22 @@ namespace Surging.Core.CPlatform
                     }
                 }
 
-                if (!bool.TryParse(token,out enableToken))
+                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(), serviceEntryManager, () =>
                 {
-                      serviceToken= token;
-                }
-                else
-                {
-                    if(enableToken) serviceToken = Guid.NewGuid().ToString("N");
-                    else serviceToken = null;
-                }
-                var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-                new ServiceRoute
-                {
-                    Address = new[] { new IpAddressModel { Ip = _ip, Port = port, Token= serviceToken } },
-                    ServiceDescriptor = i.Descriptor
-                }).ToList();
-                mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
+                    var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
+                    new ServiceRoute
+                    {
+                        Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, ProcessorTime = Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds, Token = serviceToken } },
+                        ServiceDescriptor = i.Descriptor
+                    }).ToList();
+                    mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
+                });
+
+                mapper.Resolve<IModuleProvider>().Initialize();
                 var serviceHost = mapper.Resolve<Runtime.Server.IServiceHost>();
                 Task.Factory.StartNew(async () =>
                 {
-                    await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse(_ip), port));
+                    await serviceHost.StartAsync(new IPEndPoint(IPAddress.Parse(_ip), _port));
                 }).Wait();
             });
         }
@@ -76,7 +77,7 @@ namespace Surging.Core.CPlatform
             var serverOptions = new SurgingServerOptions();
             options.Invoke(serverOptions);
             AppConfig.ServerOptions = serverOptions;
-            return hostBuilder.UseServer(serverOptions.Ip,serverOptions.Port,serverOptions.token);
+            return hostBuilder.UseServer(serverOptions.Ip,serverOptions.Port,serverOptions.Token);
         }
 
         public static IServiceHostBuilder UseClient(this IServiceHostBuilder hostBuilder)

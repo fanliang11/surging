@@ -1,14 +1,22 @@
 # surging 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/surging/blob/master/README.EN.md)
 [![Member project of .NET China Foundation](https://github.com/dotnetcore/Home/blob/master/icons/member-project-of-netchina.png)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://mit-license.org/)
-# surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
+# surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
 
 <br />
 
-启动配置：
+## 名字由来
 
- <br/>
- 
+英文名：surging
+
+中文名：滔滔
+
+中文名来自周星驰的经典台词
+
+我对阁下的景仰犹如滔滔江水,连绵不绝,犹如黄河泛滥,一发而不可收拾，而取名英文的含义也希望此框架能流行起来，也能像《.net core surging》这句英文语句含义一样，.net core技术风起云涌,冲击整个软件生态系统。
+
+## 配置：
+
  ```c#
 var host = new ServiceHostBuilder()
                 .RegisterServices(builder =>
@@ -16,6 +24,8 @@ var host = new ServiceHostBuilder()
                     builder.AddMicroService(option =>
                     {
                         option.AddServiceRuntime();//
+                        option.AddRelateService();//添加支持服务代理远程调用
+                         option.AddConfigurationWatch();//添加同步更新配置文件的监听处理
                         // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //使用Zookeeper管理
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//使用Consul管理
                         option.UseDotNettyTransport();//使用Netty传输
@@ -33,6 +43,8 @@ var host = new ServiceHostBuilder()
                 .UseServer(options=> {
                     options.Ip = "127.0.0.1";
                     options.Port = 98;
+                    //options.IpEndpoint = new IPEndPoint(IPAddress.Any, 98);
+                    //options.Ip = "0.0.0.0";
                     options.ExecutionTimeoutInMilliseconds = 30000; //执行超时时间
                     options.Strategy=(int)StrategyType.Failover; //容错策略使用故障切换
                     options.RequestCacheEnabled=true; //开启缓存（只有通过接口代理远程调用，才能启用缓存）
@@ -43,9 +55,18 @@ var host = new ServiceHostBuilder()
                     options.BreakerForceClosed=false;   //是否强制关闭熔断
                     options.BreakerRequestVolumeThreshold = 20;//10秒钟内至少多少请求失败，熔断器才发挥起作用
                     options.MaxConcurrentRequests== 100000;//支持最大并发
+                    options.ShuntStrategy=AddressSelectorMode.Polling; //使用轮询负载分流策略
+                    options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                 })
-                .UseLog4net("Configs/log4net.config") //使用log4net记录日志
-                .UseLog4net()  //使用log4net记录日志
+                //.UseLog4net("Configs/log4net.config") //使用log4net记录日志
+                .UseNLog(LogLevel.Error, "Configs/NLog.config")// 使用NLog 记录日志
+                //.UseLog4net(LogLevel.Error) //使用log4net记录日志
+                //.UseLog4net()  //使用log4net记录日志
+                .Configure(build =>
+                build.AddEventBusFile("eventBusSettings.json", optional: false))//使用eventBusSettings.json文件进行配置
+                .Configure(build =>
+                 build.AddCacheFile("cacheSettings.json", optional: false))//使用cacheSettings.json文件进行配置
+                .UseProxy() //使用Proxy
                 .UseStartup<Startup>()
                 .Build();
                 
@@ -168,18 +189,10 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
+IDE:Visual Studio 2017 15.5,vscode
 <br/>
-
-[简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)
-
-
+框架：.NET core 2.1
 <br/>
-
-
-IDE:Visual Studio 2017 15.3 Preview ,vscode
-<br/>
-框架：.NET core 2.0
-<br/>
-如有任何问题可以加入QQ群：615562965
-<br/>
-[博客园]:https://www.cnblogs.com/fanliang11
+* [Demo](https://github.com/billyang/SurgingDemo)
+* [文档](http://docs.dotnet-china.org/surging/)
+* [简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)

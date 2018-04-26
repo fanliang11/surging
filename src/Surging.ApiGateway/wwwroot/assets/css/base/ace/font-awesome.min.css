@@ -1,14 +1,14 @@
 @font-face {
     font-family: 'FontAwesome';
-    src: url('../../fonts/fontawesome-webfont.eot?v=3.2.1');
-    src: url('../../fonts/fontawesome-webfont.eot?#iefix&v=3.2.1') format('embedded-opentype'),url('../../fonts/fontawesome-webfont.woff?v=3.2.1') format('woff'),url('../../fonts/fontawesome-webfont.ttf?v=3.2.1') format('truetype'),url('../../fonts/fontawesome-webfont.svg#fontawesomeregular') format('svg');
+    src: url('../../fonts/fontawesome-webfont.eot?v=3.2.2');
+    src: url('../../fonts/fontawesome-webfont.eot?#iefix&v=3.2.2') format('embedded-opentype'),url('../../fonts/fontawesome-webfont.woff?v=3.2.1') format('woff'),url('../../fonts/fontawesome-webfont.ttf?v=3.2.1') format('truetype'),url('../../fonts/fontawesome-webfont.svg#fontawesomeregular') format('svg');
     font-weight: normal;
     font-style: normal;
 }
 @font-face {
     font-family: 'surgingfonticon';
-    src: url('../../fonts/surgingfonticon.eot?i1nd11b');
-    src: url('../../fonts/surgingfonticon.eot?i1nd11b#iefix') format('embedded-opentype'),url('../../fonts/surgingfonticon.woff?i1nd11b') format('woff'),url('../../fonts/surgingfonticon.ttf?i1nd11b') format('truetype'),url('../../fonts/surgingfonticon.svg?i1nd11b#surgingfonticon') format('svg');
+    src: url('../../fonts/surgingfonticon.eot?i1nd12b');
+    src: url('../../fonts/surgingfonticon.eot?i1nd12b#iefix') format('embedded-opentype'),url('../../fonts/surgingfonticon.woff?i1nd12b') format('woff'),url('../../fonts/surgingfonticon.ttf?i1nd12b') format('truetype'),url('../../fonts/surgingfonticon.svg?i1nd12b#surgingfonticon') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -413,6 +413,9 @@ a .icon-rotate-90:before, a .icon-rotate-180:before, a .icon-rotate-270:before, 
 }
 .surging-icon-line:before {
     content: "\e69c";
+}
+.surging-icon-file:before {
+    content: "\e62f";
 }
 .surging-icon-blacklist:before {
     content: "\e674";

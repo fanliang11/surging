@@ -13,11 +13,13 @@ namespace Surging.Core.Zookeeper.Configurations
         /// <param name="routePath">路由配置路径。</param>
         /// <param name="subscriberPath">订阅者配置路径</param>
         /// <param name="commandPath">服务命令配置路径</param>
+        /// <param name="cachePath">缓存中心配置路径</param>
         /// <param name="chRoot">根节点。</param>
         public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
-            string chRoot = null) : this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath, commandPath, chRoot)
+            string cachePath = "/services/serviceCaches",
+            string chRoot = null) : this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath, commandPath,cachePath, chRoot )
         {
         }
 
@@ -29,12 +31,15 @@ namespace Surging.Core.Zookeeper.Configurations
         /// <param name="commandPath">服务命令配置路径</param>
         /// <param name="subscriberPath">订阅者配置路径</param>
         /// <param name="sessionTimeout">会话超时时间。</param>
+        /// <param name="cachePath">缓存中心配置路径</param>
         /// <param name="chRoot">根节点。</param>
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
+            string cachePath = "/services/serviceCaches",
             string chRoot = null)
         {
+            CachePath = cachePath;
             ChRoot = chRoot;
             CommandPath = commandPath;
             SubscriberPath = subscriberPath;
@@ -72,5 +77,10 @@ namespace Surging.Core.Zookeeper.Configurations
         /// 根节点。
         /// </summary>
         public string ChRoot { get; set; }
+
+        /// <summary>
+        /// 缓存中心配置中心
+        /// </summary>
+        public string CachePath { get; set; }
     }
 }

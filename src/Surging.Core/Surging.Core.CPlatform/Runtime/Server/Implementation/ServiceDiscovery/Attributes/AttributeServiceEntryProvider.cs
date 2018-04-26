@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Autofac;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes
 {
@@ -16,16 +17,18 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         private readonly IEnumerable<Type> _types;
         private readonly IClrServiceEntryFactory _clrServiceEntryFactory;
         private readonly ILogger<AttributeServiceEntryProvider> _logger;
+        private readonly CPlatformContainer _serviceProvider;
 
         #endregion Field
 
         #region Constructor
 
-        public AttributeServiceEntryProvider(IEnumerable<Type> types, IClrServiceEntryFactory clrServiceEntryFactory, ILogger<AttributeServiceEntryProvider> logger)
+        public AttributeServiceEntryProvider(IEnumerable<Type> types, IClrServiceEntryFactory clrServiceEntryFactory, ILogger<AttributeServiceEntryProvider> logger ,CPlatformContainer serviceProvider)
         {
             _types = types;
             _clrServiceEntryFactory = clrServiceEntryFactory;
             _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         #endregion Constructor

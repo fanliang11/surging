@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Surging.Core.Caching;
 using System.Text.RegularExpressions;
+using Surging.Core.CPlatform.Cache;
 
 namespace Surging.Core.ApiGateWay.OAuth
 {
@@ -26,7 +27,7 @@ namespace Surging.Core.ApiGateWay.OAuth
             _serviceProvider = serviceProvider;
             _serviceProxyProvider = serviceProxyProvider;
             _serviceRouteProvider = serviceRouteProvider;
-            _cacheProvider = CacheContainer.GetInstances<ICacheProvider>(AppConfig.CacheMode);
+            _cacheProvider = CacheContainer.GetService<ICacheProvider>(AppConfig.CacheMode);
         }
 
         public async Task<string> GenerateTokenCredential(Dictionary<string, object> parameters)

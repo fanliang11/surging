@@ -107,6 +107,11 @@ namespace Surging.Core.Caching.HashAlgorithms
             return _ring[_nodeKeysInRing[nearestNodePosition]];
         }
 
+        public IEnumerable<T> GetNodes()
+        {
+           return _ring.Values.Distinct().ToList();
+        }
+
         /// <summary>
         /// 添加节点
         /// </summary>
@@ -137,7 +142,8 @@ namespace Surging.Core.Caching.HashAlgorithms
             for (var i = 0; i < _virtualNodeReplicationFactor; i++)
             {
                 var hashOfVirtualNode = _hashAlgorithm.Hash(node.GetHashCode().ToString() + i);
-                _ring.Remove(hashOfVirtualNode);
+                if (_ring.ContainsKey(hashOfVirtualNode))
+                    _ring.Remove(hashOfVirtualNode);
             }
         }
 

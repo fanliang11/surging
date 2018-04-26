@@ -1,8 +1,9 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
+using System.Collections.Generic; 
 
 namespace Surging.Core.ServiceHosting.Internal.Implementation
 {
@@ -10,18 +11,22 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
     {
         private readonly List<Action<IServiceCollection>> _configureServicesDelegates;
         private readonly List<Action<ContainerBuilder>> _registerServicesDelegates;
+        private readonly List<Action<IConfigurationBuilder>> _configureDelegates;
         private readonly List<Action<IContainer>> _mapServicesDelegates;
 
         public ServiceHostBuilder()
         {
             _configureServicesDelegates = new List<Action<IServiceCollection>>();
             _registerServicesDelegates = new List<Action<ContainerBuilder>>();
+            _configureDelegates = new List<Action<IConfigurationBuilder>>();
             _mapServicesDelegates = new List<Action<IContainer>>();
         }
 
         public IServiceHost Build()
         {
             var services = BuildCommonServices();
+            var config = Configure();
+            services.AddSingleton(typeof(IConfigurationBuilder), config);
             var hostingServices = RegisterServices();
             var applicationServices = services.Clone();
             var hostingServiceProvider = services.BuildServiceProvider();
@@ -61,6 +66,16 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             return this;
         }
 
+        public IServiceHostBuilder Configure(Action<IConfigurationBuilder> builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+            _configureDelegates.Add(builder);
+            return this; 
+        }
+
         private IServiceCollection BuildCommonServices()
         {
             var services = new ServiceCollection();
@@ -69,6 +84,16 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
                 configureServices(services);
             }
             return services;
+        }
+
+        private IConfigurationBuilder Configure()
+        {
+            var config = new ConfigurationBuilder().SetBasePath(AppContext.BaseDirectory); 
+            foreach (var configure in _configureDelegates)
+            {
+                configure(config);
+            }
+            return config;
         }
         
         private ContainerBuilder RegisterServices()

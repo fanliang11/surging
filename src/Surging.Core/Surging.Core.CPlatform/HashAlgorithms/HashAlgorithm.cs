@@ -16,7 +16,7 @@ namespace Surging.Core.CPlatform.HashAlgorithms
         #region 构造函数
         public int Hash(string item)
         {
-            var hash = Hash(Encoding.ASCII.GetBytes(item));
+            var hash = Hash(Encoding.ASCII.GetBytes(item??""));
             return (int)hash;
         }
         #endregion

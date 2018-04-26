@@ -3,16 +3,24 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <Authors>fanly</Authors>
-    <Version>0.4.8</Version>
+    <Version>0.6.1</Version>
     <Product>surging Micro Service Framework</Product>
     <Company />
     <Copyright>Copyright © fanly All Rights Reserved</Copyright>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>1.Add distributed cache
+2.Fixed client Get service Entries collection
+3.Optimize memory usage
+4.Service Command Add Load balancing Shunt Strategy</PackageReleaseNotes>
     <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
+    <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
+    <PackageTags>MicroService surging</PackageTags>
+    <AssemblyVersion>0.6.1.0</AssemblyVersion>
+    <FileVersion>0.6.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Consul" Version="0.7.2.3" />
+    <PackageReference Include="Consul" Version="0.7.2.4" />
   </ItemGroup>
 
   <ItemGroup>

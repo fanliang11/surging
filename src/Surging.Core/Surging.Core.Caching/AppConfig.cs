@@ -15,8 +15,9 @@ namespace Surging.Core.Caching
     {
         private const string CacheSectionName = "CachingProvider";
         private readonly CachingProvider _cacheWrapperSetting;
+        internal static string Path;
         internal static IConfigurationRoot Configuration { get; set; }
-        
+
         public AppConfig()
         {
             ServiceResolver.Current.Register(null, Activator.CreateInstance(typeof(HashAlgorithm), new object[] { }));
@@ -31,7 +32,7 @@ namespace Surging.Core.Caching
             get
             {
                 var config = ServiceResolver.Current.GetService<AppConfig>();
-                if (config==null)
+                if (config == null)
                 {
                     config = Activator.CreateInstance(typeof(AppConfig), new object[] { }) as AppConfig;
                     ServiceResolver.Current.Register(null, config);
@@ -52,7 +53,7 @@ namespace Surging.Core.Caching
             var context = ServiceResolver.Current.GetService<T>(name);
             return context;
         }
-        
+
         private void RegisterLocalInstance(string typeName)
         {
             var types = this.GetType().GetTypeInfo().Assembly.GetTypes().Where(p => p.GetTypeInfo().GetInterface(typeName) != null);
@@ -82,7 +83,7 @@ namespace Surging.Core.Caching
                         var args = properties.Select(p => GetTypedPropertyValue(p)).ToArray(); ;
                         var maps =
                             properties.Select(p => p.Maps)
-                                .FirstOrDefault(p =>p !=null && p.Any());
+                                .FirstOrDefault(p => p != null && p.Any());
                         var type = Type.GetType(setting.Class, throwOnError: true);
                         if (ServiceResolver.Current.GetService(type, setting.Id) == null)
                             ServiceResolver.Current.Register(setting.Id, Activator.CreateInstance(type, args));
@@ -102,19 +103,19 @@ namespace Surging.Core.Caching
                             Activator.CreateInstance(t));
                 }
             }
-            catch {}
+            catch { }
         }
 
         public object GetTypedPropertyValue(Property obj)
         {
             var mapCollections = obj.Maps;
-            if (mapCollections!=null && mapCollections.Any())
+            if (mapCollections != null && mapCollections.Any())
             {
                 var results = new List<object>();
                 foreach (var map in mapCollections)
                 {
                     object items = null;
-                     if(map.Properties !=null) items=map.Properties.Select(p=> GetTypedPropertyValue(p)).ToArray();
+                    if (map.Properties != null) items = map.Properties.Select(p => GetTypedPropertyValue(p)).ToArray();
                     results.Add(new
                     {
                         Name = Convert.ChangeType(obj.Name, typeof(string)),
@@ -128,13 +129,13 @@ namespace Surging.Core.Caching
             {
                 return new
                 {
-                    Name = Convert.ChangeType(obj.Name??"", typeof(string)),
+                    Name = Convert.ChangeType(obj.Name ?? "", typeof(string)),
                     Value = Convert.ChangeType(obj.Value, typeof(string)),
                 };
             }
             else if (!string.IsNullOrEmpty(obj.Ref))
                 return Convert.ChangeType(obj.Ref, typeof(string));
-          
+
             return null;
         }
 

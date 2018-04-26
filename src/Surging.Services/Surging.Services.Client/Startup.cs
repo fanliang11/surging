@@ -20,10 +20,8 @@ namespace Surging.Services.Client
     public class Startup
     {
         private ContainerBuilder _builder;
-        public Startup()
+        public Startup(IConfigurationBuilder config)
         {
-            var config = new ConfigurationBuilder()
-           .SetBasePath(AppContext.BaseDirectory);
             ConfigureEventBus(config);
             ConfigureCache(config);
         }
@@ -40,8 +38,7 @@ namespace Surging.Services.Client
 
         public void Configure(IContainer app)
         {
-            app.Resolve<ILoggerFactory>()
-                    .AddConsole((c, l) => (int)l >= 3);
+           
         }
 
         #region 私有方法
@@ -77,17 +74,26 @@ namespace Surging.Services.Client
         {
             Task.Run(async () =>
             {
-
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+                //await userProxy.PublishThroughEventBusAsync(new UserEvent
+                //{
+                //    UserId = "1",
+                //    Name = "fanly"
+                //});
                 await userProxy.GetUserId("user");
+               await userProxy.GetDictionary();
+                var serviceProxyProvider=  ServiceLocator.GetService<IServiceProxyProvider>();
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
+                
                     //1w次调用
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
+                        //var a = userProxy.GetDictionary().Result;
                         var a = userProxy.GetDictionary().Result;
+                        //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");

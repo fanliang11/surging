@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -62,10 +63,22 @@ namespace Surging.Core.Zookeeper
             });
         }
 
+        public static IServiceBuilder UseZooKeeperCacheManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseCacheManager(provider =>
+             new ZookeeperServiceCacheManager(
+                configInfo,
+              provider.GetRequiredService<ISerializer<byte[]>>(),
+                provider.GetRequiredService<ISerializer<string>>(),
+                provider.GetRequiredService<IServiceCacheFactory>(),
+                provider.GetRequiredService<ILogger<ZookeeperServiceCacheManager>>()));
+        }
+
 
         public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseZooKeeperRouteManager(configInfo)
+                .UseZooKeeperCacheManager(configInfo)
                 .UseZooKeeperServiceSubscribeManager(configInfo)
                 .UseZooKeeperCommandManager(configInfo);
         }
