@@ -40,10 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Transport\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
   </ItemGroup>
 
