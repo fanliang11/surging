@@ -66,7 +66,6 @@ namespace Surging.Modules.Common.Domain
 
         public Task<bool> GetDictionary()
         {
-            var xid = RpcContext.GetContext().GetAttachment("xid");
             return Task.FromResult<bool>(true);
         }
 
