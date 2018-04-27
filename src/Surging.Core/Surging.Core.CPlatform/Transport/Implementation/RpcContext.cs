@@ -15,6 +15,17 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             return contextParameters;
         }
 
+        public void SetAttachment(string key,object value)
+        {
+            contextParameters.AddOrUpdate(key, value,(k,v)=>value);
+        }
+
+        public object GetAttachment(string key)
+        {
+            contextParameters.TryGetValue(key, out object result);
+            return result;
+        }
+
         public void SetContextParameters(ConcurrentDictionary<String, Object> contextParameters)
         {
             this.contextParameters = contextParameters;

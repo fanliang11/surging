@@ -4,6 +4,7 @@ using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
@@ -74,7 +75,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             serviceDescriptor.EnableAuthorization(authorization != null);
             if (authorization != null)
             {
-                ;
                 serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)
                     ?? AuthorizationType.AppSecret);
             }
@@ -87,7 +87,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
              {
                  var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
-
+                 var xid = RpcContext.GetContext().GetAttachment("xid");
                  foreach (var parameterInfo in method.GetParameters())
                  {
                      var value = parameters[parameterInfo.Name];

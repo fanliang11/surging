@@ -64,7 +64,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
                 if (message == null)
                 {
-                    if (_serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
+                    if (command.FallBackName !=null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
                     {
                         var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
                         return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);

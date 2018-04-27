@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.ProxyGenerator;
@@ -74,6 +75,7 @@ namespace Surging.Services.Client
         {
             Task.Run(async () =>
             {
+                RpcContext.GetContext().SetAttachment("xid","222");
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
                 //await userProxy.PublishThroughEventBusAsync(new UserEvent
                 //{
@@ -83,6 +85,7 @@ namespace Surging.Services.Client
                 await userProxy.GetUserId("user");
                await userProxy.GetDictionary();
                 var serviceProxyProvider=  ServiceLocator.GetService<IServiceProxyProvider>();
+             
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
