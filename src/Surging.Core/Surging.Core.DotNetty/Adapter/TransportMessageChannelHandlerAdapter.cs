@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Surging.Core.DotNetty.Adaper
+namespace Surging.Core.DotNetty.Adapter
 {
     class TransportMessageChannelHandlerAdapter : ChannelHandlerAdapter
     {

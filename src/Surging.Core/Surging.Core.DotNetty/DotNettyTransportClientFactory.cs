@@ -11,7 +11,7 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.CPlatform.Transport.Implementation;
-using Surging.Core.DotNetty.Adaper;
+using Surging.Core.DotNetty.Adapter;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

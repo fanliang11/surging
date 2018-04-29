@@ -1,16 +1,16 @@
-﻿using System;
+﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using Surging.Core.CPlatform.Transport.Codec;
-using Surging.Core.CPlatform.Transport;
-using System.Threading.Tasks;
-using Surging.Core.CPlatform.Messages;
-using System.Net;
-using DotNetty.Codecs;
-using Surging.Core.DotNetty.Adaper;
 using Microsoft.Extensions.Logging;
-using DotNetty.Buffers;
+using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Transport;
+using Surging.Core.CPlatform.Transport.Codec;
+using Surging.Core.DotNetty.Adapter;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
 {
