@@ -15,6 +15,7 @@ using System.Linq;
 using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
 using System.Reflection;
 using Surging.Core.CPlatform.Utilities;
+using Newtonsoft.Json.Linq;
 
 namespace Surging.ApiGateway.Controllers
 {
@@ -34,8 +35,31 @@ namespace Surging.ApiGateway.Controllers
             _authorizationServerProvider = authorizationServerProvider;
         }
        
-        public async Task<ServiceResult<object>> Path([FromServices]IServicePartProvider servicePartProvider, string path, [FromQuery]string serviceKey, [FromBody]Dictionary<string, object> model)
+        public async Task<ServiceResult<object>> Path([FromServices]IServicePartProvider servicePartProvider, string path, [FromBody]Dictionary<string, object> model)
         {
+            var xx = this.Request.QueryString;
+            var yy = this.Request.Query;
+            var zz = this.Request.Method;
+
+            string serviceKey = this.Request.Query["servicekey"];
+            if (model == null)
+            {
+                model = new Dictionary<string, object>();
+                model[serviceKey.ToLower()] = new JObject();
+            }
+
+            foreach (string n in this.Request.Query.Keys)
+            {
+                model[n] = this.Request.Query[n].ToString();
+                Console.WriteLine(n + "=" + model[n]);
+            }
+            
+            //foreach (string n in this.Request.Form.Keys)
+           // {
+                //model[n] = this.Request.Query[n].ToString();
+              //  Console.WriteLine(n + "=" + this.Request.Form[n]);
+           // }
+
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
             path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
