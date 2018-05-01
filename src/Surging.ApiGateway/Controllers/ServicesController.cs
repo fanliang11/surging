@@ -48,7 +48,6 @@ namespace Surging.ApiGateway.Controllers
             foreach (string n in this.Request.Query.Keys)
             {
                 model[n] = this.Request.Query[n].ToString();
-                Console.WriteLine(n + "=" + model[n]);
             }
          
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
