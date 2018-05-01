@@ -10,6 +10,7 @@ using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
+using Surging.IModuleServices.Common.Models;
 using Surging.IModuleServices.Common.Models.Events;
 using System;
 using System.Collections.Generic;
@@ -75,13 +76,17 @@ namespace Surging.Services.Client
         {
             Task.Run(async () =>
             {
-                RpcContext.GetContext().SetAttachment("xid","222");
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                //await userProxy.PublishThroughEventBusAsync(new UserEvent
-                //{
-                //    UserId = "1",
-                //    Name = "fanly"
-                //});
+                await userProxy.PublishThroughEventBusAsync(new UserEvent
+                {
+                    UserId = "1",
+                    Name = "fanly"
+                });
+              var d=  await userProxy.GetUser(new UserModel
+                {
+                    UserId = 1,
+                    Name = "fanly"
+                });
                 await userProxy.GetUserId("user");
                await userProxy.GetDictionary();
                 var serviceProxyProvider=  ServiceLocator.GetService<IServiceProxyProvider>();

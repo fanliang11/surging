@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.6.1</Version>
+    <Version>0.6.5</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Company />
@@ -11,10 +11,13 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <PackageReleaseNotes>1.Add distributed cache
-2.Fixed client Get service Entries collection
-3.Optimize memory usage
-4.Service Command Add Load balancing Shunt Strategy</PackageReleaseNotes>
+    <PackageReleaseNotes>1.Add Strategy FallBack
+2.Fixed bug with rabbitmq Configuration(Surging.Core.EventBusRabbitMQ  V0.6.5)
+3.Add NLog component(Download  Surging.Core.NLog  V0.6.5)
+4.Fix socket resource exhaustion bug(Download  Surging.Core.Dotnetty  V0.6.5)
+5.Add RpcContext pass parameters(Download  Surging.Core.Codec.MessagePack or Surging.Core.Codec.ProtoBuffer   V0.6.5)</PackageReleaseNotes>
+    <AssemblyVersion>0.6.5.0</AssemblyVersion>
+    <FileVersion>0.6.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
