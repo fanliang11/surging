@@ -1,16 +1,16 @@
-﻿using System;
+﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using Surging.Core.CPlatform.Transport.Codec;
-using Surging.Core.CPlatform.Transport;
-using System.Threading.Tasks;
-using Surging.Core.CPlatform.Messages;
-using System.Net;
-using DotNetty.Codecs;
-using Surging.Core.DotNetty.Adaper;
 using Microsoft.Extensions.Logging;
-using DotNetty.Buffers;
+using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Transport;
+using Surging.Core.CPlatform.Transport.Codec;
+using Surging.Core.DotNetty.Adapter;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
 {
@@ -60,8 +60,8 @@ namespace Surging.Core.DotNetty
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
 
-            var bossGroup = new MultithreadEventLoopGroup();
-            var workerGroup = new MultithreadEventLoopGroup(4);
+            var bossGroup = new MultithreadEventLoopGroup(1);
+            var workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
             bootstrap
             .Group(bossGroup, workerGroup)
@@ -138,6 +138,7 @@ namespace Surging.Core.DotNetty
 
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
             {
+                context.CloseAsync();//客户端主动断开需要应答，否则socket变成CLOSE_WAIT状态导致socket资源耗尽
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception,$"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
             }
