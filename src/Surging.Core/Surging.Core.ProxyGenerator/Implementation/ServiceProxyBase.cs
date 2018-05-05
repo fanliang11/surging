@@ -65,12 +65,9 @@ namespace Surging.Core.ProxyGenerator.Implementation
             var command = await _commandProvider.GetCommand(serviceId);
             RemoteInvokeResultMessage message=null;
             var decodeJOject = typeof(T) == UtilityType.ObjectType;
-            var invocation = GetInvocation(parameters, serviceId, typeof(T));
-            foreach (var interceptor in _interceptors)
-            {
-                await interceptor.Intercept(invocation);
-            }
-            if (!command.RequestCacheEnabled || decodeJOject)
+            IInvocation invocation = null; 
+            var existsInterceptor = _interceptors.Any();
+            if ((!command.RequestCacheEnabled || decodeJOject) && !existsInterceptor)
             {
                 var v = typeof(T).FullName;
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
@@ -88,13 +85,20 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     }
                 }
             }
-            else
+            if (command.RequestCacheEnabled && !decodeJOject)
             {
-                await _cacheInterceptor.Intercept(invocation);
-                message = invocation.ReturnValue is RemoteInvokeResultMessage
-                    ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
-                result = invocation.ReturnValue;
+                 invocation = GetCacheInvocation(parameters, serviceId, typeof(T));
+                await Intercept(_cacheInterceptor, invocation);
             }
+            if ( existsInterceptor )
+            {
+                 invocation = invocation == null? GetInvocation(parameters, serviceId, typeof(T)):invocation;
+                foreach (var interceptor in _interceptors)
+                {
+                   await  Intercept(interceptor, invocation);
+                }
+            }
+         
             
             if (message != null)
                 result = _typeConvertibleService.Convert(message.Result, typeof(T));
@@ -150,13 +154,28 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 }
             }
         }
-       
+
+        private async Task<object> Intercept(IInterceptor interceptor, IInvocation invocation)
+        {
+            await interceptor.Intercept(invocation);
+            var message = invocation.ReturnValue is RemoteInvokeResultMessage
+             ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
+            return invocation.ReturnValue;
+        }
+
+
         private IInvocation GetInvocation(IDictionary<string, object> parameters, string serviceId, Type returnType)
         {
             var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
             return invocation.GetInvocation(this, parameters, serviceId, returnType);
         }
-        
+
+        private IInvocation GetCacheInvocation(IDictionary<string, object> parameters, string serviceId, Type returnType)
+        {
+            var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
+            return invocation.GetCacheInvocation(this, parameters, serviceId, returnType);
+        }
+
         #endregion Protected Method
     }
 }

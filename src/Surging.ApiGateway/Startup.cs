@@ -66,7 +66,7 @@ namespace Surging.ApiGateway
             {
                 option.AddClient();
                 option.AddCache();
-                option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+                option.AddClientIntercepted(typeof(CacheProviderInterceptor),typeof(LogProviderInterceptor));
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                if(registerConfig.Provider== RegisterProvider.Consul)
                 option.UseConsulManager(new ConfigInfo(registerConfig.Address));

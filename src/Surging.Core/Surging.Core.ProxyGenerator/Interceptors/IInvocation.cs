@@ -11,15 +11,11 @@ namespace Surging.Core.ProxyGenerator.Interceptors
         object Proxy { get; }
          
         string ServiceId { get; }
-
-        string[] CacheKey { get;  }
-
+        
         IDictionary<string, object> Arguments { get; }
 
         Type ReturnType { get; }
-
-        List<Attribute> Attributes { get; }
-
+        
         Task Proceed();
 
         object ReturnValue { get; set; }

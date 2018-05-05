@@ -25,6 +25,8 @@ namespace Surging.IModuleServices.Common
         Task<UserModel> Authentication(AuthenticationRequestData requestData);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
+        [Command(RequestCacheEnabled = true)]
+        [InterceptMethod(CachingMethod.Get, Key = "GetUserName_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<string> GetUserName(int id);
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "根据id查找用户是否存在")]
