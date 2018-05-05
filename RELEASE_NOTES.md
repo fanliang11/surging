@@ -1,3 +1,10 @@
+####  0.6.5 May 1 2018
+- Add Strategy FallBack
+- Fixed bug with rabbitmq Configuration
+- Add NLog component
+- Fix socket resource exhaustion bug
+- Add RpcContext pass parameters
+
 #### Surging.Core.Caching 0.6.3 March 29 2018
 - Add Distributed Cache Profile Synchronization Updates 
 
