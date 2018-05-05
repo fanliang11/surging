@@ -34,7 +34,15 @@ namespace Surging.Core.ProxyGenerator
             services.RegisterType<InterceptorProvider>().As<IInterceptorProvider>().SingleInstance();
             return builder;
         }
-         
+
+        public static IServiceBuilder AddClientIntercepted(this IServiceBuilder builder, Type interceptorServiceType)
+        {
+            var services = builder.Services;
+            services.RegisterType(interceptorServiceType).As<IInterceptor>().SingleInstance();
+            services.RegisterType<InterceptorProvider>().As<IInterceptorProvider>().SingleInstance();
+            return builder;
+        }
+
         public static IServiceBuilder AddClient(this ContainerBuilder services)
         {
             return services

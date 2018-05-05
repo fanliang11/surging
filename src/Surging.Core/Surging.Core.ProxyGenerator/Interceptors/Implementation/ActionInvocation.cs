@@ -25,7 +25,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             try
             {
                 if(_returnValue ==null)
-                _returnValue = await (Proxy as ServiceProxyBase).CallInvoke(parameters: Arguments, serviceId: ServiceId,type:ReturnType);
+                _returnValue = await (Proxy as ServiceProxyBase).CallInvoke(this);
             }
             catch (Exception ex)
             {

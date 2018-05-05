@@ -10,8 +10,7 @@ namespace Surging.Core.System.Intercept
     {
         public async Task Intercept(IInvocation invocation)
         {
-            invocation.ReturnValue = invocation.Proceed();
-            await Task.CompletedTask;
+            await invocation.Proceed();
         }
     }
 }
