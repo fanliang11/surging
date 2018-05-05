@@ -70,5 +70,5 @@ public interface IUserService :Surging.Core.CPlatform.Ioc.IServiceKey
 ```
 ## Next steps
 
-* [How to cache interception]
+* [How to cache interception](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/CacheInterception.md)
 
