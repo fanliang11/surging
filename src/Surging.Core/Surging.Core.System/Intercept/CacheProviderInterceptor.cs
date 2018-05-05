@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.System.Intercept
 {
-    public class CacheProviderInterceptor : IInterceptor
+    public class CacheProviderInterceptor : CacheInterceptor
     {
-        public async Task Intercept(IInvocation invocation)
+        public override async Task Intercept(IInvocation invocation)
         {
             var attribute =
                  invocation.Attributes.Where(p => p is InterceptMethodAttribute)
