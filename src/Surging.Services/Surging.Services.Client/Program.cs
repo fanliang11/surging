@@ -38,19 +38,20 @@ namespace Surging.Services.Client
                 {
                     builder.AddMicroService(option =>
                     {
-                        option.AddClient();
-                        option.AddClientIntercepted(typeof(CacheProviderInterceptor),typeof(LogProviderInterceptor));
+                        option.AddClient()
+                        .AddClientIntercepted(typeof(CacheProviderInterceptor))
+                        .AddClientIntercepted(typeof(LogProviderInterceptor))
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
-                        option.UseDotNettyTransport();
-                        option.UseRabbitMQTransport();
-                        option.AddCache();
-                        //option.UseKafkaMQTransport(kafkaOption =>
+                        .UseConsulManager(new ConfigInfo("127.0.0.1:8500"))
+                        .UseDotNettyTransport()
+                        .UseRabbitMQTransport()
+                        .AddCache()
+                        //.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";
                         //});
-                        //option.UseProtoBufferCodec();
-                        option.UseMessagePackCodec();
+                        //.UseProtoBufferCodec()
+                        .UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })

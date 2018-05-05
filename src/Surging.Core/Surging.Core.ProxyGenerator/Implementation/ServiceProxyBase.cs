@@ -69,7 +69,6 @@ namespace Surging.Core.ProxyGenerator.Implementation
             var existsInterceptor = _interceptors.Any();
             if ((!command.RequestCacheEnabled || decodeJOject) && !existsInterceptor)
             {
-                var v = typeof(T).FullName;
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
                 if (message == null)
                 {
