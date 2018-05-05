@@ -95,6 +95,19 @@ namespace Surging.ApiGateway
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            app.UseCors(builder =>
+            {
+                var policy = Core.ApiGateWay.AppConfig.Policy;
+                builder.WithOrigins(policy.Origins);
+                if (policy.AllowAnyHeader)
+                    builder.AllowAnyHeader();
+                if (policy.AllowAnyMethod)
+                    builder.AllowAnyMethod();
+                if (policy.AllowAnyOrigin)
+                    builder.AllowAnyOrigin();
+                if (policy.AllowCredentials)
+                    builder.AllowCredentials();
+            });
             var myProvider = new FileExtensionContentTypeProvider();
             myProvider.Mappings.Add(".tpl", "text/plain");
             app.UseStaticFiles(new StaticFileOptions() { ContentTypeProvider = myProvider });
