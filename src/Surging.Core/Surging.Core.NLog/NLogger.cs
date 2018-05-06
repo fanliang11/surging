@@ -14,7 +14,7 @@ namespace Surging.Core.Nlog
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            throw new NotImplementedException();
+            return NoopDisposable.Instance;
         }
 
         public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel)
@@ -82,6 +82,15 @@ namespace Surging.Core.Nlog
                         _log.Info(message, exception,null);
                         break;
                 }
+            }
+        }
+
+        private class NoopDisposable : IDisposable
+        {
+            public static NoopDisposable Instance = new NoopDisposable();
+
+            public void Dispose()
+            {
             }
         }
     }

@@ -40,7 +40,6 @@ namespace Surging.Services.Client
                     {
                         option.AddClient()
                         .AddClientIntercepted(typeof(CacheProviderInterceptor))
-                        .AddClientIntercepted(typeof(LogProviderInterceptor))
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         .UseConsulManager(new ConfigInfo("127.0.0.1:8500"))
                         .UseDotNettyTransport()
