@@ -2,6 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <PackageReleaseNotes>1.Add Strategy FallBack
+2.Fixed bug with rabbitmq Configuration(Surging.Core.EventBusRabbitMQ  V0.6.5)
+3.Add NLog component(Download  Surging.Core.NLog  V0.6.5)
+4.Fix socket resource exhaustion bug(Download  Surging.Core.Dotnetty  V0.6.5)
+5.Add RpcContext pass parameters(Download  Surging.Core.Codec.MessagePack or Surging.Core.Codec.ProtoBuffer   V0.6.5)</PackageReleaseNotes>
+    <Version>0.6.5</Version>
+    <Authors>fanly</Authors>
+    <Company>fanly</Company>
+    <Product>surging Micro Service Framework</Product>
+    <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
+    <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
+    <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
+    <PackageTags>MicroService surging</PackageTags>
+    <AssemblyVersion>0.6.5.0</AssemblyVersion>
+    <FileVersion>0.6.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

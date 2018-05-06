@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Autofac;
 using Surging.Core.CPlatform.Utilities;
+using System.Linq;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -25,13 +26,14 @@ namespace Surging.Core.ProxyGenerator.Implementation
         private readonly CPlatformContainer _serviceProvider;
         private readonly IServiceCommandProvider _commandProvider;
         private readonly IBreakeRemoteInvokeService _breakeRemoteInvokeService;
-        private readonly IInterceptor _interceptor;
+        private readonly IEnumerable<IInterceptor> _interceptors;
+        private readonly IInterceptor _cacheInterceptor;
         #endregion Field
 
         #region Constructor
 
-        protected ServiceProxyBase(IRemoteInvokeService remoteInvokeService, 
-            ITypeConvertibleService typeConvertibleService,String serviceKey, CPlatformContainer serviceProvider)
+        protected ServiceProxyBase(IRemoteInvokeService remoteInvokeService,
+            ITypeConvertibleService typeConvertibleService, String serviceKey, CPlatformContainer serviceProvider)
         {
             _remoteInvokeService = remoteInvokeService;
             _typeConvertibleService = typeConvertibleService;
@@ -39,8 +41,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
             _serviceProvider = serviceProvider;
             _commandProvider = serviceProvider.GetInstances<IServiceCommandProvider>();
             _breakeRemoteInvokeService = serviceProvider.GetInstances<IBreakeRemoteInvokeService>();
-            if(serviceProvider.Current.IsRegistered<IInterceptor>())
-            _interceptor= serviceProvider.GetInstances<IInterceptor>();
+            if (serviceProvider.Current.IsRegistered<IInterceptor>())
+            {
+                var interceptors = serviceProvider.GetInstances<IEnumerable<IInterceptor>>();
+                _interceptors = interceptors.Where(p => !typeof(CacheInterceptor).IsAssignableFrom(p.GetType()));
+                _cacheInterceptor = interceptors.Where(p => typeof(CacheInterceptor).IsAssignableFrom(p.GetType())).FirstOrDefault();
+            }
+
         }
         #endregion Constructor
 
@@ -56,15 +63,16 @@ namespace Surging.Core.ProxyGenerator.Implementation
         {
             object result = default(T);
             var command = await _commandProvider.GetCommand(serviceId);
-            RemoteInvokeResultMessage message;
+            RemoteInvokeResultMessage message = null;
             var decodeJOject = typeof(T) == UtilityType.ObjectType;
-            if (!command.RequestCacheEnabled || decodeJOject)
+            IInvocation invocation = null;
+            var existsInterceptor = _interceptors.Any();
+            if ((!command.RequestCacheEnabled || decodeJOject) && !existsInterceptor)
             {
-                var v = typeof(T).FullName;
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
                 if (message == null)
                 {
-                    if (command.FallBackName !=null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
+                    if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
                     {
                         var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
                         return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
@@ -76,27 +84,40 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     }
                 }
             }
-            else
+            if (command.RequestCacheEnabled && !decodeJOject)
             {
-                var invocation = GetInvocation(parameters, serviceId, typeof(T));
-                await _interceptor.Intercept(invocation);
-                message = invocation.ReturnValue is RemoteInvokeResultMessage
-                    ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
-                result = invocation.ReturnValue;
+                invocation = GetCacheInvocation(parameters, serviceId, typeof(T));
+                var interceptReuslt = await Intercept(_cacheInterceptor, invocation);
+                message = interceptReuslt.Item1;
+                result = interceptReuslt.Item2 == null ? default(T) : interceptReuslt.Item2;
             }
-
+            if (existsInterceptor)
+            {
+                invocation = invocation == null ? GetInvocation(parameters, serviceId, typeof(T)) : invocation;
+                foreach (var interceptor in _interceptors)
+                {
+                    var interceptReuslt = await Intercept(interceptor, invocation);
+                    message = interceptReuslt.Item1;
+                    result = interceptReuslt.Item2 == null ? default(T) : interceptReuslt.Item2;
+                }
+            }
             if (message != null)
                 result = _typeConvertibleService.Convert(message.Result, typeof(T));
             return (T)result;
         }
 
-        public async Task<object> CallInvoke(IDictionary<string, object> parameters, string serviceId, Type type)
+        public async Task<object> CallInvoke(IInvocation invocation)
         {
-            var message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, true);
+            var cacheInvocation = invocation as ICacheInvocation;
+            var parameters = invocation.Arguments;
+            var serviceId = invocation.ServiceId;
+            var type = invocation.ReturnType;
+            var message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey,
+                   type == typeof(Task) ? false : true);
             if (message == null)
             {
                 var command = await _commandProvider.GetCommand(serviceId);
-                if (_serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy==StrategyType.FallBack)
+                if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
                 {
                     var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
                     return await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
@@ -107,6 +128,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     return await invoker.Invoke<object>(parameters, serviceId, _serviceKey, true);
                 }
             }
+            if (type == typeof(Task)) return message;
             return _typeConvertibleService.Convert(message.Result, type);
         }
 
@@ -118,14 +140,26 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// <returns>调用任务。</returns>
         protected async Task Invoke(IDictionary<string, object> parameters, string serviceId)
         {
-            var message = _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, false);
+            var existsInterceptor = _interceptors.Any();
+            RemoteInvokeResultMessage message = null;
+            if (!existsInterceptor)
+                message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, false);
+            else
+            {
+                var invocation = GetInvocation(parameters, serviceId, typeof(Task));
+                foreach (var interceptor in _interceptors)
+                {
+                    var interceptReuslt = await Intercept(interceptor, invocation);
+                    message = interceptReuslt.Item1;
+                }
+            }
             if (message == null)
             {
                 var command = await _commandProvider.GetCommand(serviceId);
-                if (_serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
+                if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
                 {
-                     var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
-                     await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
+                    var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
+                    await invoker.Invoke<object>(parameters, serviceId, _serviceKey);
                 }
                 else
                 {
@@ -134,13 +168,28 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 }
             }
         }
-       
+
+        private async Task<Tuple<RemoteInvokeResultMessage, object>> Intercept(IInterceptor interceptor, IInvocation invocation)
+        {
+            await interceptor.Intercept(invocation);
+            var message = invocation.ReturnValue is RemoteInvokeResultMessage
+             ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
+            return new Tuple<RemoteInvokeResultMessage, object>(message, invocation.ReturnValue);
+        }
+
+
         private IInvocation GetInvocation(IDictionary<string, object> parameters, string serviceId, Type returnType)
         {
             var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
             return invocation.GetInvocation(this, parameters, serviceId, returnType);
         }
-        
+
+        private IInvocation GetCacheInvocation(IDictionary<string, object> parameters, string serviceId, Type returnType)
+        {
+            var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
+            return invocation.GetCacheInvocation(this, parameters, serviceId, returnType);
+        }
+
         #endregion Protected Method
     }
 }

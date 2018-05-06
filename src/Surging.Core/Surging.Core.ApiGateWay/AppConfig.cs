@@ -98,6 +98,18 @@ namespace Surging.Core.ApiGateWay
             }
         }
 
+        public static AccessPolicy Policy
+        {
+            get
+            {
+                var result = new AccessPolicy();
+                var section = Configuration.GetSection("AccessPolicy");
+                if (section != null)
+                    result = section.Get<AccessPolicy>();
+                return result;
+            }
+        }
+
         private static string _cacheMode = "MemoryCache";
 
         public static string CacheMode
