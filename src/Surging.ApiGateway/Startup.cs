@@ -66,7 +66,7 @@ namespace Surging.ApiGateway
             {
                 option.AddClient();
                 option.AddCache();
-                option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+                option.AddClientIntercepted(typeof(CacheProviderInterceptor),typeof(LogProviderInterceptor));
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                if(registerConfig.Provider== RegisterProvider.Consul)
                 option.UseConsulManager(new ConfigInfo(registerConfig.Address));
@@ -95,6 +95,19 @@ namespace Surging.ApiGateway
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            app.UseCors(builder =>
+            {
+                var policy = Core.ApiGateWay.AppConfig.Policy;
+                builder.WithOrigins(policy.Origins);
+                if (policy.AllowAnyHeader)
+                    builder.AllowAnyHeader();
+                if (policy.AllowAnyMethod)
+                    builder.AllowAnyMethod();
+                if (policy.AllowAnyOrigin)
+                    builder.AllowAnyOrigin();
+                if (policy.AllowCredentials)
+                    builder.AllowCredentials();
+            });
             var myProvider = new FileExtensionContentTypeProvider();
             myProvider.Mappings.Add(".tpl", "text/plain");
             app.UseStaticFiles(new StaticFileOptions() { ContentTypeProvider = myProvider });
