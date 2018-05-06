@@ -8,7 +8,7 @@ namespace Surging.IModuleServices.User
 {
 
     [ServiceBundle("api/{Service}")]
-    public interface IManagerService: IServiceKey
+    public interface IManagerServicexxx: IServiceKey
     {
         Task<string> SayHello(string name);
     }

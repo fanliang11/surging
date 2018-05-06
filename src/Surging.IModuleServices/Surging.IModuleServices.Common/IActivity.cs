@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 namespace Surging.IModuleServices.Common
 {
     [ServiceBundle("api/{Service}")]
-    public interface IUserService: IServiceKey
+    public interface IActivity: IServiceKey
     {
         Task<UserModel> Authentication(AuthenticationRequestData requestData);
 
@@ -29,9 +29,6 @@ namespace Surging.IModuleServices.Common
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "根据id查找用户是否存在")]
         Task<bool> Exists(int id);
-
-        [Authorization(AuthType = AuthorizationType.JWT)]
-        Task<IdentityUser> Save(IdentityUser requestData);
 
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]

@@ -76,7 +76,7 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 RpcContext.GetContext().SetAttachment("xid","222");
-                var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+                var userProxy = serviceProxyFactory.CreateProxy<IActivity>("User");
                 //await userProxy.PublishThroughEventBusAsync(new UserEvent
                 //{
                 //    UserId = "1",
@@ -110,7 +110,7 @@ namespace Surging.Services.Client
 
         public static void TestRabbitMq(IServiceProxyFactory serviceProxyFactory)
         {
-            serviceProxyFactory.CreateProxy<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
+            serviceProxyFactory.CreateProxy<IActivity>("User").PublishThroughEventBusAsync(new UserEvent()
             {
                 Age = "18",
                 Name = "fanly",

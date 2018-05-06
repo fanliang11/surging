@@ -12,10 +12,10 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
 {
      public  class UserLoginDateChangeHandler : IIntegrationEventHandler<UserEvent>
     {
-        private readonly IUserService _userService;
+        private readonly IActivity _userService;
         public UserLoginDateChangeHandler()
         {
-            _userService = ServiceLocator.GetService<IUserService>("User");
+            _userService = ServiceLocator.GetService<IActivity>("User");
         }
         public async Task Handle(UserEvent @event)
         {

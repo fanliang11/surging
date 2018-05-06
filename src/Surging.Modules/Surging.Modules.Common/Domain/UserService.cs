@@ -6,7 +6,6 @@ using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
-using Surging.IModuleServices.User;
 using Surging.Modules.Common.Repositories;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ using System.Threading.Tasks;
 namespace Surging.Modules.Common.Domain
 {
     [ModuleName("User")]
-    public class UserService : ProxyServiceBase, IUserService
+    public class UserService : ProxyServiceBase, IActivity
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
@@ -96,10 +95,6 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult<UserModel>(null);
         }
 
-        public Task<IdentityUser> Save(IdentityUser requestData)
-        {
-            return Task.FromResult(requestData);
-        }
         #endregion Implementation of IUserService
     }
 }
