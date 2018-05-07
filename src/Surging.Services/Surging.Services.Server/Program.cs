@@ -73,11 +73,11 @@ namespace Surging.Services.Server
                 })
                 .UseServiceCache()
                 .Configure(build =>
-                build.AddEventBusFile("eventBusSettings.json", optional: false))
+                build.AddEventBusFile("Configs/eventBusSettings.json", optional: false))
                 .Configure(build =>
-                build.AddCacheFile("cacheSettings.json", optional: false,reloadOnChange:true))
+                build.AddCacheFile("Configs/cacheSettings.json", optional: false,reloadOnChange:true))
                   .Configure(build =>
-                build.AddCPlatformFile("surgingSettings.json", optional: false, reloadOnChange: true))
+                build.AddCPlatformFile("Configs/surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseProxy()
                 .UseStartup<Startup>()
                 .Build();
