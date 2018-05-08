@@ -91,6 +91,7 @@ namespace Surging.Core.Nlog
 
             public void Dispose()
             {
+               
             }
         }
     }

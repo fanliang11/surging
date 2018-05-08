@@ -148,11 +148,15 @@ namespace Surging.Core.Zookeeper
                     {
                         _connectionWait.Set();
                     },
-                    async () =>
+                    () =>
                     {
-                        _connectionWait.Reset();
-                        await CreateZooKeeper();
-                    }));
+                        _connectionWait.Close();
+                    },
+                     async () =>
+                     {
+                         _connectionWait.Reset();
+                         await CreateZooKeeper();
+                     }));
 
         }
 

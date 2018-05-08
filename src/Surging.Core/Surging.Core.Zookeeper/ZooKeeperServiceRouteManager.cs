@@ -189,16 +189,20 @@ namespace Surging.Core.Zookeeper
             if (_zooKeeper != null)
                 await _zooKeeper.closeAsync();
             _zooKeeper = new ZooKeeper(_configInfo.ConnectionString, (int)_configInfo.SessionTimeout.TotalMilliseconds
-               , new ReconnectionWatcher(
-                    () =>
-                    {
-                        _connectionWait.Set();
-                    },
-                    async () =>
-                    {
-                        _connectionWait.Reset();
-                        await CreateZooKeeper();
-                    }));
+             , new ReconnectionWatcher(
+                () =>
+                {
+                    _connectionWait.Set();
+                },
+                () =>
+                {
+                    _connectionWait.Close();
+                },
+                async () =>
+                {
+                    _connectionWait.Reset();
+                    await CreateZooKeeper();
+                }));
 
         }
 

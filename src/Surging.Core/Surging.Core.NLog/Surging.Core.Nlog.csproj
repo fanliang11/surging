@@ -2,12 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <PackageReleaseNotes>1.Add Strategy FallBack
-2.Fixed bug with rabbitmq Configuration(Surging.Core.EventBusRabbitMQ  V0.6.5)
-3.Add NLog component(Download  Surging.Core.NLog  V0.6.5)
-4.Fix socket resource exhaustion bug(Download  Surging.Core.Dotnetty  V0.6.5)
-5.Add RpcContext pass parameters(Download  Surging.Core.Codec.MessagePack or Surging.Core.Codec.ProtoBuffer   V0.6.5)</PackageReleaseNotes>
-    <Version>0.6.5</Version>
+    <PackageReleaseNotes>1.Fix unimplemented BUG of BeginScope method of ILOG</PackageReleaseNotes>
+    <Version>0.6.5.1</Version>
     <Authors>fanly</Authors>
     <Company>fanly</Company>
     <Product>surging Micro Service Framework</Product>
@@ -16,8 +12,8 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.6.5.0</AssemblyVersion>
-    <FileVersion>0.6.5.0</FileVersion>
+    <AssemblyVersion>0.6.5.1</AssemblyVersion>
+    <FileVersion>0.6.5.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

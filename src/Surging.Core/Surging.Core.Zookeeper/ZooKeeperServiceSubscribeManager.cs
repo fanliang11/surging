@@ -165,6 +165,10 @@ namespace Surging.Core.Zookeeper
                     {
                         _connectionWait.Set();
                     },
+                    () =>
+                    {
+                        _connectionWait.Close();
+                    },
                     async () =>
                     {
                         _connectionWait.Reset();
