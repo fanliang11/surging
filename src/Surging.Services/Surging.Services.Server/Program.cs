@@ -22,7 +22,7 @@ using System;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
 
-namespace Surging.Services.Server
+namespace Surging.Services.Bootstrap
 {
     public class Program
     {
@@ -31,55 +31,7 @@ namespace Surging.Services.Server
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var host = new ServiceHostBuilder()
-                .RegisterServices(builder =>
-                {
-                    builder.AddMicroService(option =>
-                    {
-                        option.AddServiceRuntime()
-                        .AddRelateService()
-                        .AddConfigurationWatch()
-                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        .UseConsulManager(new ConfigInfo("127.0.0.1:8500"))
-                        .UseDotNettyTransport()
-                        .UseRabbitMQTransport()
-                        .AddRabbitMQAdapt()
-                        .AddCache()
-                        //.UseKafkaMQTransport(kafkaOption =>
-                        //{
-                        //    kafkaOption.Servers = "127.0.0.1";
-                        //    kafkaOption.LogConnectionClose = false;
-                        //    kafkaOption.MaxQueueBuffering = 10;
-                        //    kafkaOption.MaxSocketBlocking = 10;
-                        //    kafkaOption.EnableAutoCommit = false;
-                        //})
-                        //.AddKafkaMQAdapt()
-                        //.UseProtoBufferCodec()
-                        .UseMessagePackCodec();
-                        builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
-                    });
-                })
-                .SubscribeAt() 
-               // .UseLog4net(LogLevel.Error, "Configs/log4net.config")
-                .UseNLog(LogLevel.Error, "Configs/NLog.config")
-                //.UseServer("127.0.0.1", 98)
-                //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
-                //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
-                .UseServer(options =>
-                {
-                    // options.IpEndpoint = new IPEndPoint(IPAddress.Any, 98);  
-                    options.Token = "True";
-                    options.ExecutionTimeoutInMilliseconds = 30000;
-                    options.MaxConcurrentRequests = 200;
-                })
-                .UseServiceCache()
-                .Configure(build =>
-                build.AddEventBusFile("Configs/eventBusSettings.json", optional: false))
-                .Configure(build =>
-                build.AddCacheFile("Configs/cacheSettings.json", optional: false,reloadOnChange:true))
-                  .Configure(build =>
-                build.AddCPlatformFile("Configs/surgingSettings.json", optional: false, reloadOnChange: true))
-                .UseProxy()
-                .UseStartup<Startup>()
+                .Bootstrap()
                 .Build();
 
             using (host.Run())
