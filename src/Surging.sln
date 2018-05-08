@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Caching", "Sur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.DotNetty", "Surging.Core\Surging.Core.DotNetty\Surging.Core.DotNetty.csproj", "{38040915-5F97-4C51-9DFD-7D53EF544293}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Services.Server", "Surging.Services\Surging.Services.Server\Surging.Services.Server.csproj", "{38176595-3130-4FEC-BB07-CAFE775B681C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Services.Bootstrap", "Surging.Services\Surging.Services.Server\Surging.Services.Bootstrap.csproj", "{38176595-3130-4FEC-BB07-CAFE775B681C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Services.Client", "Surging.Services\Surging.Services.Client\Surging.Services.Client.csproj", "{D326D7EF-7D4B-410C-B144-AEBB5E3E8852}"
 EndProject
