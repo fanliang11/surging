@@ -52,7 +52,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<UserModel> GetUser(UserModel user);
 
         [Authorization(AuthType = AuthorizationType.JWT)]
-        [Command(Strategy = StrategyType.Failover, RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
+        [Command(Strategy = StrategyType.FallBack,FallBackName = "UpdateFallBackName",  RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis)]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<bool> Update(int id, UserModel model);

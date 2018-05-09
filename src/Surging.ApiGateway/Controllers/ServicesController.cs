@@ -37,7 +37,6 @@ namespace Surging.ApiGateway.Controllers
        
         public async Task<ServiceResult<object>> Path([FromServices]IServicePartProvider servicePartProvider, string path, [FromBody]Dictionary<string, object> model)
         {
-  
             string serviceKey = this.Request.Query["servicekey"];
             if (model == null)
             {
@@ -48,7 +47,6 @@ namespace Surging.ApiGateway.Controllers
             foreach (string n in this.Request.Query.Keys)
             {
                 model[n] = this.Request.Query[n].ToString();
-                Console.WriteLine(n + "=" + model[n]);
             }
          
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
