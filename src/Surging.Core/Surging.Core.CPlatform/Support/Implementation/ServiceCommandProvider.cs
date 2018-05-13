@@ -24,6 +24,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             {
                 manager.Changed += ServiceCommandManager_Removed;
                 manager.Removed += ServiceCommandManager_Removed;
+                manager.Created += ServiceCommandManager_Add;
             }
         }
 
@@ -65,6 +66,11 @@ namespace Surging.Core.CPlatform.Support.Implementation
         {
             ServiceCommand value;
             _serviceCommand.TryRemove(e.Command.ServiceId, out value);
+        }
+
+        public void ServiceCommandManager_Add(object sender, ServiceCommandEventArgs e)
+        { 
+            _serviceCommand.GetOrAdd(e.Command.ServiceId, e.Command);
         }
 
         public ServiceCommand ConvertServiceCommand(CommandAttribute command)

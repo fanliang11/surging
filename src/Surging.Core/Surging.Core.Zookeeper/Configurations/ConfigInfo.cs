@@ -19,7 +19,15 @@ namespace Surging.Core.Zookeeper.Configurations
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
             string cachePath = "/services/serviceCaches",
-            string chRoot = null) : this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath, commandPath,cachePath, chRoot )
+            string chRoot = null,
+            bool reloadOnChange = false) : this(connectionString,
+                TimeSpan.FromSeconds(20),
+                routePath,
+                subscriberPath, 
+                commandPath,
+                cachePath, 
+                chRoot,
+                reloadOnChange)
         {
         }
 
@@ -37,9 +45,11 @@ namespace Surging.Core.Zookeeper.Configurations
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
             string cachePath = "/services/serviceCaches",
-            string chRoot = null)
+            string chRoot = null,
+            bool reloadOnChange = false)
         {
             CachePath = cachePath;
+            ReloadOnChange = reloadOnChange;
             ChRoot = chRoot;
             CommandPath = commandPath;
             SubscriberPath = subscriberPath;
@@ -47,6 +57,8 @@ namespace Surging.Core.Zookeeper.Configurations
             RoutePath = routePath;
             SessionTimeout = sessionTimeout;
         }
+
+        public bool ReloadOnChange { get; set; }
 
         /// <summary>
         /// 连接字符串。

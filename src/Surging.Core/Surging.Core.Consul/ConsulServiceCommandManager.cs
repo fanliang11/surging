@@ -98,24 +98,37 @@ namespace Surging.Core.Consul
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
                 _logger.LogInformation("准备添加服务命令。");
-            var serviceCommandIds = serviceCommands.Select(i => i.ServiceId).ToArray();
-            var newServiceCommands = _serviceCommands.Where(p => !serviceCommandIds.Contains(p.ServiceId)).ToList();
             foreach (var serviceCommand in serviceCommands)
             {
                 var nodeData = _serializer.Serialize(serviceCommand);
                 var keyValuePair = new KVPair($"{_configInfo.CommandPath}{serviceCommand.ServiceId}") { Value = nodeData };
                 await _consul.KV.Put(keyValuePair);
-                newServiceCommands.Add(serviceCommand);
-            }
-            _serviceCommands = newServiceCommands.ToArray();
+            } 
         }
 
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
             var commands = await GetServiceCommands(serviceCommands.Select(p => $"{ _configInfo.CommandPath}{ p.ServiceId}"));
-            if (commands.Count() == 0)
+            if (commands.Count() == 0 || _configInfo.ReloadOnChange)
             {
+                await RemoveExceptRoutesAsync(serviceCommands);
                 await SetServiceCommandsAsync(serviceCommands);
+            }
+        }
+
+        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
+        {
+            serviceCommands = serviceCommands.ToArray();
+
+            if (_serviceCommands != null)
+            {
+                var oldCommandIds = _serviceCommands.Select(i => i.ServiceId).ToArray();
+                var newCommandIds = serviceCommands.Select(i => i.ServiceId).ToArray();
+                var deletedRCommandIds = oldCommandIds.Except(newCommandIds).ToArray();
+                foreach (var deletedRCommandId in deletedRCommandIds)
+                {
+                    await _consul.KV.Delete($"{_configInfo.CommandPath}{deletedRCommandId}");
+                }
             }
         }
 
@@ -266,8 +279,7 @@ namespace Surging.Core.Consul
 
             //获取新增的服务命令信息。
             var newCommands = (await GetServiceCommands(createdChildrens)).ToArray();
-            if (_serviceCommands != null)
-            {
+           
                 var serviceCommands = _serviceCommands.ToArray();
                 lock (_serviceCommands)
                 {
@@ -289,6 +301,5 @@ namespace Surging.Core.Consul
                 if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
                     _logger.LogInformation("服务命令数据更新成功。");
             }
-        }
     }
 }

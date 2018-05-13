@@ -39,7 +39,7 @@ namespace Surging.Services.Server
                         .AddRelateService()
                         .AddConfigurationWatch()
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        .UseConsulManager(new ConfigInfo("127.0.0.1:8500"))
+                        .UseConsulManager(new ConfigInfo("127.0.0.1:8500",reloadOnChange:true))
                         .UseDotNettyTransport()
                         .UseRabbitMQTransport()
                         .AddRabbitMQAdapt()
