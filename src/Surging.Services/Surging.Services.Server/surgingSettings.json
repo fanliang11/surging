@@ -1,7 +1,21 @@
 {
+  "ServerOptions": {
     "Ip": "127.0.0.1",
     "WatchInterval": 30,
     "Port": 98,
     "Token": "true",
     "RequestCacheEnabled": false
+  },
+  "EventBus": {
+    "EventBusConnection": "192.168.2.207",
+    "EventBusUserName": "guest",
+    "EventBusPassword": "guest",
+    "VirtualHost": "/",
+    "BrokerName": "surging_demo",
+    "Port": "5672"
+  },
+  "Register": {
+    "Provider": "Consul",
+    "Address": "127.0.0.1:8500"
+  }
 }

@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
@@ -98,6 +99,16 @@ namespace Surging.Core.Consul
             return builder;
         }
 
+       
+       public static IServiceBuilder UseConsulManager(this IServiceBuilder builder, IConfigurationRoot configurationBuilder)
+        {
+            ConfigInfo configInfo = new ConfigInfo(configurationBuilder["Register:Address"] ?? "127.0.0.1:8500");
+
+            return builder.UseConsulRouteManager(configInfo)
+                .UseConsulServiceSubscribeManager(configInfo)
+               .UseConsulCommandManager(configInfo)
+               .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
+        }
         public static IServiceBuilder UseConsulManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseConsulRouteManager(configInfo)
