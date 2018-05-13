@@ -1,11 +1,11 @@
 # surging 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/surging/blob/master/README.EN.md)
 [![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://mit-license.org/)
-# surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
+### surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
 
 <br />
 
-## 名字由来
+### 名字由来
 
 英文名：surging
 
@@ -15,7 +15,12 @@
 
 我对阁下的景仰犹如滔滔江水,连绵不绝,犹如黄河泛滥,一发而不可收拾，而取名英文的含义也希望此框架能流行起来，也能像《.net core surging》这句英文语句含义一样，.net core技术风起云涌,冲击整个软件生态系统。
 
-## 配置：
+
+### surging模块功能
+
+<img src="https://github.com/dotnetcore/surging/blob/master/docs/surging%E6%A8%A1%E5%9D%97%E5%8A%9F%E8%83%BD.png" alt="surging模块功能" />
+
+### 配置：
 
  ```c#
 var host = new ServiceHostBuilder()
