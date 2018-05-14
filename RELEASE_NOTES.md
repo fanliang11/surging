@@ -1,3 +1,18 @@
+####  0.6.5 May 1 2018
+- Add Strategy FallBack
+- Fixed bug with rabbitmq Configuration
+- Add NLog component
+- Fix socket resource exhaustion bug
+- Add RpcContext pass parameters
+
+#### Surging.Core.Caching 0.6.3 March 29 2018
+- Add Distributed Cache Profile Synchronization Updates 
+
+#### surging 0.6.3 March 29 2018
+- Add Distributed Cache Profile Synchronization Updates 
+- Add Load Balancing FairPolling Algorithm  
+- Add configuration file to define running parameters
+
 #### Surging.Core.Zookeeper 0.5.1 January 17 2017
 - Fix problems registered on different servers based on zookeeper and consul
 

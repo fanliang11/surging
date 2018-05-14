@@ -8,5 +8,6 @@ namespace Surging.Core.CPlatform.Support
     {
         Failover=0,
         Injection=1,
+        FallBack=2,
     }
 }

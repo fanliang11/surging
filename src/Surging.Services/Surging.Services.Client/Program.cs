@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Logging;
 using Surging.Core.Caching;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
@@ -7,10 +8,10 @@ using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
-using Surging.Core.EventBusKafka;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.Log4net;
+using Surging.Core.Nlog;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
@@ -37,27 +38,28 @@ namespace Surging.Services.Client
                 {
                     builder.AddMicroService(option =>
                     {
-                        option.AddClient();
-                        option.AddClientIntercepted(typeof(CacheProviderInterceptor));
+                        option.AddClient()
+                        .AddClientIntercepted(typeof(CacheProviderInterceptor))
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));
-                        option.UseDotNettyTransport();
-                        option.UseRabbitMQTransport();
-                        option.AddCache();
-                        //option.UseKafkaMQTransport(kafkaOption =>
+                        .UseConsulManager(new ConfigInfo("127.0.0.1:8500"))
+                        .UseDotNettyTransport()
+                        .UseRabbitMQTransport()
+                        .AddCache()
+                        //.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";
                         //});
-                        //option.UseProtoBufferCodec();
-                        option.UseMessagePackCodec();
+                        //.UseProtoBufferCodec()
+                        .UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-                  .ConfigureServices(build =>
+                .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
-                .ConfigureServices(build =>
-                build.AddCacheFile("cacheSettings.json", optional: false))
-                .UseLog4net()
+                .Configure(build =>
+                build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
+                .UseNLog(LogLevel.Error)
+               // .UseLog4net(LogLevel.Error)
                 .UseServiceCache()
                 .UseProxy() 
                 .UseClient()

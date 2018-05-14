@@ -5,10 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
 using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
+using Surging.IModuleServices.Common.Models;
 using Surging.IModuleServices.Common.Models.Events;
 using System;
 using System.Collections.Generic;
@@ -38,8 +40,7 @@ namespace Surging.Services.Client
 
         public void Configure(IContainer app)
         {
-            app.Resolve<ILoggerFactory>()
-                    .AddConsole((c, l) => (int)l >= 3);
+           
         }
 
         #region 私有方法
@@ -76,16 +77,30 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-               await userProxy.GetUserId("user");
-               await userProxy.GetDictionary();
-                var serviceProxyProvider=  ServiceLocator.GetService<IServiceProxyProvider>();
+                await userProxy.GetUserName(1);
+                await userProxy.PublishThroughEventBusAsync(new UserEvent
+                {
+                    UserId = "1",
+                    Name = "fanly"
+                });
+                var d = await userProxy.GetUser(new UserModel
+                {
+                    UserId = 1,
+                    Name = "fanly"
+                });
+              
+              var r=  await userProxy.GetDictionary();
+                var serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
+
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
+                
                     //1w次调用
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
+                        //var a = userProxy.GetDictionary().Result;
                         var a = userProxy.GetDictionary().Result;
                         //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }

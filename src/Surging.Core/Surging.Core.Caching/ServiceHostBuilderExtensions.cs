@@ -8,6 +8,7 @@ using Autofac;
 using System.Reflection;
 using Surging.Core.Caching.Interfaces;
 using Surging.Core.CPlatform.Cache;
+using Surging.Core.Caching.Configurations;
 
 namespace Surging.Core.Caching
 {
@@ -20,7 +21,9 @@ namespace Surging.Core.Caching
                 var serviceCacheProvider = mapper.Resolve<ICacheNodeProvider>();
                 var addressDescriptors = serviceCacheProvider.GetServiceCaches().ToList();
                 mapper.Resolve<IServiceCacheManager>().SetCachesAsync(addressDescriptors);
+                mapper.Resolve<IConfigurationWatchProvider>();
             });
         }
+        
     }
 }

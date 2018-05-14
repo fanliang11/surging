@@ -15,6 +15,7 @@ namespace Surging.Core.Caching
     {
         private const string CacheSectionName = "CachingProvider";
         private readonly CachingProvider _cacheWrapperSetting;
+        internal static string Path;
         internal static IConfigurationRoot Configuration { get; set; }
 
         public AppConfig()
@@ -31,13 +32,11 @@ namespace Surging.Core.Caching
             get
             {
                 var config = ServiceResolver.Current.GetService<AppConfig>();
-
                 if (config == null)
                 {
                     config = Activator.CreateInstance(typeof(AppConfig), new object[] { }) as AppConfig;
                     ServiceResolver.Current.Register(null, config);
                 }
-
                 return config;
             }
         }

@@ -34,7 +34,7 @@ namespace Surging.Core.ApiGateWay.OAuth
         {
             string result = null;
             var payload = await _serviceProxyProvider.Invoke<object>(parameters,AppConfig.AuthorizationRoutePath, AppConfig.AuthorizationServiceKey);
-            if (payload != null)
+            if (payload!=null && !payload.Equals("null") )
             {
                 var jwtHeader = JsonConvert.SerializeObject(new JWTSecureDataHeader() { TimeStamp = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") });
                 var base64Payload = ConverBase64String(JsonConvert.SerializeObject(payload));

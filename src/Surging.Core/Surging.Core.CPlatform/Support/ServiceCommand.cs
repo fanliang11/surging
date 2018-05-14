@@ -25,6 +25,7 @@ namespace Surging.Core.CPlatform.Support
                 BreakerForceClosed = AppConfig.ServerOptions.BreakerForceClosed;
                 BreakerRequestVolumeThreshold = AppConfig.ServerOptions.BreakerRequestVolumeThreshold;
                 MaxConcurrentRequests = AppConfig.ServerOptions.MaxConcurrentRequests;
+                FallBackName = AppConfig.ServerOptions.FallBackName;
             }
         }
         public int FailoverCluster { get; set; } = 3;
@@ -46,7 +47,12 @@ namespace Surging.Core.CPlatform.Support
         /// 注入
         /// </summary>
         public string Injection { get; set; } = "return null";
+        
 
+        /// <summary>
+        /// IFallbackInvoker 实例名称
+        /// </summary>
+        public string FallBackName { get; set; }
         /// <summary>
         /// 负载分流策略
         /// </summary>

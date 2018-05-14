@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 {
     public class ActionInvocation : AbstractInvocation
-    {
+    { 
         protected ActionInvocation(
              IDictionary<string, object> arguments,
            string serviceId,
@@ -24,7 +24,8 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
         {
             try
             {
-                _returnValue = await (Proxy as ServiceProxyBase).CallInvoke(parameters: Arguments, serviceId: ServiceId,type:ReturnType);
+                if(_returnValue ==null)
+                _returnValue = await (Proxy as ServiceProxyBase).CallInvoke(this);
             }
             catch (Exception ex)
             {

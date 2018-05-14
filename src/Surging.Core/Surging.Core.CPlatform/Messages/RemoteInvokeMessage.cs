@@ -21,5 +21,7 @@ namespace Surging.Core.CPlatform.Messages
         /// 服务参数。
         /// </summary>
         public IDictionary<string, object> Parameters { get; set; }
+
+        public IDictionary<string, object> Attachments { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
     {
         HashAlgorithm,
         Polling,
-        Random
+        Random,
+        FairPolling,
     }
 }

@@ -1,11 +1,11 @@
-# surging 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/surging/blob/master/README.EN.md)
-[![Member project of .NET China Foundation](https://github.com/dotnetcore/Home/blob/master/icons/member-project-of-netchina.png)](https://github.com/dotnetcore)
+﻿# surging 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/surging/blob/master/README.EN.md)
+[![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://mit-license.org/)
-# surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
+### surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
 
 <br />
 
-## 名字由来
+### 名字由来
 
 英文名：surging
 
@@ -15,7 +15,12 @@
 
 我对阁下的景仰犹如滔滔江水,连绵不绝,犹如黄河泛滥,一发而不可收拾，而取名英文的含义也希望此框架能流行起来，也能像《.net core surging》这句英文语句含义一样，.net core技术风起云涌,冲击整个软件生态系统。
 
-## 配置：
+
+### surging模块功能
+
+<img src="https://github.com/dotnetcore/surging/blob/master/docs/SurgingFunction.png" alt="surging模块功能" />
+
+### 配置：
 
  ```c#
 var host = new ServiceHostBuilder()
@@ -25,6 +30,7 @@ var host = new ServiceHostBuilder()
                     {
                         option.AddServiceRuntime();//
                         option.AddRelateService();//添加支持服务代理远程调用
+                         option.AddConfigurationWatch();//添加同步更新配置文件的监听处理
                         // option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); //使用Zookeeper管理
                         option.UseConsulManager(new ConfigInfo("127.0.0.1:8500"));//使用Consul管理
                         option.UseDotNettyTransport();//使用Netty传输
@@ -57,11 +63,13 @@ var host = new ServiceHostBuilder()
                     options.ShuntStrategy=AddressSelectorMode.Polling; //使用轮询负载分流策略
                     options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                 })
-                .UseLog4net("Configs/log4net.config") //使用log4net记录日志
-                .UseLog4net()  //使用log4net记录日志
-                .ConfigureServices(build =>
+                //.UseLog4net("Configs/log4net.config") //使用log4net记录日志
+                .UseNLog(LogLevel.Error, "Configs/NLog.config")// 使用NLog 记录日志
+                //.UseLog4net(LogLevel.Error) //使用log4net记录日志
+                //.UseLog4net()  //使用log4net记录日志
+                .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))//使用eventBusSettings.json文件进行配置
-                .ConfigureServices(build =>
+                .Configure(build =>
                  build.AddCacheFile("cacheSettings.json", optional: false))//使用cacheSettings.json文件进行配置
                 .UseProxy() //使用Proxy
                 .UseStartup<Startup>()
@@ -186,9 +194,9 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
-IDE:Visual Studio 2017 15.3 Preview ,vscode
+IDE:Visual Studio 2017 15.5,vscode
 <br/>
-框架：.NET core 2.0
+框架：.NET core 2.1
 <br/>
 * [Demo](https://github.com/billyang/SurgingDemo)
 * [文档](http://docs.dotnet-china.org/surging/)

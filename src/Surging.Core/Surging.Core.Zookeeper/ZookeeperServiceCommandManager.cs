@@ -132,9 +132,29 @@ namespace Surging.Core.Zookeeper
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
             var commands = await GetServiceCommands(serviceCommands.Select(p => p.ServiceId));
-            if (commands.Count() == 0)
+            if (commands.Count() == 0 || _configInfo.ReloadOnChange)
             {
+                await RemoveExceptRoutesAsync(serviceCommands);
                 await SetServiceCommandsAsync(serviceCommands);
+            }
+        }
+
+        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
+        {
+                 var path = _configInfo.CommandPath;
+            if (!path.EndsWith("/"))
+                path += "/";
+            serviceCommands = serviceCommands.ToArray();
+
+            if (_serviceCommands != null)
+            {
+                var oldCommandIds = _serviceCommands.Select(i => i.ServiceId).ToArray();
+                var newCommandIds = serviceCommands.Select(i => i.ServiceId).ToArray();
+                var deletedRCommandIds = oldCommandIds.Except(newCommandIds).ToArray();
+                foreach (var deletedRCommandId in deletedRCommandIds)
+                {
+                    await _zooKeeper.deleteAsync($"{path}{deletedRCommandId}");
+                }
             }
         }
 
@@ -148,11 +168,15 @@ namespace Surging.Core.Zookeeper
                     {
                         _connectionWait.Set();
                     },
-                    async () =>
+                    () =>
                     {
-                        _connectionWait.Reset();
-                        await CreateZooKeeper();
-                    }));
+                        _connectionWait.Close();
+                    },
+                     async () =>
+                     {
+                         _connectionWait.Reset();
+                         await CreateZooKeeper();
+                     }));
 
         }
 

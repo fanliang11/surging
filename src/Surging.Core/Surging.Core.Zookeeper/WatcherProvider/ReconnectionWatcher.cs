@@ -10,11 +10,13 @@ namespace Surging.Core.Zookeeper.WatcherProvider
     {
         private readonly Action _connectioned;
         private readonly Action _disconnect;
+        private readonly Action _reconnection;
 
-        public ReconnectionWatcher(Action connectioned, Action disconnect)
+        public ReconnectionWatcher(Action connectioned, Action disconnect, Action reconnection)
         {
             _connectioned = connectioned;
             _disconnect = disconnect;
+            _reconnection = reconnection;
         }
 
         #region Overrides of Watcher
@@ -24,14 +26,31 @@ namespace Surging.Core.Zookeeper.WatcherProvider
         /// <returns></returns>
         public override async Task process(WatchedEvent watchedEvent)
         {
-            if (watchedEvent.getState() == Event.KeeperState.SyncConnected)
+            var state = watchedEvent.getState();
+            switch (state)
             {
-                _connectioned();
+                case Event.KeeperState.Expired:
+                    {
+                        _reconnection();
+                        break;
+                    }
+                case Event.KeeperState.AuthFailed:
+                    {
+                        _disconnect();
+                        break;
+                    }
+                case Event.KeeperState.Disconnected:
+                    {
+                        _reconnection();
+                        break;
+                    }
+                default:
+                    {
+                        _connectioned();
+                        break;
+                    }
             }
-            else
-            {
-                _disconnect();
-            }
+
 #if NET
                 await Task.FromResult(1);
 #else

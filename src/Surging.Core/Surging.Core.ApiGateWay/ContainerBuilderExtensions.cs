@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Surging.Core.ApiGateWay.Aggregation;
 using Surging.Core.ApiGateWay.OAuth;
 using Surging.Core.ApiGateWay.ServiceDiscovery;
 using Surging.Core.ApiGateWay.ServiceDiscovery.Implementation;
@@ -23,6 +24,7 @@ namespace Surging.Core.ApiGateWay
             services.RegisterType<ServiceDiscoveryProvider>().As<IServiceDiscoveryProvider>().SingleInstance();
             services.RegisterType<ServiceSubscribeProvider>().As<IServiceSubscribeProvider>().SingleInstance();
             services.RegisterType<ServiceCacheProvider>().As<IServiceCacheProvider>().SingleInstance();
+            services.RegisterType<ServicePartProvider>().As<IServicePartProvider>().SingleInstance();
             if (config != null)
             {
                 AppConfig.AccessTokenExpireTimeSpan = config.AccessTokenExpireTimeSpan;

@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Surging.Core.Caching.AddressResolvers;
 using Surging.Core.Caching.AddressResolvers.Implementation;
+using Surging.Core.Caching.Configurations;
+using Surging.Core.Caching.Configurations.Implementation;
 using Surging.Core.Caching.HashAlgorithms;
 using Surging.Core.Caching.HealthChecks;
 using Surging.Core.Caching.HealthChecks.Implementation;
@@ -31,6 +33,7 @@ namespace Surging.Core.Caching
             services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
             services.RegisterType(typeof(DefaultServiceCacheFactory)).As(typeof(IServiceCacheFactory)).SingleInstance();
             services.RegisterType(typeof(DefaultCacheNodeProvider)).As(typeof(ICacheNodeProvider)).SingleInstance();
+            services.RegisterType(typeof(ConfigurationWatchProvider)).As(typeof(IConfigurationWatchProvider)).SingleInstance();
             RegisterConfigInstance(services);
             RegisterLocalInstance("ICacheClient`1", services);
             return builder;

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.System.Intercept
 {
-    public class CacheProviderInterceptor : IInterceptor
+    public class CacheProviderInterceptor : CacheInterceptor
     {
-        public async Task Intercept(IInvocation invocation)
+        public override async Task Intercept(ICacheInvocation invocation)
         {
             var attribute =
                  invocation.Attributes.Where(p => p is InterceptMethodAttribute)
@@ -18,7 +18,7 @@ namespace Surging.Core.System.Intercept
             await CacheIntercept(attribute, cacheKey, invocation);
         }
 
-        private async Task CacheIntercept(InterceptMethodAttribute attribute, string key, IInvocation invocation)
+        private async Task CacheIntercept(InterceptMethodAttribute attribute, string key, ICacheInvocation invocation)
         {
             ICacheProvider cacheProvider = null;
             switch (attribute.Mode)
@@ -38,7 +38,7 @@ namespace Surging.Core.System.Intercept
             if (cacheProvider != null) await Invoke(cacheProvider, attribute, key, invocation);
         }
 
-        private async Task Invoke(ICacheProvider cacheProvider, InterceptMethodAttribute attribute, string key, IInvocation invocation)
+        private async Task Invoke(ICacheProvider cacheProvider, InterceptMethodAttribute attribute, string key, ICacheInvocation invocation)
         {
             switch (attribute.Method)
             {

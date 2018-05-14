@@ -28,15 +28,14 @@ namespace Surging.Core.EventBusRabbitMQ
             builder.Services.RegisterType(typeof(InMemoryEventBusSubscriptionsManager)).As(typeof(IEventBusSubscriptionsManager)).SingleInstance();
             builder.Services.Register(provider =>
             {
-                var logger = provider.Resolve<ILogger<DefaultRabbitMQPersistentConnection>>();
-                var HostName = AppConfig.Configuration["EventBusConnection"];
-                var rabbitUserName= AppConfig.Configuration["EventBusUserName"]??"guest";;
-                var rabbitPassword= AppConfig.Configuration["EventBusPassword"] ??"guest";
+                var logger = provider.Resolve<ILogger<DefaultRabbitMQPersistentConnection>>();        
                 var factory = new ConnectionFactory()
                 {
-                    HostName = HostName,
-                    UserName = rabbitUserName,
-                    Password = rabbitPassword
+                    HostName = AppConfig.HostName,
+                    UserName =  AppConfig.RabbitUserName,
+                    Password = AppConfig.RabbitPassword,
+                    VirtualHost= AppConfig.VirtualHost,
+                    Port = int.Parse(AppConfig.Port),
                 };
                 factory.RequestedHeartbeat = 60;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Surging.Core.CPlatform.HashAlgorithms;
+using Surging.Core.CPlatform.Transport.Implementation;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
@@ -87,6 +88,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                         ServiceId = serviceId,
                         ServiceKey = serviceKey,
                         DecodeJOject = decodeJOject,
+                        Attachments = RpcContext.GetContext().GetContextParameters()
                     }
                 }, requestTimeout);
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>

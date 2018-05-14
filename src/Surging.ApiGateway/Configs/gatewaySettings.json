@@ -3,8 +3,34 @@
   "AuthorizationRoutePath": "api/user/authentication",
   "AuthorizationServiceKey": "User",
   "TokenEndpointPath": "api/oauth2/token",
+  "AccessPolicy": {
+    "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
+    "AllowAnyHeader": true,
+    "AllowAnyMethod": true
+  },
   "Register": {
-    "Provider": "Zookeeper",
-    "Address": "127.0.0.1:2181"
+    "Provider": "Consul",
+    "Address": "127.0.0.1:8500"
+  },
+  "ServicePart": {
+    "MainPath": "part/service/aggregation",
+    "EnableAuthorization": false,
+    "Services": [
+      {
+        "ServiceAggregation": [
+          {
+            "RoutePath": "api/user/GetUserName",
+            "ServiceKey": "User",
+            "Key": "Users"
+          },
+          {
+            "RoutePath": "api/user/GetUserName",
+            "ServiceKey": "User",
+            "Key": "Roles"
+          }
+        ],
+        "UrlMapping": "part/user/getuserrole"
+      }
+    ]
   }
 }

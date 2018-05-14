@@ -66,7 +66,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             return this;
         }
 
-        public IServiceHostBuilder ConfigureServices(Action<IConfigurationBuilder> builder)
+        public IServiceHostBuilder Configure(Action<IConfigurationBuilder> builder)
         {
             if (builder == null)
             {

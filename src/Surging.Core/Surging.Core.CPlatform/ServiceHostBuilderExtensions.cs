@@ -14,6 +14,7 @@ using Surging.Core.CPlatform.Runtime.Client;
 using System;
 using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Module;
+using System.Diagnostics;
 
 namespace Surging.Core.CPlatform
 {
@@ -26,10 +27,11 @@ namespace Surging.Core.CPlatform
                 mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
                 string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
-                int _port = port;
-                string _ip = ip;
+                int _port = AppConfig.ServerOptions.Port==0? port: AppConfig.ServerOptions.Port;
+                string _ip = AppConfig.ServerOptions.Ip??ip;
                 _port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
                 _ip = AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
+                
                 if (_ip.IndexOf(".") < 0 || _ip == "" || _ip == "0.0.0.0")
                 {
                     NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
@@ -49,14 +51,18 @@ namespace Surging.Core.CPlatform
                         }
                     }
                 }
-                
-                var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-                new ServiceRoute
+
+                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(), serviceEntryManager, () =>
                 {
-                    Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, Token= serviceToken } },
-                    ServiceDescriptor = i.Descriptor
-                }).ToList();
-                mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
+                    var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
+                    new ServiceRoute
+                    {
+                        Address = new[] { new IpAddressModel { Ip = _ip, Port = _port, ProcessorTime = Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds, Token = serviceToken } },
+                        ServiceDescriptor = i.Descriptor
+                    }).ToList();
+                    mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);
+                });
+
                 mapper.Resolve<IModuleProvider>().Initialize();
                 var serviceHost = mapper.Resolve<Runtime.Server.IServiceHost>();
                 Task.Factory.StartNew(async () =>
