@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 using System.Linq;
 using Surging.Core.CPlatform.HashAlgorithms;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Filters;
+using Autofac;
+using System.Threading;
+using Surging.Core.CPlatform.Filters.Implementation;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
@@ -19,13 +23,18 @@ namespace Surging.Core.CPlatform.Support.Implementation
         private readonly ILogger<BreakeRemoteInvokeService> _logger;
         private readonly ConcurrentDictionary<string, ServiceInvokeListenInfo> _serviceInvokeListenInfo = new ConcurrentDictionary<string, ServiceInvokeListenInfo>();
         private readonly IHashAlgorithm _hashAlgorithm;
+        private readonly IEnumerable<IExceptionFilter> exceptionFilters=new List<IExceptionFilter>();
 
-        public BreakeRemoteInvokeService(IHashAlgorithm hashAlgorithm, IServiceCommandProvider commandProvider, ILogger<BreakeRemoteInvokeService> logger, IRemoteInvokeService remoteInvokeService)
+        public BreakeRemoteInvokeService(IHashAlgorithm hashAlgorithm, IServiceCommandProvider commandProvider, ILogger<BreakeRemoteInvokeService> logger,
+            IRemoteInvokeService remoteInvokeService,
+             CPlatformContainer serviceProvider)
         {
             _commandProvider = commandProvider;
             _remoteInvokeService = remoteInvokeService;
             _logger = logger;
             _hashAlgorithm = hashAlgorithm;
+            if (serviceProvider.Current.IsRegistered<IExceptionFilter>())
+                exceptionFilters= serviceProvider.GetInstances<IEnumerable<IExceptionFilter>>();
         }
 
         public async Task<RemoteInvokeResultMessage> InvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
@@ -70,6 +79,16 @@ namespace Surging.Core.CPlatform.Support.Implementation
         private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout,int hashCode)
         {
             var serviceInvokeInfo = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
+            CancellationTokenSource source = new CancellationTokenSource();
+            var token = source.Token;
+            var invokeMessage = new RemoteInvokeMessage
+            {
+                Parameters = parameters,
+                ServiceId = serviceId,
+                ServiceKey = serviceKey,
+                DecodeJOject = decodeJOject,
+                Attachments = RpcContext.GetContext().GetContextParameters()
+            };
             try
             {
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
@@ -82,14 +101,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 var message = await _remoteInvokeService.InvokeAsync(new RemoteInvokeContext
                 {
                     HashCode=hashCode ,
-                    InvokeMessage = new RemoteInvokeMessage
-                    {
-                        Parameters = parameters,
-                        ServiceId = serviceId,
-                        ServiceKey = serviceKey,
-                        DecodeJOject = decodeJOject,
-                        Attachments = RpcContext.GetContext().GetContextParameters()
-                    }
+                    InvokeMessage = invokeMessage
                 }, requestTimeout);
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
                 {
@@ -98,7 +110,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 });
                 return message;
             }
-            catch
+            catch(Exception ex)
             {
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
                 {
@@ -107,8 +119,21 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     --v.ConcurrentRequests;
                     return v;
                 });
+                await ExecuteExceptionFilter(ex, invokeMessage, token);
                 return null;
             }
+        }
+
+        private async Task ExecuteExceptionFilter(Exception ex, RemoteInvokeMessage invokeMessage, CancellationToken token)
+        {
+                foreach (var filter in exceptionFilters)
+                {
+                    await filter.ExecuteExceptionFilterAsync(new RpcActionExecutedContext
+                    {
+                        Exception = ex,
+                        InvokeMessage = invokeMessage
+                    }, token);
+                }
         }
 
         private int GetHashCode(ServiceCommand command, IDictionary<string, object> parameters)

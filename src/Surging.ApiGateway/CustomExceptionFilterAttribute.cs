@@ -29,7 +29,7 @@ namespace Surging.ApiGateway
             {
                 return;
             }
-            var result =  ServiceResult<object>.Create(false,errorMessage: "request fail");
+            var result =  ServiceResult<object>.Create(false,errorMessage: context.Exception.Message);
             result.StatusCode = 400;
             context.Result =new JsonResult(result);
         }

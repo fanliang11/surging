@@ -353,6 +353,18 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
+        public static IServiceBuilder AddFilter(this IServiceBuilder builder, IFilter filter)
+        {
+            var services = builder.Services;
+            services.Register(p => filter).As(typeof(IFilter)).SingleInstance();
+            if (typeof(IExceptionFilter).IsAssignableFrom(filter.GetType()))
+            {
+                var exceptionFilter = filter as IExceptionFilter;
+                services.Register(p => exceptionFilter).As(typeof(IExceptionFilter)).SingleInstance();
+            }
+            return builder;
+        }
+
         /// <summary>
         /// 添加服务运行时服务。
         /// </summary>

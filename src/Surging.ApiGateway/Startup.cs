@@ -74,6 +74,7 @@ namespace Surging.ApiGateway
                     option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
+                option.AddFilter(new ServiceExceptionFilter());
                 //option.UseProtoBufferCodec();
                 option.UseMessagePackCodec();
                 builder.Register(m => new CPlatformContainer(ServiceLocator.Current));
