@@ -21,8 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.2" />
-    <PackageReference Include="DotNetty.Codecs" Version="0.4.7" />
+    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="DotNetty.Codecs" Version="0.4.8" />
   </ItemGroup>
 
   <ItemGroup>
