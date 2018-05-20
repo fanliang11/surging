@@ -60,6 +60,7 @@ namespace Surging.ApiGateway
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver();
             });
             services.AddLogging();
+            services.AddCors();
             var builder = new ContainerBuilder();
             builder.Populate(services); 
             builder.AddMicroService(option =>

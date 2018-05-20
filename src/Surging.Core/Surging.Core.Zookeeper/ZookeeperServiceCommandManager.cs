@@ -123,11 +123,11 @@ namespace Surging.Core.Zookeeper
                     if (!DataEquals(nodeData, onlineData))
                         await _zooKeeper.setDataAsync(nodePath, nodeData);
                 }
+                NodeChange(command);
             }
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("服务命令添加成功。");
         }
-
 
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
@@ -286,6 +286,23 @@ namespace Surging.Core.Zookeeper
                     return false;
             }
             return true;
+        }
+
+        public void NodeChange(ServiceCommandDescriptor newCommand)
+        {
+            //得到旧的服务命令。
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+            //触发服务命令变更事件。
+            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
         }
 
         public void NodeChange(byte[] oldData, byte[] newData)

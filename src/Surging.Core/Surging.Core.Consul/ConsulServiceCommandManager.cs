@@ -94,6 +94,23 @@ namespace Surging.Core.Consul
             OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
         }
 
+        public void NodeChange(ServiceCommandDescriptor newCommand)
+        { 
+            //得到旧的服务命令。
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+            //触发服务命令变更事件。
+            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+
         public override async Task SetServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
@@ -102,7 +119,9 @@ namespace Surging.Core.Consul
             {
                 var nodeData = _serializer.Serialize(serviceCommand);
                 var keyValuePair = new KVPair($"{_configInfo.CommandPath}{serviceCommand.ServiceId}") { Value = nodeData };
-                await _consul.KV.Put(keyValuePair);
+                var isSuccess=  await _consul.KV.Put(keyValuePair);
+                if (isSuccess.Response)
+                    NodeChange(serviceCommand);
             } 
         }
 
