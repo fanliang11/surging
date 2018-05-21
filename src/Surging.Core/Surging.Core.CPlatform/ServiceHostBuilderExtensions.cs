@@ -52,7 +52,7 @@ namespace Surging.Core.CPlatform
                     }
                 }
 
-                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(), serviceEntryManager, () =>
+                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),  () =>
                 {
                     var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                     new ServiceRoute

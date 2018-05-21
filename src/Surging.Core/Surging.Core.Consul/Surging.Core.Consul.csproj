@@ -3,20 +3,25 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <Authors>fanly</Authors>
-    <Version>0.6.1</Version>
+    <Version>0.6.6</Version>
     <Product>surging Micro Service Framework</Product>
     <Company />
     <Copyright>Copyright © fanly All Rights Reserved</Copyright>
-    <PackageReleaseNotes>1.Add distributed cache
-2.Fixed client Get service Entries collection
-3.Optimize memory usage
-4.Service Command Add Load balancing Shunt Strategy</PackageReleaseNotes>
+    <PackageReleaseNotes>1.Fix does not support multiple interceptors
+2.Fix NLog file path configuration (Download Surging.Core.Nlog  V0.6.6)
+3.Optimize zookeeper connection(Download  Surging.Core.Zookeeper  V0.6.6)
+4. Consul,zookeeper add reloadOnChange configuration(Download  Surging.Core.Zookeeper  or 
+Surging.Core.Consul V0.6.6)
+5.Fix Service Router heartbeat registration failed(Download  Surging.Core.Zookeeper  or 
+Surging.Core.Consul V0.6.6)
+6.add Exception Filter(Download  Surging.Core.Zookeeper 0.6.6)
+7.Upgrade netty version to repair transmission of big data(Download  Surging.Core.DotNetty 0.6.6)</PackageReleaseNotes>
     <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
-    <FileVersion>0.6.1.0</FileVersion>
+    <AssemblyVersion>0.6.6.0</AssemblyVersion>
+    <FileVersion>0.6.6.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
