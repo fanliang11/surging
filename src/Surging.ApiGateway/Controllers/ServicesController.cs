@@ -41,7 +41,7 @@ namespace Surging.ApiGateway.Controllers
             if (model == null)
             {
                 model = new Dictionary<string, object>();
-                model[serviceKey.ToLower()] = new JObject();
+                if(!string.IsNullOrEmpty(serviceKey))  model[serviceKey.ToLower()] = new JObject();
             }
 
             foreach (string n in this.Request.Query.Keys)
