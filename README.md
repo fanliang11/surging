@@ -198,6 +198,7 @@ IDE:Visual Studio 2017 15.5,vscode
 <br/>
 框架：.NET core 2.1
 <br/>
+QQ群：615562965
 * [Demo](https://github.com/billyang/SurgingDemo)
 * [文档](http://docs.dotnet-china.org/surging/)
 * [简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)
