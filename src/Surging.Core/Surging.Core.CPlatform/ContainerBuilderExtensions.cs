@@ -1,7 +1,4 @@
 ﻿using Autofac;
-using Autofac.Builder;
-using Autofac.Core.Registration;
-using Autofac.Features.Scanning;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Cache;
@@ -44,6 +41,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Surging.Core.CPlatform
@@ -559,7 +557,18 @@ namespace Surging.Core.CPlatform
             });
             return types;
         }
-        
+
+        public static IEnumerable<string> GetDataContractName(this IServiceBuilder builder)
+        {
+            var namespaces = new List<string>();
+            var referenceAssemblies = GetReferenceAssembly();
+            referenceAssemblies.ForEach(p =>
+            {
+                namespaces.AddRange( p.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() !=null).Select(n=>n.Namespace));
+            });
+            return namespaces.Distinct();
+        }
+
         private static List<Assembly> GetReferenceAssembly()
         {
             string path = AppContext.BaseDirectory;

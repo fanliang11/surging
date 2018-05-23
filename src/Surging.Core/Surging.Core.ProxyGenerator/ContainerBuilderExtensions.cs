@@ -22,7 +22,8 @@ namespace Surging.Core.ProxyGenerator
                  provider.Resolve<IRemoteInvokeService>(),
                  provider.Resolve<ITypeConvertibleService>(),
                  provider.Resolve<IServiceProvider>(),
-                 builder.GetInterfaceService()
+                 builder.GetInterfaceService(),
+                 builder.GetDataContractName()
                  )).As<IServiceProxyFactory>().SingleInstance();
             return builder;
         }

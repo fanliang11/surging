@@ -67,6 +67,7 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult<bool>(true);
         }
 
+
         public async Task Try()
         {
             Console.WriteLine("start");
@@ -96,6 +97,11 @@ namespace Surging.Modules.Common.Domain
         public Task<IdentityUser> Save(IdentityUser requestData)
         {
             return Task.FromResult(requestData);
+        }
+
+        public Task<ApiResult<UserModel>> GetApiResult()
+        {
+            return Task.FromResult(new ApiResult<UserModel>() { Value = new UserModel { Name = "fanly" }, StatusCode=200 });
         }
 
         #endregion Implementation of IUserService
