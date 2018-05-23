@@ -31,7 +31,6 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
         private readonly IServiceIdGenerator _serviceIdGenerator;
         private readonly ILogger<ServiceProxyGenerater> _logger;
-        private  IEnumerable<string> _namespaces;
         #endregion Field
 
         #region Constructor
@@ -53,7 +52,6 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// <returns>服务代理实现。</returns>
         public IEnumerable<Type> GenerateProxys(IEnumerable<Type> interfacTypes, IEnumerable<string> namespaces)
         {
-            _namespaces = namespaces;
 #if NET
             var assemblys = AppDomain.CurrentDomain.GetAssemblies();
 #else
