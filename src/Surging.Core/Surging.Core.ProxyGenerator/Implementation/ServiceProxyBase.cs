@@ -41,12 +41,14 @@ namespace Surging.Core.ProxyGenerator.Implementation
             _serviceProvider = serviceProvider;
             _commandProvider = serviceProvider.GetInstances<IServiceCommandProvider>();
             _breakeRemoteInvokeService = serviceProvider.GetInstances<IBreakeRemoteInvokeService>();
+            _interceptors = new List<IInterceptor>();
             if (serviceProvider.Current.IsRegistered<IInterceptor>())
             {
                 var interceptors = serviceProvider.GetInstances<IEnumerable<IInterceptor>>();
                 _interceptors = interceptors.Where(p => !typeof(CacheInterceptor).IsAssignableFrom(p.GetType()));
                 _cacheInterceptor = interceptors.Where(p => typeof(CacheInterceptor).IsAssignableFrom(p.GetType())).FirstOrDefault();
-            }
+            } 
+
 
         }
         #endregion Constructor

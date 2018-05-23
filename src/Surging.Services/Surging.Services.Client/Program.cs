@@ -39,7 +39,6 @@ namespace Surging.Services.Client
                     builder.AddMicroService(option =>
                     {
                         option.AddClient()
-                        .AddClientIntercepted(typeof(CacheProviderInterceptor))
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         .UseConsulManager(new ConfigInfo("127.0.0.1:8500"))
                         .UseDotNettyTransport()
