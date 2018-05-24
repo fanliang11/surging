@@ -304,13 +304,13 @@ namespace Surging.Core.Consul
             {
                 _serviceCaches = _serviceCaches
                     //删除无效的缓存节点。
-                    .Where(i => !deletedChildrens.Contains(i.CacheDescriptor.Id))
+                    .Where(i => !deletedChildrens.Contains($"{_configInfo.CachePath}{i.CacheDescriptor.Id}"))
                     //连接上新的缓存。
                     .Concat(newCaches)
                     .ToArray();
             }
             //需要删除的缓存集合。
-            var deletedCaches = caches.Where(i => deletedChildrens.Contains(i.CacheDescriptor.Id)).ToArray();
+            var deletedCaches = caches.Where(i => deletedChildrens.Contains($"{_configInfo.CachePath}{i.CacheDescriptor.Id}")).ToArray();
             //触发删除事件。
             OnRemoved(deletedCaches.Select(cache => new ServiceCacheEventArgs(cache)).ToArray());
 

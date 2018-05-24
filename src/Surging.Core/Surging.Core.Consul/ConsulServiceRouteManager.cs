@@ -320,13 +320,13 @@ namespace Surging.Core.Consul
             {
                 _routes = _routes
                     //删除无效的节点路由。
-                    .Where(i => !deletedChildrens.Contains(i.ServiceDescriptor.Id))
+                    .Where(i => !deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}"))
                     //连接上新的路由。
                     .Concat(newRoutes)
                     .ToArray();
             }
             //需要删除的路由集合。
-            var deletedRoutes = routes.Where(i => deletedChildrens.Contains(i.ServiceDescriptor.Id)).ToArray();
+            var deletedRoutes = routes.Where(i => deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}")).ToArray();
             //触发删除事件。
             OnRemoved(deletedRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
 

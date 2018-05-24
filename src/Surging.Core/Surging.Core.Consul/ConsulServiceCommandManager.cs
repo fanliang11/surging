@@ -304,13 +304,13 @@ namespace Surging.Core.Consul
                 {
                     _serviceCommands = _serviceCommands
                         //删除无效的节点服务命令。
-                        .Where(i => !deletedChildrens.Contains(i.ServiceId))
+                        .Where(i => !deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}"))
                         //连接上新的服务命令。
                         .Concat(newCommands)
                         .ToArray();
                 }
                 //需要删除的服务命令集合。
-                var deletedRoutes = serviceCommands.Where(i => deletedChildrens.Contains(i.ServiceId)).ToArray();
+                var deletedRoutes = serviceCommands.Where(i => deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}")).ToArray();
                 //触发删除事件。
                 OnRemoved(deletedRoutes.Select(command => new ServiceCommandEventArgs(command)).ToArray());
 
