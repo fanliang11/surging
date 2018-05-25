@@ -360,6 +360,11 @@ namespace Surging.Core.CPlatform
                 var exceptionFilter = filter as IExceptionFilter;
                 services.Register(p => exceptionFilter).As(typeof(IExceptionFilter)).SingleInstance();
             }
+            else if(typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
+            {
+                var exceptionFilter = filter as IAuthorizationFilter;
+                services.Register(p => exceptionFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
+            }
             return builder;
         }
 

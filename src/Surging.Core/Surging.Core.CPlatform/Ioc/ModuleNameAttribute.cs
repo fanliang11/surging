@@ -9,6 +9,8 @@ namespace Surging.Core.CPlatform.Ioc
     {
         public string ModuleName { get; set; }
 
+        public string Version { get; set; }
+
         public ModuleNameAttribute()
         {
 
