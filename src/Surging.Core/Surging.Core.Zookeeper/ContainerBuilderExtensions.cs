@@ -43,6 +43,7 @@ namespace Surging.Core.Zookeeper
                     configInfo,
                   provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
+                  provider.GetRequiredService<IServiceRouteManager>(),
                     provider.GetRequiredService<IServiceEntryManager>(),
                     provider.GetRequiredService<ILogger<ZookeeperServiceCommandManager>>());
                 return result;

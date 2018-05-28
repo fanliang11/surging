@@ -62,6 +62,7 @@ namespace Surging.Core.Consul
                     configInfo,
                   provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
+                    provider.GetRequiredService <IServiceRouteManager>(),
                     provider.GetRequiredService<IClientWatchManager>(),
                     provider.GetRequiredService<IServiceEntryManager>(),
                     provider.GetRequiredService<ILogger<ConsulServiceCommandManager>>());

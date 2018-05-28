@@ -85,12 +85,12 @@ namespace Surging.Core.Consul
                     var addresses = serviceRoute.Address.Concat(
                       route.Address.Except(serviceRoute.Address)).ToList();
 
-                    foreach (var address in route.Address)
-                    {
-                        addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
-                        addresses.Add(address);
-                    }
-                    route.Address = addresses;
+                    //foreach (var address in route.Address)
+                    //{
+                    //    addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
+                    //    addresses.Add(address);
+                    //}
+                    //route.Address = addresses;
                 }
             }
             await RemoveExceptRoutesAsync(routes);
