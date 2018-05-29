@@ -148,7 +148,11 @@ namespace Surging.Core.Zookeeper
             var path = _configInfo.CommandPath;
             if (!path.EndsWith("/"))
                 path += "/";
-            _zooKeeper.deleteAsync($"{path}{e.Route.ServiceDescriptor.Id}").Wait();
+            var nodePath = $"{path}{e.Route.ServiceDescriptor.Id}";
+            if ( _zooKeeper.existsAsync(nodePath).Result != null)
+            {
+                _zooKeeper.deleteAsync(nodePath).Wait();
+            }
         }
         
 
