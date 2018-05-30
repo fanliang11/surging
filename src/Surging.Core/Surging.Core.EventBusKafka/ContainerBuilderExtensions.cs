@@ -11,11 +11,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.EventBus.Events;
 using Microsoft.Extensions.Options;
 using Surging.Core.EventBusKafka.Configurations;
+using Microsoft.Extensions.Configuration;
 
 namespace Surging.Core.EventBusKafka
 {
     public static class ContainerBuilderExtensions
     {
+
+        /// <summary>
+        /// 使用KafkaMQ进行传输。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseKafkaMQTransport(this IServiceBuilder builder, IConfigurationRoot configurationBuilder)
+        {
+
+            var vKafkaOptions = configurationBuilder.GetSection("KafkaOptions").Get<KafkaOptions>();
+            return UseKafkaMQTransport(builder, kafkaOption =>
+                         {
+                             kafkaOption = vKafkaOptions;
+                         });
+
+        }
 
         /// <summary>
         /// 使用KafkaMQ进行传输。
