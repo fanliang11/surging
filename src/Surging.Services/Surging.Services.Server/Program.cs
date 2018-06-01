@@ -44,6 +44,7 @@ namespace Surging.Services.Server
                         .UseRabbitMQTransport()
                         .AddRabbitMQAdapt()
                         .AddCache()
+                        .AddServiceEngine(typeof(SurgingServiceEngine))
                         //.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";

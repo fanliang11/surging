@@ -151,7 +151,8 @@ namespace Surging.Core.Redis.Provider.Implementation
         /// </remarks>
         public void AddAsync(string key, object value, TimeSpan timeSpan)
         {
-            this.AddTaskAsync(key, value, timeSpan);
+            var redis = _cacheClient.GetClient(_endpoint, _connectTimeout);
+            redis.Set(GetKeySuffix(key), value, timeSpan);
         }
 
         /// <summary>
@@ -261,9 +262,7 @@ namespace Surging.Core.Redis.Provider.Implementation
                 DbIndex = int.Parse(node.Db),
                 Host = node.Host,
                 Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
+                Port = int.Parse(node.Port), 
             });
             result = redis.Get<T>(GetKeySuffix(key));
             return result;
@@ -353,6 +352,8 @@ namespace Surging.Core.Redis.Provider.Implementation
 
 
         #endregion
+
+
 
         private string GetKeySuffix(string key)
         {

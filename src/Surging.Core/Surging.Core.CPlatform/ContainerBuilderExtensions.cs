@@ -6,6 +6,8 @@ using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Configurations.Watch;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Convertibles.Implementation;
+using Surging.Core.CPlatform.Engines;
+using Surging.Core.CPlatform.Engines.Implementation;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Filters.Implementation;
@@ -368,6 +370,14 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
+        public static IServiceBuilder AddServiceEngine(this IServiceBuilder builder, Type engine)
+        {
+            var services = builder.Services;
+            services.RegisterType(engine).As(typeof(IServiceEngine)).SingleInstance();
+            builder.Services.RegisterType(typeof(DefaultServiceEngineBuilder)).As(typeof(IServiceEngineBuilder)).SingleInstance();
+            return builder;
+        }
+
         /// <summary>
         /// 添加服务运行时服务。
         /// </summary>
@@ -454,12 +464,12 @@ namespace Surging.Core.CPlatform
         /// </summary>
         /// <param name="builder">ioc容器</param>
         /// <returns>返回注册模块信息</returns>
-        public static IServiceBuilder RegisterServices(this IServiceBuilder builder)
+        public static IServiceBuilder RegisterServices(this IServiceBuilder builder,params string [] virtualPaths)
         {
             try
             {
                 var services = builder.Services;
-                var referenceAssemblies = GetReferenceAssembly();
+                var referenceAssemblies = GetReferenceAssembly(virtualPaths);
                 foreach (var assembly in referenceAssemblies)
                 {
                     services.RegisterAssemblyTypes(assembly)
@@ -518,10 +528,10 @@ namespace Surging.Core.CPlatform
         /// <param name="builder">IOC容器</param>
         /// <returns>返回注册模块信息</returns>
         public static IServiceBuilder RegisterRepositories
-         (this IServiceBuilder builder)
+         (this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly();
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
 
             foreach (var assembly in referenceAssemblies)
             {
@@ -532,10 +542,10 @@ namespace Surging.Core.CPlatform
         }
 
         public static IServiceBuilder RegisterModules(
-      this IServiceBuilder builder)
+      this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly();
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
             if (builder == null) throw new ArgumentNullException("builder");
             List<AbstractModule> modules = new List<AbstractModule>();
             foreach (var moduleAssembly in referenceAssemblies)
@@ -574,19 +584,26 @@ namespace Surging.Core.CPlatform
             return namespaces.Distinct();
         }
 
-        private static List<Assembly> GetReferenceAssembly()
+        private static List<Assembly> GetReferenceAssembly(params string[] virtualPaths)
         {
-            string path = AppContext.BaseDirectory;
+            string rootPath = AppContext.BaseDirectory;
+            var existsPath = virtualPaths.Any();
             var result = _referenceAssembly;
-            if (!result.Any())
+            if (!result.Any() || existsPath)
             {
-                var assemblyFiles = GetAllAssemblyFiles(path);
-                foreach (var referencedAssemblyFile in assemblyFiles)
+                var paths = virtualPaths.Select(m => Path.Combine(rootPath, m)).ToList();
+                if (!existsPath) paths.Add(rootPath);
+                paths.ForEach(path =>
                 {
-                    var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
-                    _referenceAssembly.Add(referencedAssembly);
-                }
-                result = _referenceAssembly;
+                    var assemblyFiles = GetAllAssemblyFiles(path);
+                    foreach (var referencedAssemblyFile in assemblyFiles)
+                    {
+                        var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
+                        if (!_referenceAssembly.Contains(referencedAssembly))
+                            _referenceAssembly.Add(referencedAssembly);
+                    }
+                    result = _referenceAssembly;
+                });
             }
             return result;
         }
