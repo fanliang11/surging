@@ -109,12 +109,10 @@ namespace Surging.Core.CPlatform
             if(container.IsRegistered<IServiceEngine>())
             {
                 using (var soap = container.BeginLifetimeScope(
-  builder =>
-  {
-      container.Resolve<IServiceEngineBuilder>().Build(builder);
-  })) {
-
-                }
+                  builder =>
+                  {
+                      container.Resolve<IServiceEngineBuilder>().Build(builder);
+                  })) {}
             }
         }
     }
