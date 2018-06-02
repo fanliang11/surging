@@ -55,11 +55,11 @@ var host = new ServiceHostBuilder()
                     options.RequestCacheEnabled=true; //开启缓存（只有通过接口代理远程调用，才能启用缓存）
                     options.Injection="return null"; //注入方式
                     options.InjectionNamespaces= new string[] { "Surging.IModuleServices.Common" }); //脚本注入使用的命名空间
-                    options.BreakeErrorThresholdPercentage="50";  //错误率达到多少开启熔断保护
+                    options.BreakeErrorThresholdPercentage=50;  //错误率达到多少开启熔断保护
                     options.BreakeSleepWindowInMilliseconds=60000; //熔断多少毫秒后去尝试请求
                     options.BreakerForceClosed=false;   //是否强制关闭熔断
                     options.BreakerRequestVolumeThreshold = 20;//10秒钟内至少多少请求失败，熔断器才发挥起作用
-                    options.MaxConcurrentRequests== 100000;//支持最大并发
+                    options.MaxConcurrentRequests=100000;//支持最大并发
                     options.ShuntStrategy=AddressSelectorMode.Polling; //使用轮询负载分流策略
                     options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                 })
