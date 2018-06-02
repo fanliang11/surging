@@ -41,14 +41,11 @@ namespace Surging.ApiGateway.Controllers
             if (model == null)
             {
                 model = new Dictionary<string, object>();
-                if(!string.IsNullOrEmpty(serviceKey))  model[serviceKey.ToLower()] = new JObject();
             }
-
             foreach (string n in this.Request.Query.Keys)
             {
                 model[n] = this.Request.Query[n].ToString();
             }
-         
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
             path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();

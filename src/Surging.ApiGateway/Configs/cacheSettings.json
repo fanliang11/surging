@@ -1,7 +1,7 @@
 ﻿{ 
     "CachingSettings": [
       {
-        "Id": "gateway",
+        "Id": "ddlCache",
         "Class": "Surging.Core.Caching.RedisCache.RedisContext,Surging.Core.Caching",
         "Properties": [
           {
