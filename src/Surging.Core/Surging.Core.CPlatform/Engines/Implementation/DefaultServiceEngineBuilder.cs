@@ -50,6 +50,11 @@ namespace Surging.Core.CPlatform.Engines.Implementation
                     var dirs = Directory.GetDirectories(path);
                     Directories.AddRange(dirs.Select(dir => Path.Combine(path, new DirectoryInfo(dir).Name)));
                 }
+                else if (Directory.Exists(virtualPath))
+                {
+                    var dirs = Directory.GetDirectories(virtualPath);
+                    Directories.AddRange(dirs.Select(dir => Path.Combine(virtualPath, new DirectoryInfo(dir).Name)));
+                }
                 else
                     virPaths = null;
             }
