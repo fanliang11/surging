@@ -11,7 +11,7 @@ namespace Surging.IModuleServices.User
 {
 
     [ServiceBundle("api/{Service}")]
-    public interface IIdentityService: IServiceKey
+    public interface IManagerService : IServiceKey
     {
         [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 2500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
         Task<string> SayHello(string name);

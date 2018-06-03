@@ -37,6 +37,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             }
         }
 
+
         public void NotifyStopped()
         {
             try
