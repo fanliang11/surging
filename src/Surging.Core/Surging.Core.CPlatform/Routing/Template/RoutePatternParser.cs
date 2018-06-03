@@ -21,7 +21,7 @@ namespace Surging.Core.CPlatform.Routing.Template
                 }
                 else if (service.EndsWith(param))
                 {
-                    result.Append(service.TrimStart('I').Substring(0, service.Length - param.Length - 1));
+                    result.Append(service.Substring(1, service.Length - param.Length - 1));
                 }
                 else if (param == "Method")
                 {
