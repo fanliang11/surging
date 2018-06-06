@@ -49,7 +49,8 @@ namespace Surging.ApiGateway.Controllers
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
             path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
-            if(servicePartProvider.IsPart(path))
+            if( await GetAllowRequest(path)==false) return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+            if (servicePartProvider.IsPart(path))
             {
                 result = ServiceResult<object>.Create(true, await servicePartProvider.Merge(path, model));
                 result.StatusCode = (int)ServiceStatusCode.Success;
@@ -86,6 +87,13 @@ namespace Surging.ApiGateway.Controllers
                 }
             }
             return result;
+        }
+
+        private async Task<bool> GetAllowRequest(string path)
+        {
+            bool isSuccess = true;
+            var route = await _serviceRouteProvider.GetRouteByPath(path);
+            return !route.ServiceDescriptor.DisableNetwork();
         }
 
         private bool OnAuthorization(string path, Dictionary<string, object> model, ref ServiceResult<object> result)
