@@ -48,7 +48,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             bool reachRequestVolumeThreshold() => intervalSeconds <= 10
                 && serviceInvokeInfos.SinceFaultRemoteServiceRequests > command.BreakerRequestVolumeThreshold;
             bool reachErrorThresholdPercentage() =>
-                serviceInvokeInfos.FaultRemoteServiceRequests / (serviceInvokeInfos.RemoteServiceRequests ?? 1) * 100 > command.BreakeErrorThresholdPercentage;
+                (double)serviceInvokeInfos.FaultRemoteServiceRequests / (double)(serviceInvokeInfos.RemoteServiceRequests ?? 1) * 100 > command.BreakeErrorThresholdPercentage;
             var hashCode = GetHashCode(command,parameters);
             if (command.BreakerForceClosed)
             {
