@@ -46,7 +46,7 @@ new Surging.IModuleServices.Common.Models.UserModel
          {
             Name=""fanly"",
             Age=19
-         };", RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
+         };", RequestCacheEnabled = false, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
