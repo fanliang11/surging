@@ -85,6 +85,16 @@ namespace Surging.Core.Zookeeper
                 .UseZooKeeperCommandManager(configInfo);
         }
 
+        public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder)
+        {
+            var configInfo = new ConfigInfo(null);
+            return builder.UseZooKeeperRouteManager(configInfo)
+                .UseZooKeeperCacheManager(configInfo)
+                .UseZooKeeperServiceSubscribeManager(configInfo)
+                .UseZooKeeperCommandManager(configInfo);
+        }
+
+
         private static ConfigInfo GetConfigInfo(ConfigInfo config)
         {
             var sessionTimeout = config.SessionTimeout.TotalSeconds;
