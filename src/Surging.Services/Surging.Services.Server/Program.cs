@@ -17,6 +17,7 @@ using Surging.Core.Nlog;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
+using Surging.Core.Zookeeper.Configurations;
 using System;
 //using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
@@ -39,7 +40,7 @@ namespace Surging.Services.Server
                         .AddRelateService()
                         .AddConfigurationWatch()
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        .UseConsulManager(new ConfigInfo("127.0.0.1:8500",reloadOnChange:true))
+                        .UseConsulManager()
                         .UseDotNettyTransport()
                         .UseRabbitMQTransport()
                         .AddRabbitMQAdapt()
@@ -73,6 +74,10 @@ namespace Surging.Services.Server
                     options.MaxConcurrentRequests = 200;
                 })
                 .UseServiceCache()
+                // .Configure(build =>
+                //build.AddZookeeperFile("Configs/zookeeper.json", optional: false))
+               .Configure(build =>
+                build.AddConsulFile("Configs/consul.json", optional: false))
                 .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
                 .Configure(build =>

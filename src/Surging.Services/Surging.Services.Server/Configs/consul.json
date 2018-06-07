@@ -1,0 +1,5 @@
+﻿{
+  "ConnectionString": "127.0.0.1:8500",
+  "SessionTimeout": 50,
+  "ReloadOnChange": true
+}
