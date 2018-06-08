@@ -97,10 +97,11 @@ namespace Surging.Core.Zookeeper
 
         private static ConfigInfo GetConfigInfo(ConfigInfo config)
         {
-            var sessionTimeout = config.SessionTimeout.TotalSeconds;
-            Double.TryParse(AppConfig.Configuration["SessionTimeout"], out sessionTimeout);
+
             if (AppConfig.Configuration != null)
             {
+                var sessionTimeout = config.SessionTimeout.TotalSeconds;
+                Double.TryParse(AppConfig.Configuration["SessionTimeout"], out sessionTimeout);
                 config = new ConfigInfo(
                     AppConfig.Configuration["ConnectionString"],
                     TimeSpan.FromSeconds(sessionTimeout),
@@ -108,11 +109,10 @@ namespace Surging.Core.Zookeeper
                     AppConfig.Configuration["SubscriberPath"] ?? config.SubscriberPath,
                     AppConfig.Configuration["CommandPath"] ?? config.CommandPath,
                     AppConfig.Configuration["CachePath"] ?? config.CachePath,
-                    AppConfig.Configuration["ChRoot"]?? config.ChRoot,
+                    AppConfig.Configuration["ChRoot"] ?? config.ChRoot,
                     AppConfig.Configuration["ReloadOnChange"] != null ? bool.Parse(AppConfig.Configuration["ReloadOnChange"]) :
                     config.ReloadOnChange
                    );
-
             }
             return config;
         }
