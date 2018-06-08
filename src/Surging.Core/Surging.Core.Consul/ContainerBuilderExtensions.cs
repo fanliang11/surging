@@ -123,8 +123,7 @@ namespace Surging.Core.Consul
             {
                 var sessionTimeout = config.SessionTimeout.TotalSeconds;
                 Double.TryParse(AppConfig.Configuration["SessionTimeout"], out sessionTimeout);
-                var conn = EnvConfig.ConsulConn;
-                if (string.IsNullOrEmpty(conn)) conn = AppConfig.Configuration["ConnectionString"];
+                var conn = AppConfig.Configuration["ConnectionString"];
                 config = new ConfigInfo(
                     AppConfig.Configuration["ConnectionString"],
                     TimeSpan.FromSeconds(sessionTimeout),

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Surging.Core.CPlatform.Configurations.Remote
 {
@@ -117,6 +118,18 @@ namespace Surging.Core.CPlatform.Configurations.Remote
             var key = _currentPath;
             Check.CheckCondition(() => _data.ContainsKey(key), "key");
             _data[key] = data.ToString();
+            var param= GetParameters( data.ToString()).FirstOrDefault();
+            if(!string.IsNullOrEmpty(param))
+            {
+                 var env = EnvironmentHelper.GetEnvironmentVariable(param);
+                _data[key] = env;
+                if (string.IsNullOrEmpty(env))
+                {
+                   var arrayData= data.ToString().Split("|");
+                    _data[key] = arrayData.Length == 2 ? arrayData[1] : env;
+                }
+            }
+           
         }
 
         private void EnterContext(string context)
@@ -156,6 +169,18 @@ namespace Surging.Core.CPlatform.Configurations.Remote
             }
 
             return errorLine;
+        }
+
+        private static List<string> GetParameters(string text)
+        {
+            var matchVale = new List<string>();
+            string Reg = @"(?<=\${)[^\${}]*(?=})";
+            string key = string.Empty;
+            foreach (Match m in Regex.Matches(text, Reg))
+            {
+                matchVale.Add(m.Value);
+            }
+            return matchVale;
         }
     }
 }
