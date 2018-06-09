@@ -82,6 +82,18 @@ var host = new ServiceHostBuilder()
  ```    
 <br/>
 
+### 文件配置：
+
+```c#
+{
+  "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // ${环境变量名} |默认值,
+  "SessionTimeout": "${Register_SessionTimeout}|50",
+  "ReloadOnChange": true
+}
+
+```
+
+
 服务路由访问配置：
 <br/>
 
