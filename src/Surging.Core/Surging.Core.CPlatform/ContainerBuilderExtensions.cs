@@ -586,8 +586,10 @@ namespace Surging.Core.CPlatform
 
         private static List<Assembly> GetReferenceAssembly(params string[] virtualPaths)
         {
-            string rootPath = AppContext.BaseDirectory;
+            var rootPath = AppContext.BaseDirectory;
             var existsPath = virtualPaths.Any();
+            if (existsPath && !string.IsNullOrEmpty(AppConfig.ServerOptions.RootPath))
+                rootPath = AppConfig.ServerOptions.RootPath;
             var result = _referenceAssembly;
             if (!result.Any() || existsPath)
             {

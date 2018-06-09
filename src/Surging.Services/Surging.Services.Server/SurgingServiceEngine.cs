@@ -9,10 +9,13 @@ namespace Surging.Services.Server
     {
         public SurgingServiceEngine()
         {
+            //ModuleServiceLocationFormats = new[] {
+            //    @"Modules",
+            //     @"Modules\2.1"
+            //};
             ModuleServiceLocationFormats = new[] {
-                @"Modules",
-                 @"Modules/2.1"
-            }; 
+               ""
+            };
         }
     }
 }

@@ -39,21 +39,25 @@ namespace Surging.Core.CPlatform.Engines.Implementation
 
         private string [] GetPaths(params string [] virtualPaths)
         {
-            var Directories = new List<string>();
-            string rootPath = AppContext.BaseDirectory;
-            var virPaths = virtualPaths;
+            var Directories = new List<string>(virtualPaths.Where(p=>!string.IsNullOrEmpty(p))) ;
+            string rootPath =string.IsNullOrEmpty(AppConfig.ServerOptions.RootPath)? 
+                AppContext.BaseDirectory: AppConfig.ServerOptions.RootPath;
+            var virPaths = virtualPaths; 
             foreach (var virtualPath in virtualPaths)
             {
                 var path = Path.Combine(rootPath, virtualPath);
                 if (Directory.Exists(path))
                 {
                     var dirs = Directory.GetDirectories(path);
-                    Directories.AddRange(dirs.Select(dir => Path.Combine(path, new DirectoryInfo(dir).Name)));
+                    Directories.AddRange(dirs.Select(dir => Path.Combine(virtualPath, new DirectoryInfo(dir).Name)));
                 }
                 else
+                {
+                    Directories.Remove(virtualPath);
                     virPaths = null;
+                }
             }
-            return Directories.Any() ?Directories.ToArray(): virPaths;
+            return Directories.Any() ?Directories.Distinct().ToArray(): virPaths;
         }
     }
 }

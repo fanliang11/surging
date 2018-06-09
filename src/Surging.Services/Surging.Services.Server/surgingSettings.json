@@ -1,7 +1,8 @@
 {
-    "Ip": "127.0.0.1",
-    "WatchInterval": 30,
-    "Port": 198,
-    "Token": "true",
-    "RequestCacheEnabled": false
+  "Ip": "127.0.0.1",
+  "WatchInterval": 30,
+  "Port": 198,
+  "Token": "true",
+  "RootPath": "${RootPath}",
+  "RequestCacheEnabled": false
 }
