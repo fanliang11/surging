@@ -69,5 +69,7 @@ new Surging.IModuleServices.Common.Models.UserModel
 
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task PublishThroughEventBusAsync(IntegrationEvent evt);
+
+        Task<string> HelloWorld(string username);
     }
 }

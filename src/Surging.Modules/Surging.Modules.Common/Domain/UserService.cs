@@ -100,6 +100,11 @@ namespace Surging.Modules.Common.Domain
         {
             return Task.FromResult(requestData);
         }
+
+        public Task<string> HelloWorld(string username)
+        {
+            return Task.FromResult($"'{username}',HelloWorld");
+        }
         #endregion Implementation of IUserService
     }
 }

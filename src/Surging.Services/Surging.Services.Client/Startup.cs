@@ -106,6 +106,7 @@ namespace Surging.Services.Client
                     }
                     watch.Stop();
                     Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
+                    Console.WriteLine(await userProxy.HelloWorld("盛学飞"));
                     Console.WriteLine("Press any key to continue, q to exit the loop...");
                     var key = Console.ReadLine();
                     if (key.ToLower() == "q")
