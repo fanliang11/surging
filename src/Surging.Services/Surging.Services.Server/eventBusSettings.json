@@ -1,5 +1,5 @@
 {
-  "EventBusConnection": "localhost",
+  "EventBusConnection": "${EventBusConnection}|localhost",
   "EventBusUserName": "guest",
   "EventBusPassword": "guest",
   "VirtualHost": "/",
