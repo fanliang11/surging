@@ -1,5 +1,5 @@
 ﻿{
-  "ConnectionString": "127.0.0.1:2181",
+  "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181",
   "SessionTimeout": 50,
   "ReloadOnChange": true
 }
