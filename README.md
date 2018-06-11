@@ -93,6 +93,37 @@ var host = new ServiceHostBuilder()
 
 ```
 
+### 非容器环境文件配置
+
+```c#
+ {
+  "Ip": "${Server_IP}|127.0.0.1",
+  "WatchInterval": 30,
+  "Port": "${Server_port}",
+  "Token": "true",
+  "RootPath": "${RootPath}",
+  "RequestCacheEnabled": false
+}
+
+```
+
+
+### 容器环境文件配置
+
+```c#
+ {
+  "Ip": "${Server_IP}|0.0.0.0",//私有容器IP
+  "WatchInterval": 30,
+  "Port": "${Server_port}|98",//私有容器端口
+   "MappingIp": "${Mapping_ip}",//公开主机IP
+  "MappingPort": "${Mapping_Port}",//公开主机端口
+  "Token": "true",
+  "RootPath": "${RootPath}",
+  "RequestCacheEnabled": false
+}
+
+```
+
 
 服务路由访问配置：
 <br/>
