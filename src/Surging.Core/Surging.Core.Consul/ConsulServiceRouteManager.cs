@@ -79,10 +79,18 @@ namespace Surging.Core.Consul
             foreach (var route in routes)
             {
                 var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
+
                 if (serviceRoute != null)
                 {
-                    route.Address = serviceRoute.Address.Concat(
-                      route.Address.Except(serviceRoute.Address));
+                    var addresses = serviceRoute.Address.Concat(
+                      route.Address.Except(serviceRoute.Address)).ToList();
+
+                    foreach (var address in route.Address)
+                    {
+                        addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
+                        addresses.Add(address);
+                    }
+                    route.Address = addresses;
                 }
             }
             await RemoveExceptRoutesAsync(routes);
@@ -312,13 +320,13 @@ namespace Surging.Core.Consul
             {
                 _routes = _routes
                     //删除无效的节点路由。
-                    .Where(i => !deletedChildrens.Contains(i.ServiceDescriptor.Id))
+                    .Where(i => !deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}"))
                     //连接上新的路由。
                     .Concat(newRoutes)
                     .ToArray();
             }
             //需要删除的路由集合。
-            var deletedRoutes = routes.Where(i => deletedChildrens.Contains(i.ServiceDescriptor.Id)).ToArray();
+            var deletedRoutes = routes.Where(i => deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}")).ToArray();
             //触发删除事件。
             OnRemoved(deletedRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
 

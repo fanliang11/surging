@@ -45,13 +45,16 @@ namespace Surging.Core.Consul.Configurations
             RoutePath = routePath;
             SubscriberPath = subscriberPath;
             CommandPath = commandPath;
-            var  address= connectionString.Split(":");
-            if(address.Length>1)
+            if (!string.IsNullOrEmpty(connectionString))
             {
-                int port;
-                int.TryParse(address[1], out port);
-                Host = address[0];
-                Port = port;
+                var address = connectionString.Split(":");
+                if (address.Length > 1)
+                {
+                    int port;
+                    int.TryParse(address[1], out port);
+                    Host = address[0];
+                    Port = port;
+                }
             }
         }
 

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using org.apache.zookeeper;
+using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Support;
@@ -23,16 +25,19 @@ namespace Surging.Core.Zookeeper
         private readonly ILogger<ZookeeperServiceCommandManager> _logger;
         private ServiceCommandDescriptor[] _serviceCommands;
         private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
+        private readonly IServiceRouteManager _serviceRouteManager;
 
         public ZookeeperServiceCommandManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
-            ISerializer<string> stringSerializer, IServiceEntryManager serviceEntryManager,
+            ISerializer<string> stringSerializer, IServiceRouteManager serviceRouteManager, IServiceEntryManager serviceEntryManager,
             ILogger<ZookeeperServiceCommandManager> logger) : base(stringSerializer, serviceEntryManager)
         {
             _configInfo = configInfo;
             _serializer = serializer;
+            _serviceRouteManager = serviceRouteManager;
             _logger = logger;
             CreateZooKeeper().Wait();
             EnterServiceCommands().Wait();
+            _serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
 
@@ -123,40 +128,33 @@ namespace Surging.Core.Zookeeper
                     if (!DataEquals(nodeData, onlineData))
                         await _zooKeeper.setDataAsync(nodePath, nodeData);
                 }
+                NodeChange(command);
             }
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("服务命令添加成功。");
         }
 
-
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
             var commands = await GetServiceCommands(serviceCommands.Select(p => p.ServiceId));
             if (commands.Count() == 0 || _configInfo.ReloadOnChange)
-            {
-                await RemoveExceptRoutesAsync(serviceCommands);
+            { 
                 await SetServiceCommandsAsync(serviceCommands);
             }
         }
 
-        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
+        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
         {
-                 var path = _configInfo.CommandPath;
+            var path = _configInfo.CommandPath;
             if (!path.EndsWith("/"))
                 path += "/";
-            serviceCommands = serviceCommands.ToArray();
-
-            if (_serviceCommands != null)
+            var nodePath = $"{path}{e.Route.ServiceDescriptor.Id}";
+            if ( _zooKeeper.existsAsync(nodePath).Result != null)
             {
-                var oldCommandIds = _serviceCommands.Select(i => i.ServiceId).ToArray();
-                var newCommandIds = serviceCommands.Select(i => i.ServiceId).ToArray();
-                var deletedRCommandIds = oldCommandIds.Except(newCommandIds).ToArray();
-                foreach (var deletedRCommandId in deletedRCommandIds)
-                {
-                    await _zooKeeper.deleteAsync($"{path}{deletedRCommandId}");
-                }
+                _zooKeeper.deleteAsync(nodePath).Wait();
             }
         }
+        
 
         private async Task CreateZooKeeper()
         {
@@ -286,6 +284,23 @@ namespace Surging.Core.Zookeeper
                     return false;
             }
             return true;
+        }
+
+        public void NodeChange(ServiceCommandDescriptor newCommand)
+        {
+            //得到旧的服务命令。
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+            //触发服务命令变更事件。
+            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
         }
 
         public void NodeChange(byte[] oldData, byte[] newData)

@@ -16,12 +16,15 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
         private IContainer _applicationServices;
         private readonly IServiceProvider _hostingServiceProvider;
         private readonly List<Action<IContainer>> _mapServicesDelegates;
+        private IApplicationLifetime _applicationLifetime;
 
         public ServiceHost(ContainerBuilder builder,
             IServiceProvider hostingServiceProvider,
              List<Action<IContainer>> mapServicesDelegate)
         {
             _builder = builder;
+            _builder.RegisterType(typeof(ApplicationLifetime)).
+                As(typeof(IApplicationLifetime)).SingleInstance();
             _hostingServiceProvider = hostingServiceProvider;
             _mapServicesDelegates = mapServicesDelegate;
         }
@@ -35,6 +38,8 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
         {
             if (_applicationServices != null)
                 MapperServices(_applicationServices);
+            _applicationLifetime = _applicationServices.Resolve<IApplicationLifetime>();
+            _applicationLifetime.NotifyStarted();
             return this;
         }
 
@@ -83,6 +88,8 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
                 throw;
             }
         }
+
+
 
         private void MapperServices(IContainer mapper)
         {

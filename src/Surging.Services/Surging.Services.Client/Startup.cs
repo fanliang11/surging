@@ -78,11 +78,13 @@ namespace Surging.Services.Client
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
                 await userProxy.GetUserName(1);
+                var apiResult = await userProxy.GetApiResult();
                 await userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
                     UserId = "1",
                     Name = "fanly"
                 });
+        
                 var d = await userProxy.GetUser(new UserModel
                 {
                     UserId = 1,

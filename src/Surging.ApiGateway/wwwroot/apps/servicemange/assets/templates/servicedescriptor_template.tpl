@@ -16,6 +16,20 @@
 									否
 								{{/if}}
 										</td>
+									<td class="center">
+										 {{if Metadatas.DisableNetwork==true }}
+								是
+								{{else}}
+									否
+								{{/if}}
+										</td>
+												<td class="center">
+										 {{if Metadatas.EnableAuthorization==true }}
+								是
+								{{else}}
+									否
+								{{/if}}
+										</td>
                                         <td class="center">${Metadatas.Director}</td>
                                         <td class="center">${Metadatas.Date}</td>         
 										  <td class="center"><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">

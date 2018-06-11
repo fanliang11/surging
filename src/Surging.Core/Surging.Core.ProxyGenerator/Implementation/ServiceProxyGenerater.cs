@@ -31,7 +31,6 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
         private readonly IServiceIdGenerator _serviceIdGenerator;
         private readonly ILogger<ServiceProxyGenerater> _logger;
-
         #endregion Field
 
         #region Constructor
@@ -51,7 +50,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// </summary>
         /// <param name="interfacTypes">需要被代理的接口类型。</param>
         /// <returns>服务代理实现。</returns>
-        public IEnumerable<Type> GenerateProxys(IEnumerable<Type> interfacTypes)
+        public IEnumerable<Type> GenerateProxys(IEnumerable<Type> interfacTypes, IEnumerable<string> namespaces)
         {
 #if NET
             var assemblys = AppDomain.CurrentDomain.GetAssemblies();
@@ -65,7 +64,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             {
                 assemblys = assemblys.Append(t.Assembly);
             }
-            var trees = interfacTypes.Select(p=>GenerateProxyTree(p)).ToList();
+            var trees = interfacTypes.Select(p=>GenerateProxyTree(p,namespaces)).ToList();
             var stream = CompilationUtilitys.CompileClientProxy(trees,
                 assemblys
                     .Select(a => MetadataReference.CreateFromFile(a.Location))
@@ -91,7 +90,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// </summary>
         /// <param name="interfaceType">需要被代理的接口类型。</param>
         /// <returns>代码树。</returns>
-        public SyntaxTree GenerateProxyTree(Type interfaceType)
+        public SyntaxTree GenerateProxyTree(Type interfaceType, IEnumerable<string> namespaces)
         {
             var className = interfaceType.Name.StartsWith("I") ? interfaceType.Name.Substring(1) : interfaceType.Name;
             className += "ClientProxy";
@@ -103,7 +102,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
             members.AddRange(GenerateMethodDeclarations(interfaceType.GetMethods()));
             return CompilationUnit()
-                .WithUsings(GetUsings())
+                .WithUsings(GetUsings(namespaces))
                 .WithMembers(
                     SingletonList<MemberDeclarationSyntax>(
                         NamespaceDeclaration(
@@ -158,8 +157,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
             return left;
         }
 
-        private static SyntaxList<UsingDirectiveSyntax> GetUsings()
+        private static SyntaxList<UsingDirectiveSyntax> GetUsings(IEnumerable<string> namespaces)
         {
+            var directives = new List<UsingDirectiveSyntax>();
+           foreach(var name in namespaces)
+            {
+                directives.Add(UsingDirective(GetQualifiedNameSyntax(name)));
+            }
             return List(
                 new[]
                 {
@@ -171,7 +175,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     UsingDirective(GetQualifiedNameSyntax(typeof(CPlatformContainer).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
-                });
+                }.Concat(directives));
         }
 
         private static ConstructorDeclarationSyntax GetConstructorDeclaration(string className)

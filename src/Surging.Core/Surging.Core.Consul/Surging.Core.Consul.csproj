@@ -1,22 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <Authors>fanly</Authors>
-    <Version>0.6.1</Version>
+    <Version>0.7.0.1</Version>
     <Product>surging Micro Service Framework</Product>
     <Company />
     <Copyright>Copyright © fanly All Rights Reserved</Copyright>
-    <PackageReleaseNotes>1.Add distributed cache
-2.Fixed client Get service Entries collection
-3.Optimize memory usage
-4.Service Command Add Load balancing Shunt Strategy</PackageReleaseNotes>
+    <PackageReleaseNotes>1.Fix incorrect question of Error Threshold Percentage 
+2.Service metadata add DisableNetwork option
+3.Upgrade to core 2.1</PackageReleaseNotes>
     <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
-    <FileVersion>0.6.1.0</FileVersion>
+    <AssemblyVersion>0.7.0.1</AssemblyVersion>
+    <FileVersion>0.7.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

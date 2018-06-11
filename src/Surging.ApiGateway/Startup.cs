@@ -25,6 +25,8 @@ using ZookeeperConfigInfo =  Surging.Core.Zookeeper.Configurations.ConfigInfo;
 using System;
 using ApiGateWayConfig = Surging.Core.ApiGateWay.AppConfig;
 using Surging.Core.Caching;
+using Surging.Core.CPlatform.Cache;
+using System.Linq;
 
 namespace Surging.ApiGateway
 {
@@ -60,6 +62,7 @@ namespace Surging.ApiGateway
                 options.SerializerSettings.ContractResolver = new DefaultContractResolver();
             });
             services.AddLogging();
+            services.AddCors();
             var builder = new ContainerBuilder();
             builder.Populate(services); 
             builder.AddMicroService(option =>
@@ -74,6 +77,7 @@ namespace Surging.ApiGateway
                     option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
+                option.AddFilter(new ServiceExceptionFilter());
                 //option.UseProtoBufferCodec();
                 option.UseMessagePackCodec();
                 builder.Register(m => new CPlatformContainer(ServiceLocator.Current));
@@ -86,6 +90,10 @@ namespace Surging.ApiGateway
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole();
+            var serviceCacheProvider = ServiceLocator.Current.Resolve<ICacheNodeProvider>();
+            var addressDescriptors = serviceCacheProvider.GetServiceCaches().ToList();
+            ServiceLocator.Current.Resolve<IServiceCacheManager>().SetCachesAsync(addressDescriptors);
+            ServiceLocator.Current.Resolve<IConfigurationWatchProvider>();
 
             if (env.IsDevelopment())
             {

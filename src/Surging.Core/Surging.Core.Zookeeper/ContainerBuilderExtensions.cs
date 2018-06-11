@@ -7,6 +7,7 @@ using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.Zookeeper.Configurations;
+using System;
 
 namespace Surging.Core.Zookeeper
 {
@@ -22,7 +23,7 @@ namespace Surging.Core.Zookeeper
         {
             return builder.UseRouteManager(provider =>
              new ZooKeeperServiceRouteManager(
-                configInfo,
+                GetConfigInfo(configInfo),
               provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IServiceRouteFactory>(),
@@ -40,9 +41,10 @@ namespace Surging.Core.Zookeeper
             return builder.UseCommandManager(provider =>
             {
                 var result = new ZookeeperServiceCommandManager(
-                    configInfo,
+                    GetConfigInfo(configInfo),
                   provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
+                  provider.GetRequiredService<IServiceRouteManager>(),
                     provider.GetRequiredService<IServiceEntryManager>(),
                     provider.GetRequiredService<ILogger<ZookeeperServiceCommandManager>>());
                 return result;
@@ -54,7 +56,7 @@ namespace Surging.Core.Zookeeper
             return builder.UseSubscribeManager(provider =>
             {
                 var result = new ZooKeeperServiceSubscribeManager(
-                    configInfo,
+                    GetConfigInfo(configInfo),
                   provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
                     provider.GetRequiredService<IServiceSubscriberFactory>(),
@@ -67,7 +69,7 @@ namespace Surging.Core.Zookeeper
         {
             return builder.UseCacheManager(provider =>
              new ZookeeperServiceCacheManager(
-                configInfo,
+               GetConfigInfo(configInfo),
               provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IServiceCacheFactory>(),
@@ -81,6 +83,38 @@ namespace Surging.Core.Zookeeper
                 .UseZooKeeperCacheManager(configInfo)
                 .UseZooKeeperServiceSubscribeManager(configInfo)
                 .UseZooKeeperCommandManager(configInfo);
+        }
+
+        public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder)
+        {
+            var configInfo = new ConfigInfo(null);
+            return builder.UseZooKeeperRouteManager(configInfo)
+                .UseZooKeeperCacheManager(configInfo)
+                .UseZooKeeperServiceSubscribeManager(configInfo)
+                .UseZooKeeperCommandManager(configInfo);
+        }
+
+
+        private static ConfigInfo GetConfigInfo(ConfigInfo config)
+        {
+
+            if (AppConfig.Configuration != null)
+            {
+                var sessionTimeout = config.SessionTimeout.TotalSeconds;
+                Double.TryParse(AppConfig.Configuration["SessionTimeout"], out sessionTimeout);
+                config = new ConfigInfo(
+                    AppConfig.Configuration["ConnectionString"],
+                    TimeSpan.FromSeconds(sessionTimeout),
+                    AppConfig.Configuration["RoutePath"] ?? config.RoutePath,
+                    AppConfig.Configuration["SubscriberPath"] ?? config.SubscriberPath,
+                    AppConfig.Configuration["CommandPath"] ?? config.CommandPath,
+                    AppConfig.Configuration["CachePath"] ?? config.CachePath,
+                    AppConfig.Configuration["ChRoot"] ?? config.ChRoot,
+                    AppConfig.Configuration["ReloadOnChange"] != null ? bool.Parse(AppConfig.Configuration["ReloadOnChange"]) :
+                    config.ReloadOnChange
+                   );
+            }
+            return config;
         }
     }
 }

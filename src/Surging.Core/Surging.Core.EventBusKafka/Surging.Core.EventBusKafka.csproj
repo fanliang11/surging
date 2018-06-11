@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.6.1</Version>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>0.7.0.1</Version>
     <Authors>fanly</Authors>
     <Company>fanly</Company>
     <Product>surging Micro Service Framework</Product>
@@ -10,13 +10,12 @@
     <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
-    <PackageReleaseNotes>1.Add distributed cache
-2.Fixed client Get service Entries collection
-3.Optimize memory usage
-4.Service Command Add Load balancing Shunt Strategy</PackageReleaseNotes>
+    <PackageReleaseNotes>1.Fix incorrect question of Error Threshold Percentage 
+2.Service metadata add DisableNetwork option
+3.Upgrade to core 2.1</PackageReleaseNotes>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
-    <FileVersion>0.6.1.0</FileVersion>
+    <AssemblyVersion>0.7.0.1</AssemblyVersion>
+    <FileVersion>0.7.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

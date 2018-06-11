@@ -15,6 +15,7 @@ using System;
 using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Module;
 using System.Diagnostics;
+using Surging.Core.CPlatform.Engines;
 
 namespace Surging.Core.CPlatform
 {
@@ -24,6 +25,7 @@ namespace Surging.Core.CPlatform
         {
             return hostBuilder.MapServices(mapper =>
             {
+                BuildServiceEngine(mapper);
                 mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
                 string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
@@ -52,7 +54,7 @@ namespace Surging.Core.CPlatform
                     }
                 }
 
-                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(), serviceEntryManager, () =>
+                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),  () =>
                 {
                     var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                     new ServiceRoute
@@ -100,6 +102,18 @@ namespace Surging.Core.CPlatform
                 mapper.Resolve<IServiceSubscribeManager>().SetSubscribersAsync(addressDescriptors);
 
             });
+        }
+
+        public static void BuildServiceEngine(IContainer container)
+        {
+            if(container.IsRegistered<IServiceEngine>())
+            {
+                using (var soap = container.BeginLifetimeScope(
+                  builder =>
+                  {
+                      container.Resolve<IServiceEngineBuilder>().Build(builder);
+                  })) {}
+            }
         }
     }
 }

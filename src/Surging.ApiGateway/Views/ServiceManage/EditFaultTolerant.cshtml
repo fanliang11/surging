@@ -9,22 +9,23 @@
     <div class="form-group">
         <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>服务编号</label>
         <div class="col-sm-9 control-sm">
-            @Html.LabelFor(p => p.ServiceId,Model.ServiceId)
+            @Html.LabelFor(p => p.ServiceId, Model.ServiceId)
         </div>
     </div>
     <div class="form-group">
         <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>强制熔断</label>
         <div class="col-sm-9 control-sm">
-            @Html.RadioButtonFor(p => p.CircuitBreakerForceOpen, true,new { name= "CircuitBreakerForceOpen" }) <label>是</label>  
-            @Html.RadioButtonFor(p => p.CircuitBreakerForceOpen, false, new { name = "CircuitBreakerForceOpen" }) <label>否</label>  
+            @Html.RadioButtonFor(p => p.CircuitBreakerForceOpen, true, new { name = "CircuitBreakerForceOpen" }) <label>是</label>
+            @Html.RadioButtonFor(p => p.CircuitBreakerForceOpen, false, new { name = "CircuitBreakerForceOpen" }) <label>否</label>
         </div>
     </div>
     <div class="form-group">
         <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>容错策略</label>
         <div class="col-sm-9 control-sm">
-           @Html.DropDownListFor(p=>p.Strategy,new SelectListItem[] { 
+            @Html.DropDownListFor(p => p.Strategy, new SelectListItem[] {
               new SelectListItem{ Text="Failover",Value=StrategyType.Failover.ToString(),Selected=true},
-               new SelectListItem{ Text="Injection",Value=StrategyType.Injection.ToString()}
+               new SelectListItem{ Text="Injection",Value=StrategyType.Injection.ToString()},
+                  new SelectListItem{ Text="FallBack",Value=StrategyType.Injection.ToString()}
            })
         </div>
     </div>
@@ -73,19 +74,25 @@
         </div>
     </div>
     <div class="form-group">
-    <label class="col-sm-2 control-label no-padding-right">命名空间</label>
-    <div class="col-sm-9">
-        <input type="text" name="InjectionNamespaces"  autocomplete = "off"  placeholder = "命名空间" class = "form-control" value =" @(Model.InjectionNamespaces==null?"":string.Join(",", Model.InjectionNamespaces))" />
+        <label class="col-sm-2 control-label no-padding-right">命名空间</label>
+        <div class="col-sm-9">
+            <input type="text" name="InjectionNamespaces" autocomplete="off" placeholder="命名空间" class="form-control" value=" @(Model.InjectionNamespaces==null?"":string.Join(",", Model.InjectionNamespaces))" />
+        </div>
     </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right">回退实例名</label>
+        <div class="col-sm-9">
+            <input type="text" name="FallBackName" autocomplete="off" placeholder="命名空间" class="form-control" value=" @(Model.InjectionNamespaces==null?"":string.Join(",", Model.FallBackName))" />
+        </div>
     </div>
+
     <div class="form-group">
         <label class="col-sm-2 control-label no-padding-right">注入脚本</label>
         <div class="col-sm-9">
             @Html.TextAreaFor(p => p.Injection, new { autocomplete = "off", placeholder = "填写描述", @class = "form-control", style = "height: 120px;" })
-
         </div>
     </div>
-   
+
     @Html.HiddenFor(p => p.ServiceId)
 </div>
 

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.6.3</Version>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>0.7.0.1</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Company />
@@ -11,20 +11,20 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.6.3.0</AssemblyVersion>
-    <FileVersion>0.6.3.0</FileVersion>
-    <PackageReleaseNotes>1.Add Distributed Cache Profile Synchronization Updates 
-2.Add load balancing FairPolling Algorithm  
-3.Add configuration file to define running parameters</PackageReleaseNotes>
+    <AssemblyVersion>0.7.0.1</AssemblyVersion>
+    <FileVersion>0.7.0.1</FileVersion>
+    <PackageReleaseNotes>1.Fix incorrect question of Error Threshold Percentage 
+2.Service metadata add DisableNetwork option
+3.Upgrade to core 2.1</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.2" />
+    <PackageReference Include="Autofac" Version="4.8.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
   </ItemGroup>
 

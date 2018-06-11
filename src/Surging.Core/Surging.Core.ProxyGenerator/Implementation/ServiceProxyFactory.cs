@@ -27,20 +27,20 @@ namespace Surging.Core.ProxyGenerator.Implementation
         #region Constructor
 
         public ServiceProxyFactory(IRemoteInvokeService remoteInvokeService, ITypeConvertibleService typeConvertibleService,
-           IServiceProvider serviceProvider):this(remoteInvokeService, typeConvertibleService, serviceProvider,null)
+           IServiceProvider serviceProvider):this(remoteInvokeService, typeConvertibleService, serviceProvider,null,null)
         {
 
         }
 
         public ServiceProxyFactory(IRemoteInvokeService remoteInvokeService, ITypeConvertibleService typeConvertibleService,
-            IServiceProvider serviceProvider, IEnumerable<Type> types)
+            IServiceProvider serviceProvider, IEnumerable<Type> types, IEnumerable<string> namespaces)
         {
             _remoteInvokeService = remoteInvokeService;
             _typeConvertibleService = typeConvertibleService;
             _serviceProvider = serviceProvider;
             if (types != null)
             {
-               RegisterProxType(types.ToArray());
+               RegisterProxType(namespaces.ToArray(),types.ToArray());
             }
         }
 
@@ -94,10 +94,10 @@ namespace Surging.Core.ProxyGenerator.Implementation
             return CreateProxy<T>(null);
         }
 
-        public void RegisterProxType(params Type[] types)
+        public void RegisterProxType(string[] namespaces,params Type[] types)
         {
             var proxyGenerater = _serviceProvider.GetService<IServiceProxyGenerater>();
-            _serviceTypes = proxyGenerater.GenerateProxys(types).ToArray();
+            _serviceTypes = proxyGenerater.GenerateProxys(types, namespaces).ToArray();
             proxyGenerater.Dispose();
         }
 

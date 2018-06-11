@@ -101,9 +101,9 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(requestData);
         }
 
-        public Task<string> HelloWorld(string username)
+        public Task<ApiResult<UserModel>> GetApiResult()
         {
-            return Task.FromResult($"'{username}',HelloWorld");
+            return Task.FromResult(new ApiResult<UserModel>() { Value = new UserModel { Name = "fanly" }, StatusCode = 200 });
         }
         #endregion Implementation of IUserService
     }

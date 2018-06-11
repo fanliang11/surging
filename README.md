@@ -55,11 +55,11 @@ var host = new ServiceHostBuilder()
                     options.RequestCacheEnabled=true; //开启缓存（只有通过接口代理远程调用，才能启用缓存）
                     options.Injection="return null"; //注入方式
                     options.InjectionNamespaces= new string[] { "Surging.IModuleServices.Common" }); //脚本注入使用的命名空间
-                    options.BreakeErrorThresholdPercentage="50";  //错误率达到多少开启熔断保护
+                    options.BreakeErrorThresholdPercentage=50;  //错误率达到多少开启熔断保护
                     options.BreakeSleepWindowInMilliseconds=60000; //熔断多少毫秒后去尝试请求
                     options.BreakerForceClosed=false;   //是否强制关闭熔断
                     options.BreakerRequestVolumeThreshold = 20;//10秒钟内至少多少请求失败，熔断器才发挥起作用
-                    options.MaxConcurrentRequests== 100000;//支持最大并发
+                    options.MaxConcurrentRequests=100000;//支持最大并发
                     options.ShuntStrategy=AddressSelectorMode.Polling; //使用轮询负载分流策略
                     options.NotRelatedAssemblyFiles = "Centa.Agency.Application.DTO\\w*|StackExchange.Redis\\w*"; //排除无需依赖注册
                 })
@@ -81,6 +81,18 @@ var host = new ServiceHostBuilder()
             }
  ```    
 <br/>
+
+### 文件配置：
+
+```c#
+{
+  "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // ${环境变量名} |默认值,
+  "SessionTimeout": "${Register_SessionTimeout}|50",
+  "ReloadOnChange": true
+}
+
+```
+
 
 服务路由访问配置：
 <br/>
@@ -198,6 +210,7 @@ IDE:Visual Studio 2017 15.5,vscode
 <br/>
 框架：.NET core 2.1
 <br/>
+QQ群：615562965
 * [Demo](https://github.com/billyang/SurgingDemo)
 * [文档](http://docs.dotnet-china.org/surging/)
 * [简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)

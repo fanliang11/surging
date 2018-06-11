@@ -139,7 +139,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
                 var content = message.GetContent<RemoteInvokeResultMessage>();
                 if (!string.IsNullOrEmpty(content.ExceptionMessage))
                 {
-                    task.TrySetException(new CPlatformCommunicationException(content.ExceptionMessage));
+                    task.TrySetException(new CPlatformCommunicationException(content.ExceptionMessage,content.StatusCode));
                 }
                 else
                 {

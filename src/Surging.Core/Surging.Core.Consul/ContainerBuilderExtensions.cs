@@ -28,7 +28,7 @@ namespace Surging.Core.Consul
         {
             return builder.UseRouteManager(provider =>
              new ConsulServiceRouteManager(
-                configInfo,
+                 GetConfigInfo(configInfo),
               provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IClientWatchManager>(),
@@ -40,7 +40,7 @@ namespace Surging.Core.Consul
         {
             return builder.UseCacheManager(provider =>
              new ConsulServiceCacheManager(
-                configInfo,
+                 GetConfigInfo(configInfo),
               provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IClientWatchManager>(),
@@ -59,9 +59,10 @@ namespace Surging.Core.Consul
             return builder.UseCommandManager(provider =>
             {
                 var result = new ConsulServiceCommandManager(
-                    configInfo,
+                     GetConfigInfo(configInfo),
                   provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
+                    provider.GetRequiredService <IServiceRouteManager>(),
                     provider.GetRequiredService<IClientWatchManager>(),
                     provider.GetRequiredService<IServiceEntryManager>(),
                     provider.GetRequiredService<ILogger<ConsulServiceCommandManager>>());
@@ -74,7 +75,7 @@ namespace Surging.Core.Consul
             return builder.UseSubscribeManager(provider =>
             {
                 var result = new ConsulServiceSubscribeManager(
-                    configInfo,
+                    GetConfigInfo(configInfo),
                     provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
                     provider.GetRequiredService<IClientWatchManager>(),
@@ -94,7 +95,7 @@ namespace Surging.Core.Consul
             builder.Services.Register(provider =>
             {
                 return new ClientWatchManager(configInfo);
-            }).As<IClientWatchManager>();
+            }).As<IClientWatchManager>().SingleInstance();
             return builder;
         }
 
@@ -104,6 +105,39 @@ namespace Surging.Core.Consul
                 .UseConsulServiceSubscribeManager(configInfo)
                .UseConsulCommandManager(configInfo)
                .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
+        }
+
+        public static IServiceBuilder UseConsulManager(this IServiceBuilder builder)
+        {
+            var configInfo = new ConfigInfo(null);
+            return builder.UseConsulRouteManager(configInfo)
+                .UseConsulServiceSubscribeManager(configInfo)
+               .UseConsulCommandManager(configInfo)
+               .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
+        }
+
+
+        private static ConfigInfo GetConfigInfo(ConfigInfo config)
+        {
+            if (AppConfig.Configuration != null)
+            {
+                var sessionTimeout = config.SessionTimeout.TotalSeconds;
+                Double.TryParse(AppConfig.Configuration["SessionTimeout"], out sessionTimeout);
+                var conn = AppConfig.Configuration["ConnectionString"];
+                config = new ConfigInfo(
+                    AppConfig.Configuration["ConnectionString"],
+                    TimeSpan.FromSeconds(sessionTimeout),
+                    AppConfig.Configuration["RoutePath"] ?? config.RoutePath,
+                    AppConfig.Configuration["SubscriberPath"] ?? config.SubscriberPath,
+                    AppConfig.Configuration["CommandPath"] ?? config.CommandPath,
+                    AppConfig.Configuration["CachePath"] ?? config.CachePath,
+                    AppConfig.Configuration["ReloadOnChange"] != null ? bool.Parse(AppConfig.Configuration["ReloadOnChange"]) :
+                    config.ReloadOnChange
+                   );
+
+               
+            }
+            return config;
         }
     }
 }

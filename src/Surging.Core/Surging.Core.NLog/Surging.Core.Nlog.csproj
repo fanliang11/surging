@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <PackageReleaseNotes>1.Fix unimplemented BUG of BeginScope method of ILOG</PackageReleaseNotes>
-    <Version>0.6.5.1</Version>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <PackageReleaseNotes>1.Fix incorrect question of Error Threshold Percentage 
+2.Service metadata add DisableNetwork option
+3.Upgrade to core 2.1</PackageReleaseNotes>
+    <Version>0.7.0.1</Version>
     <Authors>fanly</Authors>
     <Company>fanly</Company>
     <Product>surging Micro Service Framework</Product>
@@ -12,8 +14,8 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.6.5.1</AssemblyVersion>
-    <FileVersion>0.6.5.1</FileVersion>
+    <AssemblyVersion>0.7.0.1</AssemblyVersion>
+    <FileVersion>0.7.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

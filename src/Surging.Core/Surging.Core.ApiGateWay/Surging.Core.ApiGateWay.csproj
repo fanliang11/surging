@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>0.4.8</Version>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>0.6.6</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Company />
@@ -11,6 +11,17 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
+    <PackageReleaseNotes>1.Fix does not support multiple interceptors
+2.Fix NLog file path configuration (Download Surging.Core.Nlog  V0.6.6)
+3.Optimize zookeeper connection(Download  Surging.Core.Zookeeper  V0.6.6)
+4. Consul,zookeeper add reloadOnChange configuration(Download  Surging.Core.Zookeeper  or 
+Surging.Core.Consul V0.6.6)
+5.Fix Service Router heartbeat registration failed(Download  Surging.Core.Zookeeper  or 
+Surging.Core.Consul V0.6.6)
+6.add Exception Filter(Download  Surging.Core.Zookeeper 0.6.6)
+7.Upgrade netty version to repair transmission of big data(Download  Surging.Core.DotNetty 0.6.6)</PackageReleaseNotes>
+    <AssemblyVersion>0.6.6.0</AssemblyVersion>
+    <FileVersion>0.6.6.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

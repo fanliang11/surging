@@ -27,7 +27,7 @@ namespace Surging.IModuleServices.Common
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task<string> GetUserName(int id);
 
-        [Service(Date = "2017-8-11", Director = "fanly", Name = "根据id查找用户是否存在")]
+        [Service(Date = "2017-8-11", Director = "fanly", DisableNetwork =true, Name = "根据id查找用户是否存在")]
         Task<bool> Exists(int id);
 
         [Authorization(AuthType = AuthorizationType.JWT)]
@@ -70,6 +70,8 @@ new Surging.IModuleServices.Common.Models.UserModel
         [Service(Date = "2017-8-11", Director = "fanly", Name = "获取用户")]
         Task PublishThroughEventBusAsync(IntegrationEvent evt);
 
-        Task<string> HelloWorld(string username);
+        [Service(Date = "2018-5-23", Director = "fanly", Name = "获取用户")]
+        [Command(Strategy = StrategyType.Injection,  ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 2500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
+        Task<ApiResult<UserModel>> GetApiResult();
     }
 }

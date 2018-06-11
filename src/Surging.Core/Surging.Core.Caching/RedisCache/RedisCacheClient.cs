@@ -59,8 +59,9 @@ namespace Surging.Core.Caching.RedisCache
                         {
                             EndPoints = { { point } },
                             ServiceName = point,
-                            Password = info.Password,
-                            ConnectTimeout = connectTimeout
+                            Password = info.Password, 
+                            ConnectTimeout = connectTimeout,
+                            AbortOnConnectFail=false
                         });
                         return redisClient.GetDatabase(info.DbIndex) as T;
                     }, info.MinSize, info.MaxSize);

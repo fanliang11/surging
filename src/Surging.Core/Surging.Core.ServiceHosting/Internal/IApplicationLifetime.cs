@@ -15,5 +15,9 @@ namespace Surging.Core.ServiceHosting.Internal
 
  
         void StopApplication();
+
+        void NotifyStopped();
+
+        void NotifyStarted();
     }
 }

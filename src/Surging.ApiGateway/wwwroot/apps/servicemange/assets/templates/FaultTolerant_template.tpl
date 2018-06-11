@@ -26,6 +26,7 @@
 							<span class="label label-danger arrowed">否</span>
 					{{/if}}
 			</td>      
+			<td class="center">${FallBackName}</td>  
 			<td class="center">${Injection}</td>     
 			<td class="center">${InjectionNamespaces}</td>   
 			<td class="center">${BreakeErrorThresholdPercentage}</td>   
