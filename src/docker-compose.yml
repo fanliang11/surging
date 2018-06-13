@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  surging.services.server:
+    image: surging.services.server
+    build:
+      context: .
+      dockerfile: Surging.Services/Surging.Services.Server/Dockerfile
+
+  surging.apigateway:
+    image: surging.apigateway
+    build:
+      context: .
+      dockerfile: Surging.ApiGateway/Dockerfile
+

@@ -14,7 +14,8 @@
  <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
  <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
  <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
- <PackageTags>MicroService surging</PackageTags>  </PropertyGroup>
+ <PackageTags>MicroService surging</PackageTags>
+ <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
