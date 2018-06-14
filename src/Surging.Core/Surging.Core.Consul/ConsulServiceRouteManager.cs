@@ -27,6 +27,7 @@ namespace Surging.Core.Consul
         private readonly ISerializer<string> _stringSerializer;
         private readonly IClientWatchManager _manager;
         private ServiceRoute[] _routes;
+        private readonly bool _enableChildrenMonitor;
 
         public ConsulServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceRouteFactory serviceRouteFactory,
@@ -221,8 +222,9 @@ namespace Surging.Core.Consul
         {
             if (_routes != null && _routes.Length > 0)
                 return;
-
-            var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.RoutePath,
+            ChildrenMonitorWatcher watcher = null;
+            if (_configInfo.EnableChildrenMonitor)
+                watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.RoutePath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                   (result) => ConvertPaths(result).Result);
             if (_consul.KV.Keys(_configInfo.RoutePath).Result.Response?.Count() > 0)
@@ -230,6 +232,7 @@ namespace Surging.Core.Consul
                 var result = await _consul.GetChildrenAsync(_configInfo.RoutePath);
                 var keys = await _consul.KV.Keys(_configInfo.RoutePath);
                 var childrens = result;
+                if(watcher !=null)
                 watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.RoutePath}{key}").ToArray());
                 _routes = await GetRoutes(keys.Response);
             }
@@ -290,6 +293,15 @@ namespace Surging.Core.Consul
                         .Where(i => i.ServiceDescriptor.Id != newRoute.ServiceDescriptor.Id)
                         .Concat(new[] { newRoute }).ToArray();
             }
+
+            if(newRoute==null)
+            //触发删除事件。
+            OnRemoved( new ServiceRouteEventArgs(oldRoute));
+
+            else if(oldRoute==null)
+            OnCreated(new ServiceRouteEventArgs(newRoute));
+
+            else
             //触发路由变更事件。
             OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
         }

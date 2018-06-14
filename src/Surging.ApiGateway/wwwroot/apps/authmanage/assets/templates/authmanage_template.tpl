@@ -17,13 +17,7 @@
 								{{/if}}
 							</td>
 							 <td class="center">${Address.Token}</td>
-							    <td class="center">
-							      {{if Address.DisableAuth ==true }}
-								<span class="label label-danger arrowed">是</span>
-								{{else}}
-										<span class="label label-success arrowed-in arrowed-in-right">否</span>
-								{{/if}}
-							</td>
+							  
                             <td class="center"><div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
                                                    <a href="javascript:void(0);" class="red editServiceToken"><i class="icon-trash bigger-120"></i>编辑令牌</a>
                              </div></td>

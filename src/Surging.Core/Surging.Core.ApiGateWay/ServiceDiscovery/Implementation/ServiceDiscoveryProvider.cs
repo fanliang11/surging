@@ -49,7 +49,6 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
                     if (addressModel.ToString() == address.ToString())
                     {
                         addressModel.Token = address.Token;
-                        addressModel.DisableAuth = address.DisableAuth;
                     }
                     addresses.Add(addressModel);
                 });

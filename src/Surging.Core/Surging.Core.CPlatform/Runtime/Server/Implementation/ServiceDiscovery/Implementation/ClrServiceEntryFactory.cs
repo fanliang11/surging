@@ -71,7 +71,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 descriptorAttribute.Apply(serviceDescriptor);
             }
             var authorization = attributes.Where(p => p is AuthorizationFilterAttribute).FirstOrDefault();
-            serviceDescriptor.EnableAuthorization(authorization != null);
+            if(authorization != null)
+            serviceDescriptor.EnableAuthorization(true);
             if (authorization != null)
             { 
                 serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)

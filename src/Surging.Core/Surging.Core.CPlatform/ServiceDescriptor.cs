@@ -77,7 +77,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务描述符。</returns>
         public static bool EnableAuthorization(this ServiceDescriptor descriptor)
         {
-            return descriptor.GetMetadata("EnableAuthorization", true);
+            return descriptor.GetMetadata("EnableAuthorization", false);
         }
 
         /// <summary>

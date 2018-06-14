@@ -59,8 +59,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                 _addressModel.TryGetValue(descriptor.Value, out AddressModel address);
                 if (address == null)
                 {
-                    var addressType = Type.GetType(descriptor.Type);
-                    address = (AddressModel)_serializer.Deserialize(descriptor.Value, addressType);
+                    address = (AddressModel)_serializer.Deserialize(descriptor.Value, typeof(IpAddressModel));
                     _addressModel.TryAdd(descriptor.Value, address);
                 }
                 yield return address;

@@ -63,7 +63,9 @@ namespace Surging.Core.CPlatform
                     var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
                     new ServiceRoute
                     {
-                        Address = new[] { new IpAddressModel { Ip = mappingIp, Port = mappingPort, ProcessorTime = Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds, Token = serviceToken } },
+                        Address = new[] { new IpAddressModel { Ip = mappingIp, Port = mappingPort,
+                            ProcessorTime = Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds),2, MidpointRounding.AwayFromZero),
+                            Token = serviceToken } },
                         ServiceDescriptor = i.Descriptor
                     }).ToList();
                     mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors);

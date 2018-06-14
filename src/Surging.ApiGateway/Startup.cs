@@ -72,9 +72,9 @@ namespace Surging.ApiGateway
                 option.AddClientIntercepted(typeof(CacheProviderInterceptor));
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                if(registerConfig.Provider== RegisterProvider.Consul)
-                option.UseConsulManager(new ConfigInfo(registerConfig.Address));
+                option.UseConsulManager(new ConfigInfo(registerConfig.Address,enableChildrenMonitor:true));
                else if(registerConfig.Provider == RegisterProvider.Zookeeper)
-                    option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address));
+                    option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address, enableChildrenMonitor: true));
                 option.UseDotNettyTransport();
                 option.AddApiGateWay();
                 option.AddFilter(new ServiceExceptionFilter());

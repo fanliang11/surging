@@ -18,8 +18,8 @@ namespace Surging.Core.Consul.Configurations
              string subscriberPath = "services/serviceSubscribers/",
             string commandPath = "services/serviceCommands/",
             string cachePath="services/serviceCaches/",
-            bool reloadOnChange=false) :
-            this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath,commandPath, cachePath, reloadOnChange)
+            bool reloadOnChange=false, bool enableChildrenMonitor = false) :
+            this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath,commandPath, cachePath, reloadOnChange, enableChildrenMonitor)
         {
         }
 
@@ -37,7 +37,7 @@ namespace Surging.Core.Consul.Configurations
              string subscriberPath = "services/serviceSubscribers/",
             string commandPath = "services/serviceCommands/",
             string cachePath= "services/serviceCaches/",
-            bool reloadOnChange=false)
+            bool reloadOnChange=false, bool enableChildrenMonitor = false)
         {
             CachePath = cachePath;
             ReloadOnChange = reloadOnChange;
@@ -45,6 +45,7 @@ namespace Surging.Core.Consul.Configurations
             RoutePath = routePath;
             SubscriberPath = subscriberPath;
             CommandPath = commandPath;
+            EnableChildrenMonitor = enableChildrenMonitor;
             if (!string.IsNullOrEmpty(connectionString))
             {
                 var address = connectionString.Split(":");
@@ -76,6 +77,8 @@ namespace Surging.Core.Consul.Configurations
         /// </summary>
         public int WatchInterval { get; set; } = 60;
 
+
+        public bool EnableChildrenMonitor { get; set; }
         /// <summary>
         /// 命令配置路径
         /// </summary>

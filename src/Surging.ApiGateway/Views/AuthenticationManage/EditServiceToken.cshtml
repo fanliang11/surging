@@ -16,16 +16,7 @@
         <div class="col-sm-9">
             @Html.TextBoxFor(p => ((IpAddressModel)p.Address).Token, new {autocomplete = "off", placeholder = "令牌", @class = "form-control" })
         </div>
-    </div>
-    <div class="form-group">
-        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>禁用验证</label>
-        <div class="col-sm-9 control-sm">
-            @Html.DropDownListFor(p => ((IpAddressModel)p.Address).DisableAuth, new SelectListItem[] {
-              new SelectListItem{ Text="开启",Value="false",Selected=true},
-               new SelectListItem{ Text="禁用",Value="true"}
-           })
-        </div>
-    </div>
+    </div> 
 
     @Html.HiddenFor(p => ((IpAddressModel)p.Address).Ip)
     @Html.HiddenFor(p => ((IpAddressModel)p.Address).Port)
