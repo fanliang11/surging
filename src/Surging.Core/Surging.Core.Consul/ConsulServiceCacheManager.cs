@@ -176,18 +176,15 @@ namespace Surging.Core.Consul
         private async Task EnterCaches()
         {
             if (_serviceCaches != null && _serviceCaches.Length > 0)
-                return;
-            ChildrenMonitorWatcher watcher=null;
-            if (_configInfo.EnableChildrenMonitor)
-              watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CachePath,
+                return; 
+             var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CachePath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                   (result) => ConvertPaths(result).Result);
             if (_consul.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.CachePath);
                 var keys = await _consul.KV.Keys(_configInfo.CachePath);
-                var childrens = result;
-                if(watcher!=null)
+                var childrens = result; 
                 watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
                 _serviceCaches = await GetCaches(keys.Response);
             }

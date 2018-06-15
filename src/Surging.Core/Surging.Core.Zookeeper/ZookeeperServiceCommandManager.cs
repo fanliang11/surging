@@ -254,16 +254,14 @@ namespace Surging.Core.Zookeeper
             if (_serviceCommands != null)
                 return;
             _connectionWait.WaitOne();
-            ChildrenMonitorWatcher watcher = null;
-            if (_configInfo.EnableChildrenMonitor)
-                 watcher = new ChildrenMonitorWatcher(_zooKeeper, _configInfo.CommandPath,
+            var watcher = new ChildrenMonitorWatcher(_zooKeeper, _configInfo.CommandPath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
             if (await _zooKeeper.existsAsync(_configInfo.CommandPath, watcher) != null)
             {
                 var result = await _zooKeeper.getChildrenAsync(_configInfo.CommandPath, watcher);
                 var childrens = result.Children.ToArray();
-                if (watcher != null)
-                    watcher.SetCurrentData(childrens);
+
+                watcher.SetCurrentData(childrens);
                 _serviceCommands = await GetServiceCommands(childrens);
             }
             else
@@ -301,16 +299,9 @@ namespace Surging.Core.Zookeeper
                         .Where(i => i.ServiceId != newCommand.ServiceId)
                         .Concat(new[] { newCommand }).ToArray();
             }
-
-            if (newCommand == null)
-                //触发删除事件。
-                OnRemoved(new ServiceCommandEventArgs(oldCommand));
-
-            else if (oldCommand == null)
-                OnCreated(new ServiceCommandEventArgs(newCommand));
-            else
+            
                 //触发服务命令变更事件。
-                OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
         }
 
         public void NodeChange(byte[] oldData, byte[] newData)

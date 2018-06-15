@@ -290,16 +290,13 @@ namespace Surging.Core.Zookeeper
             if (_routes != null)
                 return;
             _connectionWait.WaitOne();
-            ChildrenMonitorWatcher watcher = null;
-            if (_configInfo.EnableChildrenMonitor)
-                watcher = new ChildrenMonitorWatcher(_zooKeeper, _configInfo.RoutePath,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
+            var watcher = new ChildrenMonitorWatcher(_zooKeeper, _configInfo.RoutePath,
+             async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
             if (await _zooKeeper.existsAsync(_configInfo.RoutePath, watcher) != null)
             {
                 var result = await _zooKeeper.getChildrenAsync(_configInfo.RoutePath, watcher);
                 var childrens = result.Children.ToArray();
-                if (watcher != null)
-                    watcher.SetCurrentData(childrens);
+                watcher.SetCurrentData(childrens);
                 _routes = await GetRoutes(childrens);
             }
             else
@@ -342,16 +339,8 @@ namespace Surging.Core.Zookeeper
                         .Concat(new[] { newRoute }).ToArray();
             }
 
-            if (newRoute == null)
-                //触发删除事件。
-                OnRemoved(new ServiceRouteEventArgs(oldRoute));
-
-            else if (oldRoute == null)
-                OnCreated(new ServiceRouteEventArgs(newRoute));
-
-            else
-                //触发路由变更事件。
-                OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
+            //触发路由变更事件。
+            OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
         }
 
         public async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)

@@ -272,16 +272,13 @@ namespace Surging.Core.Zookeeper
                 return;
             _connectionWait.WaitOne();
             var path = _configInfo.CachePath;
-            ChildrenMonitorWatcher watcher = null;
-            if (_configInfo.EnableChildrenMonitor)
-                 watcher = new ChildrenMonitorWatcher(_zooKeeper, path,
+            var watcher = new ChildrenMonitorWatcher(_zooKeeper, path,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
             if (await _zooKeeper.existsAsync(path, watcher) != null)
             {
                 var result = await _zooKeeper.getChildrenAsync(path, watcher);
                 var childrens = result.Children.ToArray();
-                if (watcher != null)
-                    watcher.SetCurrentData(childrens);
+                watcher.SetCurrentData(childrens);
                 _serviceCaches = await GetCaches(childrens);
             }
             else
@@ -368,17 +365,9 @@ namespace Surging.Core.Zookeeper
                         .Where(i => i.CacheDescriptor.Id != newCache.CacheDescriptor.Id)
                         .Concat(new[] { newCache }).ToArray();
             }
-
-            if (newCache == null)
-                //触发删除事件。
-                OnRemoved(new ServiceCacheEventArgs(oldCache));
-
-            else if (oldCache == null)
-                OnCreated(new ServiceCacheEventArgs(newCache));
-
-            else
-                //触发缓存变更事件。
-                OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+            
+            //触发缓存变更事件。
+             OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
         }
 
         private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)

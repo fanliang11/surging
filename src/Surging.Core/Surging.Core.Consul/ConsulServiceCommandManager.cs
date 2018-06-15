@@ -228,18 +228,15 @@ namespace Surging.Core.Consul
         private async Task EnterServiceCommands()
         {
             if (_serviceCommands != null)
-                return;
-            ChildrenMonitorWatcher watcher = null;
-            if (_configInfo.EnableChildrenMonitor)
-                watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CommandPath,
+                return;  
+               var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CommandPath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                        (result) => ConvertPaths(result));
             if (_consul.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.CommandPath);
                 var keys = await _consul.KV.Keys(_configInfo.CommandPath);
-                var childrens = result;
-                if(watcher !=null)
+                var childrens = result; 
                 watcher.SetCurrentData(ConvertPaths(childrens).Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
                 _serviceCommands = await GetServiceCommands(keys.Response);
             }
