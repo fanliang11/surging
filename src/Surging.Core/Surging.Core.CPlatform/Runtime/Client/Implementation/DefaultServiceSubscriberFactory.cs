@@ -40,8 +40,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
 
             foreach (var descriptor in descriptors)
             {
-                var addressType = Type.GetType(descriptor.Type);
-                yield return (AddressModel)_serializer.Deserialize(descriptor.Value, addressType);
+                yield return (AddressModel)_serializer.Deserialize(descriptor.Value, typeof(IpAddressModel));
             }
         }
     }
