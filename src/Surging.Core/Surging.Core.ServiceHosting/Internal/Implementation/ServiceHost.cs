@@ -37,9 +37,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
 
         public IDisposable Run()
         {
-            
             RunAsync().GetAwaiter().GetResult();
-             
             return this;
         }
 
@@ -55,7 +53,6 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
                 cancellationToken.ThrowIfCancellationRequested();
                 _applicationLifetime?.NotifyStarted();
             }
-           
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -64,20 +61,11 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             using (var cts = new CancellationTokenSource(2000))
             using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
             {
-                var token = linkedCts.Token;
-                // Trigger IApplicationLifetime.ApplicationStopping
-                _applicationLifetime?.StopApplication();
-
-                IList<Exception> exceptions = new List<Exception>();
-               
-
+                var token = linkedCts.Token; 
+                _applicationLifetime?.StopApplication(); 
                 token.ThrowIfCancellationRequested();
-                await _hostLifetime.StopAsync(token);
-
-                // Fire IApplicationLifetime.Stopped
+                await _hostLifetime.StopAsync(token); 
                 _applicationLifetime?.NotifyStopped();
-
-                
             }
         }
 
