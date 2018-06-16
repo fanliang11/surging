@@ -27,6 +27,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
            
             var services = BuildCommonServices();
             var config = Configure();
+            services.AddLogging();
             services.AddSingleton(typeof(IConfigurationBuilder), config);
             var hostingServices = RegisterServices();
             var applicationServices = services.Clone();
