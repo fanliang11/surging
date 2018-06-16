@@ -5,6 +5,6 @@
   "MappingIp": "${Mapping_ip}",
   "MappingPort": "${Mapping_Port}",
   "Token": "true",
-  "RootPath": "${RootPath}|d:\\",
+  "RootPath": "${RootPath}|d:\\mcrosurging",
   "RequestCacheEnabled": false
 }

@@ -16,6 +16,7 @@ using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Module;
 using System.Diagnostics;
 using Surging.Core.CPlatform.Engines;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.CPlatform
 {
@@ -112,13 +113,11 @@ namespace Surging.Core.CPlatform
 
         public static void BuildServiceEngine(IContainer container)
         {
-            if(container.IsRegistered<IServiceEngine>())
+            if (container.IsRegistered<IServiceEngine>())
             {
-                using (var soap = container.BeginLifetimeScope(
-                  builder =>
-                  {
-                      container.Resolve<IServiceEngineBuilder>().Build(builder);
-                  })) {}
+                var builder = new ContainerBuilder();
+                container.Resolve<IServiceEngineBuilder>().Build(builder);
+                builder.Update(container);
             }
         }
     }
