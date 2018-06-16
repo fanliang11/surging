@@ -126,30 +126,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
                 throw;
             }
         }
-
-        private  async Task WaitForTokenShutdownAsync( CancellationToken token)
-        {
-            
-
-            token.Register(state =>
-            {
-                ((IApplicationLifetime)state).StopApplication();
-            },
-            _applicationLifetime);
-
-            var waitForStop = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _applicationLifetime.ApplicationStopping.Register(obj =>
-            {
-                var tcs = (TaskCompletionSource<object>)obj;
-                tcs.TrySetResult(null);
-            }, waitForStop);
-
-            await waitForStop.Task;
-
-            // WebHost will use its default ShutdownTimeout if none is specified.
-            await this.StopAsync();
-        }
-
+        
         private void MapperServices(IContainer mapper)
         {
             foreach (var mapServices in _mapServicesDelegates)
