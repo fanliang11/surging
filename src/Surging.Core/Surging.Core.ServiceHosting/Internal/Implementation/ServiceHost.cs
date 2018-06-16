@@ -14,18 +14,19 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
         private readonly ContainerBuilder _builder;
         private IStartup _startup;
         private IContainer _applicationServices;
+        private readonly IHostLifetime _hostLifetime;
         private readonly IServiceProvider _hostingServiceProvider;
         private readonly List<Action<IContainer>> _mapServicesDelegates;
         private IApplicationLifetime _applicationLifetime;
 
         public ServiceHost(ContainerBuilder builder,
             IServiceProvider hostingServiceProvider,
+            IHostLifetime hostLifetime,
              List<Action<IContainer>> mapServicesDelegate)
         {
             _builder = builder;
-            _builder.RegisterType(typeof(ApplicationLifetime)).
-                As(typeof(IApplicationLifetime)).SingleInstance();
             _hostingServiceProvider = hostingServiceProvider;
+            _hostLifetime = hostLifetime;
             _mapServicesDelegates = mapServicesDelegate;
         }
 
@@ -36,11 +37,48 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
 
         public IDisposable Run()
         {
+            
+            RunAsync().GetAwaiter().GetResult();
+             
+            return this;
+        }
+
+        public async Task RunAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
             if (_applicationServices != null)
                 MapperServices(_applicationServices);
-            _applicationLifetime = _applicationServices.Resolve<IApplicationLifetime>();
-            _applicationLifetime.NotifyStarted();
-            return this;
+
+            if (_hostLifetime != null)
+            {
+                _applicationLifetime = _hostingServiceProvider.GetService<IApplicationLifetime>();
+                await _hostLifetime.WaitForStartAsync(cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                _applicationLifetime?.NotifyStarted();
+            }
+           
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken = default(CancellationToken))
+        { 
+
+            using (var cts = new CancellationTokenSource(2000))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken))
+            {
+                var token = linkedCts.Token;
+                // Trigger IApplicationLifetime.ApplicationStopping
+                _applicationLifetime?.StopApplication();
+
+                IList<Exception> exceptions = new List<Exception>();
+               
+
+                token.ThrowIfCancellationRequested();
+                await _hostLifetime.StopAsync(token);
+
+                // Fire IApplicationLifetime.Stopped
+                _applicationLifetime?.NotifyStopped();
+
+                
+            }
         }
 
         public IContainer Initialize()
@@ -89,7 +127,28 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             }
         }
 
+        private  async Task WaitForTokenShutdownAsync( CancellationToken token)
+        {
+            
 
+            token.Register(state =>
+            {
+                ((IApplicationLifetime)state).StopApplication();
+            },
+            _applicationLifetime);
+
+            var waitForStop = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _applicationLifetime.ApplicationStopping.Register(obj =>
+            {
+                var tcs = (TaskCompletionSource<object>)obj;
+                tcs.TrySetResult(null);
+            }, waitForStop);
+
+            await waitForStop.Task;
+
+            // WebHost will use its default ShutdownTimeout if none is specified.
+            await this.StopAsync();
+        }
 
         private void MapperServices(IContainer mapper)
         {

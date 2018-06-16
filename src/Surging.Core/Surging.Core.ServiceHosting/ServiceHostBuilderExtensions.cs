@@ -40,5 +40,14 @@ namespace Surging.Core.ServiceHosting
         {
             return hostBuilder.UseStartup(typeof(TStartup));
         }
+
+        public static IServiceHostBuilder UseConsoleLifetime(this IServiceHostBuilder hostBuilder)
+        {
+            return hostBuilder.ConfigureServices((collection) =>
+            {
+                collection.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
+                collection.AddSingleton<IHostLifetime, ConsoleLifetime>();
+                });
+        }
     }
 }
