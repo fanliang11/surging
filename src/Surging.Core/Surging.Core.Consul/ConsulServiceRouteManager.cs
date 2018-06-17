@@ -27,6 +27,7 @@ namespace Surging.Core.Consul
         private readonly ISerializer<string> _stringSerializer;
         private readonly IClientWatchManager _manager;
         private ServiceRoute[] _routes;
+        private readonly bool _enableChildrenMonitor;
 
         public ConsulServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceRouteFactory serviceRouteFactory,
@@ -221,10 +222,9 @@ namespace Surging.Core.Consul
         {
             if (_routes != null && _routes.Length > 0)
                 return;
-
             var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.RoutePath,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
-                  (result) => ConvertPaths(result).Result);
+             async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
+               (result) => ConvertPaths(result).Result);
             if (_consul.KV.Keys(_configInfo.RoutePath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.RoutePath);
@@ -290,6 +290,7 @@ namespace Surging.Core.Consul
                         .Where(i => i.ServiceDescriptor.Id != newRoute.ServiceDescriptor.Id)
                         .Concat(new[] { newRoute }).ToArray();
             }
+            
             //触发路由变更事件。
             OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
         }

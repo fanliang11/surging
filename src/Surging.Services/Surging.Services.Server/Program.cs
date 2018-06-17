@@ -60,7 +60,7 @@ namespace Surging.Services.Server
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-                .SubscribeAt() 
+              .SubscribeAt() 
                // .UseLog4net(LogLevel.Error, "Configs/log4net.config")
                 .UseNLog(LogLevel.Error, "Configs/NLog.config")
                 //.UseServer("127.0.0.1", 98)
@@ -74,8 +74,9 @@ namespace Surging.Services.Server
                     options.MaxConcurrentRequests = 200;
                 })
                 .UseServiceCache()
-                // .Configure(build =>
-                //build.AddZookeeperFile("Configs/zookeeper.json", optional: false))
+               // .UseConsoleLifetime()
+               // .Configure(build =>
+               //build.AddZookeeperFile("Configs/zookeeper.json", optional: false))
                .Configure(build =>
                 build.AddConsulFile("Configs/consul.json", optional: false))
                 .Configure(build =>

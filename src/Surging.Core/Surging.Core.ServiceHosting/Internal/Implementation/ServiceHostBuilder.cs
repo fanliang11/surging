@@ -24,14 +24,17 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
 
         public IServiceHost Build()
         {
+           
             var services = BuildCommonServices();
             var config = Configure();
+            services.AddLogging();
             services.AddSingleton(typeof(IConfigurationBuilder), config);
             var hostingServices = RegisterServices();
             var applicationServices = services.Clone();
             var hostingServiceProvider = services.BuildServiceProvider();
             hostingServices.Populate(services);
-            var host = new ServiceHost(hostingServices,hostingServiceProvider, _mapServicesDelegates);
+            var hostLifetime = hostingServiceProvider.GetService<IHostLifetime>();
+            var host = new ServiceHost(hostingServices,hostingServiceProvider, hostLifetime,_mapServicesDelegates);
             var container= host.Initialize();
             return host;
         }

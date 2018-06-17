@@ -20,6 +20,7 @@ namespace Surging.Core.Log4net
         {
             return hostBuilder.MapServices(mapper =>
             {
+
                 mapper.Resolve<ILoggerFactory>().AddConsole(minLevel);
                 mapper.Resolve<ILoggerFactory>().AddProvider(new Log4NetProvider(log4NetConfigFile));
             });

@@ -272,7 +272,6 @@ namespace Surging.Core.Zookeeper
                 return;
             _connectionWait.WaitOne();
             var path = _configInfo.CachePath;
-
             var watcher = new ChildrenMonitorWatcher(_zooKeeper, path,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
             if (await _zooKeeper.existsAsync(path, watcher) != null)
@@ -366,8 +365,9 @@ namespace Surging.Core.Zookeeper
                         .Where(i => i.CacheDescriptor.Id != newCache.CacheDescriptor.Id)
                         .Concat(new[] { newCache }).ToArray();
             }
+            
             //触发缓存变更事件。
-            OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+             OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
         }
 
         private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)

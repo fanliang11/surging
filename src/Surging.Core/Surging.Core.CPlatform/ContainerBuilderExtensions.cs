@@ -576,10 +576,10 @@ namespace Surging.Core.CPlatform
         public static IEnumerable<string> GetDataContractName(this IServiceBuilder builder)
         {
             var namespaces = new List<string>();
-            var referenceAssemblies = GetReferenceAssembly();
+            var referenceAssemblies = builder.GetInterfaceService();
             referenceAssemblies.ForEach(p =>
             {
-                namespaces.AddRange( p.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() !=null).Select(n=>n.Namespace));
+                namespaces.AddRange( p.Assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() !=null).Select(n=>n.Namespace));
             });
             return namespaces.Distinct();
         }

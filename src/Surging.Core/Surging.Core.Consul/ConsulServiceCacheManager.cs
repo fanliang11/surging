@@ -24,7 +24,7 @@ namespace Surging.Core.Consul
         private readonly IClientWatchManager _manager;
         private ServiceCache[] _serviceCaches;
         private readonly IServiceCacheFactory _serviceCacheFactory;
-        private readonly ISerializer<string> _stringSerializer;
+        private readonly ISerializer<string> _stringSerializer; 
 
         public ConsulServiceCacheManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
         ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceCacheFactory serviceCacheFactory,
@@ -35,12 +35,12 @@ namespace Surging.Core.Consul
             _stringSerializer = stringSerializer;
             _serviceCacheFactory = serviceCacheFactory;
             _logger = logger;
-            _manager = manager;
+            _manager = manager; 
             _consul = new ConsulClient(config =>
             {
                 config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
             }, null, h => { h.UseProxy = false; h.Proxy = null; });
-           EnterCaches().Wait();
+            EnterCaches().Wait();
         }
 
         public override async Task ClearAsync()
@@ -127,7 +127,6 @@ namespace Surging.Core.Consul
                 if (cache != null)
                     caches.Add(cache);
             }
-
             return caches.ToArray();
         }
 
@@ -177,16 +176,15 @@ namespace Surging.Core.Consul
         private async Task EnterCaches()
         {
             if (_serviceCaches != null && _serviceCaches.Length > 0)
-                return;
-
-            var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CachePath,
+                return; 
+             var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CachePath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                   (result) => ConvertPaths(result).Result);
             if (_consul.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.CachePath);
                 var keys = await _consul.KV.Keys(_configInfo.CachePath);
-                var childrens = result;
+                var childrens = result; 
                 watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
                 _serviceCaches = await GetCaches(keys.Response);
             }
@@ -274,6 +272,15 @@ namespace Surging.Core.Consul
                         .Where(i => i.CacheDescriptor.Id != newCache.CacheDescriptor.Id)
                         .Concat(new[] { newCache }).ToArray();
             }
+
+            if (newCache == null)
+                //触发删除事件。
+                OnRemoved(new ServiceCacheEventArgs(oldCache));
+
+            else if (oldCache == null)
+                OnCreated(new ServiceCacheEventArgs(newCache));
+
+            else 
             //触发缓存变更事件。
             OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
         }

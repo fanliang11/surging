@@ -132,7 +132,9 @@ namespace Surging.Core.Consul
                     AppConfig.Configuration["CommandPath"] ?? config.CommandPath,
                     AppConfig.Configuration["CachePath"] ?? config.CachePath,
                     AppConfig.Configuration["ReloadOnChange"] != null ? bool.Parse(AppConfig.Configuration["ReloadOnChange"]) :
-                    config.ReloadOnChange
+                    config.ReloadOnChange,
+                    AppConfig.Configuration["EnableChildrenMonitor"] != null ? bool.Parse(AppConfig.Configuration["EnableChildrenMonitor"]) :
+                    config.EnableChildrenMonitor
                    );
 
                

@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
-using Surging.Core.Caching.Configurations.Remote;
+﻿using Microsoft.Extensions.Configuration; 
+using Surging.Core.CPlatform.Configurations.Remote;
 using System;
 using System.Collections;
 using System.Collections.Generic;

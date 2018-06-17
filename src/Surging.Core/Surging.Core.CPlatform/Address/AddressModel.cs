@@ -19,12 +19,9 @@ namespace Surging.Core.CPlatform.Address
         /// </summary>
         public string Token { get; set; }
 
-        /// <summary>
-        /// 是否禁用令牌验证
-        /// </summary>
-        public bool DisableAuth { get; set; }
+        
 
-        public double ProcessorTime { get; set; }
+        public decimal ProcessorTime { get; set; }
         /// <summary>
         /// 重写后的标识。
         /// </summary>

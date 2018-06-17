@@ -32,7 +32,7 @@ namespace Surging.Core.Consul
 
         public ConsulServiceCommandManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
         ISerializer<string> stringSerializer, IServiceRouteManager serviceRouteManager, IClientWatchManager manager, IServiceEntryManager serviceEntryManager,
-            ILogger<ConsulServiceCommandManager> logger) : base(stringSerializer, serviceEntryManager)
+            ILogger<ConsulServiceCommandManager> logger, bool enableChildrenMonitor = false) : base(stringSerializer, serviceEntryManager)
         {
             _configInfo = configInfo;
             _serializer = serializer;
@@ -45,7 +45,7 @@ namespace Surging.Core.Consul
                 config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
 
             }, null, h => { h.UseProxy = false; h.Proxy = null; });
-            EnterServiceCommands().Wait();
+             EnterServiceCommands().Wait();
             _serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
@@ -95,6 +95,14 @@ namespace Surging.Core.Consul
                         .Where(i => i.ServiceId != newCommand.ServiceId)
                         .Concat(new[] { newCommand }).ToArray();
             }
+
+            if (newCommand == null)
+                //触发删除事件。
+                OnRemoved(new ServiceCommandEventArgs(oldCommand));
+
+            else if (oldCommand == null)
+                OnCreated(new ServiceCommandEventArgs(newCommand));
+            else
             //触发服务命令变更事件。
             OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
         }
@@ -220,16 +228,15 @@ namespace Surging.Core.Consul
         private async Task EnterServiceCommands()
         {
             if (_serviceCommands != null)
-                return;
-
-            var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CommandPath,
+                return;  
+               var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CommandPath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                        (result) => ConvertPaths(result));
             if (_consul.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.CommandPath);
                 var keys = await _consul.KV.Keys(_configInfo.CommandPath);
-                var childrens = result;
+                var childrens = result; 
                 watcher.SetCurrentData(ConvertPaths(childrens).Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
                 _serviceCommands = await GetServiceCommands(keys.Response);
             }

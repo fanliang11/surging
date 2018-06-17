@@ -20,14 +20,14 @@ namespace Surging.Core.Zookeeper.Configurations
             string commandPath = "/services/serviceCommands",
             string cachePath = "/services/serviceCaches",
             string chRoot = null,
-            bool reloadOnChange = false) : this(connectionString,
+            bool reloadOnChange = false, bool enableChildrenMonitor = false) : this(connectionString,
                 TimeSpan.FromSeconds(20),
                 routePath,
                 subscriberPath, 
                 commandPath,
                 cachePath, 
                 chRoot,
-                reloadOnChange)
+                reloadOnChange, enableChildrenMonitor)
         {
         }
 
@@ -46,7 +46,7 @@ namespace Surging.Core.Zookeeper.Configurations
             string commandPath = "/services/serviceCommands",
             string cachePath = "/services/serviceCaches",
             string chRoot = null,
-            bool reloadOnChange = false)
+            bool reloadOnChange = false, bool enableChildrenMonitor = false)
         {
             CachePath = cachePath;
             ReloadOnChange = reloadOnChange;
@@ -56,7 +56,10 @@ namespace Surging.Core.Zookeeper.Configurations
             ConnectionString = connectionString;
             RoutePath = routePath;
             SessionTimeout = sessionTimeout;
+            EnableChildrenMonitor = enableChildrenMonitor;
         }
+
+        public bool EnableChildrenMonitor { get; set; }
 
         public bool ReloadOnChange { get; set; }
 

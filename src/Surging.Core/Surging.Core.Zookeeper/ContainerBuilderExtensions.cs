@@ -111,7 +111,9 @@ namespace Surging.Core.Zookeeper
                     AppConfig.Configuration["CachePath"] ?? config.CachePath,
                     AppConfig.Configuration["ChRoot"] ?? config.ChRoot,
                     AppConfig.Configuration["ReloadOnChange"] != null ? bool.Parse(AppConfig.Configuration["ReloadOnChange"]) :
-                    config.ReloadOnChange
+                    config.ReloadOnChange,
+                    AppConfig.Configuration["EnableChildrenMonitor"] != null ? bool.Parse(AppConfig.Configuration["EnableChildrenMonitor"]) :
+                    config.EnableChildrenMonitor
                    );
             }
             return config;

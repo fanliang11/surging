@@ -90,8 +90,7 @@ namespace Surging.ApiGateway.Controllers
         }
 
         private async Task<bool> GetAllowRequest(string path)
-        {
-            bool isSuccess = true;
+        { 
             var route = await _serviceRouteProvider.GetRouteByPath(path);
             return !route.ServiceDescriptor.DisableNetwork();
         }
@@ -119,25 +118,22 @@ namespace Surging.ApiGateway.Controllers
         {
             bool isSuccess = true; 
             var author = HttpContext.Request.Headers["Authorization"];
-            if (author.Count>0)
+            if (author.Count > 0)
             {
-                if (route.Address.Any(p => p.DisableAuth == false))
+                isSuccess = _authorizationServerProvider.ValidateClientAuthentication(author).Result;
+                if (!isSuccess)
                 {
-                    isSuccess = _authorizationServerProvider.ValidateClientAuthentication(author).Result;
-                    if (!isSuccess)
+                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                }
+                else
+                {
+                    var keyValue = model.FirstOrDefault();
+                    if (!(keyValue.Value is IConvertible) || !typeof(IConvertible).GetTypeInfo().IsAssignableFrom(keyValue.Value.GetType()))
                     {
-                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
-                    }
-                    else
-                    {
-                        var keyValue = model.FirstOrDefault();
-                        if (!(keyValue.Value is IConvertible) || !typeof(IConvertible).GetTypeInfo().IsAssignableFrom(keyValue.Value.GetType()))
-                        {
-                            dynamic instance = keyValue.Value;
-                            instance.Payload = _authorizationServerProvider.GetPayloadString(author);
-                            model.Remove(keyValue.Key);
-                            model.Add(keyValue.Key, instance);
-                        }
+                        dynamic instance = keyValue.Value;
+                        instance.Payload = _authorizationServerProvider.GetPayloadString(author);
+                        model.Remove(keyValue.Key);
+                        model.Add(keyValue.Key, instance);
                     }
                 }
             }
@@ -155,8 +151,7 @@ namespace Surging.ApiGateway.Controllers
             bool isSuccess = true;
             DateTime time;
             var author = HttpContext.Request.Headers["Authorization"];
-            if (route.Address.Any(p => p.DisableAuth == false))
-            {
+            
                 if (!string.IsNullOrEmpty(path) && model.ContainsKey("timeStamp") && author.Count>0)
                 {
                     if (DateTime.TryParse(model["timeStamp"].ToString(), out time))
@@ -186,8 +181,7 @@ namespace Surging.ApiGateway.Controllers
                 {
                     result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
                     isSuccess = false;
-                }
-            }
+                } 
             return isSuccess;
         }
 

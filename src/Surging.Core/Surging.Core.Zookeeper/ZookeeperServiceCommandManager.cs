@@ -36,7 +36,7 @@ namespace Surging.Core.Zookeeper
             _serviceRouteManager = serviceRouteManager;
             _logger = logger;
             CreateZooKeeper().Wait();
-            EnterServiceCommands().Wait();
+             EnterServiceCommands().Wait();
             _serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
@@ -254,13 +254,13 @@ namespace Surging.Core.Zookeeper
             if (_serviceCommands != null)
                 return;
             _connectionWait.WaitOne();
-
             var watcher = new ChildrenMonitorWatcher(_zooKeeper, _configInfo.CommandPath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
             if (await _zooKeeper.existsAsync(_configInfo.CommandPath, watcher) != null)
             {
                 var result = await _zooKeeper.getChildrenAsync(_configInfo.CommandPath, watcher);
                 var childrens = result.Children.ToArray();
+
                 watcher.SetCurrentData(childrens);
                 _serviceCommands = await GetServiceCommands(childrens);
             }
@@ -299,7 +299,8 @@ namespace Surging.Core.Zookeeper
                         .Where(i => i.ServiceId != newCommand.ServiceId)
                         .Concat(new[] { newCommand }).ToArray();
             }
-            //触发服务命令变更事件。
+            
+                //触发服务命令变更事件。
             OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
         }
 

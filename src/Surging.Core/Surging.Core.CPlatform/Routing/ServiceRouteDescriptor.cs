@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Address;
+﻿using Newtonsoft.Json;
+using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Serialization;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Surging.Core.CPlatform.Routing
         /// <summary>
         /// 地址类型。
         /// </summary>
+        [JsonIgnore]
         public string Type { get; set; }
 
         /// <summary>
@@ -20,21 +22,7 @@ namespace Surging.Core.CPlatform.Routing
         /// </summary>
         public string Value { get; set; }
 
-        /// <summary>
-        /// 创建一个描述符。
-        /// </summary>
-        /// <typeparam name="T">地址模型类型。</typeparam>
-        /// <param name="address">地址模型实例。</param>
-        /// <param name="serializer">序列化器。</param>
-        /// <returns>服务地址描述符。</returns>
-        public static ServiceAddressDescriptor CreateDescriptor<T>(T address, ISerializer<string> serializer) where T : AddressModel, new()
-        {
-            return new ServiceAddressDescriptor
-            {
-                Type = typeof(T).FullName,
-                Value = serializer.Serialize(address)
-            };
-        }
+        
     }
 
     /// <summary>

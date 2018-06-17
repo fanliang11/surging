@@ -103,7 +103,6 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             {
                 AddressDescriptors = route.Address?.Select(address => new ServiceAddressDescriptor
                 {
-                    Type = address.GetType().FullName,
                     Value = _serializer.Serialize(address)
                 }) ?? Enumerable.Empty<ServiceAddressDescriptor>(),
                 ServiceDescriptor = route.ServiceDescriptor
