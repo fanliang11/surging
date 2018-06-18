@@ -29,6 +29,7 @@ namespace Surging.Core.Consul.Configurations
         {
             Check.NotNull(builder, "builder");
             Check.CheckCondition(() => string.IsNullOrEmpty(path), "path");
+            path = EnvironmentHelper.GetEnvironmentVariable(path);
             if (provider == null && Path.IsPathRooted(path))
             {
                 provider = new PhysicalFileProvider(Path.GetDirectoryName(path));

@@ -74,17 +74,10 @@ namespace Surging.Services.Server
                     options.MaxConcurrentRequests = 200;
                 })
                 .UseServiceCache()
-               // .UseConsoleLifetime()
-               // .Configure(build =>
-               //build.AddZookeeperFile("Configs/zookeeper.json", optional: false))
-               .Configure(build =>
-                build.AddConsulFile("Configs/consul.json", optional: false))
                 .Configure(build =>
-                build.AddEventBusFile("eventBusSettings.json", optional: false))
-                .Configure(build =>
-                build.AddCacheFile("cacheSettings.json", optional: false,reloadOnChange:true))
+                build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false,reloadOnChange:true))
                   .Configure(build =>
-                build.AddCPlatformFile("surgingSettings.json", optional: false, reloadOnChange: true))
+                build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseProxy()
                 .UseStartup<Startup>()
                 .Build();

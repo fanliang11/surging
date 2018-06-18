@@ -29,6 +29,7 @@ namespace Surging.Core.CPlatform.Configurations
         {
             Check.NotNull(builder, "builder");
             Check.CheckCondition(() => string.IsNullOrEmpty(path), "path");
+            path = EnvironmentHelper.GetEnvironmentVariable(path);
             if (provider == null && Path.IsPathRooted(path))
             {
                 provider = new PhysicalFileProvider(Path.GetDirectoryName(path));
@@ -44,6 +45,9 @@ namespace Surging.Core.CPlatform.Configurations
             builder.Add(source);
             AppConfig.Configuration = builder.Build();
            AppConfig.ServerOptions = AppConfig.Configuration.Get<SurgingServerOptions>();
+            var section = AppConfig.Configuration.GetSection("Surging");
+            if (section.Exists())
+                AppConfig.ServerOptions = AppConfig.Configuration.GetSection("Surging").Get<SurgingServerOptions>();
             return builder;
         }
     }

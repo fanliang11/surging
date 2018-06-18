@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Cache;
@@ -97,22 +98,27 @@ namespace Surging.Core.Zookeeper
 
         private static ConfigInfo GetConfigInfo(ConfigInfo config)
         {
-
+            ZookeeperOption option = null;
+            var section = CPlatform.AppConfig.GetSection("Consul");
+            if (section.Exists())
+                option = section.Get<ZookeeperOption>();
+            else if (AppConfig.Configuration != null)
+                option = AppConfig.Configuration.Get<ZookeeperOption>();
             if (AppConfig.Configuration != null)
             {
                 var sessionTimeout = config.SessionTimeout.TotalSeconds;
-                Double.TryParse(AppConfig.Configuration["SessionTimeout"], out sessionTimeout);
+                Double.TryParse(option.SessionTimeout, out sessionTimeout);
                 config = new ConfigInfo(
-                    AppConfig.Configuration["ConnectionString"],
+                    option.ConnectionString,
                     TimeSpan.FromSeconds(sessionTimeout),
-                    AppConfig.Configuration["RoutePath"] ?? config.RoutePath,
-                    AppConfig.Configuration["SubscriberPath"] ?? config.SubscriberPath,
-                    AppConfig.Configuration["CommandPath"] ?? config.CommandPath,
-                    AppConfig.Configuration["CachePath"] ?? config.CachePath,
-                    AppConfig.Configuration["ChRoot"] ?? config.ChRoot,
-                    AppConfig.Configuration["ReloadOnChange"] != null ? bool.Parse(AppConfig.Configuration["ReloadOnChange"]) :
+                    option.RoutePath ?? config.RoutePath,
+                    option.SubscriberPath ?? config.SubscriberPath,
+                    option.CommandPath ?? config.CommandPath,
+                    option.CachePath ?? config.CachePath,
+                    option.ChRoot ?? config.ChRoot,
+                    option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
                     config.ReloadOnChange,
-                    AppConfig.Configuration["EnableChildrenMonitor"] != null ? bool.Parse(AppConfig.Configuration["EnableChildrenMonitor"]) :
+                   option.EnableChildrenMonitor!= null ? bool.Parse(AppConfig.Configuration["EnableChildrenMonitor"]) :
                     config.EnableChildrenMonitor
                    );
             }
