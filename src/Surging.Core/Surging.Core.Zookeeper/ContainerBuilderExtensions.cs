@@ -104,7 +104,7 @@ namespace Surging.Core.Zookeeper
                 option = section.Get<ZookeeperOption>();
             else if (AppConfig.Configuration != null)
                 option = AppConfig.Configuration.Get<ZookeeperOption>();
-            if (AppConfig.Configuration != null)
+            if (option != null)
             {
                 var sessionTimeout = config.SessionTimeout.TotalSeconds;
                 Double.TryParse(option.SessionTimeout, out sessionTimeout);
@@ -118,7 +118,7 @@ namespace Surging.Core.Zookeeper
                     option.ChRoot ?? config.ChRoot,
                     option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
                     config.ReloadOnChange,
-                   option.EnableChildrenMonitor!= null ? bool.Parse(AppConfig.Configuration["EnableChildrenMonitor"]) :
+                   option.EnableChildrenMonitor!= null ? bool.Parse(option.EnableChildrenMonitor):
                     config.EnableChildrenMonitor
                    );
             }
