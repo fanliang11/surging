@@ -99,7 +99,7 @@ namespace Surging.Core.Zookeeper
         private static ConfigInfo GetConfigInfo(ConfigInfo config)
         {
             ZookeeperOption option = null;
-            var section = CPlatform.AppConfig.GetSection("Consul");
+            var section = CPlatform.AppConfig.GetSection("Zookeeper");
             if (section.Exists())
                 option = section.Get<ZookeeperOption>();
             else if (AppConfig.Configuration != null)
