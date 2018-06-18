@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.ServiceHosting.Internal;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace Surging.Core.Nlog
             return hostBuilder.MapServices(mapper =>
             {
                 mapper.Resolve<ILoggerFactory>().AddConsole((c, l) => (int)l >= 3);
+                nlogConfigFile = EnvironmentHelper.GetEnvironmentVariable(nlogConfigFile);
                 NLog.LogManager.LoadConfiguration(nlogConfigFile);
                 mapper.Resolve<ILoggerFactory>().AddProvider(new NLogProvider());
             });
@@ -24,6 +26,7 @@ namespace Surging.Core.Nlog
             return hostBuilder.MapServices(mapper =>
             {
                 mapper.Resolve<ILoggerFactory>().AddConsole(minLevel);
+                nlogConfigFile =EnvironmentHelper.GetEnvironmentVariable(nlogConfigFile);
                 NLog.LogManager.LoadConfiguration(nlogConfigFile);
                 mapper.Resolve<ILoggerFactory>().AddProvider(new NLogProvider());
             });
@@ -34,6 +37,7 @@ namespace Surging.Core.Nlog
             return hostBuilder.MapServices(mapper =>
             {
                 mapper.Resolve<ILoggerFactory>().AddConsole(filter);
+                nlogConfigFile = EnvironmentHelper.GetEnvironmentVariable(nlogConfigFile);
                 NLog.LogManager.LoadConfiguration(nlogConfigFile);
                 mapper.Resolve<ILoggerFactory>().AddProvider(new NLogProvider());
             });

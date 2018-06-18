@@ -61,14 +61,13 @@ namespace Surging.Services.Server
                     });
                 })
               .SubscribeAt() 
-               // .UseLog4net(LogLevel.Error, "Configs/log4net.config")
-                .UseNLog(LogLevel.Error, "Configs/NLog.config")
+               //.UseLog4net(LogLevel.Error, "Configs/log4net.config")
+                .UseNLog(LogLevel.Error, "${LogPath}|Configs/NLog.config")
                 //.UseServer("127.0.0.1", 98)
                 //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
                 //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
                 .UseServer(options =>
-                {
-                    // options.IpEndpoint = new IPEndPoint(IPAddress.Any, 98);  
+                { 
                     options.Token = "True";
                     options.ExecutionTimeoutInMilliseconds = 30000;
                     options.MaxConcurrentRequests = 200;

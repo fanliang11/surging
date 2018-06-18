@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.ServiceHosting.Internal;
 using System;
 
@@ -12,6 +13,7 @@ namespace Surging.Core.Log4net
             return hostBuilder.MapServices(mapper =>
             {
                 mapper.Resolve<ILoggerFactory>().AddConsole((c, l) => (int)l >= 3);
+                log4NetConfigFile = EnvironmentHelper.GetEnvironmentVariable(log4NetConfigFile);
                 mapper.Resolve<ILoggerFactory>().AddProvider(new Log4NetProvider(log4NetConfigFile));
             });
         }
@@ -20,8 +22,8 @@ namespace Surging.Core.Log4net
         {
             return hostBuilder.MapServices(mapper =>
             {
-
                 mapper.Resolve<ILoggerFactory>().AddConsole(minLevel);
+                log4NetConfigFile = EnvironmentHelper.GetEnvironmentVariable(log4NetConfigFile);
                 mapper.Resolve<ILoggerFactory>().AddProvider(new Log4NetProvider(log4NetConfigFile));
             });
         }
@@ -31,6 +33,7 @@ namespace Surging.Core.Log4net
             return hostBuilder.MapServices(mapper =>
             {
                 mapper.Resolve<ILoggerFactory>().AddConsole(filter);
+                log4NetConfigFile = EnvironmentHelper.GetEnvironmentVariable(log4NetConfigFile);
                 mapper.Resolve<ILoggerFactory>().AddProvider(new Log4NetProvider(log4NetConfigFile));
             });
         }
