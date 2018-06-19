@@ -27,5 +27,21 @@
     "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181",
     "SessionTimeout": 50,
     "ReloadOnChange": true
+  },
+  "Logging": {
+    "Debug": {
+      "LogLevel": {
+        "Default": "Information"
+      }
+    },
+    "Console": {
+      "IncludeScopes": true,
+      "LogLevel": {
+        "Default": "${LogLevel}|Debug"
+      }
+    },
+    "LogLevel": {
+      "Default": "${LogLevel}|Debug"
+    }
   }
 }

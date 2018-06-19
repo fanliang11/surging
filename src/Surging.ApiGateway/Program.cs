@@ -2,6 +2,7 @@
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Logging;
 using Surging.Core.ApiGateWay;
 using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
@@ -14,6 +15,7 @@ using Surging.Core.ServiceHosting;
 using Surging.Core.System.Intercept;
 using System;
 using System.IO;
+
 
 namespace Surging.ApiGateway
 {
@@ -34,6 +36,9 @@ namespace Surging.ApiGateway
                         new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
+                .ConfigureLogging((context, logger) => {
+                    logger.AddConfiguration(context.Configuration.GetSection("Logging"));
+                })
                 .UseIISIntegration()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()

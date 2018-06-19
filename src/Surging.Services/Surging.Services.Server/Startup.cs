@@ -37,7 +37,7 @@ namespace Surging.Services.Server
         /// <param name="services"></param>
         private void ConfigureLogging(IServiceCollection services)
         {
-            services.AddLogging();
+           // services.AddLogging();
         }
 
         private static void ConfigureEventBus(IConfigurationBuilder build)
