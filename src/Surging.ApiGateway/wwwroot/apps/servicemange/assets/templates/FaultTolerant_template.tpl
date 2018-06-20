@@ -1,6 +1,6 @@
 ﻿{{each Entity}}
 	<tr>
-            <td class="center">
+           <td class="center">
 					{{if ($index+1)%2==1 }}
                     <span class="badge badge-grey ">${$index+1}</span>
                     {{else}}
