@@ -36,9 +36,6 @@ namespace Surging.ApiGateway
                         new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .ConfigureLogging((context, logger) => {
-                    logger.AddConfiguration(context.Configuration.GetSection("Logging"));
-                })
                 .UseIISIntegration()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
