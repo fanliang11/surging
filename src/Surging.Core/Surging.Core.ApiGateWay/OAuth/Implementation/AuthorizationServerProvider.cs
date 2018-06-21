@@ -40,8 +40,7 @@ namespace Surging.Core.ApiGateWay.OAuth
                 var base64Payload = ConverBase64String(JsonConvert.SerializeObject(payload));
                 var encodedString = $"{ConverBase64String(jwtHeader)}.{base64Payload}";
                 var route = await _serviceRouteProvider.GetRouteByPath(AppConfig.AuthorizationRoutePath);
-                var addressModel = route.Address.FirstOrDefault();
-                var signature = HMACSHA256(encodedString, addressModel.Token);
+                var signature = HMACSHA256(encodedString, route.ServiceDescriptor.Token);
                 result= $"{encodedString}.{signature}";
                 _cacheProvider.Add(base64Payload, result,AppConfig.AccessTokenExpireTimeSpan);
             }

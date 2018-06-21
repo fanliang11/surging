@@ -8,9 +8,9 @@ namespace Surging.Core.EventBusRabbitMQ.Configurations
     {
         public string EventBusConnection {get; set; }= "";
 
-        public string RabbitUserName { get; set; } = "guest";
+        public string EventBusUserName { get; set; } = "guest";
 
-        public string RabbitPassword { get; set; } = "guest";
+        public string EventBusPassword { get; set; } = "guest";
 
         public string VirtualHost { get; set; } = "/";
 

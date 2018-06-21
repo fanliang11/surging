@@ -40,8 +40,8 @@ namespace Surging.Core.EventBusRabbitMQ
                 var factory = new ConnectionFactory()
                 {
                     HostName = option.EventBusConnection,
-                    UserName = option.RabbitUserName,
-                    Password = option.RabbitPassword,
+                    UserName = option.EventBusUserName,
+                    Password = option.EventBusPassword,
                     VirtualHost= option.VirtualHost,
                     Port = int.Parse(option.Port),
                 };

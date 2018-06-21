@@ -37,11 +37,11 @@
     "Console": {
       "IncludeScopes": true,
       "LogLevel": {
-        "Default": "${LogLevel}|Debug"
+        "Default": "${LogLevel}|ERROR"
       }
     },
     "LogLevel": {
-      "Default": "${LogLevel}|Debug"
+      "Default": "${LogLevel}|ERROR"
     }
   }
 }

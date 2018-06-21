@@ -11,9 +11,7 @@ namespace Surging.Core.CPlatform.Messages
         /// 服务Id。
         /// </summary>
         public string ServiceId { get; set; }
-
-        public string Token { get; set; }
-
+         
         public bool DecodeJOject { get; set; }
 
         public string ServiceKey { get; set; }

@@ -71,16 +71,7 @@ namespace Surging.Core.CPlatform.Routing
             return (await serviceRouteManager.GetRoutesAsync()).SingleOrDefault(i => i.ServiceDescriptor.Id == serviceId);
         }
 
-        /// <summary>
-        /// 获取令牌
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<string> GetTokensAsync(this IServiceRouteManager serviceRouteManager, string ipAddress)
-        {
-            var routes = await serviceRouteManager.GetAddressAsync(ipAddress);
-            var address = routes.FirstOrDefault();
-            return address?.Token;
-        }
+       
 
         /// <summary>
         /// 获取地址
