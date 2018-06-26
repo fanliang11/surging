@@ -119,6 +119,7 @@ var host = new ServiceHostBuilder()
   "WatchInterval": 30,
   "Port": "${Server_port}",
   "Token": "true",
+   "Protocol": "${Protocol}|Tcp", //支持Http,Tcp协议
   "RootPath": "${RootPath}",
   "RequestCacheEnabled": false
 }
@@ -135,6 +136,7 @@ var host = new ServiceHostBuilder()
   "Port": "${Server_port}|98",//私有容器端口
    "MappingIp": "${Mapping_ip}",//公开主机IP
   "MappingPort": "${Mapping_Port}",//公开主机端口
+   "Protocol": "${Protocol}|Tcp", //支持Http,Tcp协议
   "Token": "true",
   "RootPath": "${RootPath}",
   "RequestCacheEnabled": false
