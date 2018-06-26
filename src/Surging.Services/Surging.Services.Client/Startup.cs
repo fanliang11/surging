@@ -84,14 +84,14 @@ namespace Surging.Services.Client
                     UserId = "1",
                     Name = "fanly"
                 });
-        
-                var d = await userProxy.GetUser(new UserModel
+
+                await userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
-                    UserId = 1,
+                    UserId = "1",
                     Name = "fanly"
-                });
+                }); 
               
-              var r=  await userProxy.GetDictionary();
+                 var r=  await userProxy.GetDictionary();
                 var serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
 
                 do

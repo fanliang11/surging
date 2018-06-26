@@ -103,7 +103,7 @@ namespace Surging.Core.Protocol.Http
 
         #region Implementation of IDisposable
 
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        
         public void Dispose()
         {
             Task.Run(async () =>
@@ -165,7 +165,6 @@ namespace Surging.Core.Protocol.Http
 
             public IDictionary<string, object> GetParameters(string msg, out string routePath)
             {
-
                 var urlSpan = msg.AsSpan();
                 var len = urlSpan.IndexOf("?");
                 routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
