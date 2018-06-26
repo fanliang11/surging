@@ -338,6 +338,7 @@ namespace Surging.Core.Caching.RedisCache
         {
             obj = null;
             var o = this.Get<object>(key);
+            obj = o;
             return o != null;
         }
 
