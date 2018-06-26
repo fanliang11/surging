@@ -59,6 +59,7 @@ namespace Surging.Core.CPlatform
                 var mappingPort = AppConfig.ServerOptions.MappingPort;
                 if (mappingPort == 0)
                     mappingPort = _port;
+                if(AppConfig.ServerOptions.Protocol==CommunicationProtocol.Tcp)
                 new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),  () =>
                 {
                     var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>

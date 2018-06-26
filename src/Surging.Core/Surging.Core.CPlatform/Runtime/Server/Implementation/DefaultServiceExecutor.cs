@@ -51,8 +51,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         public async Task ExecuteAsync(IMessageSender sender, TransportMessage message)
         {
 
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("接收到消息。");
+            if (_logger.IsEnabled(LogLevel.Trace))
+                _logger.LogTrace("服务提供者接收到消息。");
 
             if (!message.IsInvokeMessage())
                 return;
@@ -128,7 +128,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 }
                 else
                 {
-                    task.Wait();
+                    await task;
                     var taskType = task.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)
                         resultMessage.Result = taskType.GetProperty("Result").GetValue(task);

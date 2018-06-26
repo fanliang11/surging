@@ -6,7 +6,7 @@ namespace Surging.Core.CPlatform
 {
    public enum CommunicationProtocol
     {
-        Rpc,
-        RestFul
+        Tcp,
+        Http
     }
 }

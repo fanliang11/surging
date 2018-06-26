@@ -18,6 +18,7 @@ namespace Surging.Core.CPlatform.Configurations
 
         public IPEndPoint IpEndpoint { get; set; }
 
+        public CommunicationProtocol Protocol { get; set; }
         public string RootPath { get; set; }
 
         public int Port { get; set; }

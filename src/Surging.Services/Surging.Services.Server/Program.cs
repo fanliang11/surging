@@ -14,6 +14,7 @@ using Surging.Core.EventBusKafka.Configurations;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.Log4net;
 using Surging.Core.Nlog;
+using Surging.Core.Protocol.Http;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
@@ -45,6 +46,7 @@ namespace Surging.Services.Server
                         .UseRabbitMQTransport()
                         .AddRabbitMQAdapt()
                         .AddCache()
+                        .AddHttpProtocol()
                         .AddServiceEngine(typeof(SurgingServiceEngine))
                         //.UseKafkaMQTransport(kafkaOption =>
                         //{
@@ -72,12 +74,12 @@ namespace Surging.Services.Server
                     options.ExecutionTimeoutInMilliseconds = 30000;
                     options.MaxConcurrentRequests = 200;
                 })
+                .UseProxy()
                 .UseServiceCache()
                 .Configure(build =>
                 build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false, reloadOnChange: true))
                   .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
-                .UseProxy()
                 .UseStartup<Startup>()
                 .Build();
 

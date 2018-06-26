@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Implementation
 {
@@ -82,6 +81,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
+                 RoutePath= serviceDescriptor.RoutePath,
+                 MethodName=method.Name,
+                  Type= method.DeclaringType,
                 Attributes = attributes,
                 Func = (key, parameters) =>
              {

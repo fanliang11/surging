@@ -17,7 +17,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
         private readonly IHostLifetime _hostLifetime;
         private readonly IServiceProvider _hostingServiceProvider;
         private readonly List<Action<IContainer>> _mapServicesDelegates;
-        private IApplicationLifetime _applicationLifetime;
+        private IApplicationLifetime _applicationLifetime; 
 
         public ServiceHost(ContainerBuilder builder,
             IServiceProvider hostingServiceProvider,
@@ -27,7 +27,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             _builder = builder;
             _hostingServiceProvider = hostingServiceProvider;
             _hostLifetime = hostLifetime;
-            _mapServicesDelegates = mapServicesDelegate;
+            _mapServicesDelegates = mapServicesDelegate; 
         }
 
         public void Dispose()
@@ -44,7 +44,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
         public async Task RunAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             if (_applicationServices != null)
-                MapperServices(_applicationServices);
+                MapperServices(_applicationServices); 
 
             if (_hostLifetime != null)
             {
@@ -121,6 +121,6 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             {
                 mapServices(mapper);
             }
-        }
+        }   
     }
 }

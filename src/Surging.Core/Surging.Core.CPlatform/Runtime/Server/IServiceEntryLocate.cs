@@ -13,5 +13,7 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// <param name="invokeMessage">远程调用消息。</param>
         /// <returns>服务条目。</returns>
         ServiceEntry Locate(RemoteInvokeMessage invokeMessage);
+
+        ServiceEntry Locate(HttpMessage httpMessage);
     }
 }

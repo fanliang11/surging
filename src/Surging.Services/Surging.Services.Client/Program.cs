@@ -72,9 +72,8 @@ namespace Surging.Services.Client
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
                 /// test Parallel
-                //var connectionCount = 250000;
-                //var requestThread = new Thread(() => StartRequest(connectionCount)) { IsBackground = true };
-                //requestThread.Start();
+                //var connectionCount = 200000;
+                //StartRequest(connectionCount);
                 //Console.ReadLine();
             }
         }

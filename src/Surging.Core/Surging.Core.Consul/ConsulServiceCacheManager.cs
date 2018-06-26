@@ -298,10 +298,10 @@ namespace Surging.Core.Consul
             //计算出新增的节点。
             var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
 
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的服务缓存节点：{string.Join(",", deletedChildrens)}");
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
-                _logger.LogInformation($"需要被删除的服务缓存节点：{string.Join(",", deletedChildrens)}");
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
-                _logger.LogInformation($"需要被添加的服务缓存节点：{string.Join(",", createdChildrens)}");
+                _logger.LogDebug($"需要被添加的服务缓存节点：{string.Join(",", createdChildrens)}");
 
             //获取新增的缓存信息。
             var newCaches = (await GetCaches(createdChildrens)).ToArray();

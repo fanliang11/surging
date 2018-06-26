@@ -59,6 +59,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Nlog", "Surgin
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{117D3803-8937-4A28-B296-46BBF945FD7B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Protocol.Http", "Surging.Core\Surging.Core.Protocol.Http\Surging.Core.Protocol.Http.csproj", "{8B85B3BF-E35A-4CAD-AC82-B8AB1DE72737}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,6 +163,10 @@ Global
 		{117D3803-8937-4A28-B296-46BBF945FD7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{117D3803-8937-4A28-B296-46BBF945FD7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{117D3803-8937-4A28-B296-46BBF945FD7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B85B3BF-E35A-4CAD-AC82-B8AB1DE72737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B85B3BF-E35A-4CAD-AC82-B8AB1DE72737}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B85B3BF-E35A-4CAD-AC82-B8AB1DE72737}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B85B3BF-E35A-4CAD-AC82-B8AB1DE72737}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +194,7 @@ Global
 		{AF8FAB5B-029E-438F-AD57-B46681046D3F} = {CAC2EAD5-5AC7-44A2-9705-F2D8D3012A6F}
 		{78F64412-7403-449C-8AC4-C5C0A58E4A0E} = {F65BE227-30B5-4217-AEC8-AD7F96411702}
 		{704B35B0-9029-46CE-AEA2-A3A3AD3FC2C4} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{8B85B3BF-E35A-4CAD-AC82-B8AB1DE72737} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}

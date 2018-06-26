@@ -1,13 +1,11 @@
-﻿
-using Surging.Core.CPlatform;
+﻿using Surging.Core.CPlatform;
 using Surging.Core.ProxyGenerator.Implementation;
 using Autofac;
 using System;
 using Surging.Core.ProxyGenerator.Interceptors;
-using Surging.Core.ProxyGenerator.Interceptors.Implementation;
-using Surging.Core.CPlatform.Support;
+using Surging.Core.ProxyGenerator.Interceptors.Implementation; 
 using Surging.Core.CPlatform.Runtime.Client;
-using Surging.Core.CPlatform.Convertibles;
+using Surging.Core.CPlatform.Convertibles; 
 
 namespace Surging.Core.ProxyGenerator
 {

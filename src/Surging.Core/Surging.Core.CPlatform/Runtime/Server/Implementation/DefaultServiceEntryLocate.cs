@@ -28,6 +28,12 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             return serviceEntries.SingleOrDefault(i => i.Descriptor.Id == invokeMessage.ServiceId);
         }
 
+        public ServiceEntry Locate(HttpMessage httpMessage)
+        {
+            var serviceEntries = _serviceEntryManager.GetEntries();
+            return serviceEntries.SingleOrDefault(i => i.RoutePath == httpMessage.RoutePath);
+        }
+
         #endregion Implementation of IServiceEntryLocate
     }
 }

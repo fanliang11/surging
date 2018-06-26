@@ -1,15 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Autofac;
+using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Transport;
-using Autofac;
-using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Transport.Codec;
 
 namespace Surging.Core.DotNetty
 {
-   public static class ContainerBuilderExtensions
+    public static class ContainerBuilderExtensions
     {
         /// <summary>
         /// 使用DotNetty进行传输。
@@ -20,21 +19,25 @@ namespace Surging.Core.DotNetty
         {
             var services = builder.Services;
             services.RegisterType(typeof(DotNettyTransportClientFactory)).As(typeof(ITransportClientFactory)).SingleInstance();
-            services.Register(provider => {
-              return  new DotNettyServerMessageListener(provider.Resolve<ILogger<DotNettyServerMessageListener>>(),
-                    provider.Resolve<ITransportMessageCodecFactory>());
-            }).SingleInstance();
-            services.Register(provider =>
+            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp)
             {
-                var messageListener = provider.Resolve<DotNettyServerMessageListener>();
-                var serviceExecutor = provider.Resolve<IServiceExecutor>();
-                return new DefaultServiceHost(async endPoint =>
+                services.Register(provider =>
+                {
+                    return new DotNettyServerMessageListener(provider.Resolve<ILogger<DotNettyServerMessageListener>>(),
+                          provider.Resolve<ITransportMessageCodecFactory>());
+                }).SingleInstance();
+                services.Register(provider =>
+                {
+
+                    var serviceExecutor = provider.Resolve<IServiceExecutor>();
+                    var messageListener = provider.Resolve<DotNettyServerMessageListener>();
+                    return new DefaultServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-                }).As<IServiceHost>(); 
-
+                }).As<IServiceHost>();
+            }
             return builder;
         }
     }

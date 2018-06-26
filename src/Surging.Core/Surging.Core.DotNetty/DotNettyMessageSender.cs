@@ -4,8 +4,6 @@ using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
@@ -101,10 +99,10 @@ namespace Surging.Core.DotNetty
         /// </summary>
         /// <param name="message">消息内容。</param>
         /// <returns>一个任务。</returns>
-        public Task SendAsync(TransportMessage message)
+        public async Task SendAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            return _context.WriteAsync(buffer);
+            await _context.WriteAsync(buffer);
         }
 
         /// <summary>
@@ -112,10 +110,10 @@ namespace Surging.Core.DotNetty
         /// </summary>
         /// <param name="message">消息内容。</param>
         /// <returns>一个任务。</returns>
-        public Task SendAndFlushAsync(TransportMessage message)
+        public async Task SendAndFlushAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            return _context.WriteAndFlushAsync(buffer);
+            await _context.WriteAndFlushAsync(buffer);
         }
 
         #endregion Implementation of IMessageSender
