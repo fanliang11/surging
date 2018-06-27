@@ -75,6 +75,7 @@ namespace Surging.Services.Server
                     options.MaxConcurrentRequests = 200;
                 })
                 .UseProxy()
+                .UseConsoleLifetime()
                 .UseServiceCache()
                 .Configure(build =>
                 build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false, reloadOnChange: true))

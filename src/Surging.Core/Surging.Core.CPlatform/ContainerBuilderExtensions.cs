@@ -426,6 +426,7 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
             services.RegisterType(typeof(ServiceTokenGenerator)).As(typeof(IServiceTokenGenerator)).SingleInstance();
             services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
+            services.RegisterType(typeof(ServiceEngineLifetime)).As(typeof(IServiceEngineLifetime)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
@@ -509,10 +510,10 @@ namespace Surging.Core.CPlatform
         }
 
         public static IServiceBuilder RegisterServiceBus
-            (this IServiceBuilder builder)
+            (this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly();
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
 
             foreach (var assembly in referenceAssemblies)
             {

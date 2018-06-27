@@ -6,7 +6,7 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
-    "Protocol": "${Protocol}|Tcp", //Http
+    "Protocol": "${Protocol}|Http", //Http
     "RootPath": "${RootPath}|d:\\microsurging",
     "RequestCacheEnabled": false
   },

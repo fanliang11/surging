@@ -78,8 +78,8 @@ namespace Surging.Core.Protocol.Http
             {
                 IChannelPipeline pipeline = channel.Pipeline;
                 pipeline.AddLast("encoder", new HttpResponseEncoder());
-                pipeline.AddLast(new HttpRequestDecoder(4096, 8192, 8192, true));
-                pipeline.AddLast(new HttpObjectAggregator(4096));
+                pipeline.AddLast(new HttpRequestDecoder(int.MaxValue, 8192, 8192, true));
+                pipeline.AddLast(new HttpObjectAggregator(int.MaxValue));
                 pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
                 {
                     var sender = new DotNettyHttpServerMessageSender(_transportMessageEncoder, contenxt, _serializer);
