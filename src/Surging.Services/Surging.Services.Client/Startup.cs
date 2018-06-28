@@ -67,7 +67,7 @@ namespace Surging.Services.Client
             build
               .AddCacheFile("cacheSettings.json", optional: false);
         }
-        
+
         /// <summary>
         /// 测试
         /// </summary>
@@ -84,20 +84,20 @@ namespace Surging.Services.Client
                     UserId = "1",
                     Name = "fanly"
                 });
-        
-                var d = await userProxy.GetUser(new UserModel
+
+                await userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
-                    UserId = 1,
+                    UserId = "1",
                     Name = "fanly"
                 });
-              
-              var r=  await userProxy.GetDictionary();
+
+                var r = await userProxy.GetDictionary();
                 var serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
 
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
-                
+
                     //1w次调用
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)

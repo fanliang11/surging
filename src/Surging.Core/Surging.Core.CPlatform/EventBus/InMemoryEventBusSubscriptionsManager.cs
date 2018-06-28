@@ -10,20 +10,22 @@ namespace Surging.Core.CPlatform.EventBus
    public class InMemoryEventBusSubscriptionsManager : IEventBusSubscriptionsManager
     {
         private readonly Dictionary<string, List<Delegate>> _handlers;
+        private readonly Dictionary<Delegate, string> _consumers;
         private readonly List<Type> _eventTypes;
 
-        public event EventHandler<string> OnEventRemoved;
+        public event EventHandler<ValueTuple<string, string>> OnEventRemoved;
 
         public InMemoryEventBusSubscriptionsManager()
         {
             _handlers = new Dictionary<string, List<Delegate>>();
+            _consumers = new Dictionary<Delegate, string>();
             _eventTypes = new List<Type>();
         }
 
         public bool IsEmpty => !_handlers.Keys.Any();
         public void Clear() => _handlers.Clear();
 
-        public void AddSubscription<T, TH>(Func<TH> handler)
+        public void AddSubscription<T, TH>(Func<TH> handler,string consumerName)
             where TH : IIntegrationEventHandler<T>
         {
             var key = GetEventKey<T>();
@@ -32,6 +34,7 @@ namespace Surging.Core.CPlatform.EventBus
                 _handlers.Add(key, new List<Delegate>());
             }
             _handlers[key].Add(handler);
+            _consumers.Add(handler, consumerName);
             _eventTypes.Add(typeof(T));
         }
 
@@ -42,6 +45,7 @@ namespace Surging.Core.CPlatform.EventBus
             if (handlerToRemove != null)
             {
                 var key = GetEventKey<T>();
+                var consumerName = _consumers[handlerToRemove];
                 _handlers[key].Remove(handlerToRemove);
                 if (!_handlers[key].Any())
                 {
@@ -50,7 +54,8 @@ namespace Surging.Core.CPlatform.EventBus
                     if (eventType != null)
                     {
                         _eventTypes.Remove(eventType);
-                        RaiseOnEventRemoved(eventType.Name);
+                        _consumers.Remove(handlerToRemove);
+                        RaiseOnEventRemoved(eventType.Name,consumerName);
                     }
                 }
 
@@ -64,12 +69,12 @@ namespace Surging.Core.CPlatform.EventBus
         }
         public IEnumerable<Delegate> GetHandlersForEvent(string eventName) => _handlers[eventName];
 
-        private void RaiseOnEventRemoved(string eventName)
+        private void RaiseOnEventRemoved(string eventName,string consumerName)
         {
             var handler = OnEventRemoved;
             if (handler != null)
             {
-                OnEventRemoved(this, eventName);
+                OnEventRemoved(this,new ValueTuple<string,string>(consumerName, eventName));
             }
         }
 

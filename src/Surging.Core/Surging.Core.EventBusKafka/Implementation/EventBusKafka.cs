@@ -32,7 +32,7 @@ namespace Surging.Core.EventBusKafka.Implementation
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 
-        private void SubsManager_OnEventRemoved(object sender, string eventName)
+        private void SubsManager_OnEventRemoved(object sender, ValueTuple<string,string> tuple)
         {
             if (!_consumerConnection.IsConnected)
             {
@@ -100,7 +100,7 @@ namespace Surging.Core.EventBusKafka.Implementation
                     channel.Subscribe(eventName); 
                 }
             }
-            _subsManager.AddSubscription<T, TH>(handler);
+            _subsManager.AddSubscription<T, TH>(handler,null);
 
         }
 
