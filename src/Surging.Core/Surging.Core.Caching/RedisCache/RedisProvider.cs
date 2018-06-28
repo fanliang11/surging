@@ -53,9 +53,6 @@ namespace Surging.Core.Caching.RedisCache
 
         }
         #endregion
-
-        #region 公共方法
-
         protected IDatabase GetRedisClient(string key)
         {
             var node = GetRedisNode(key);
@@ -70,6 +67,8 @@ namespace Surging.Core.Caching.RedisCache
             });
             return redis;
         }
+
+        #region 公共方法
 
         /// <summary>
         /// 添加K/V值
@@ -206,17 +205,7 @@ namespace Surging.Core.Caching.RedisCache
             IDictionary<string, T> result = null;
             foreach (var key in keys)
             {
-
-                var node = GetRedisNode(key);
-                var redis = GetRedisClient(new RedisEndpoint()
-                {
-                    DbIndex = int.Parse(node.Db),
-                    Host = node.Host,
-                    Password = node.Password,
-                    Port = int.Parse(node.Port),
-                    MinSize = int.Parse(node.MinSize),
-                    MaxSize = int.Parse(node.MaxSize),
-                });
+                var redis = GetRedisClient(key);
                 result.Add(key, redis.Get<T>(key));
             }
             return result;
@@ -237,17 +226,7 @@ namespace Surging.Core.Caching.RedisCache
             IDictionary<string, T> result = null;
             foreach (var key in keys)
             {
-
-                var node = GetRedisNode(key);
-                var redis = GetRedisClient(new RedisEndpoint()
-                {
-                    DbIndex = int.Parse(node.Db),
-                    Host = node.Host,
-                    Password = node.Password,
-                    Port = int.Parse(node.Port),
-                    MinSize = int.Parse(node.MinSize),
-                    MaxSize = int.Parse(node.MaxSize),
-                });
+                var redis = GetRedisClient(key);
                 result.Add(key, await redis.GetAsync<T>(key));
             }
             return result;
@@ -445,7 +424,5 @@ namespace Surging.Core.Caching.RedisCache
         }
 
         #endregion
-
-
     }
 }
