@@ -32,6 +32,7 @@ namespace Surging.Core.CPlatform.Engines.Implementation
                         _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的业务模块。");
                     serviceBuilder.RegisterServices(paths);
                     serviceBuilder.RegisterRepositories(paths);
+                    serviceBuilder.RegisterServiceBus(paths);
                 }
                 if (_serviceEngine.ComponentServiceLocationFormats != null)
                 {

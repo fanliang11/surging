@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Surging.Core.CPlatform.Engines;
 using Surging.Core.ServiceHosting.Internal;
 
 namespace Surging.Core.ProxyGenerator
@@ -9,7 +10,10 @@ namespace Surging.Core.ProxyGenerator
         {
             return hostBuilder.MapServices(mapper =>
             {
-                mapper.Resolve<IServiceProxyFactory>();
+                mapper.Resolve<IServiceEngineLifetime>().ServiceEngineStarted.Register(() =>
+                 {
+                     mapper.Resolve<IServiceProxyFactory>();
+                 }); 
             });
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Surging.Core.CPlatform.EventBus;
 using Surging.Core.ServiceHosting.Internal;
 using Autofac;
+using Surging.Core.CPlatform.Engines;
 
 namespace Surging.Core.EventBusRabbitMQ
 {
@@ -10,7 +11,10 @@ namespace Surging.Core.EventBusRabbitMQ
         {
             return hostBuilder.MapServices(mapper =>
             {
-                mapper.Resolve<ISubscriptionAdapt>().SubscribeAt();
+                mapper.Resolve<IServiceEngineLifetime>().ServiceEngineStarted.Register(() =>
+                {
+                      mapper.Resolve<ISubscriptionAdapt>().SubscribeAt();
+                });
             });
         }
     }
