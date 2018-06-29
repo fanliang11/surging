@@ -101,6 +101,8 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
         {  
             var eventName = typeof(T).Name;
             var queueConsumerAttr = typeof(TH).GetCustomAttribute<QueueConsumerAttribute>();
+            if (queueConsumerAttr == null)
+                throw new ArgumentNullException("QueueConsumerAttribute");
             var containsKey = _subsManager.HasSubscriptionsForEvent<T>();
             if (!containsKey)
             {
