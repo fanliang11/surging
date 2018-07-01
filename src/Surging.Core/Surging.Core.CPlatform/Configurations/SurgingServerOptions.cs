@@ -23,6 +23,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public int Port { get; set; }
 
+        public ProtocolPortOptions Ports { get; set; } = new  ProtocolPortOptions();
+
         public string Token { get; set; } = "True";
 
         public string NotRelatedAssemblyFiles { get; set; }

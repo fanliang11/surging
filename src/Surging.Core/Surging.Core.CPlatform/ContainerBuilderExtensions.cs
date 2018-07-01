@@ -386,10 +386,9 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddServiceRuntime(this IServiceBuilder builder)
         {
             builder.Services.RegisterType(typeof(DefaultServiceEntryLocate)).As(typeof(IServiceEntryLocate)).SingleInstance();
-            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp)
-            {
-                builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor)).SingleInstance();
-            }
+            builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor))
+                .Named<IServiceExecutor>(CommunicationProtocol.Tcp.ToString()).SingleInstance();
+
             return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().AddRuntime();
         }
 

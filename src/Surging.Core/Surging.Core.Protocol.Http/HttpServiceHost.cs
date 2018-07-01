@@ -1,14 +1,19 @@
-﻿using Surging.Core.CPlatform.Transport;
+﻿using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Runtime.Server.Implementation;
+using Surging.Core.CPlatform.Transport;
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Surging.Core.CPlatform.Runtime.Server.Implementation
+namespace Surging.Core.Protocol.Http
 {
     /// <summary>
-    /// 一个默认的服务主机。
+    /// HTTP服务主机
     /// </summary>
-    public class DefaultServiceHost : ServiceHostAbstract
+   public class HttpServiceHost : ServiceHostAbstract
     {
         #region Field
 
@@ -17,7 +22,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
         #endregion Field
 
-        public DefaultServiceHost(Func<EndPoint, Task<IMessageListener>> messageListenerFactory, IServiceExecutor serviceExecutor) : base(serviceExecutor)
+        public HttpServiceHost(Func<EndPoint, Task<IMessageListener>> messageListenerFactory, IServiceExecutor serviceExecutor) : base(serviceExecutor)
         {
             _messageListenerFactory = messageListenerFactory;
         }
@@ -49,11 +54,11 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             };
         }
 
-        public override async Task StartAsync(string  ip)
+        public override async Task StartAsync(string ip)
         {
             if (_serverMessageListener != null)
                 return;
-            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Port));
+            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort));
             _serverMessageListener.Received += async (sender, message) =>
             {
                 await Task.Run(() =>

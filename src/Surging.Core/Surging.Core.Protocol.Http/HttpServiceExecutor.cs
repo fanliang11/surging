@@ -81,64 +81,74 @@ namespace Surging.Core.Protocol.Http
             }
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("准备执行本地逻辑。");
+            HttpResultMessage<object> httpResultMessage = new HttpResultMessage<object>() { };
+
             if (_serviceProvider.IsRegisteredWithKey(httpMessage.ServiceKey, entry.Type))
             {
-                HttpResultMessage<object> httpResultMessage = new HttpResultMessage<object>();
                 //执行本地代码。
-                await LocalExecuteAsync(entry, httpMessage, httpResultMessage);
-                //向客户端发送调用结果。
-                await SendRemoteInvokeResult(sender, httpResultMessage);
+                httpResultMessage = await LocalExecuteAsync(entry, httpMessage);
             }
             else
             {
-                HttpResultMessage<object> httpResultMessage = new HttpResultMessage<object>();
-                await RemoteExecuteAsync(entry, httpMessage, httpResultMessage);
-                await SendRemoteInvokeResult(sender, httpResultMessage);
+                httpResultMessage = await RemoteExecuteAsync(entry, httpMessage);
             }
+            await SendRemoteInvokeResult(sender, httpResultMessage);
         }
 
         #endregion Implementation of IServiceExecutor
 
         #region Private Method
 
-        private async Task RemoteExecuteAsync(ServiceEntry entry, HttpMessage httpMessage, HttpResultMessage<object> resultMessage)
+        private async Task<HttpResultMessage<object>> RemoteExecuteAsync(ServiceEntry entry, HttpMessage httpMessage)
         {
-            var provider = _concurrent.GetValueOrDefault(httpMessage.RoutePath);
-            var list = new List<object>();
-            if (provider.Item1 == null)
+            HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
+                var provider = _concurrent.GetValueOrDefault(httpMessage.RoutePath);
+                var list = new List<object>();
+                if (provider.Item1 == null)
+                {
+                    provider.Item2 = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(httpMessage.ServiceKey, entry.Type);
+                    provider.Item3 = provider.Item2.GetType().GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault(); ;
+                    provider.Item1 = FastInvoke.GetMethodInvoker(provider.Item3);
+                    _concurrent.GetOrAdd(httpMessage.RoutePath, ValueTuple.Create<FastInvokeHandler, object, MethodInfo>(provider.Item1, provider.Item2, provider.Item3));
+                }
+                foreach (var parameterInfo in provider.Item3.GetParameters())
+                {
+                    var value = httpMessage.Parameters[parameterInfo.Name];
+                    var parameterType = parameterInfo.ParameterType;
+                    var parameter = _typeConvertibleService.Convert(value, parameterType);
+                    list.Add(parameter);
+                }
+            try
             {
-                provider.Item2 = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(httpMessage.ServiceKey, entry.Type);
-                provider.Item3 = provider.Item2.GetType().GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault(); ;
-                provider.Item1 = FastInvoke.GetMethodInvoker(provider.Item3);
-                _concurrent.GetOrAdd(httpMessage.RoutePath, ValueTuple.Create<FastInvokeHandler, object, MethodInfo>(provider.Item1, provider.Item2, provider.Item3));
-            }
-            foreach (var parameterInfo in provider.Item3.GetParameters())
-            {
-                var value = httpMessage.Parameters[parameterInfo.Name];
-                var parameterType = parameterInfo.ParameterType;
-                var parameter = _typeConvertibleService.Convert(value, parameterType);
-                list.Add(parameter);
-            }
-            var methodResult = provider.Item1(provider.Item2, list.ToArray());
+                var methodResult = provider.Item1(provider.Item2, list.ToArray());
 
-            var task = methodResult as Task;
-            if (task == null)
-            {
-                resultMessage.Entity = methodResult;
+                var task = methodResult as Task;
+                if (task == null)
+                {
+                    resultMessage.Entity = methodResult;
+                }
+                else
+                {
+                    await task;
+                    var taskType = task.GetType().GetTypeInfo();
+                    if (taskType.IsGenericType)
+                        resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
+                }
                 resultMessage.IsSucceed = resultMessage.Entity != null;
+                resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
             }
-            else
+            catch (Exception ex)
             {
-                await task;
-                var taskType = task.GetType().GetTypeInfo();
-                if (taskType.IsGenericType)
-                    resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
-                resultMessage.IsSucceed = resultMessage.Entity != null;
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(ex, "执行远程调用逻辑时候发生了错误。");
+                resultMessage = new HttpResultMessage<object> { Entity = null, Message = "执行发生了错误。", StatusCode = (int)StatusCode.RequestError };
             }
+            return resultMessage;
         }
 
-        private async Task LocalExecuteAsync(ServiceEntry entry, HttpMessage httpMessage, HttpResultMessage<object> resultMessage)
+        private async Task<HttpResultMessage<object>> LocalExecuteAsync(ServiceEntry entry, HttpMessage httpMessage)
         {
+            HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
             try
             {
                 var result = await entry.Func(httpMessage.ServiceKey, httpMessage.Parameters);
@@ -147,7 +157,6 @@ namespace Surging.Core.Protocol.Http
                 if (task == null)
                 {
                     resultMessage.Entity = result;
-                    resultMessage.IsSucceed = resultMessage.Entity != null;
                 }
                 else
                 {
@@ -155,16 +164,18 @@ namespace Surging.Core.Protocol.Http
                     var taskType = task.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)
                         resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
-                    resultMessage.IsSucceed = resultMessage.Entity != null;
                 }
-
+                resultMessage.IsSucceed = resultMessage.Entity != null;
+                resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
             }
             catch (Exception exception)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
+                resultMessage.Message = "执行发生了错误。";
                 resultMessage.StatusCode = exception.HResult;
             }
+            return resultMessage;
         }
 
         private async Task SendRemoteInvokeResult(IMessageSender sender, HttpResultMessage resultMessage)

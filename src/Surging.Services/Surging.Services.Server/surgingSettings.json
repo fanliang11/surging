@@ -6,8 +6,11 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
-    "Protocol": "${Protocol}|Tcp", //Http
+    //"Protocol": "${Protocol}|Tcp", //Http¡¢Tcp¡¢None
     "RootPath": "${RootPath}|d:\\microsurging",
+    "Ports": {
+      "HttpPort": "${HttpPort}|180"
+    },
     "RequestCacheEnabled": false
   },
   "Consul": {

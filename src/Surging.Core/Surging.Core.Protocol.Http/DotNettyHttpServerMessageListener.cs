@@ -142,14 +142,14 @@ namespace Surging.Core.Protocol.Http
                 msg.Content.ReadBytes(data);
 
                 var parameters = GetParameters(msg.Uri, out string routePath);
-                parameters.Remove("servicekey", out object value);
+                parameters.Remove("servicekey", out object serviceKey);
                 if (msg.Method.Name == "POST")
                 {
                     _readAction(ctx, new TransportMessage(new HttpMessage
                     {
                         Parameters = _serializer.Deserialize<string, IDictionary<string, object>>(System.Text.Encoding.ASCII.GetString(data)) ?? new Dictionary<string, object>(),
                         RoutePath = routePath,
-                        ServiceKey = value.ToString()
+                        ServiceKey = serviceKey?.ToString()
                     }));
                 }
                 else
@@ -158,7 +158,7 @@ namespace Surging.Core.Protocol.Http
                     {
                         Parameters = parameters,
                         RoutePath = routePath,
-                        ServiceKey = value.ToString()
+                        ServiceKey = serviceKey?.ToString()
                     }));
                 }
             }
@@ -167,6 +167,11 @@ namespace Surging.Core.Protocol.Http
             {
                 var urlSpan = msg.AsSpan();
                 var len = urlSpan.IndexOf("?");
+                if (len == -1)
+                {
+                    routePath = urlSpan.TrimStart("/").ToString().ToLower();
+                    return new  Dictionary<string, object>();
+                }
                 routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
                 var paramStr = urlSpan.Slice(len + 1).ToString();
                 var parameters = paramStr.Split('&');

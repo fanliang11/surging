@@ -18,27 +18,42 @@ namespace Surging.Core.DotNetty
         public static IServiceBuilder UseDotNettyTransport(this IServiceBuilder builder)
         {
             var services = builder.Services;
-            services.RegisterType(typeof(DotNettyTransportClientFactory)).As(typeof(ITransportClientFactory)).SingleInstance();
-            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp)
-            {
-                services.Register(provider =>
-                {
-                    return new DotNettyServerMessageListener(provider.Resolve<ILogger<DotNettyServerMessageListener>>(),
-                          provider.Resolve<ITransportMessageCodecFactory>());
-                }).SingleInstance();
-                services.Register(provider =>
-                {
 
-                    var serviceExecutor = provider.Resolve<IServiceExecutor>();
-                    var messageListener = provider.Resolve<DotNettyServerMessageListener>();
-                    return new DefaultServiceHost(async endPoint =>
+            services.Register(provider =>
+            {
+                IServiceExecutor serviceExecutor = null;
+                if (provider.IsRegistered(typeof(IServiceExecutor)))
+                    serviceExecutor = provider.Resolve<IServiceExecutor>();
+                return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
+                    provider.Resolve<ILogger<DotNettyTransportClientFactory>>(),
+                    serviceExecutor);
+            }).As(typeof(ITransportClientFactory)).SingleInstance();
+            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
+                AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
+            {
+                RegisterDefaultProtocol(services);
+            }
+            return builder;
+        }
+
+        private static void RegisterDefaultProtocol(ContainerBuilder builder)
+        {
+            builder.Register(provider =>
+            {
+                return new DotNettyServerMessageListener(provider.Resolve<ILogger<DotNettyServerMessageListener>>(),
+                      provider.Resolve<ITransportMessageCodecFactory>());
+            }).SingleInstance();
+            builder.Register(provider =>
+            {
+
+                var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Tcp.ToString());
+                var messageListener = provider.Resolve<DotNettyServerMessageListener>();
+                return new DefaultServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-                }).As<IServiceHost>();
-            }
-            return builder;
+            }).As<IServiceHost>();
         }
     }
 }
