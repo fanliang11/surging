@@ -35,7 +35,7 @@ namespace Surging.Core.CPlatform.Module
 
         #region 实例方法
         
-        public virtual void Initialize()
+        public virtual void Initialize(CPlatformContainer serviceProvider)
         {
         }
         

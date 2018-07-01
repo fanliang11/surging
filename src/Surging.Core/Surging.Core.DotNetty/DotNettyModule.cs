@@ -1,28 +1,32 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Surging.Core.DotNetty
 {
-    public static class ContainerBuilderExtensions
+    public class DotNettyModule : SystemModule
     {
-        /// <summary>
-        /// 使用DotNetty进行传输。
-        /// </summary>
-        /// <param name="builder">服务构建者。</param>
-        /// <returns>服务构建者。</returns>
-
-        [Obsolete]
-        public static IServiceBuilder UseDotNettyTransport(this IServiceBuilder builder)
+        public override void Initialize(CPlatformContainer serviceProvider)
         {
-            var services = builder.Services;
+            base.Initialize(serviceProvider);
+        }
 
-            services.Register(provider =>
+        /// <summary>
+        /// Inject dependent third-party components
+        /// </summary>
+        /// <param name="builder"></param>
+        protected override void RegisterBuilder(ContainerBuilderWrapper builder)
+        {
+            base.RegisterBuilder(builder);
+            builder.Register(provider =>
             {
                 IServiceExecutor serviceExecutor = null;
                 if (provider.IsRegistered(typeof(IServiceExecutor)))
@@ -34,12 +38,11 @@ namespace Surging.Core.DotNetty
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
                 AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
             {
-                RegisterDefaultProtocol(services);
+                RegisterDefaultProtocol(builder);
             }
-            return builder;
         }
 
-        private static void RegisterDefaultProtocol(ContainerBuilder builder)
+        private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
             {

@@ -6,6 +6,7 @@ using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;
@@ -41,8 +42,6 @@ namespace Surging.Services.Client
                         option.AddClient()
                         .AddClientIntercepted(typeof(CacheProviderInterceptor))
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        .UseConsulManager(new ConfigInfo("127.0.0.1:8500"))
-                        .UseDotNettyTransport()
                         .UseRabbitMQTransport()
                         .AddCache()
                         //.UseKafkaMQTransport(kafkaOption =>
@@ -58,6 +57,8 @@ namespace Surging.Services.Client
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
                 .Configure(build =>
                 build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
+                .Configure(build =>
+                build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseNLog(LogLevel.Error)
                // .UseLog4net(LogLevel.Error)
                 .UseServiceCache()

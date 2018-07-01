@@ -98,6 +98,7 @@ namespace Surging.Core.Consul
             return builder;
         }
 
+        [Obsolete]
         public static IServiceBuilder UseConsulManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseConsulRouteManager(configInfo)
@@ -106,6 +107,7 @@ namespace Surging.Core.Consul
                .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
         }
 
+        [Obsolete]
         public static IServiceBuilder UseConsulManager(this IServiceBuilder builder)
         {
             var configInfo = new ConfigInfo(null);

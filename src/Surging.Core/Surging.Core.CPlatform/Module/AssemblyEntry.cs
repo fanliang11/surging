@@ -146,7 +146,7 @@ namespace Surging.Core.CPlatform.Module
         {
             AbstractModules.ForEach(module =>
             {
-                module.Initialize();
+             //   module.Initialize();
                 builder.RegisterModule(module);
             });
         }
