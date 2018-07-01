@@ -49,11 +49,11 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             };
         }
 
-        public override async Task StartAsync(string  ip)
+        public override async Task StartAsync(string ip,int port)
         {
             if (_serverMessageListener != null)
                 return;
-            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Port));
+            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), port));
             _serverMessageListener.Received += async (sender, message) =>
             {
                 await Task.Run(() =>

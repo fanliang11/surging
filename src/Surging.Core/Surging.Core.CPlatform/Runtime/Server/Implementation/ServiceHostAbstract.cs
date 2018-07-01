@@ -57,7 +57,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             await _serviceExecutor.ExecuteAsync(sender, message);
         }
 
-        public abstract Task StartAsync(string ip);
+        public abstract Task StartAsync(string ip,int port);
 
         #endregion Private Method
     }

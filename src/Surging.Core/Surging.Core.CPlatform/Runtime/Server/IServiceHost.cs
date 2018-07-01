@@ -20,6 +20,6 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// 启动主机。
         /// </summary>
         /// <param name="endPoint">ip地址。</param>
-        Task StartAsync(string ip);
+        Task StartAsync(string ip,int port);
     }
 }

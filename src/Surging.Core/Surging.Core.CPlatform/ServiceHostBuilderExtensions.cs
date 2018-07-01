@@ -84,7 +84,7 @@ namespace Surging.Core.CPlatform
                 Task.Factory.StartNew(async () =>
                 {
                     foreach(var serviceHost in serviceHosts)
-                    await serviceHost.StartAsync(_ip);
+                    await serviceHost.StartAsync(_ip,_port);
                     mapper.Resolve<IServiceEngineLifetime>().NotifyStarted();
                 }).Wait();
             });
