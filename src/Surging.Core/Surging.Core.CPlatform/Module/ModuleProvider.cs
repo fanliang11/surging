@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Engines;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,11 +12,19 @@ namespace Surging.Core.CPlatform.Module
         public ModuleProvider(List<AbstractModule> modules,CPlatformContainer serviceProvoider)
         {
             _modules = modules;
+            _serviceProvoider = serviceProvoider;
         }
 
         public void Initialize()
         {
-            _modules.ForEach(p => p.Initialize(_serviceProvoider));
+            _serviceProvoider.GetInstances<IServiceEngineLifetime>().ServiceEngineStarted.Register(() =>
+            {
+                _modules.ForEach(p =>
+                {
+                    if (p.Enable)
+                        p.Initialize(_serviceProvoider);
+                });
+            });
         }
     }
 }

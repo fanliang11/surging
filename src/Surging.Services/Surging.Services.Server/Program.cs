@@ -45,7 +45,7 @@ namespace Surging.Services.Server
                         .AddRabbitMQAdapt()
                         .AddCache()
                         .AddHttpProtocol()
-                        .AddServiceEngine(typeof(SurgingServiceEngine))
+                        .AddServiceEngine(typeof(SurgingServiceEngine));
                         //.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";
@@ -55,8 +55,7 @@ namespace Surging.Services.Server
                         //    kafkaOption.EnableAutoCommit = false;
                         //})
                         //.AddKafkaMQAdapt()
-                        //.UseProtoBufferCodec()
-                        .UseMessagePackCodec();
+                        //.UseProtoBufferCodec() 
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })

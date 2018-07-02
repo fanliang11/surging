@@ -32,12 +32,15 @@ namespace Surging.Core.Consul
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-            var configInfo = new ConfigInfo(null);
-            UseConsulRouteManager(builder, configInfo)
-               .UseConsulServiceSubscribeManager(builder, configInfo)
-              .UseConsulCommandManager(builder, configInfo)
-              .UseConsulCacheManager(builder, configInfo)
-              .UseConsulWatch(builder, configInfo);
+            if (this.Enable)
+            {
+                var configInfo = new ConfigInfo(null);
+                UseConsulRouteManager(builder, configInfo)
+                   .UseConsulServiceSubscribeManager(builder, configInfo)
+                  .UseConsulCommandManager(builder, configInfo)
+                  .UseConsulCacheManager(builder, configInfo)
+                  .UseConsulWatch(builder, configInfo);
+            }
         }
 
         public ConsulModule UseConsulRouteManager(ContainerBuilderWrapper builder, ConfigInfo configInfo)

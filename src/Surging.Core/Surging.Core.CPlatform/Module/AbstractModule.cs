@@ -26,15 +26,26 @@ namespace Surging.Core.CPlatform.Module
     
 
         public string Title { get; set; }
-        
+
+        public bool Enable { get; set; } = true;
+
+
         public string Description { get; set; }
         
         public List<Component> Components { get; set; }
 
         #endregion
 
+        #region 构造函数
+        public AbstractModule()
+        {
+            ModuleName = this.GetType().Name;
+            TypeName = this.GetType().BaseType.Name;
+        }
+        #endregion
+
         #region 实例方法
-        
+
         public virtual void Initialize(CPlatformContainer serviceProvider)
         {
         }

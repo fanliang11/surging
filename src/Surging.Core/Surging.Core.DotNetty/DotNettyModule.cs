@@ -6,9 +6,6 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Surging.Core.DotNetty
 {
@@ -26,23 +23,26 @@ namespace Surging.Core.DotNetty
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-            builder.Register(provider =>
+            if (this.Enable)
             {
-                IServiceExecutor serviceExecutor = null;
-                if (provider.IsRegistered(typeof(IServiceExecutor)))
-                    serviceExecutor = provider.Resolve<IServiceExecutor>();
-                return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
-                    provider.Resolve<ILogger<DotNettyTransportClientFactory>>(),
-                    serviceExecutor);
-            }).As(typeof(ITransportClientFactory)).SingleInstance();
-            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
-                AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
-            {
-                RegisterDefaultProtocol(builder);
+                builder.Register(provider =>
+                {
+                    IServiceExecutor serviceExecutor = null;
+                    if (provider.IsRegistered(typeof(IServiceExecutor)))
+                        serviceExecutor = provider.Resolve<IServiceExecutor>();
+                    return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
+                        provider.Resolve<ILogger<DotNettyTransportClientFactory>>(),
+                        serviceExecutor);
+                }).As(typeof(ITransportClientFactory)).SingleInstance();
+                if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
+                    AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
+                {
+                    RegisterDefaultProtocol(builder);
+                }
             }
         }
 
-        private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
+        private void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
             {
@@ -51,7 +51,6 @@ namespace Surging.Core.DotNetty
             }).SingleInstance();
             builder.Register(provider =>
             {
-
                 var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Tcp.ToString());
                 var messageListener = provider.Resolve<DotNettyServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>

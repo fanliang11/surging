@@ -555,6 +555,10 @@ namespace Surging.Core.CPlatform
                 GetAbstractModules(moduleAssembly).ForEach(p =>
                 {
                     services.RegisterModule(p);
+                    if (AppConfig.ServerOptions.UnPackage
+                     .AsSpan().IndexOf(p.ModuleName) >= 0)
+                        p.Enable = false;
+                   
                     modules.Add(p);
                 });
             }
@@ -588,6 +592,7 @@ namespace Surging.Core.CPlatform
 
         private static List<Assembly> GetReferenceAssembly(params string[] virtualPaths)
         {
+            var refAssemblies = new List<Assembly>();
             var rootPath = AppContext.BaseDirectory;
             var existsPath = virtualPaths.Any();
             if (existsPath && !string.IsNullOrEmpty(AppConfig.ServerOptions.RootPath))
@@ -600,13 +605,15 @@ namespace Surging.Core.CPlatform
                 paths.ForEach(path =>
                 {
                     var assemblyFiles = GetAllAssemblyFiles(path);
+                    
                     foreach (var referencedAssemblyFile in assemblyFiles)
                     {
                         var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
                         if (!_referenceAssembly.Contains(referencedAssembly))
                             _referenceAssembly.Add(referencedAssembly);
+                        refAssemblies.Add(referencedAssembly);
                     }
-                    result = _referenceAssembly;
+                    result = existsPath ? refAssemblies: _referenceAssembly;
                 });
             }
             return result;
