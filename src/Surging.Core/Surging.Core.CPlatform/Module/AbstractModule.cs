@@ -56,8 +56,11 @@ namespace Surging.Core.CPlatform.Module
             {
                 base.Load(builder);
                 Builder = new ContainerBuilderWrapper(builder);
-                RegisterBuilder(Builder);
-                RegisterComponents(Builder);
+                if (Enable)
+                {
+                    RegisterBuilder(Builder);
+                    RegisterComponents(Builder);
+                }
             }
             catch (Exception ex)
             {
@@ -69,7 +72,7 @@ namespace Surging.Core.CPlatform.Module
         protected virtual void RegisterBuilder(ContainerBuilderWrapper builder)
         {
         }
-        
+
         internal virtual void RegisterComponents(ContainerBuilderWrapper builder)
         {
             if (Components != null)

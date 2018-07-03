@@ -1,17 +1,16 @@
 ﻿using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
-using Surging.Core.CPlatform.Transport.Codec;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Surging.Core.Codec.MessagePack
+namespace Surging.Core.ProxyGenerator
 {
-   public class MessagePackModule : SystemModule
+   public class ServiceProxyModule:SystemModule
     {
         public override void Initialize(CPlatformContainer serviceProvider)
         {
-            base.Initialize(serviceProvider);
+            serviceProvider.GetInstances<IServiceProxyFactory>();
         }
 
         /// <summary>
@@ -21,7 +20,7 @@ namespace Surging.Core.Codec.MessagePack
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-            builder.RegisterType<MessagePackTransportMessageCodecFactory>().As<ITransportMessageCodecFactory>().SingleInstance();
+
         }
     }
 }

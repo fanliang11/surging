@@ -22,9 +22,7 @@ namespace Surging.Core.DotNetty
         /// <param name="builder"></param>
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
-            base.RegisterBuilder(builder);
-            if (this.Enable)
-            {
+            base.RegisterBuilder(builder); 
                 builder.Register(provider =>
                 {
                     IServiceExecutor serviceExecutor = null;
@@ -39,7 +37,6 @@ namespace Surging.Core.DotNetty
                 {
                     RegisterDefaultProtocol(builder);
                 }
-            }
         }
 
         private void RegisterDefaultProtocol(ContainerBuilderWrapper builder)

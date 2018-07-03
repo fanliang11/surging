@@ -6,6 +6,8 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
+    "MaxConcurrentRequests": 20,
+    "ExecutionTimeoutInMilliseconds": 30000,
     "Protocol": "${Protocol}|None", //Http¡¢Tcp¡¢None
     "RootPath": "${RootPath}|d:\\microsurging",
     "Ports": {

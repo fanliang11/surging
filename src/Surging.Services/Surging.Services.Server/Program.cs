@@ -46,32 +46,16 @@ namespace Surging.Services.Server
                         .AddCache()
                         .AddHttpProtocol()
                         .AddServiceEngine(typeof(SurgingServiceEngine));
-                        //.UseKafkaMQTransport(kafkaOption =>
-                        //{
-                        //    kafkaOption.Servers = "127.0.0.1";
-                        //    kafkaOption.LogConnectionClose = false;
-                        //    kafkaOption.MaxQueueBuffering = 10;
-                        //    kafkaOption.MaxSocketBlocking = 10;
-                        //    kafkaOption.EnableAutoCommit = false;
-                        //})
-                        //.AddKafkaMQAdapt()
-                        //.UseProtoBufferCodec() 
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-              .SubscribeAt()
-               // .UseLog4net(LogLevel.Trace, "Configs/log4net.config")
-               .UseNLog("${LogPath}|Configs/NLog.config")
-                //.UseServer("127.0.0.1", 98)
-                //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
-                //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
-                .UseServer(options =>
+                .SubscribeAt()
+                .ConfigureLogging(logger =>
                 {
-                    options.Token = "True";
-                    options.ExecutionTimeoutInMilliseconds = 30000;
-                    options.MaxConcurrentRequests = 200;
+                    logger.AddConfiguration(
+                        Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
-                .UseProxy()
+                .UseServer(options =>{ })
                 .UseConsoleLifetime()
                 .UseServiceCache()
                 .Configure(build =>

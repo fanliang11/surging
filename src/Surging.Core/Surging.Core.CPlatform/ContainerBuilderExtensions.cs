@@ -84,7 +84,7 @@ namespace Surging.Core.CPlatform
     public static class ContainerBuilderExtensions
     {
         private static List<Assembly> _referenceAssembly = new List<Assembly>();
-
+        private static List<AbstractModule> _modules = new List<AbstractModule>();
         /// <summary>
         /// 添加Json序列化支持。
         /// </summary>
@@ -549,7 +549,6 @@ namespace Surging.Core.CPlatform
             var services = builder.Services;
             var referenceAssemblies = GetReferenceAssembly(virtualPaths);
             if (builder == null) throw new ArgumentNullException("builder");
-            List<AbstractModule> modules = new List<AbstractModule>();
             foreach (var moduleAssembly in referenceAssemblies)
             {
                 GetAbstractModules(moduleAssembly).ForEach(p =>
@@ -558,12 +557,12 @@ namespace Surging.Core.CPlatform
                     if (AppConfig.ServerOptions.UnPackage
                      .AsSpan().IndexOf(p.ModuleName) >= 0)
                         p.Enable = false;
-                   
-                    modules.Add(p);
+
+                    _modules.Add(p);
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               modules,provider.Resolve<CPlatformContainer>()
+               _modules, provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }
