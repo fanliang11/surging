@@ -1,5 +1,4 @@
 ﻿
-using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
@@ -20,15 +19,13 @@ namespace Surging.Modules.Common.Domain
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
-        private readonly ILogger<UserService> _logger;
-        public UserService(UserRepository repository, ILogger<UserService> logger)
+        public UserService(UserRepository repository)
         {
             this._repository = repository;
         }
 
         public Task<string> GetUserName(int id)
         {
-            this.GetService<IManagerService>().SayHello("333");
             return Task.FromResult($"id:{id} is name fanly.");
         }
 
@@ -37,11 +34,10 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
-        public async Task<int> GetUserId(string userName)
-        { 
-           var d= await this.GetService<IManagerService>().SayHello("333"); 
+        public Task<int> GetUserId(string userName)
+        {
             var xid = RpcContext.GetContext().GetAttachment("xid");
-            return await  Task.FromResult(1);
+            return Task.FromResult(1);
         }
 
         public Task<DateTime> GetUserLastSignInTime(int id)
@@ -70,8 +66,6 @@ namespace Surging.Modules.Common.Domain
 
         public Task<bool> GetDictionary()
         {
-            Console.WriteLine("执行SayHello");
-            
             return Task.FromResult<bool>(true);
         }
 
