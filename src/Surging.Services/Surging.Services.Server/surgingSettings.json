@@ -2,16 +2,16 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": 98,
+    "Port": 198,
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
     "MaxConcurrentRequests": 20,
     "ExecutionTimeoutInMilliseconds": 30000,
     "Protocol": "${Protocol}|None", //Http¡¢Tcp¡¢None
-    "RootPath": "${RootPath}|d:\\microsurging",
+    "RootPath": "${RootPath}",
     "Ports": {
-      "HttpPort": "${HttpPort}|180"
+      "HttpPort": "${HttpPort}|280"
     },
     "UnPackage": "${UnPackage}", //"DotNettyModule;NlogModule;MessagePackModule;ConsulModule;HttpProtocolModule;",
     "RequestCacheEnabled": false

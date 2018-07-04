@@ -31,6 +31,8 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.System\Surging.Core.System.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Zookeeper\Surging.Core.Zookeeper.csproj" />
+    <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.Common\Surging.IModuleServices.Common.csproj" />
+    <ProjectReference Include="..\..\Surging.Modules\Surging.Modules.Common\Surging.Modules.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

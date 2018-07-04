@@ -44,7 +44,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             var services = _types.Where(i =>
             {
                 var typeInfo = i.GetTypeInfo();
-                return typeInfo.IsInterface && typeInfo.GetCustomAttribute<ServiceBundleAttribute>() != null;
+                return typeInfo.IsInterface && typeInfo.GetCustomAttribute<ServiceBundleAttribute>() != null && _serviceProvider.Current.IsRegistered(i);
             }).Distinct().ToArray();
 
             if (_logger.IsEnabled(LogLevel.Information))
