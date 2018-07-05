@@ -18,7 +18,7 @@ using System.Text;
 
 namespace Surging.Core.Consul
 {
-    public class ConsulModule : SystemModule
+    public class ConsulModule : EnginePartModule
     {
         public override void Initialize(CPlatformContainer serviceProvider)
         {

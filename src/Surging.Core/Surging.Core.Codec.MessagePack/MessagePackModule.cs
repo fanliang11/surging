@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Surging.Core.Codec.MessagePack
 {
-   public class MessagePackModule : SystemModule
+   public class MessagePackModule : EnginePartModule
     {
         public override void Initialize(CPlatformContainer serviceProvider)
         {

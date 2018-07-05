@@ -362,7 +362,7 @@ namespace Surging.Core.CPlatform
                 var exceptionFilter = filter as IExceptionFilter;
                 services.Register(p => exceptionFilter).As(typeof(IExceptionFilter)).SingleInstance();
             }
-            else if(typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
+            else if (typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
             {
                 var exceptionFilter = filter as IAuthorizationFilter;
                 services.Register(p => exceptionFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
@@ -466,7 +466,7 @@ namespace Surging.Core.CPlatform
         /// </summary>
         /// <param name="builder">ioc容器</param>
         /// <returns>返回注册模块信息</returns>
-        public static IServiceBuilder RegisterServices(this IServiceBuilder builder,params string [] virtualPaths)
+        public static IServiceBuilder RegisterServices(this IServiceBuilder builder, params string[] virtualPaths)
         {
             try
             {
@@ -496,7 +496,7 @@ namespace Surging.Core.CPlatform
                 }
                 return builder;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (ex is System.Reflection.ReflectionTypeLoadException)
                 {
@@ -504,7 +504,7 @@ namespace Surging.Core.CPlatform
                     var loaderExceptions = typeLoadException.LoaderExceptions;
                     throw loaderExceptions[0];
                 }
-                throw ex; 
+                throw ex;
             }
         }
 
@@ -549,20 +549,26 @@ namespace Surging.Core.CPlatform
             var services = builder.Services;
             var referenceAssemblies = GetReferenceAssembly(virtualPaths);
             if (builder == null) throw new ArgumentNullException("builder");
+            var packages = ConvertDictionary(AppConfig.ServerOptions.Packages);
             foreach (var moduleAssembly in referenceAssemblies)
             {
                 GetAbstractModules(moduleAssembly).ForEach(p =>
                 {
                     services.RegisterModule(p);
-                    if (AppConfig.ServerOptions.UnPackage
-                     .AsSpan().IndexOf(p.ModuleName) >= 0)
-                        p.Enable = false;
+                    if (packages.ContainsKey(p.TypeName))
+                    {
+                        var useModules = packages[p.TypeName];
+                        if (useModules.AsSpan().IndexOf(p.ModuleName) >= 0)
+                            p.Enable = true;
+                        else
+                            p.Enable = false;
+                    }
 
                     _modules.Add(p);
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               _modules, provider.Resolve<CPlatformContainer>()
+               _modules,provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }
@@ -584,9 +590,19 @@ namespace Surging.Core.CPlatform
             var referenceAssemblies = builder.GetInterfaceService();
             referenceAssemblies.ForEach(p =>
             {
-                namespaces.AddRange( p.Assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() !=null).Select(n=>n.Namespace));
+                namespaces.AddRange(p.Assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() != null).Select(n => n.Namespace));
             });
             return namespaces.Distinct();
+        }
+
+        private static IDictionary<string, string> ConvertDictionary(List<ModulePackage> list)
+        {
+           var result = new Dictionary<string, string>();
+            list.ForEach(p =>
+            {
+                result.Add(p.TypeName, p.Using);
+            });
+            return result;
         }
 
         private static List<Assembly> GetReferenceAssembly(params string[] virtualPaths)

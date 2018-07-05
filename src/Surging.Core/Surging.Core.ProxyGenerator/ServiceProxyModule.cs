@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Surging.Core.ProxyGenerator
 {
-   public class ServiceProxyModule:SystemModule
+   public class ServiceProxyModule: EnginePartModule
     {
         public override void Initialize(CPlatformContainer serviceProvider)
         {

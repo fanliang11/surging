@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Surging.Core.Nlog
 {
-    public class NLogModule : SystemModule
+    public class NLogModule : EnginePartModule
     {
         private string nlogConfigFile = "${LogPath}|nLog.config";
         public override void Initialize(CPlatformContainer serviceProvider)

@@ -11,7 +11,13 @@
     "Ports": {
       "HttpPort": "${HttpPort}|180"
     },
-    "RequestCacheEnabled": false
+    "RequestCacheEnabled": false,
+    "Packages": [
+      {
+        "TypeName": "EnginePartModule",
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;HttpProtocolModule;"
+      }
+    ]
   },
   "Consul": {
     "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",

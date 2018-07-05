@@ -13,9 +13,14 @@
     "Ports": {
       "HttpPort": "${HttpPort}|280"
     },
-    "UnPackage": "${UnPackage}", //"DotNettyModule;NlogModule;MessagePackModule;ConsulModule;HttpProtocolModule;",
-    "RequestCacheEnabled": false
-  },
+    "RequestCacheEnabled": false,
+    "Packages": [
+      {
+        "TypeName": "EnginePartModule",
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;HttpProtocolModule;"
+      }
+    ]
+  }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
   "Consul": {
     "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
     "SessionTimeout": "${Register_SessionTimeout}|50",

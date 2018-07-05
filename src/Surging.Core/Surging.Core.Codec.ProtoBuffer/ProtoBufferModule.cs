@@ -1,19 +1,17 @@
 ﻿using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
-using Surging.Core.CPlatform.Utilities;
-using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Transport.Codec;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Surging.Core.Log4net
+namespace Surging.Core.Codec.ProtoBuffer
 {
-   public class Log4netModule : EnginePartModule
+   public class ProtoBufferModule : EnginePartModule
     {
-        private string log4NetConfigFile = "${LogPath}|log4net.config";
         public override void Initialize(CPlatformContainer serviceProvider)
         {
             base.Initialize(serviceProvider);
-            var section = CPlatform.AppConfig.GetSection("Logging");
-            log4NetConfigFile = EnvironmentHelper.GetEnvironmentVariable(log4NetConfigFile);
-            serviceProvider.GetInstances<ILoggerFactory>().AddProvider(new Log4NetProvider(log4NetConfigFile));
         }
 
         /// <summary>
@@ -23,7 +21,7 @@ namespace Surging.Core.Log4net
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-
+            builder.RegisterType<ProtoBufferTransportMessageCodecFactory>().As<ITransportMessageCodecFactory>().SingleInstance();
         }
     }
 }

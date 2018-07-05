@@ -9,7 +9,7 @@ using Surging.Core.CPlatform.Transport.Codec;
 
 namespace Surging.Core.DotNetty
 {
-    public class DotNettyModule : SystemModule
+    public class DotNettyModule : EnginePartModule
     {
         public override void Initialize(CPlatformContainer serviceProvider)
         {
@@ -22,21 +22,21 @@ namespace Surging.Core.DotNetty
         /// <param name="builder"></param>
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
-            base.RegisterBuilder(builder); 
-                builder.Register(provider =>
-                {
-                    IServiceExecutor serviceExecutor = null;
-                    if (provider.IsRegistered(typeof(IServiceExecutor)))
-                        serviceExecutor = provider.Resolve<IServiceExecutor>();
-                    return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
-                        provider.Resolve<ILogger<DotNettyTransportClientFactory>>(),
-                        serviceExecutor);
-                }).As(typeof(ITransportClientFactory)).SingleInstance();
-                if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
-                    AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
-                {
-                    RegisterDefaultProtocol(builder);
-                }
+            base.RegisterBuilder(builder);
+            builder.Register(provider =>
+            {
+                IServiceExecutor serviceExecutor = null;
+                if (provider.IsRegistered(typeof(IServiceExecutor)))
+                    serviceExecutor = provider.Resolve<IServiceExecutor>();
+                return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
+                    provider.Resolve<ILogger<DotNettyTransportClientFactory>>(),
+                    serviceExecutor);
+            }).As(typeof(ITransportClientFactory)).SingleInstance();
+            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
+                AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
+            {
+                RegisterDefaultProtocol(builder);
+            }
         }
 
         private void RegisterDefaultProtocol(ContainerBuilderWrapper builder)

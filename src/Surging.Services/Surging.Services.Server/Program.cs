@@ -43,8 +43,7 @@ namespace Surging.Services.Server
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         .UseRabbitMQTransport()
                         .AddRabbitMQAdapt()
-                        .AddCache()
-                        .AddHttpProtocol()
+                        .AddCache() 
                         .AddServiceEngine(typeof(SurgingServiceEngine));
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });

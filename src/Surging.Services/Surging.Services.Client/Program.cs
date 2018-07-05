@@ -43,13 +43,12 @@ namespace Surging.Services.Client
                         .AddClientIntercepted(typeof(CacheProviderInterceptor))
                         //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                         .UseRabbitMQTransport()
-                        .AddCache()
+                        .AddCache();
                         //.UseKafkaMQTransport(kafkaOption =>
                         //{
                         //    kafkaOption.Servers = "127.0.0.1";
                         //});
                         //.UseProtoBufferCodec()
-                        .UseMessagePackCodec();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
@@ -62,7 +61,6 @@ namespace Surging.Services.Client
                 .UseNLog(LogLevel.Error)
                // .UseLog4net(LogLevel.Error)
                 .UseServiceCache()
-                .UseProxy() 
                 .UseClient()
                 .UseStartup<Startup>()
                 .Build();

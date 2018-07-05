@@ -116,7 +116,7 @@ namespace Surging.Core.CPlatform
                     };
                 }).ToList();
                 mapper.Resolve<IServiceSubscribeManager>().SetSubscribersAsync(addressDescriptors);
-
+                mapper.Resolve<IModuleProvider>().Initialize();
             });
         }
 

@@ -18,7 +18,7 @@ namespace Surging.Core.CPlatform.Configurations
 
         public IPEndPoint IpEndpoint { get; set; }
 
-        public string UnPackage { get; set; } = "";
+        public List<ModulePackage> Packages { get; set; } = new List<ModulePackage>();
 
         public CommunicationProtocol Protocol { get; set; }
         public string RootPath { get; set; }
