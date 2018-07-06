@@ -33,6 +33,9 @@
 
 7. 业务模块化驱动引擎，通过加载指定业务模块，能够更加灵活、高效的部署不同版本的业务功能模块
 
+### 引擎如何安装
+docker hub : docker pull fanly11/surging
+nuget:Install-Package surging -Version  版本号
 
 ### surging模块功能
 
