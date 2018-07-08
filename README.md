@@ -35,7 +35,7 @@
 
 ### 引擎如何安装
 
-docker hub : docker pull fanly11/surging
+docker hub : docker pull serviceengine/surging:版本号
 
 nuget:Install-Package surging -Version  版本号
 
