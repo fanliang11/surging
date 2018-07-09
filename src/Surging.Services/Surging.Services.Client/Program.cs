@@ -41,14 +41,7 @@ namespace Surging.Services.Client
                     {
                         option.AddClient()
                         .AddClientIntercepted(typeof(CacheProviderInterceptor))
-                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        .UseRabbitMQTransport()
                         .AddCache();
-                        //.UseKafkaMQTransport(kafkaOption =>
-                        //{
-                        //    kafkaOption.Servers = "127.0.0.1";
-                        //});
-                        //.UseProtoBufferCodec()
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
@@ -59,8 +52,6 @@ namespace Surging.Services.Client
                 .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseNLog(LogLevel.Error)
-               // .UseLog4net(LogLevel.Error)
-                .UseServiceCache()
                 .UseClient()
                 .UseStartup<Startup>()
                 .Build();

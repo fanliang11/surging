@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Core.Lifetime;
 using Surging.Core.CPlatform.Exceptions;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -50,7 +51,7 @@ namespace Surging.Core.CPlatform.Module
         {
         }
         
-        protected override void Load(ContainerBuilder builder)
+        protected override  void Load(ContainerBuilder builder)
         {
             try
             {
@@ -60,6 +61,7 @@ namespace Surging.Core.CPlatform.Module
                 {
                     RegisterBuilder(Builder);
                     RegisterComponents(Builder);
+                    
                 }
             }
             catch (Exception ex)
@@ -72,6 +74,7 @@ namespace Surging.Core.CPlatform.Module
         protected virtual void RegisterBuilder(ContainerBuilderWrapper builder)
         {
         }
+         
 
         internal virtual void RegisterComponents(ContainerBuilderWrapper builder)
         {

@@ -40,15 +40,11 @@ namespace Surging.Services.Server
                         option.AddServiceRuntime()
                         .AddRelateService()
                         .AddConfigurationWatch()
-                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        .UseRabbitMQTransport()
-                        .AddRabbitMQAdapt()
-                        .AddCache() 
+                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); 
                         .AddServiceEngine(typeof(SurgingServiceEngine));
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-                .SubscribeAt()
                 .ConfigureLogging(logger =>
                 {
                     logger.AddConfiguration(
@@ -56,7 +52,6 @@ namespace Surging.Services.Server
                 })
                 .UseServer(options =>{ })
                 .UseConsoleLifetime()
-                .UseServiceCache()
                 .Configure(build =>
                 build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false, reloadOnChange: true))
                   .Configure(build =>
