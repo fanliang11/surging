@@ -68,5 +68,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         
         [Command(Strategy = StrategyType.Injection,  ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 2500, BreakerRequestVolumeThreshold = 3, Injection = @"return null;", RequestCacheEnabled = false)]
         Task<ApiResult<UserModel>> GetApiResult();
+
+        Task<string> GetUser(List<int> idList);
     }
 }

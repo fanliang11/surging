@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WebSocket\WebSocketCore\WebSocketCore.csproj" />
+    <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
+  </ItemGroup>
+
+</Project>

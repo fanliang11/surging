@@ -28,7 +28,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
             else
                 TypeName = valueType.AssemblyQualifiedName;
 
-            if (valueType == UtilityType.JObjectType)
+            if (valueType == UtilityType.JObjectType || valueType == UtilityType.JArrayType)
                 Content = SerializerUtilitys.Serialize(value.ToString());
             else
                 Content = SerializerUtilitys.Serialize(value);
@@ -52,10 +52,10 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 return null;
 
             var typeName = Type.GetType(TypeName);
-            if (typeName == UtilityType.JObjectType)
+            if (typeName == UtilityType.JObjectType || typeName == UtilityType.JArrayType)
             {
                 var content = SerializerUtilitys.Deserialize<string>(Content);
-                return JsonConvert.DeserializeObject<JObject>(content);
+                return JsonConvert.DeserializeObject(content,typeName);
             }
             else
             {
