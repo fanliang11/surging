@@ -8,6 +8,7 @@ namespace Surging.Core.CPlatform
     {
         None,
         Tcp,
-        Http
+        Http,
+        WS
     }
 }

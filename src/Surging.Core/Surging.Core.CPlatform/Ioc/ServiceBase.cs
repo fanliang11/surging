@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Ioc
 {
-    public abstract class ServiceBase
+    public abstract class ServiceBase: IServiceBehavior
     {
         public virtual T GetService<T>() where T : class
         {

@@ -922,7 +922,7 @@ namespace WebSocketCore.Server
     {
       var path = context.RequestUri.AbsolutePath;
 
-      WebSocketServiceHost host;
+      WebSocketServiceHostBase host;
       if (!_services.InternalTryGetServiceHost (path, out host)) {
         context.Close (HttpStatusCode.NotImplemented);
         return;

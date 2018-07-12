@@ -30,7 +30,7 @@ using System;
 
 namespace WebSocketCore.Server
 {
-  internal class WebSocketServiceHost<TBehavior> : WebSocketServiceHost
+  internal class WebSocketServiceHost<TBehavior> : WebSocketServiceHostBase
     where TBehavior : WebSocketBehavior
   {
     #region Private Fields

@@ -27,10 +27,12 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Log4net\Surging.Core.Log4net.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.NLog\Surging.Core.Nlog.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Http\Surging.Core.Protocol.Http.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WS\Surging.Core.Protocol.WS.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.System\Surging.Core.System.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Zookeeper\Surging.Core.Zookeeper.csproj" />
+    <ProjectReference Include="..\..\WebSocket\WebSocketCore\WebSocketCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

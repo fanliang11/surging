@@ -48,7 +48,7 @@ namespace WebSocketCore.Server
     #region Private Fields
 
     private volatile bool                            _clean;
-    private Dictionary<string, WebSocketServiceHost> _hosts;
+    private Dictionary<string, WebSocketServiceHostBase> _hosts;
     private Logger                                   _log;
     private volatile ServerState                     _state;
     private object                                   _sync;
@@ -63,7 +63,7 @@ namespace WebSocketCore.Server
       _log = log;
 
       _clean = true;
-      _hosts = new Dictionary<string, WebSocketServiceHost> ();
+      _hosts = new Dictionary<string, WebSocketServiceHostBase> ();
       _state = ServerState.Ready;
       _sync = ((ICollection) _hosts).SyncRoot;
       _waitTime = TimeSpan.FromSeconds (1);
@@ -98,7 +98,7 @@ namespace WebSocketCore.Server
     ///   the collection of the host instances.
     ///   </para>
     /// </value>
-    public IEnumerable<WebSocketServiceHost> Hosts {
+    public IEnumerable<WebSocketServiceHostBase> Hosts {
       get {
         lock (_sync)
           return _hosts.Values.ToList ();
@@ -115,7 +115,7 @@ namespace WebSocketCore.Server
     /// </remarks>
     /// <value>
     ///   <para>
-    ///   A <see cref="WebSocketServiceHost"/> instance or
+    ///   A <see cref="WebSocketServiceHostBase"/> instance or
     ///   <see langword="null"/> if not found.
     ///   </para>
     ///   <para>
@@ -148,7 +148,7 @@ namespace WebSocketCore.Server
     ///   query and fragment components.
     ///   </para>
     /// </exception>
-    public WebSocketServiceHost this[string path] {
+    public WebSocketServiceHostBase this[string path] {
       get {
         if (path == null)
           throw new ArgumentNullException ("path");
@@ -164,7 +164,7 @@ namespace WebSocketCore.Server
           throw new ArgumentException (msg, "path");
         }
 
-        WebSocketServiceHost host;
+        WebSocketServiceHostBase host;
         InternalTryGetServiceHost (path, out host);
 
         return host;
@@ -412,7 +412,7 @@ namespace WebSocketCore.Server
       path = HttpUtility.UrlDecode (path).TrimSlashFromEnd ();
 
       lock (_sync) {
-        WebSocketServiceHost host;
+        WebSocketServiceHostBase host;
         if (_hosts.TryGetValue (path, out host))
           throw new ArgumentException ("Already in use.", "path");
 
@@ -434,7 +434,7 @@ namespace WebSocketCore.Server
     }
 
     internal bool InternalTryGetServiceHost (
-      string path, out WebSocketServiceHost host
+      string path, out WebSocketServiceHostBase host
     )
     {
       path = HttpUtility.UrlDecode (path).TrimSlashFromEnd ();
@@ -545,7 +545,7 @@ namespace WebSocketCore.Server
       path = HttpUtility.UrlDecode (path).TrimSlashFromEnd ();
 
       lock (_sync) {
-        WebSocketServiceHost host;
+        WebSocketServiceHostBase host;
         if (_hosts.TryGetValue (path, out host))
           throw new ArgumentException ("Already in use.", "path");
 
@@ -565,6 +565,49 @@ namespace WebSocketCore.Server
         _hosts.Add (path, host);
       }
     }
+
+        public void AddService(
+        string path, WebSocketBehavior webSocketBehavior)
+        {
+            if (path == null)
+                throw new ArgumentNullException("path");
+
+            if (path.Length == 0)
+                throw new ArgumentException("An empty string.", "path");
+
+            if (path[0] != '/')
+                throw new ArgumentException("Not an absolute path.", "path");
+
+            if (path.IndexOfAny(new[] { '?', '#' }) > -1)
+            {
+                var msg = "It includes either or both query and fragment components.";
+                throw new ArgumentException(msg, "path");
+            }
+
+            path = HttpUtility.UrlDecode(path).TrimSlashFromEnd();
+
+            lock (_sync)
+            {
+                WebSocketServiceHostBase host;
+                if (_hosts.TryGetValue(path, out host))
+                    throw new ArgumentException("Already in use.", "path");
+
+                host = new WebSocketServiceHost(
+                        path, webSocketBehavior, _log
+                               );
+
+                if (!_clean)
+                    host.KeepClean = false;
+
+                if (_waitTime != host.WaitTime)
+                    host.WaitTime = _waitTime;
+
+                if (_state == ServerState.Start)
+                    host.Start();
+
+                _hosts.Add(path, host);
+            }
+        }
 
     /// <summary>
     /// Sends <paramref name="data"/> to every client in the WebSocket services.
@@ -913,7 +956,7 @@ namespace WebSocketCore.Server
     /// </remarks>
     public void Clear ()
     {
-      List<WebSocketServiceHost> hosts = null;
+      List<WebSocketServiceHostBase> hosts = null;
 
       lock (_sync) {
         hosts = _hosts.Values.ToList ();
@@ -986,7 +1029,7 @@ namespace WebSocketCore.Server
 
       path = HttpUtility.UrlDecode (path).TrimSlashFromEnd ();
 
-      WebSocketServiceHost host;
+      WebSocketServiceHostBase host;
       lock (_sync) {
         if (!_hosts.TryGetValue (path, out host))
           return false;
@@ -1018,7 +1061,7 @@ namespace WebSocketCore.Server
     /// </param>
     /// <param name="host">
     ///   <para>
-    ///   When this method returns, a <see cref="WebSocketServiceHost"/>
+    ///   When this method returns, a <see cref="WebSocketServiceHostBase"/>
     ///   instance or <see langword="null"/> if not found.
     ///   </para>
     ///   <para>
@@ -1047,7 +1090,7 @@ namespace WebSocketCore.Server
     ///   query and fragment components.
     ///   </para>
     /// </exception>
-    public bool TryGetServiceHost (string path, out WebSocketServiceHost host)
+    public bool TryGetServiceHost (string path, out WebSocketServiceHostBase host)
     {
       if (path == null)
         throw new ArgumentNullException ("path");

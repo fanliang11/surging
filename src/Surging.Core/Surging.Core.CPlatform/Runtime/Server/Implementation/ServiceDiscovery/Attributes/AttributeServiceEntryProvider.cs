@@ -41,11 +41,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         /// <returns>服务条目集合。</returns>
         public IEnumerable<ServiceEntry> GetEntries()
         {
-            var services = _types.Where(i =>
-            {
-                var typeInfo = i.GetTypeInfo();
-                return typeInfo.IsInterface && typeInfo.GetCustomAttribute<ServiceBundleAttribute>() != null && _serviceProvider.Current.IsRegistered(i);
-            }).Distinct().ToArray();
+            var services = GetTypes();
 
             if (_logger.IsEnabled(LogLevel.Information))
             {
@@ -57,6 +53,16 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 entries.AddRange( _clrServiceEntryFactory.CreateServiceEntry(service));
             }
             return entries;
+        }
+
+        public IEnumerable<Type> GetTypes()
+        {
+            var services = _types.Where(i =>
+            {
+                var typeInfo = i.GetTypeInfo();
+                return typeInfo.IsInterface && typeInfo.GetCustomAttribute<ServiceBundleAttribute>() != null && _serviceProvider.Current.IsRegistered(i);
+            }).Distinct().ToArray();
+            return services;
         }
 
         #endregion Implementation of IServiceEntryProvider
