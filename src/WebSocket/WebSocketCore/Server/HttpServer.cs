@@ -459,12 +459,11 @@ namespace WebSocketCore.Server
     }
 
     /// <summary>
-    /// Gets a value indicating whether the server provides
-    /// secure connections.
+    /// Gets a value indicating whether secure connections are provided.
     /// </summary>
     /// <value>
-    /// <c>true</c> if the server provides secure connections;
-    /// otherwise, <c>false</c>.
+    /// <c>true</c> if this instance provides secure connections; otherwise,
+    /// <c>false</c>.
     /// </value>
     public bool IsSecure {
       get {
@@ -621,15 +620,23 @@ namespace WebSocketCore.Server
     /// Gets the configuration for secure connections.
     /// </summary>
     /// <remarks>
-    /// The configuration will be referenced when the server starts.
-    /// So you must configure it before calling the start method.
+    /// This configuration will be referenced when attempts to start,
+    /// so it must be configured before the start method is called.
     /// </remarks>
     /// <value>
     /// A <see cref="ServerSslConfiguration"/> that represents
     /// the configuration used to provide secure connections.
     /// </value>
+    /// <exception cref="InvalidOperationException">
+    /// This instance does not provide secure connections.
+    /// </exception>
     public ServerSslConfiguration SslConfiguration {
       get {
+        if (!_secure) {
+          var msg = "This instance does not provide secure connections.";
+          throw new InvalidOperationException (msg);
+        }
+
         return _listener.SslConfiguration;
       }
     }
@@ -759,11 +766,6 @@ namespace WebSocketCore.Server
     public event EventHandler<HttpRequestEventArgs> OnOptions;
 
     /// <summary>
-    /// Occurs when the server receives an HTTP PATCH request.
-    /// </summary>
-    public event EventHandler<HttpRequestEventArgs> OnPatch;
-
-    /// <summary>
     /// Occurs when the server receives an HTTP POST request.
     /// </summary>
     public event EventHandler<HttpRequestEventArgs> OnPost;
@@ -826,9 +828,6 @@ namespace WebSocketCore.Server
     {
       message = null;
 
-      if (!_secure)
-        return true;
-
       var byUser = _listener.SslConfiguration.ServerCertificate != null;
 
       var path = _listener.CertificateFolderPath;
@@ -836,13 +835,13 @@ namespace WebSocketCore.Server
 
       var both = byUser && withPort;
       if (both) {
-        _log.Warn ("The certificate associated with the port will be used.");
+        _log.Warn ("A server certificate associated with the port is used.");
         return true;
       }
 
       var either = byUser || withPort;
       if (!either) {
-        message = "There is no certificate used to authenticate the server.";
+        message = "There is no server certificate for secure connections.";
         return false;
       }
 
@@ -900,15 +899,13 @@ namespace WebSocketCore.Server
                       ? OnPut
                       : method == "DELETE"
                         ? OnDelete
-                        : method == "OPTIONS"
-                          ? OnOptions
-                          : method == "TRACE"
-                            ? OnTrace
-                            : method == "CONNECT"
-                              ? OnConnect
-                              : method == "PATCH"
-                                ? OnPatch
-                                : null;
+                        : method == "CONNECT"
+                          ? OnConnect
+                          : method == "OPTIONS"
+                            ? OnOptions
+                            : method == "TRACE"
+                              ? OnTrace
+                              : null;
 
       if (evt != null)
         evt (this, new HttpRequestEventArgs (context, _docRootPath));
@@ -920,7 +917,13 @@ namespace WebSocketCore.Server
 
     private void processRequest (HttpListenerWebSocketContext context)
     {
-      var path = context.RequestUri.AbsolutePath;
+      var uri = context.RequestUri;
+      if (uri == null) {
+        context.Close (HttpStatusCode.BadRequest);
+        return;
+      }
+
+      var path = uri.AbsolutePath;
 
       WebSocketServiceHostBase host;
       if (!_services.InternalTryGetServiceHost (path, out host)) {
@@ -940,7 +943,7 @@ namespace WebSocketCore.Server
           ThreadPool.QueueUserWorkItem (
             state => {
               try {
-                if (ctx.Request.IsUpgradeTo ("websocket")) {
+                if (ctx.Request.IsUpgradeRequest ("websocket")) {
                   processRequest (ctx.AcceptWebSocket (null));
                   return;
                 }
@@ -1451,12 +1454,12 @@ namespace WebSocketCore.Server
     /// Starts receiving incoming requests.
     /// </summary>
     /// <remarks>
-    /// This method does nothing if the server has already
-    /// started or it is shutting down.
+    /// This method does nothing if the server has already started or
+    /// it is shutting down.
     /// </remarks>
     /// <exception cref="InvalidOperationException">
     ///   <para>
-    ///   There is no certificate used to authenticate the server.
+    ///   There is no server certificate for secure connections.
     ///   </para>
     ///   <para>
     ///   -or-
@@ -1467,9 +1470,11 @@ namespace WebSocketCore.Server
     /// </exception>
     public void Start ()
     {
-      string msg;
-      if (!checkCertificate (out msg))
-        throw new InvalidOperationException (msg);
+      if (_secure) {
+        string msg;
+        if (!checkCertificate (out msg))
+          throw new InvalidOperationException (msg);
+      }
 
       start ();
     }

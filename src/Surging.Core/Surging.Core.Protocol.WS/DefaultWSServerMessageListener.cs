@@ -30,6 +30,9 @@ namespace Surging.Core.Protocol.WS
             {
                 foreach (var entry in _entries)
                     _wssv.AddWebSocketService(entry.Path, entry.Behavior);
+                _wssv.KeepClean = true;
+                _wssv.AllowForwardedRequest = true;
+
                 _wssv.Start();
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"WS服务主机启动成功，监听地址：{endPoint}。");
@@ -39,6 +42,14 @@ namespace Surging.Core.Protocol.WS
                 _logger.LogError($"WS服务主机启动失败，监听地址：{endPoint}。 ");
             }
          
+        }
+
+        public WebSocketServer  Server
+        {
+            get
+            {
+                return _wssv;
+            }
         }
 
         public event ReceivedDelegate Received;

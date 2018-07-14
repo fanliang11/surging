@@ -61,6 +61,11 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             }
         }
 
+        public async Task<ServiceRoute> SearchRoute(string path)
+        {
+            return await SearchRouteAsync(path);
+        }
+
         #region 私有方法
         private static string GetCacheKey(ServiceDescriptor descriptor)
         {
@@ -82,11 +87,24 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             _serviceRoute.GetOrAdd(e.Route.ServiceDescriptor.RoutePath, e.Route);
         }
 
+        private async Task<ServiceRoute> SearchRouteAsync(string path)
+        {
+            var routes = await _serviceRouteManager.GetRoutesAsync();
+            var route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath.Contains(path));
+            if (route == null)
+            {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                    _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
+            }
+            else
+                _serviceRoute.GetOrAdd(path, route);
+            return route;
+        }
 
         private async Task<ServiceRoute> GetRouteByPathAsync(string path)
         {
             var routes = await _serviceRouteManager.GetRoutesAsync();
-            var  route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath == path);
+            var  route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath==path);
             if (route == null)
             {
                 if (_logger.IsEnabled(LogLevel.Warning))

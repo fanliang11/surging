@@ -51,7 +51,7 @@ namespace Surging.Core.CPlatform.Routing.Template
                 result.Append("/");
             }
 
-            return result.ToString().ToLower();
+            return result.ToString().TrimEnd('/').ToLower();
         }
 
         private static List<string> GetParameters(string text)

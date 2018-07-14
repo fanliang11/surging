@@ -3,9 +3,11 @@ using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Utilities;
+using Surging.Core.Protocol.WS.Runtime;
 using Surging.Core.ProxyGenerator;
 using System;
 using WebSocketCore.Server;
+using System.Linq;
 
 namespace Surging.Core.Protocol.WS
 {
@@ -63,6 +65,17 @@ namespace Surging.Core.Protocol.WS
             else
                 return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key, type);
 
+        }
+
+        public WebSocketSessionManager GetClient()
+        {
+            WebSocketSessionManager result = null;
+            var server = ServiceLocator.GetService<DefaultWSServerMessageListener>().Server;
+            var entries = ServiceLocator.GetService<IWSServiceEntryProvider>().GetEntries();
+            var entry = entries.Where(p => p.Type == this.GetType()).FirstOrDefault();
+            if (server.WebSocketServices.TryGetServiceHost(entry.Path, out WebSocketServiceHostBase webSocketServiceHost))
+                result = webSocketServiceHost.Sessions;
+            return result;
         }
 
         public void Publish(IntegrationEvent @event)

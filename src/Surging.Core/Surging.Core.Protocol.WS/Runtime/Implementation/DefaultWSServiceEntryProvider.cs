@@ -19,7 +19,8 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
 
         private readonly IEnumerable<Type> _types;
         private readonly ILogger<DefaultWSServiceEntryProvider> _logger;
-        private readonly CPlatformContainer _serviceProvider; 
+        private readonly CPlatformContainer _serviceProvider;
+        private List<WSServiceEntry> _wSServiceEntries;
 
         #endregion Field
 
@@ -43,20 +44,23 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
         public IEnumerable<WSServiceEntry> GetEntries()
         {
             var services = _types.ToArray();
-            var entries = new List<WSServiceEntry>();
-            foreach (var service in services)
+            if (_wSServiceEntries == null)
             {
-                var entry = CreateServiceEntry(service);
-                if (entry != null)
+                _wSServiceEntries = new List<WSServiceEntry>();
+                foreach (var service in services)
                 {
-                    entries.Add(entry);
+                    var entry = CreateServiceEntry(service);
+                    if (entry != null)
+                    {
+                        _wSServiceEntries.Add(entry);
+                    }
+                }
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug($"发现了以下WS服务：{string.Join(",", _wSServiceEntries.Select(i => i.Type.FullName))}。");
                 }
             }
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                _logger.LogDebug($"发现了以下WS服务：{string.Join(",", entries.Select(i => i.Type.FullName))}。");
-            }
-            return entries;
+            return _wSServiceEntries;
         }
         #endregion
 
@@ -67,7 +71,7 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
             var objInstance = _serviceProvider.GetInstances(service);
             var behavior = objInstance as WebSocketBehavior;
             var path = RoutePatternParser.Parse(routeTemplate.RouteTemplate, service.Name);
-            if (path[0] != '/')
+            if (path.Length>0 && path[0] != '/')
                 path = $"/{path}";
             if (behavior != null)
                 result = new WSServiceEntry
