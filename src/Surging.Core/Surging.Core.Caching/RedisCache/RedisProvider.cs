@@ -22,6 +22,7 @@ namespace Surging.Core.Caching.RedisCache
         private Lazy<int> _connectTimeout;
         private readonly Lazy<ICacheClient<IDatabase>> _cacheClient;
         private readonly IAddressResolver addressResolver;
+        private readonly string _appName;
         #endregion
 
         #region 构造函数
@@ -34,7 +35,8 @@ namespace Surging.Core.Caching.RedisCache
                 else
                     return CacheContainer.GetInstances<RedisContext>(appName);
             });
-            _keySuffix = appName;
+            _appName = appName;
+            //_keySuffix = appName;
             _defaultExpireTime = new Lazy<long>(() => long.Parse(_context.Value._defaultExpireTime));
             _connectTimeout = new Lazy<int>(() => int.Parse(_context.Value._connectTimeout));
             if (CacheContainer.IsRegistered<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()))
@@ -51,8 +53,23 @@ namespace Surging.Core.Caching.RedisCache
 
         }
         #endregion
+        protected IDatabase GetRedisClient(string key)
+        {
+            var node = GetRedisNode(key);
+            var redis = GetRedisClient(new RedisEndpoint()
+            {
+                DbIndex = int.Parse(node.Db),
+                Host = node.Host,
+                Password = node.Password,
+                Port = int.Parse(node.Port),
+                MinSize = int.Parse(node.MinSize),
+                MaxSize = int.Parse(node.MaxSize),
+            });
+            return redis;
+        }
 
         #region 公共方法
+
         /// <summary>
         /// 添加K/V值
         /// </summary>
@@ -142,7 +159,6 @@ namespace Surging.Core.Caching.RedisCache
             this.AddTaskAsync(key, value, TimeSpan.FromMinutes(numOfMinutes));
         }
 
-
         /// <summary>
         /// 添加k/v值
         /// </summary>
@@ -155,16 +171,7 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public void Add(string key, object value, TimeSpan timeSpan)
         {
-            var node = GetRedisNode(key);
-            var redis = GetRedisClient(new RedisEndpoint()
-            {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
+            var redis = GetRedisClient(key);
             redis.Set(GetKeySuffix(key), value, timeSpan);
         }
 
@@ -198,17 +205,7 @@ namespace Surging.Core.Caching.RedisCache
             IDictionary<string, T> result = null;
             foreach (var key in keys)
             {
-
-                var node = GetRedisNode(key);
-                var redis = GetRedisClient(new RedisEndpoint()
-                {
-                    DbIndex = int.Parse(node.Db),
-                    Host = node.Host,
-                    Password = node.Password,
-                    Port = int.Parse(node.Port),
-                    MinSize = int.Parse(node.MinSize),
-                    MaxSize = int.Parse(node.MaxSize),
-                });
+                var redis = GetRedisClient(key);
                 result.Add(key, redis.Get<T>(key));
             }
             return result;
@@ -229,17 +226,7 @@ namespace Surging.Core.Caching.RedisCache
             IDictionary<string, T> result = null;
             foreach (var key in keys)
             {
-
-                var node = GetRedisNode(key);
-                var redis = GetRedisClient(new RedisEndpoint()
-                {
-                    DbIndex = int.Parse(node.Db),
-                    Host = node.Host,
-                    Password = node.Password,
-                    Port = int.Parse(node.Port),
-                    MinSize = int.Parse(node.MinSize),
-                    MaxSize = int.Parse(node.MaxSize),
-                });
+                var redis = GetRedisClient(key);
                 result.Add(key, await redis.GetAsync<T>(key));
             }
             return result;
@@ -283,22 +270,11 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public T Get<T>(string key)
         {
-            var node = GetRedisNode(key);
+            var redis = GetRedisClient(key);
             var result = default(T);
-            var redis = GetRedisClient(new RedisEndpoint()
-            {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
             result = redis.Get<T>(GetKeySuffix(key));
             return result;
         }
-
-
 
         /// <summary>
         /// 根据KEY异步获取指定的类型对象
@@ -308,20 +284,9 @@ namespace Surging.Core.Caching.RedisCache
         /// <returns></returns>
         public async Task<T> GetAsync<T>(string key)
         {
-            var node = GetRedisNode(key);
-            var redis = GetRedisClient(new RedisEndpoint()
-            {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
-
+            var redis = GetRedisClient(key);
             var result = await Task.Run(() => redis.Get<T>(GetKeySuffix(key)));
             return result;
-
         }
 
         /// <summary>
@@ -352,18 +317,8 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public void Remove(string key)
         {
-            var node = GetRedisNode(key);
-            var redis = GetRedisClient(new RedisEndpoint()
-            {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
+            var redis = GetRedisClient(key);
             redis.Remove(GetKeySuffix(key));
-
         }
 
         /// <summary>
@@ -431,7 +386,7 @@ namespace Surging.Core.Caching.RedisCache
         {
             if (addressResolver != null)
             {
-                return addressResolver.Resolver($"{KeySuffix}.{CacheTargetType.Redis.ToString()}", item).Result;
+                return addressResolver.Resolver($"{_appName}.{CacheTargetType.Redis.ToString()}", item).Result;
             }
             else
             {
@@ -469,7 +424,5 @@ namespace Surging.Core.Caching.RedisCache
         }
 
         #endregion
-
-
     }
 }
