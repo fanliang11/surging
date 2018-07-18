@@ -18,18 +18,7 @@ namespace Surging.Modules.Common.Domain
         private static readonly ConcurrentDictionary<string, string> _users = new ConcurrentDictionary<string, string>();
         private static readonly ConcurrentDictionary<string, string> _clients = new ConcurrentDictionary<string, string>();
         private string _name;
-        private  int _number = 0;
-     
-
-        private  int getNumber()
-        {
-            return Interlocked.Increment(ref _number);
-        }
-
-        protected override void OnClose(CloseEventArgs e)
-        {
-            //Sessions.Broadcast(String.Format("{0} got logged off...", _name));
-        }
+       
 
         protected override void OnMessage(MessageEventArgs e)
         {
@@ -38,11 +27,9 @@ namespace Surging.Modules.Common.Domain
                 Dictionary<string, object> model = new Dictionary<string, object>();
                 model.Add("name", _clients[ID]);
                 model.Add("data", e.Data);
-               var result=  ServiceLocator.GetService<IServiceProxyProvider>()
-                    .Invoke<object>(model, "api/chat/SendMessage").Result;
+                var result = ServiceLocator.GetService<IServiceProxyProvider>()
+                     .Invoke<object>(model, "api/chat/SendMessage").Result;
 
-                //this.CreateProxy<IChatService>()
-                //    .SendMessage(_clients[ID], e.Data);
             }
         }
 
@@ -59,7 +46,6 @@ namespace Surging.Modules.Common.Domain
         {
             if (_users.ContainsKey(name))
             { 
-                
                 this.GetClient().SendTo($"hello,{name},{data}", _users[name]);
             }
             return Task.CompletedTask;

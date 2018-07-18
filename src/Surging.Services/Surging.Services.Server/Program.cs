@@ -55,12 +55,14 @@ namespace Surging.Services.Server
                 .Configure(build =>
                 build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false, reloadOnChange: true))
                   .Configure(build =>
+                build.AddCPlatformFile("${appsettingspath}|Configs/appsettings.json", optional: false, reloadOnChange: true))
+                .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseStartup<Startup>()
                 .Build();
 
             using (host.Run())
-            {
+            { 
                 Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
             }
         }
