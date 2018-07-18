@@ -18,6 +18,8 @@ using System.Diagnostics;
 using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Utilities;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace Surging.Core.CPlatform
 {
@@ -125,7 +127,11 @@ namespace Surging.Core.CPlatform
             if (container.IsRegistered<IServiceEngine>())
             {
                 var builder = new ContainerBuilder();
+
                 container.Resolve<IServiceEngineBuilder>().Build(builder);
+                 var configBuilder=  container.Resolve<IConfigurationBuilder>();
+                var appSettingPath = Path.Combine(AppConfig.ServerOptions.RootPath, "appsettings.json");
+                configBuilder.AddCPlatformFile("${appsettingspath}|"+ appSettingPath, optional: false, reloadOnChange: true);
                 builder.Update(container);
             }
         }

@@ -9,7 +9,7 @@
     "MaxConcurrentRequests": 20,
     "ExecutionTimeoutInMilliseconds": 30000,
     "Protocol": "${Protocol}|None", //Http¡¢Tcp¡¢None
-    "RootPath": "${RootPath}|D:\\microsurging2",
+    "RootPath": "${RootPath}|D:\\userapp",
     "Ports": {
       "HttpPort": "${HttpPort}|280",
       "WSPort": "${WSPort}|96"
