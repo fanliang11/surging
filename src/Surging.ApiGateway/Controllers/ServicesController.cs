@@ -16,6 +16,7 @@ using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
 using System.Reflection;
 using Surging.Core.CPlatform.Utilities;
 using Newtonsoft.Json.Linq;
+using Surging.Core.CPlatform.Transport.Implementation;
 
 namespace Surging.ApiGateway.Controllers
 {
@@ -132,6 +133,7 @@ namespace Surging.ApiGateway.Controllers
                     {
                         dynamic instance = keyValue.Value;
                         instance.Payload = _authorizationServerProvider.GetPayloadString(author);
+                        RpcContext.GetContext().SetAttachment("payload", instance.Payload);
                         model.Remove(keyValue.Key);
                         model.Add(keyValue.Key, instance);
                     }
