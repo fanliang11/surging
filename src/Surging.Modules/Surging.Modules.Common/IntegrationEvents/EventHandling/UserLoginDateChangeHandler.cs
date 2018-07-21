@@ -8,11 +8,12 @@ using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Attributes;
+using Surging.Core.EventBusRabbitMQ;
 
 namespace Surging.Modules.Common.IntegrationEvents.EventHandling
 {
 
-    [QueueConsumer("UserLoginDateChangeHandler")]
+    [QueueConsumer("UserLoginDateChangeHandler", QueueConsumerMode.Normal, QueueConsumerMode.Retry, QueueConsumerMode.Rollback)]
     public  class UserLoginDateChangeHandler : IIntegrationEventHandler<UserEvent>
     {
         private readonly IUserService _userService;
