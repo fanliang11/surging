@@ -17,5 +17,9 @@ namespace Surging.Core.EventBusRabbitMQ.Configurations
         public string Port { get; set; } = "5672";
 
         public string BrokerName { get; set; } = "surging";
+
+        public int RetryCount { get; set; } = 3;
+
+        public int MessageTTL { get; set; } = 30 * 1000;
     }
 }

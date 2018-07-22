@@ -33,6 +33,8 @@
     "EventBusUserName": "guest",
     "EventBusPassword": "guest",
     "VirtualHost": "/",
+    "MessageTTL": 30000,
+    "RetryCount": 3,
     "BrokerName": "surging_demo",
     "Port": "5672"
   },

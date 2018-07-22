@@ -47,6 +47,8 @@ namespace Surging.Core.EventBusRabbitMQ
                 };
                 factory.RequestedHeartbeat = 60;
                 AppConfig.BrokerName = option.BrokerName;
+                AppConfig.MessageTTL = option.MessageTTL;
+                AppConfig.RetryCount = option.RetryCount;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();
             return builder;
