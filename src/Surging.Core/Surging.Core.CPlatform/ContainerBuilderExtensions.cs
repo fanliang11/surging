@@ -84,7 +84,7 @@ namespace Surging.Core.CPlatform
     public static class ContainerBuilderExtensions
     {
         private static List<Assembly> _referenceAssembly = new List<Assembly>();
-
+        private static List<AbstractModule> _modules = new List<AbstractModule>();
         /// <summary>
         /// 添加Json序列化支持。
         /// </summary>
@@ -362,7 +362,7 @@ namespace Surging.Core.CPlatform
                 var exceptionFilter = filter as IExceptionFilter;
                 services.Register(p => exceptionFilter).As(typeof(IExceptionFilter)).SingleInstance();
             }
-            else if(typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
+            else if (typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
             {
                 var exceptionFilter = filter as IAuthorizationFilter;
                 services.Register(p => exceptionFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
@@ -386,7 +386,9 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddServiceRuntime(this IServiceBuilder builder)
         {
             builder.Services.RegisterType(typeof(DefaultServiceEntryLocate)).As(typeof(IServiceEntryLocate)).SingleInstance();
-            builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor)).SingleInstance();
+            builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor))
+                .Named<IServiceExecutor>(CommunicationProtocol.Tcp.ToString()).SingleInstance();
+
             return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().AddRuntime();
         }
 
@@ -423,6 +425,7 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
             services.RegisterType(typeof(ServiceTokenGenerator)).As(typeof(IServiceTokenGenerator)).SingleInstance();
             services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
+            services.RegisterType(typeof(ServiceEngineLifetime)).As(typeof(IServiceEngineLifetime)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
@@ -446,7 +449,6 @@ namespace Surging.Core.CPlatform
                 }
                 finally
                 {
-                     _referenceAssembly.Clear();
                     builder = null;
                 }
             }).As<IServiceEntryProvider>();
@@ -464,7 +466,7 @@ namespace Surging.Core.CPlatform
         /// </summary>
         /// <param name="builder">ioc容器</param>
         /// <returns>返回注册模块信息</returns>
-        public static IServiceBuilder RegisterServices(this IServiceBuilder builder,params string [] virtualPaths)
+        public static IServiceBuilder RegisterServices(this IServiceBuilder builder, params string[] virtualPaths)
         {
             try
             {
@@ -476,9 +478,9 @@ namespace Surging.Core.CPlatform
                        .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface)
                        .AsImplementedInterfaces();
                     services.RegisterAssemblyTypes(assembly)
-                 .Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+                 .Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
 
-                    var types = assembly.GetTypes().Where(t => typeof(ServiceBase).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
+                    var types = assembly.GetTypes().Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
                     foreach (var type in types)
                     {
                         var module = type.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>();
@@ -494,7 +496,7 @@ namespace Surging.Core.CPlatform
                 }
                 return builder;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (ex is System.Reflection.ReflectionTypeLoadException)
                 {
@@ -502,15 +504,15 @@ namespace Surging.Core.CPlatform
                     var loaderExceptions = typeLoadException.LoaderExceptions;
                     throw loaderExceptions[0];
                 }
-                throw ex; 
+                throw ex;
             }
         }
 
         public static IServiceBuilder RegisterServiceBus
-            (this IServiceBuilder builder)
+            (this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly();
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
 
             foreach (var assembly in referenceAssemblies)
             {
@@ -547,17 +549,26 @@ namespace Surging.Core.CPlatform
             var services = builder.Services;
             var referenceAssemblies = GetReferenceAssembly(virtualPaths);
             if (builder == null) throw new ArgumentNullException("builder");
-            List<AbstractModule> modules = new List<AbstractModule>();
+            var packages = ConvertDictionary(AppConfig.ServerOptions.Packages);
             foreach (var moduleAssembly in referenceAssemblies)
             {
                 GetAbstractModules(moduleAssembly).ForEach(p =>
                 {
                     services.RegisterModule(p);
-                    modules.Add(p);
+                    if (packages.ContainsKey(p.TypeName))
+                    {
+                        var useModules = packages[p.TypeName];
+                        if (useModules.AsSpan().IndexOf(p.ModuleName) >= 0)
+                            p.Enable = true;
+                        else
+                            p.Enable = false;
+                    }
+
+                    _modules.Add(p);
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               modules
+               _modules,provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }
@@ -579,13 +590,24 @@ namespace Surging.Core.CPlatform
             var referenceAssemblies = builder.GetInterfaceService();
             referenceAssemblies.ForEach(p =>
             {
-                namespaces.AddRange( p.Assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() !=null).Select(n=>n.Namespace));
+                namespaces.AddRange(p.Assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() != null).Select(n => n.Namespace));
             });
             return namespaces.Distinct();
         }
 
+        private static IDictionary<string, string> ConvertDictionary(List<ModulePackage> list)
+        {
+           var result = new Dictionary<string, string>();
+            list.ForEach(p =>
+            {
+                result.Add(p.TypeName, p.Using);
+            });
+            return result;
+        }
+
         private static List<Assembly> GetReferenceAssembly(params string[] virtualPaths)
         {
+            var refAssemblies = new List<Assembly>();
             var rootPath = AppContext.BaseDirectory;
             var existsPath = virtualPaths.Any();
             if (existsPath && !string.IsNullOrEmpty(AppConfig.ServerOptions.RootPath))
@@ -598,13 +620,15 @@ namespace Surging.Core.CPlatform
                 paths.ForEach(path =>
                 {
                     var assemblyFiles = GetAllAssemblyFiles(path);
+                    
                     foreach (var referencedAssemblyFile in assemblyFiles)
                     {
                         var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
                         if (!_referenceAssembly.Contains(referencedAssembly))
                             _referenceAssembly.Add(referencedAssembly);
+                        refAssemblies.Add(referencedAssembly);
                     }
-                    result = _referenceAssembly;
+                    result = existsPath ? refAssemblies: _referenceAssembly;
                 });
             }
             return result;
@@ -628,7 +652,7 @@ namespace Surging.Core.CPlatform
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac.\\w*|Surging.Core.\\w*{0}",
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);

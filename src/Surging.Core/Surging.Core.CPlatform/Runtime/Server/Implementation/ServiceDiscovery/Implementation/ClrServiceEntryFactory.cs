@@ -82,6 +82,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
+                 RoutePath= serviceDescriptor.RoutePath,
+                 MethodName=method.Name,
+                  Type= method.DeclaringType,
                 Attributes = attributes,
                 Func = (key, parameters) =>
              {

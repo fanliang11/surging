@@ -14,6 +14,7 @@ using Surging.Core.EventBusKafka.Configurations;
 using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.Log4net;
 using Surging.Core.Nlog;
+using Surging.Core.Protocol.Http;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting;
 using Surging.Core.ServiceHosting.Internal.Implementation;
@@ -39,53 +40,22 @@ namespace Surging.Services.Server
                         option.AddServiceRuntime()
                         .AddRelateService()
                         .AddConfigurationWatch()
-                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-                        .UseConsulManager()
-                        .UseDotNettyTransport()
-                        .UseRabbitMQTransport()
-                        .AddRabbitMQAdapt()
-                        .AddCache()
-                        .AddServiceEngine(typeof(SurgingServiceEngine))
-                        //.UseKafkaMQTransport(kafkaOption =>
-                        //{
-                        //    kafkaOption.Servers = "127.0.0.1";
-                        //    kafkaOption.LogConnectionClose = false;
-                        //    kafkaOption.MaxQueueBuffering = 10;
-                        //    kafkaOption.MaxSocketBlocking = 10;
-                        //    kafkaOption.EnableAutoCommit = false;
-                        //})
-                        //.AddKafkaMQAdapt()
-                        //.UseProtoBufferCodec()
-                        .UseMessagePackCodec();
+                        //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181")); 
+                        .AddServiceEngine(typeof(SurgingServiceEngine));
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
                 })
-              .SubscribeAt() 
-               // .UseLog4net(LogLevel.Error, "Configs/log4net.config")
-                .UseNLog(LogLevel.Error, "Configs/NLog.config")
-                //.UseServer("127.0.0.1", 98)
-                //.UseServer("127.0.0.1", 98，“true”) //自动生成Token
-                //.UseServer("127.0.0.1", 98，“123456789”) //固定密码Token
-                .UseServer(options =>
+                .ConfigureLogging(logger =>
                 {
-                    // options.IpEndpoint = new IPEndPoint(IPAddress.Any, 98);  
-                    options.Token = "True";
-                    options.ExecutionTimeoutInMilliseconds = 30000;
-                    options.MaxConcurrentRequests = 200;
+                    logger.AddConfiguration(
+                        Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
-                .UseServiceCache()
-               // .UseConsoleLifetime()
-               // .Configure(build =>
-               //build.AddZookeeperFile("Configs/zookeeper.json", optional: false))
-               .Configure(build =>
-                build.AddConsulFile("Configs/consul.json", optional: false))
+                .UseServer(options =>{ })
+                .UseConsoleLifetime()
                 .Configure(build =>
-                build.AddEventBusFile("eventBusSettings.json", optional: false))
-                .Configure(build =>
-                build.AddCacheFile("cacheSettings.json", optional: false,reloadOnChange:true))
+                build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false, reloadOnChange: true))
                   .Configure(build =>
-                build.AddCPlatformFile("surgingSettings.json", optional: false, reloadOnChange: true))
-                .UseProxy()
+                build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseStartup<Startup>()
                 .Build();
 

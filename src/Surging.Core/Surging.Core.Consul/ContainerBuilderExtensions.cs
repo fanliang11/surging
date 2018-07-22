@@ -11,8 +11,7 @@ using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Surging.Core.Consul
 {
@@ -99,6 +98,7 @@ namespace Surging.Core.Consul
             return builder;
         }
 
+        [Obsolete]
         public static IServiceBuilder UseConsulManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseConsulRouteManager(configInfo)
@@ -107,6 +107,7 @@ namespace Surging.Core.Consul
                .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
         }
 
+        [Obsolete]
         public static IServiceBuilder UseConsulManager(this IServiceBuilder builder)
         {
             var configInfo = new ConfigInfo(null);
@@ -119,25 +120,28 @@ namespace Surging.Core.Consul
 
         private static ConfigInfo GetConfigInfo(ConfigInfo config)
         {
-            if (AppConfig.Configuration != null)
+            ConsulOption option = null;
+            var section = CPlatform.AppConfig.GetSection("Consul");
+            if (section.Exists())
+                option = section.Get<ConsulOption>();
+            else if(AppConfig.Configuration!=null)
+                option = AppConfig.Configuration.Get<ConsulOption>();
+            if (option != null)
             {
                 var sessionTimeout = config.SessionTimeout.TotalSeconds;
-                Double.TryParse(AppConfig.Configuration["SessionTimeout"], out sessionTimeout);
-                var conn = AppConfig.Configuration["ConnectionString"];
+                Double.TryParse(option.SessionTimeout, out sessionTimeout);
                 config = new ConfigInfo(
-                    AppConfig.Configuration["ConnectionString"],
+                   option.ConnectionString,
                     TimeSpan.FromSeconds(sessionTimeout),
-                    AppConfig.Configuration["RoutePath"] ?? config.RoutePath,
-                    AppConfig.Configuration["SubscriberPath"] ?? config.SubscriberPath,
-                    AppConfig.Configuration["CommandPath"] ?? config.CommandPath,
-                    AppConfig.Configuration["CachePath"] ?? config.CachePath,
-                    AppConfig.Configuration["ReloadOnChange"] != null ? bool.Parse(AppConfig.Configuration["ReloadOnChange"]) :
+                    option.RoutePath ?? config.RoutePath,
+                    option.SubscriberPath ?? config.SubscriberPath,
+                    option.CommandPath  ?? config.CommandPath,
+                    option.CachePath ?? config.CachePath,
+                   option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
                     config.ReloadOnChange,
-                    AppConfig.Configuration["EnableChildrenMonitor"] != null ? bool.Parse(AppConfig.Configuration["EnableChildrenMonitor"]) :
+                    option.EnableChildrenMonitor != null ? bool.Parse(option.EnableChildrenMonitor) :
                     config.EnableChildrenMonitor
                    );
-
-               
             }
             return config;
         }

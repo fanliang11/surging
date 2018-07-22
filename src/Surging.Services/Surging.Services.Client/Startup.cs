@@ -67,7 +67,7 @@ namespace Surging.Services.Client
             build
               .AddCacheFile("cacheSettings.json", optional: false);
         }
-        
+
         /// <summary>
         /// 测试
         /// </summary>
@@ -77,27 +77,29 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                await userProxy.GetUserName(1);
-                var apiResult = await userProxy.GetApiResult();
-                await userProxy.PublishThroughEventBusAsync(new UserEvent
+                var v =  userProxy.GetUserId("fanly").GetAwaiter().GetResult();
+                var fa=   userProxy.GetUserName(1).GetAwaiter().GetResult();
+                var v1 = userProxy.GetUserLastSignInTime(1).Result;
+                var apiResult =  userProxy.GetApiResult().GetAwaiter().GetResult();
+                userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
                     UserId = "1",
                     Name = "fanly"
-                });
-        
-                var d = await userProxy.GetUser(new UserModel
+                }).Wait();
+
+                  userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
-                    UserId = 1,
+                    UserId = "1",
                     Name = "fanly"
-                });
-              
-              var r=  await userProxy.GetDictionary();
+                }).Wait();
+
+                var r = await userProxy.GetDictionary();
                 var serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
 
                 do
                 {
                     Console.WriteLine("正在循环 1w次调用 GetUser.....");
-                
+
                     //1w次调用
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)

@@ -117,19 +117,7 @@ namespace Surging.Core.CPlatform.Configurations.Remote
         {
             var key = _currentPath;
             Check.CheckCondition(() => _data.ContainsKey(key), "key");
-            _data[key] = data.ToString();
-            var param= GetParameters( data.ToString()).FirstOrDefault();
-            if(!string.IsNullOrEmpty(param))
-            {
-                 var env = EnvironmentHelper.GetEnvironmentVariable(param);
-                _data[key] = env;
-                if (string.IsNullOrEmpty(env))
-                {
-                   var arrayData= data.ToString().Split("|");
-                    _data[key] = arrayData.Length == 2 ? arrayData[1] : env;
-                }
-            }
-           
+            _data[key] = EnvironmentHelper.GetEnvironmentVariable(data.ToString());
         }
 
         private void EnterContext(string context)

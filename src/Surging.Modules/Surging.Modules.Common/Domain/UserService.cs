@@ -26,6 +26,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<string> GetUserName(int id)
         {
+            this.GetService<IManagerService>().SayHello("fanly");
             return Task.FromResult($"id:{id} is name fanly.");
         }
 
@@ -42,7 +43,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<DateTime> GetUserLastSignInTime(int id)
         {
-            return Task.FromResult(new DateTime(DateTime.Now.Ticks, DateTimeKind.Utc));
+            return Task.FromResult(new DateTime(DateTime.Now.Ticks));
         }
 
         public Task<bool> Get(List<UserModel> users)
@@ -104,6 +105,11 @@ namespace Surging.Modules.Common.Domain
         public Task<ApiResult<UserModel>> GetApiResult()
         {
             return Task.FromResult(new ApiResult<UserModel>() { Value = new UserModel { Name = "fanly" }, StatusCode = 200 });
+        }
+
+        public Task<string> GetUser(List<int> idList)
+        {
+            return Task.FromResult("type is List<int>");
         }
         #endregion Implementation of IUserService
     }

@@ -9,6 +9,8 @@ using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using Surging.Core.EventBusRabbitMQ.Configurations;
+using Microsoft.Extensions.Configuration;
 
 namespace Surging.Core.EventBusRabbitMQ
 {
@@ -28,16 +30,23 @@ namespace Surging.Core.EventBusRabbitMQ
             builder.Services.RegisterType(typeof(InMemoryEventBusSubscriptionsManager)).As(typeof(IEventBusSubscriptionsManager)).SingleInstance();
             builder.Services.Register(provider =>
             {
-                var logger = provider.Resolve<ILogger<DefaultRabbitMQPersistentConnection>>();        
+                var logger = provider.Resolve<ILogger<DefaultRabbitMQPersistentConnection>>();
+                EventBusOption option = new EventBusOption();
+                var section = CPlatform.AppConfig.GetSection("EventBus");
+                if (section.Exists())
+                    option = section.Get<EventBusOption>();
+                else if (AppConfig.Configuration != null)
+                    option = AppConfig.Configuration.Get<EventBusOption>();
                 var factory = new ConnectionFactory()
                 {
-                    HostName = AppConfig.HostName,
-                    UserName =  AppConfig.RabbitUserName,
-                    Password = AppConfig.RabbitPassword,
-                    VirtualHost= AppConfig.VirtualHost,
-                    Port = int.Parse(AppConfig.Port),
+                    HostName = option.EventBusConnection,
+                    UserName = option.EventBusUserName,
+                    Password = option.EventBusPassword,
+                    VirtualHost= option.VirtualHost,
+                    Port = int.Parse(option.Port),
                 };
                 factory.RequestedHeartbeat = 60;
+                AppConfig.BrokerName = option.BrokerName;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();
             return builder;

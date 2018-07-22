@@ -42,7 +42,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             try
             {
                 var endPoint = address.CreateEndPoint();
-                invokeMessage.Token = address.Token;
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
                 var client = _transportClientFactory.CreateClient(endPoint);
@@ -67,7 +66,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             try
             {
                 var endPoint = address.CreateEndPoint();
-                invokeMessage.Token = address.Token;
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
                 var client = _transportClientFactory.CreateClient(endPoint);

@@ -40,6 +40,11 @@ namespace Surging.Core.CPlatform
             }
         }
 
+        public static IConfigurationSection GetSection(string name)
+        {
+            return Configuration?.GetSection(name);
+        }
+
         public static SurgingServerOptions ServerOptions
         {
             get

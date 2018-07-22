@@ -12,11 +12,19 @@ namespace Surging.Core.EventBusRabbitMQ.Attributes
             get { return _queueName; }
         }
 
+        public QueueConsumerMode[] Mode
+        {
+            get { return _modes; }
+        }
+
         private string _queueName { get; set; }
 
-        public QueueConsumerAttribute(string queueName)
+        private QueueConsumerMode[] _modes { get; set; }
+
+        public QueueConsumerAttribute(string queueName,params QueueConsumerMode [] modes )
         {
             _queueName = queueName;
+            _modes = modes;
         }
 
     }

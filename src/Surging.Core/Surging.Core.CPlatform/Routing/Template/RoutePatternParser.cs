@@ -33,6 +33,27 @@ namespace Surging.Core.CPlatform.Routing.Template
             return result.Append(method).ToString().ToLower();
         }
 
+        public static string Parse(string routeTemplet, string service)
+        {
+            StringBuilder result = new StringBuilder();
+            var parameters = routeTemplet.Split(@"/");
+            foreach (var parameter in parameters)
+            {
+                var param = GetParameters(parameter).FirstOrDefault();
+                if (param == null)
+                {
+                    result.Append(parameter);
+                }
+                else if (service.EndsWith(param))
+                {
+                    result.Append(service.Substring(1, service.Length - param.Length - 1));
+                }
+                result.Append("/");
+            }
+
+            return result.ToString().TrimEnd('/').ToLower();
+        }
+
         private static List<string> GetParameters(string text)
         {
             var matchVale = new List<string>();

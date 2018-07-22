@@ -80,9 +80,16 @@ namespace Surging.Core.DotNetty
                     await OnReceived(sender, message);
                 }, _logger));
             }));
-            _channel = await bootstrap.BindAsync(endPoint);
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"服务主机启动成功，监听地址：{endPoint}。");
+            try
+            {
+                _channel = await bootstrap.BindAsync(endPoint);
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug($"服务主机启动成功，监听地址：{endPoint}。");
+            }
+            catch
+            {
+                _logger.LogError($"服务主机启动失败，监听地址：{endPoint}。 ");
+            }
         }
 
         public void CloseAsync()

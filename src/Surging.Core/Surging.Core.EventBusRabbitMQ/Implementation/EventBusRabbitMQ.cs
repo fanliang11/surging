@@ -8,6 +8,7 @@ using RabbitMQ.Client.Exceptions;
 using Surging.Core.CPlatform.EventBus;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
+using Surging.Core.EventBusRabbitMQ.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -35,11 +36,11 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
-            _consumerChannel = CreateConsumerChannel();
+            
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 
-        private void SubsManager_OnEventRemoved(object sender, string eventName)
+        private void SubsManager_OnEventRemoved(object sender, ValueTuple<string, string> tuple)
         {
             if (!_persistentConnection.IsConnected)
             {
@@ -48,9 +49,9 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
 
             using (var channel = _persistentConnection.CreateModel())
             {
-                channel.QueueUnbind(queue: _queueName,
+                channel.QueueUnbind(queue: tuple.Item1,
                     exchange: BROKER_NAME,
-                    routingKey: eventName);
+                    routingKey: tuple.Item2);
 
                 if (_subsManager.IsEmpty)
                 {
@@ -97,8 +98,11 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
 
         public void Subscribe<T, TH>(Func<TH> handler)
             where TH : IIntegrationEventHandler<T>
-        {
+        {  
             var eventName = typeof(T).Name;
+            var queueConsumerAttr = typeof(TH).GetCustomAttribute<QueueConsumerAttribute>();
+            if (queueConsumerAttr == null)
+                throw new ArgumentNullException("QueueConsumerAttribute");
             var containsKey = _subsManager.HasSubscriptionsForEvent<T>();
             if (!containsKey)
             {
@@ -106,10 +110,10 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 {
                     _persistentConnection.TryConnect();
                 }
-
+                _consumerChannel = CreateConsumerChannel(queueConsumerAttr.QueueName);
                 using (var channel = _persistentConnection.CreateModel())
                 {
-                    channel.QueueBind(queue: _queueName,
+                    channel.QueueBind(queue: queueConsumerAttr.QueueName,
                                       exchange: BROKER_NAME,
                                       routingKey: eventName); 
                       var properties = channel.CreateBasicProperties();  
@@ -117,7 +121,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 }
             }
 
-            _subsManager.AddSubscription<T, TH>(handler);
+            _subsManager.AddSubscription<T, TH>(handler, queueConsumerAttr.QueueName);
 
         }
 
@@ -150,7 +154,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             _subsManager.Clear();
         }
 
-        private IModel CreateConsumerChannel()
+        private IModel CreateConsumerChannel(string queueName)
         {
             if (!_persistentConnection.IsConnected)
             {
@@ -158,11 +162,11 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             }
 
             var channel = _persistentConnection.CreateModel();
-
+         
             channel.ExchangeDeclare(exchange: BROKER_NAME,
                                  type: "direct");
 
-            _queueName = channel.QueueDeclare().QueueName;
+            channel.QueueDeclare(queueName,true,false,false,null);
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += async (model, ea) =>
@@ -173,14 +177,14 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 await ProcessEvent(eventName, message);
             };
 
-            channel.BasicConsume(queue: _queueName,
+            channel.BasicConsume(queue: queueName,
                                   autoAck:true,
                                  consumer: consumer);
          
             channel.CallbackException += (sender, ea) =>
             {
                 _consumerChannel.Dispose();
-                _consumerChannel = CreateConsumerChannel();
+                _consumerChannel = CreateConsumerChannel(queueName);
             };
 
             return channel;

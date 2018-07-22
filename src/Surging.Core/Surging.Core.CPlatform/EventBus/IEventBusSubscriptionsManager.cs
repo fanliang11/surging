@@ -9,8 +9,8 @@ namespace Surging.Core.CPlatform.EventBus
     {
         bool IsEmpty { get; }
 
-        event EventHandler<string> OnEventRemoved;
-        void AddSubscription<T, TH>(Func<TH> handler)
+        event EventHandler<ValueTuple<string,string>> OnEventRemoved;
+        void AddSubscription<T, TH>(Func<TH> handler, string consumerName)
            where TH : IIntegrationEventHandler<T>;
 
         void RemoveSubscription<T, TH>()

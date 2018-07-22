@@ -8,5 +8,7 @@ namespace Surging.Core.CPlatform.Routing
         Task<ServiceRoute> Locate(string serviceId);
 
         ValueTask<ServiceRoute> GetRouteByPath(string path);
+
+        Task<ServiceRoute> SearchRoute(string path);
     }
 }

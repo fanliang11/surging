@@ -18,6 +18,26 @@
 ### 微服务定义
 微服务应该是可以自由组合拆分，对于每个业务都是独立的，针对于业务模块的 CRUD 可以注册为服务，而每个服务都是高度自治的，从开发，部署都是独立，而每个服务只做单一功能，利用领域驱动设计去更好的拆分成粒度更小的模块
 
+### 能做什么
+1.简化的服务调用，通过服务规则的指定，就可以做到服务之间的远程调用，无需其它方式的侵入
+
+2.服务自动注册与发现，不需要配置服务提供方地址，注册中心基于ServiceId 或者RoutePath查询服务提供者的地址和元数据，并且能够平滑添加或删除服务提供者。
+
+3.软负载均衡及容错机制，通过surging内部负载算法和容错规则的设定，从而达到内部调用的负载和容错
+
+4.分布式缓存中间件：通过哈希一致性算法来实现负载，并且有健康检查能够平滑的把不健康的服务从列表中删除
+
+5. 事件总线：通过对于事件总线的适配可以实现发布订阅交互模式
+
+6.容器化持续集成与持续交付 ：通过构建一体化Devops平台,实现项目的自动化构建、部署、测试和发布，从而提高生产环境的可靠性、稳定性、弹性和安全性。
+
+7. 业务模块化驱动引擎，通过加载指定业务模块，能够更加灵活、高效的部署不同版本的业务功能模块
+
+### 引擎如何安装
+
+docker hub : docker pull serviceengine/surging:版本号
+
+nuget:Install-Package surging -Version  版本号
 
 ### surging模块功能
 
@@ -104,6 +124,7 @@ var host = new ServiceHostBuilder()
   "WatchInterval": 30,
   "Port": "${Server_port}",
   "Token": "true",
+   "Protocol": "${Protocol}|Tcp", //支持Http,Tcp协议
   "RootPath": "${RootPath}",
   "RequestCacheEnabled": false
 }
@@ -120,6 +141,7 @@ var host = new ServiceHostBuilder()
   "Port": "${Server_port}|98",//私有容器端口
    "MappingIp": "${Mapping_ip}",//公开主机IP
   "MappingPort": "${Mapping_Port}",//公开主机端口
+   "Protocol": "${Protocol}|Tcp", //支持Http,Tcp协议
   "Token": "true",
   "RootPath": "${RootPath}",
   "RequestCacheEnabled": false

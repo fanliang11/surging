@@ -16,6 +16,7 @@ using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
 using System.Reflection;
 using Surging.Core.CPlatform.Utilities;
 using Newtonsoft.Json.Linq;
+using Surging.Core.CPlatform.Transport.Implementation;
 
 namespace Surging.ApiGateway.Controllers
 {
@@ -132,6 +133,7 @@ namespace Surging.ApiGateway.Controllers
                     {
                         dynamic instance = keyValue.Value;
                         instance.Payload = _authorizationServerProvider.GetPayloadString(author);
+                        RpcContext.GetContext().SetAttachment("payload", instance.Payload);
                         model.Remove(keyValue.Key);
                         model.Add(keyValue.Key, instance);
                     }
@@ -159,7 +161,7 @@ namespace Surging.ApiGateway.Controllers
                         var seconds = (DateTime.Now - time).TotalSeconds;
                         if (seconds <= 3560 && seconds >= 0)
                         {
-                            if (!route.Address.Any(p => GetMD5($"{p.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") == author.ToString()))
+                            if (GetMD5($"{route.ServiceDescriptor.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") != author.ToString())
                             {
                                 result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
                                 isSuccess = false;

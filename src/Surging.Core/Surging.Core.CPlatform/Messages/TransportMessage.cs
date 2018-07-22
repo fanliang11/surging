@@ -63,6 +63,16 @@ namespace Surging.Core.CPlatform.Messages
             return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
         }
 
+        public bool IsHttpMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.httpMessageTypeName;
+        }
+
+        public bool IsHttpResultMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.httpResultMessageTypeName;
+        }
+
         /// <summary>
         /// 获取内容。
         /// </summary>

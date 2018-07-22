@@ -13,14 +13,7 @@ namespace Surging.Core.CPlatform.Address
         /// </summary>
         /// <returns></returns>
         public abstract EndPoint CreateEndPoint();
-
-        /// <summary>
-        /// 访问的令牌
-        /// </summary>
-        public string Token { get; set; }
-
         
-
         public decimal ProcessorTime { get; set; }
         /// <summary>
         /// 重写后的标识。

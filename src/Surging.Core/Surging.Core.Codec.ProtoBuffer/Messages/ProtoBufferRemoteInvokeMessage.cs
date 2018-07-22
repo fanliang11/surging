@@ -36,8 +36,7 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
     {
         public ProtoBufferRemoteInvokeMessage(RemoteInvokeMessage message)
         {
-            ServiceId = message.ServiceId;
-            Token = message.Token;
+            ServiceId = message.ServiceId; 
             DecodeJOject = message.DecodeJOject;
             ServiceKey = message.ServiceKey;
             Parameters = message.Parameters?.Select(i => new ParameterItem(i)).ToArray();
@@ -76,8 +75,7 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
                 Attachments = Attachments?.ToDictionary(i => i.Key, i => i.Value?.Get()),
                 ServiceId = ServiceId,
                 DecodeJOject = DecodeJOject,
-                ServiceKey = ServiceKey,
-                Token = Token
+                ServiceKey = ServiceKey, 
             };
         }
     }

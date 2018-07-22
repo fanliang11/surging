@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Core.Lifetime;
 using Surging.Core.CPlatform.Exceptions;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -26,27 +27,42 @@ namespace Surging.Core.CPlatform.Module
     
 
         public string Title { get; set; }
-        
+
+        public bool Enable { get; set; } = true;
+
+
         public string Description { get; set; }
         
         public List<Component> Components { get; set; }
 
         #endregion
 
+        #region 构造函数
+        public AbstractModule()
+        {
+            ModuleName = this.GetType().Name;
+            TypeName = this.GetType().BaseType.Name;
+        }
+        #endregion
+
         #region 实例方法
-        
-        public virtual void Initialize()
+
+        public virtual void Initialize(CPlatformContainer serviceProvider)
         {
         }
         
-        protected override void Load(ContainerBuilder builder)
+        protected override  void Load(ContainerBuilder builder)
         {
             try
             {
                 base.Load(builder);
                 Builder = new ContainerBuilderWrapper(builder);
-                RegisterBuilder(Builder);
-                RegisterComponents(Builder);
+                if (Enable)
+                {
+                    RegisterBuilder(Builder);
+                    RegisterComponents(Builder);
+                    
+                }
             }
             catch (Exception ex)
             {
@@ -58,7 +74,8 @@ namespace Surging.Core.CPlatform.Module
         protected virtual void RegisterBuilder(ContainerBuilderWrapper builder)
         {
         }
-        
+         
+
         internal virtual void RegisterComponents(ContainerBuilderWrapper builder)
         {
             if (Components != null)

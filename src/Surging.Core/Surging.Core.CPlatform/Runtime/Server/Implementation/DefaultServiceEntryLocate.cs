@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Messages;
+using System;
 using System.Linq;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation
@@ -26,6 +27,15 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         {
             var serviceEntries = _serviceEntryManager.GetEntries();
             return serviceEntries.SingleOrDefault(i => i.Descriptor.Id == invokeMessage.ServiceId);
+        }
+
+        public ServiceEntry Locate(HttpMessage httpMessage)
+        {
+            string routePath = httpMessage.RoutePath;
+            if (httpMessage.RoutePath.AsSpan().IndexOf("/") == -1)
+                routePath = $"/{routePath}";
+            var serviceEntries = _serviceEntryManager.GetEntries();
+            return serviceEntries.SingleOrDefault(i => i.RoutePath == routePath);
         }
 
         #endregion Implementation of IServiceEntryLocate

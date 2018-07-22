@@ -2,6 +2,7 @@
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Logging;
 using Surging.Core.ApiGateWay;
 using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
@@ -14,6 +15,7 @@ using Surging.Core.ServiceHosting;
 using Surging.Core.System.Intercept;
 using System;
 using System.IO;
+
 
 namespace Surging.ApiGateway
 {

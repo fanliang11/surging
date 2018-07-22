@@ -104,6 +104,11 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(new ApiResult<UserModel>() { Value = new UserModel { Name = "fanly" }, StatusCode=200 });
         }
 
+        public   Task<string> GetUser(List<int> idList)
+        {
+            return Task.FromResult("type is List<int>");
+        }
+
         #endregion Implementation of IUserService
     }
 }

@@ -127,8 +127,8 @@ namespace Surging.Core.CPlatform.Transport.Implementation
 
         private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("接收到消息。");
+            if (_logger.IsEnabled(LogLevel.Trace))
+                _logger.LogTrace("服务消费者接收到消息。");
 
             TaskCompletionSource<TransportMessage> task;
             if (!_resultDictionary.TryGetValue(message.Id, out task))

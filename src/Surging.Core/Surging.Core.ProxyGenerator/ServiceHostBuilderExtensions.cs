@@ -1,16 +1,19 @@
-﻿using Surging.Core.ServiceHosting.Internal;
-using Autofac;
-using Surging.Core.ProxyGenerator.Implementation;
+﻿using Autofac;
+using Surging.Core.CPlatform.Engines;
+using Surging.Core.ServiceHosting.Internal;
 
 namespace Surging.Core.ProxyGenerator
 {
-   public static class ServiceHostBuilderExtensions
+    public static class ServiceHostBuilderExtensions
     {
         public static IServiceHostBuilder UseProxy(this IServiceHostBuilder hostBuilder)
         {
             return hostBuilder.MapServices(mapper =>
             {
-                mapper.Resolve<IServiceProxyFactory>();
+                mapper.Resolve<IServiceEngineLifetime>().ServiceEngineStarted.Register(() =>
+                 {
+                     mapper.Resolve<IServiceProxyFactory>();
+                 }); 
             });
         }
     }

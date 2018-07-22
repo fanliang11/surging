@@ -47,7 +47,7 @@ namespace Surging.Core.ServiceHosting
             {
                 collection.AddSingleton<IApplicationLifetime, ApplicationLifetime>();
                 collection.AddSingleton<IHostLifetime, ConsoleLifetime>();
-                });
+            });
         }
     }
 }

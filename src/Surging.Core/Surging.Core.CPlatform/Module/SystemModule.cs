@@ -6,9 +6,9 @@ namespace Surging.Core.CPlatform.Module
 {
    public class SystemModule : AbstractModule
     {
-        public override void Initialize()
+        public override void Initialize(CPlatformContainer serviceProvider)
         {
-            base.Initialize();
+            base.Initialize(serviceProvider);
         }
         
         internal override void RegisterComponents(ContainerBuilderWrapper builder)

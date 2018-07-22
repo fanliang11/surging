@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Surging.Core.CPlatform.Runtime.Server
 {
@@ -12,5 +13,7 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// </summary>
         /// <returns>服务条目集合。</returns>
         IEnumerable<ServiceEntry> GetEntries();
+
+        IEnumerable<Type> GetTypes();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Module;
+﻿using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.System.MongoProvider.Repositories;
 using System;
@@ -12,9 +13,9 @@ namespace Surging.Core.System.MongoProvider
         /// <summary>
         ///  Function module initialization,trigger when the module starts loading
         /// </summary>
-        public override void Initialize()
+        public override void Initialize(CPlatformContainer serviceProvider)
         {
-            base.Initialize();
+            base.Initialize(serviceProvider);
         }
 
         /// <summary>
