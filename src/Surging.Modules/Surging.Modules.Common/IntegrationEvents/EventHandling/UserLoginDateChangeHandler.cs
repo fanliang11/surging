@@ -13,7 +13,7 @@ using Surging.Core.EventBusRabbitMQ;
 namespace Surging.Modules.Common.IntegrationEvents.EventHandling
 {
 
-    [QueueConsumer("UserLoginDateChangeHandler", QueueConsumerMode.Normal, QueueConsumerMode.Retry, QueueConsumerMode.Rollback)]
+    [QueueConsumer("UserLoginDateChangeHandler", QueueConsumerMode.Normal, QueueConsumerMode.Fail)]
     public  class UserLoginDateChangeHandler : IIntegrationEventHandler<UserEvent>
     {
         private readonly IUserService _userService;
@@ -28,6 +28,8 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
             {
 
             });
+            Console.WriteLine($"消费1失败。");
+            throw new Exception();
         }
     }
 }

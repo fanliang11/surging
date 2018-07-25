@@ -6,7 +6,7 @@ namespace Surging.Core.EventBusRabbitMQ.Configurations
 {
     public class EventBusOption
     {
-        public string EventBusConnection {get; set; }= "";
+        public string EventBusConnection { get; set; } = "";
 
         public string EventBusUserName { get; set; } = "guest";
 
@@ -19,6 +19,8 @@ namespace Surging.Core.EventBusRabbitMQ.Configurations
         public string BrokerName { get; set; } = "surging";
 
         public int RetryCount { get; set; } = 3;
+
+        public int FailCount { get; set; } = 3;
 
         public int MessageTTL { get; set; } = 30 * 1000;
     }

@@ -42,13 +42,14 @@ namespace Surging.Core.EventBusRabbitMQ
                     HostName = option.EventBusConnection,
                     UserName = option.EventBusUserName,
                     Password = option.EventBusPassword,
-                    VirtualHost= option.VirtualHost,
+                    VirtualHost = option.VirtualHost,
                     Port = int.Parse(option.Port),
                 };
                 factory.RequestedHeartbeat = 60;
                 AppConfig.BrokerName = option.BrokerName;
                 AppConfig.MessageTTL = option.MessageTTL;
                 AppConfig.RetryCount = option.RetryCount;
+                AppConfig.FailCount = option.FailCount;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();
             return builder;

@@ -11,7 +11,6 @@ using Surging.Core.EventBusRabbitMQ.Implementation;
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
-using Autofac;
 using Surging.Core.CPlatform.EventBus.Implementation;
 
 namespace Surging.Core.EventBusRabbitMQ
@@ -21,7 +20,7 @@ namespace Surging.Core.EventBusRabbitMQ
         public override void Initialize(CPlatformContainer serviceProvider)
         {
             base.Initialize(serviceProvider);
-            serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt(); 
+            serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
         }
 
         /// <summary>
@@ -35,8 +34,8 @@ namespace Surging.Core.EventBusRabbitMQ
             .AddRabbitMQAdapt(builder);
         }
 
-        public  EventBusRabbitMQModule UseRabbitMQTransport(ContainerBuilderWrapper builder)
-        { 
+        public EventBusRabbitMQModule UseRabbitMQTransport(ContainerBuilderWrapper builder)
+        {
             builder.RegisterType(typeof(Implementation.EventBusRabbitMQ)).As(typeof(IEventBus)).SingleInstance();
             builder.RegisterType(typeof(DefaultConsumeConfigurator)).As(typeof(IConsumeConfigurator)).SingleInstance();
             builder.RegisterType(typeof(InMemoryEventBusSubscriptionsManager)).As(typeof(IEventBusSubscriptionsManager)).SingleInstance();
@@ -59,25 +58,28 @@ namespace Surging.Core.EventBusRabbitMQ
                 };
                 factory.RequestedHeartbeat = 60;
                 AppConfig.BrokerName = option.BrokerName;
+                AppConfig.MessageTTL = option.MessageTTL;
+                AppConfig.RetryCount = option.RetryCount;
+                AppConfig.FailCount = option.FailCount;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();
             return this;
         }
 
-        private   ContainerBuilderWrapper UseRabbitMQEventAdapt(ContainerBuilderWrapper builder, Func<IServiceProvider, ISubscriptionAdapt> adapt)
-        { 
+        private ContainerBuilderWrapper UseRabbitMQEventAdapt(ContainerBuilderWrapper builder, Func<IServiceProvider, ISubscriptionAdapt> adapt)
+        {
             builder.RegisterAdapter(adapt);
             return builder;
         }
 
         private EventBusRabbitMQModule AddRabbitMQAdapt(ContainerBuilderWrapper builder)
         {
-           UseRabbitMQEventAdapt(builder,provider =>
-             new RabbitMqSubscriptionAdapt(
-                 provider.GetService<IConsumeConfigurator>(),
-                 provider.GetService<IEnumerable<IIntegrationEventHandler>>()
-                 )
-            );
+            UseRabbitMQEventAdapt(builder, provider =>
+               new RabbitMqSubscriptionAdapt(
+                   provider.GetService<IConsumeConfigurator>(),
+                   provider.GetService<IEnumerable<IIntegrationEventHandler>>()
+                   )
+             );
             return this;
         }
     }

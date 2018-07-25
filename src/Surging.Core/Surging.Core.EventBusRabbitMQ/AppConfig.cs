@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Surging.Core.EventBusRabbitMQ
 {
-   public static class AppConfig
+    public static class AppConfig
     {
         public static IConfigurationRoot Configuration { get; set; }
 
@@ -13,6 +13,8 @@ namespace Surging.Core.EventBusRabbitMQ
         public static string BrokerName { get; internal set; }
 
         public static int RetryCount { get; internal set; } = 3;
+
+        public static int FailCount { get; internal set; } = 3;
 
         public static int MessageTTL { get; internal set; } = 30 * 1000;
     }
