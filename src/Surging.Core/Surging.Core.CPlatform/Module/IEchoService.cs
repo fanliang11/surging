@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Module
 {
-    [ServiceBundle("")]
+    //[ServiceBundle("")]
     public interface IEchoService: IServiceKey
     {
         Task<string> Locate(string routePath, string key);
