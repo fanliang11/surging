@@ -1,4 +1,4 @@
-﻿using StackExchange.Redis;
+using StackExchange.Redis;
 using Surging.Core.Caching.HashAlgorithms;
 using Surging.Core.Caching.Interfaces;
 using Surging.Core.Caching.Utilities;
@@ -14,8 +14,8 @@ namespace Surging.Core.Caching.RedisCache
         where T : class
 
     {
-        private static readonly ConcurrentDictionary<string, ObjectPool<T>> _pool =
-            new ConcurrentDictionary<string, ObjectPool<T>>();
+        private static readonly ConcurrentDictionary<string, Lazy<ObjectPool<T>>> _pool =
+            new ConcurrentDictionary<string, Lazy<ObjectPool<T>>>();
 
         public RedisCacheClient()
         {
@@ -24,11 +24,12 @@ namespace Surging.Core.Caching.RedisCache
 
         public async Task<bool> ConnectionAsync(CacheEndpoint endpoint, int connectTimeout)
         {
+            ConnectionMultiplexer conn=null;
             try
             {
                 var info = endpoint as ConsistentHashNode;
                 var point = string.Format("{0}:{1}", info.Host, info.Port);
-                var conn = await ConnectionMultiplexer.ConnectAsync(new ConfigurationOptions()
+                  conn = await ConnectionMultiplexer.ConnectAsync(new ConfigurationOptions()
                 {
                     EndPoints = { { point } },
                     ServiceName = point,
@@ -41,6 +42,11 @@ namespace Surging.Core.Caching.RedisCache
             {
                 throw new CacheException(e.Message);
             }
+            finally
+            {
+               if(conn !=null)
+                conn.Close();
+            }
         }
 
         public T GetClient(CacheEndpoint endpoint, int connectTimeout)
@@ -51,32 +57,32 @@ namespace Surging.Core.Caching.RedisCache
                 Check.NotNull(info, "endpoint");
                 var key = string.Format("{0}{1}{2}{3}", info.Host, info.Port, info.Password, info.DbIndex);
                 if (!_pool.ContainsKey(key))
-                {
-                    var objectPool = new ObjectPool<T>(() =>
-                    {
-                        var point = string.Format("{0}:{1}", info.Host, info.Port);
-                        var redisClient = ConnectionMultiplexer.Connect(new ConfigurationOptions()
+                { 
+                        var objectPool = new Lazy<ObjectPool<T>>(()=>new ObjectPool<T>(() =>
                         {
-                            EndPoints = { { point } },
-                            ServiceName = point,
-                            Password = info.Password, 
-                            ConnectTimeout = connectTimeout,
-                            AbortOnConnectFail=false
-                        });
-                        return redisClient.GetDatabase(info.DbIndex) as T;
-                    }, info.MinSize, info.MaxSize);
-                    _pool.GetOrAdd(key, objectPool);
-                    return objectPool.GetObject();
+                            var point = string.Format("{0}:{1}", info.Host, info.Port);
+                            var redisClient = ConnectionMultiplexer.Connect(new ConfigurationOptions()
+                            {
+                                EndPoints = { { point } },
+                                ServiceName = point,
+                                Password = info.Password,
+                                ConnectTimeout = connectTimeout,
+                                AbortOnConnectFail = false
+                            }); 
+                            return redisClient.GetDatabase(info.DbIndex) as T;
+                        }, info.MinSize, info.MaxSize));
+                        _pool.GetOrAdd(key, objectPool);
+                        return objectPool.Value.GetObject(); 
                 }
                 else
                 {
-                    return _pool[key].GetObject();
+                    return _pool[key].Value.GetObject();
                 }
             }
             catch (Exception e)
             {
                 throw new CacheException(e.Message);
-            }
+            } 
         }
     }
 }
