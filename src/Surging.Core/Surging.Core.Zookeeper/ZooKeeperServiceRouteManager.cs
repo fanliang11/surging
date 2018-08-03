@@ -4,6 +4,7 @@ using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Serialization;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.Zookeeper.Configurations;
 using Surging.Core.Zookeeper.WatcherProvider;
 using System;
@@ -143,6 +144,7 @@ namespace Surging.Core.Zookeeper
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
+            var hostAddr = RpcContext.GetContext().GetAttachment("Host") as AddressModel;
             var serviceRoutes = await GetRoutes(routes.Select(p => p.ServiceDescriptor.Id));
             if (serviceRoutes.Count() > 0)
             {
@@ -163,11 +165,11 @@ namespace Surging.Core.Zookeeper
                     }
                 }
             }
-            await RemoveExceptRoutesAsync(routes);
+            await RemoveExceptRoutesAsync(routes, hostAddr);
             await base.SetRoutesAsync(routes);
         }
 
-        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes)
+        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes, AddressModel hostAddr)
         {
             var path = _configInfo.RoutePath;
             if (!path.EndsWith("/"))
@@ -181,10 +183,9 @@ namespace Surging.Core.Zookeeper
                 foreach (var deletedRouteId in deletedRouteIds)
                 {
                     var addresses = _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p => p.Address).FirstOrDefault();
+                    if (addresses.Contains(hostAddr))
+                    { 
                         var nodePath = $"{path}{deletedRouteId}";
-                    foreach (var address in addresses)
-                    {
-                        if (routes.Any(p => p.Address.Select(a => a.ToString()).Contains(address.ToString())))
                          await _zooKeeper.deleteAsync(nodePath);
                     }
                 }

@@ -2,14 +2,14 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|98",
+    "Port": "${Surging_Server_Port}|99",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
     "MaxConcurrentRequests": 20,
     "ExecutionTimeoutInMilliseconds": 30000,
     "Protocol": "${Protocol}|None", //Http¡¢Tcp¡¢None
-    "RootPath": "${RootPath}|D:\\userapp",
+    "RootPath": "${RootPath}|D:\\userapp1",
     "Ports": {
       "HttpPort": "${HttpPort}|280",
       "WSPort": "${WSPort}|96"

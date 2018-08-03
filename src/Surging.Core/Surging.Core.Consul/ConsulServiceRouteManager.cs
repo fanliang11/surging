@@ -14,6 +14,7 @@ using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.Transport.Implementation;
 
 namespace Surging.Core.Consul
 {
@@ -76,6 +77,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
+            var hostAddr = RpcContext.GetContext().GetAttachment("Host") as AddressModel;
             var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
             foreach (var route in routes)
             {
@@ -94,7 +96,7 @@ namespace Surging.Core.Consul
                     route.Address = addresses;
                 }
             }
-            await RemoveExceptRoutesAsync(routes);
+            await RemoveExceptRoutesAsync(routes, hostAddr);
             await base.SetRoutesAsync(routes);
         }
 
@@ -128,7 +130,7 @@ namespace Surging.Core.Consul
 
         #region 私有方法
 
-        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes)
+        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes, AddressModel hostAddr)
         {
             routes = routes.ToArray();
 
@@ -139,12 +141,9 @@ namespace Surging.Core.Consul
                 var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
                 foreach (var deletedRouteId in deletedRouteIds)
                 {
-                   var addresses=  _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p=>p.Address).FirstOrDefault();
-                    foreach (var address in addresses)
-                    {
-                        if (routes.Any(p => p.Address.Select(a=>a.ToString()).Contains(address.ToString())))
-                            await _consul.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
-                    }
+                    var addresses = _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p => p.Address).FirstOrDefault();
+                    if (addresses.Contains(hostAddr))
+                        await _consul.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
                 }
             }
         }
