@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Confluent.Kafka;
+using Confluent.Kafka.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Surging.Core.EventBusKafka.Implementation
 {
     public class KafkaProducerPersistentConnection : KafkaPersistentConnectionBase
     {
-        private  Producer _connection;
+        private Producer<Null, string> _connection;
         private readonly ILogger<KafkaProducerPersistentConnection> _logger;
+        private readonly ISerializer<string> _stringDeserializer;
         bool _disposed;
 
         public KafkaProducerPersistentConnection(ILogger<KafkaProducerPersistentConnection> logger)
-            :base(logger)
+            :base(logger,AppConfig.KafkaProducerConfig)
         {
-            _logger = logger;
+            _logger = logger; 
+            _stringDeserializer = new StringSerializer(Encoding.UTF8);
         }
 
         public override bool IsConnected =>   _connection != null &&  !_disposed;
@@ -26,7 +29,7 @@ namespace Surging.Core.EventBusKafka.Implementation
         {
             return () =>
             {
-                _connection = new Producer(options);
+                _connection = new Producer<Null, string>(options,null, _stringDeserializer);
                 _connection.OnError += OnConnectionException;
  
             };

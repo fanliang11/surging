@@ -67,7 +67,7 @@ namespace Surging.Core.EventBusKafka.Implementation
                    .Name;
             
             var message = JsonConvert.SerializeObject(@event);
-            var body = Encoding.UTF8.GetBytes(message);
+            var body =message;
 
             var policy = RetryPolicy.Handle<KafkaException>()
                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
@@ -75,11 +75,11 @@ namespace Surging.Core.EventBusKafka.Implementation
                    _logger.LogWarning(ex.ToString());
                });
 
-            using (var conn = _producerConnection.CreateConnect() as Producer)
+            using (var conn = _producerConnection.CreateConnect() as Producer<Null,string>)
             {
                 policy.Execute(() =>
                 {
-                    conn.ProduceAsync(eventName, null, body);
+                     conn.ProduceAsync(eventName, null, body).GetAwaiter().GetResult();
                 });
             }
         }
@@ -97,10 +97,14 @@ namespace Surging.Core.EventBusKafka.Implementation
 
                 using (var channel = _consumerConnection.CreateConnect() as Consumer<Null, string>)
                 {
+                    channel.OnMessage += ConsumerClient_OnMessage;
                     channel.Subscribe(eventName); 
+                    channel.Poll(TimeSpan.FromMilliseconds(100)); 
                 }
             }
             _subsManager.AddSubscription<T, TH>(handler,null);
+
+           
 
         }
 
@@ -109,23 +113,27 @@ namespace Surging.Core.EventBusKafka.Implementation
             _subsManager.RemoveSubscription<T, TH>();
         }
 
-        private void CreateConsumerChannel()
-        {
-            if (!_consumerConnection.IsConnected)
-            {
-                _consumerConnection.TryConnect();
-            }
+        //private void CreateConsumerChannel()
+        //{
+        //    if (!_consumerConnection.IsConnected)
+        //    {
+        //        _consumerConnection.TryConnect();
+        //    }
 
-            using (var channel = _consumerConnection.CreateConnect() as Consumer<Null, string>)
-            {
-                channel.OnMessage +=   ConsumerClient_OnMessage;
-            }
+        //    using (var channel = _consumerConnection.CreateConnect() as Consumer<Null, string>)
+        //    {
+
+        //        channel.OnMessage += ConsumerClient_OnMessage;
+
+        //    }
+        //}
+
+
+        private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
+        {
+            ProcessEvent(e.Topic, e.Value).Wait();
         }
 
-        private  void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
-        {
-             ProcessEvent(e.Topic, e.Value).Wait();
-        }
 
         private async Task ProcessEvent(string eventName, string message)
         {

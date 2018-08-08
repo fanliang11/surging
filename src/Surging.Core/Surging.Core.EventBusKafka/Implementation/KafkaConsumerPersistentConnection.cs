@@ -16,7 +16,7 @@ namespace Surging.Core.EventBusKafka.Implementation
         bool _disposed;
 
         public KafkaConsumerPersistentConnection(ILogger<KafkaConsumerPersistentConnection> logger)
-            : base(logger)
+            : base(logger, AppConfig.KafkaConsumerConfig)
         {
             _logger = logger;
             _stringDeserializer = new StringDeserializer(Encoding.UTF8);

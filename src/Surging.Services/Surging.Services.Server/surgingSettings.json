@@ -9,7 +9,7 @@
     "MaxConcurrentRequests": 20,
     "ExecutionTimeoutInMilliseconds": 30000,
     "Protocol": "${Protocol}|None", //Http、Tcp、None
-    "RootPath": "${RootPath}|D:\\userapp1",
+    "RootPath": "${RootPath}|D:\\userapp",
     "Ports": {
       "HttpPort": "${HttpPort}|280",
       "WSPort": "${WSPort}|96"
@@ -18,7 +18,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;EventBusRabbitMQModule;WSProtocolModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;WSProtocolModule;EventBusKafkaModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -27,6 +27,14 @@
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
     "ReloadOnChange": true
+  },
+  "EventBus_Kafka": {
+    "Servers": "localhost:9092",
+    "MaxQueueBuffering": 10,
+    "MaxSocketBlocking": 10,
+    "EnableAutoCommit": false,
+    "LogConnectionClose": false,
+    "GroupID": "surgingdemo"
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",

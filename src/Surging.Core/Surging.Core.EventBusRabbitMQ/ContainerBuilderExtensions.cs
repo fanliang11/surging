@@ -24,7 +24,6 @@ namespace Surging.Core.EventBusRabbitMQ
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseRabbitMQTransport(this IServiceBuilder builder)
         {
-            var services = builder.Services;
             builder.Services.RegisterType(typeof(Implementation.EventBusRabbitMQ)).As(typeof(IEventBus)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultConsumeConfigurator)).As(typeof(IConsumeConfigurator)).SingleInstance();
             builder.Services.RegisterType(typeof(InMemoryEventBusSubscriptionsManager)).As(typeof(IEventBusSubscriptionsManager)).SingleInstance();

@@ -11,17 +11,32 @@ namespace Surging.Core.EventBusKafka
 
         public static IConfigurationRoot Configuration { get; set; }
 
-        private static IEnumerable<KeyValuePair<string, object>> _kafkaConfig;
+        private static IEnumerable<KeyValuePair<string, object>> _kafkaConsumerConfig;
 
-        public static IEnumerable<KeyValuePair<string, object>> KafkaConfig
+
+        private static IEnumerable<KeyValuePair<string, object>> _kafkaProducerConfig;
+
+        public static IEnumerable<KeyValuePair<string, object>> KafkaConsumerConfig
         {
             get
             {
-                return _kafkaConfig;
+                return _kafkaConsumerConfig;
             }
             internal set
             {
-                _kafkaConfig = value;
+                _kafkaConsumerConfig = value;
+            }
+        }
+
+        public static IEnumerable<KeyValuePair<string, object>> KafkaProducerConfig
+        {
+            get
+            {
+                return _kafkaProducerConfig;
+            }
+            internal set
+            {
+                _kafkaProducerConfig = value;
             }
         }
     }
