@@ -58,7 +58,6 @@ namespace Surging.Core.EventBusKafka.Implementation
 
         public abstract Action Connection(IEnumerable<KeyValuePair<string, object>> options);
         
- 
         public abstract object CreateConnect();
         public abstract void Dispose();
     }

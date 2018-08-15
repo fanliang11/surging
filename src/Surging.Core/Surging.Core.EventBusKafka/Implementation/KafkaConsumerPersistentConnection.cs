@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace Surging.Core.EventBusKafka.Implementation
 {
@@ -22,7 +23,7 @@ namespace Surging.Core.EventBusKafka.Implementation
             _stringDeserializer = new StringDeserializer(Encoding.UTF8);
         }
 
-        public override bool IsConnected => _consumerClient != null && !_disposed;
+        public override bool IsConnected => _consumerClient != null && !_disposed ;
 
         public override Action Connection(IEnumerable<KeyValuePair<string, object>> options)
         {
@@ -34,8 +35,21 @@ namespace Surging.Core.EventBusKafka.Implementation
             };
         }
 
+        public void Listening(TimeSpan timeout)
+        {
+            if (!IsConnected)
+            {
+                TryConnect();
+            }
+            while (true)
+            { 
+                _consumerClient.Poll(timeout);
+            }
+        }
+
         public override object CreateConnect()
         {
+            TryConnect();
             return _consumerClient;
         }
 
