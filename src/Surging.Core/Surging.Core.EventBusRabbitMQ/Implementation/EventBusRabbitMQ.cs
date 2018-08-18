@@ -31,7 +31,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
         private readonly IEventBusSubscriptionsManager _subsManager;
         private readonly IDictionary<QueueConsumerMode, string> _exchanges;
 
-        private IDictionary<QueueConsumerMode, IModel> _consumerChannels;
+        private IDictionary<Tuple<string,QueueConsumerMode>, IModel> _consumerChannels;
         private string _queueName;
 
         public EventBusRabbitMQ(IRabbitMQPersistentConnection persistentConnection, ILogger<EventBusRabbitMQ> logger, IEventBusSubscriptionsManager subsManager)
@@ -40,7 +40,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             _messageTTL = AppConfig.MessageTTL;
             _retryCount = AppConfig.RetryCount;
             _rollbackCount = AppConfig.FailCount;
-            _consumerChannels = new Dictionary<QueueConsumerMode, IModel>();
+            _consumerChannels = new Dictionary<Tuple<string,QueueConsumerMode>, IModel>();
             _exchanges = new Dictionary<QueueConsumerMode, string>();
             _exchanges.Add(QueueConsumerMode.Normal, BROKER_NAME);
             _exchanges.Add(QueueConsumerMode.Retry, $"{BROKER_NAME}@{QueueConsumerMode.Retry.ToString()}");
@@ -133,13 +133,14 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                     foreach (var modeName in _modeNames)
                     {
                         var mode = Enum.Parse<QueueConsumerMode>(modeName);
-                        _consumerChannels.Add(mode, CreateConsumerChannel(queueConsumerAttr, eventName, mode));
                         string queueName = "";
 
                         if (mode != QueueConsumerMode.Normal)
                             queueName = $"{queueConsumerAttr.QueueName}@{mode.ToString()}";
                         else
                             queueName = queueConsumerAttr.QueueName;
+                        _consumerChannels.Add(new Tuple<string,QueueConsumerMode>(queueName, mode), 
+                            CreateConsumerChannel(queueConsumerAttr, eventName, mode));
                         channel.QueueBind(queue: queueName,
                                           exchange: _exchanges[mode],
                                           routingKey: eventName);
@@ -237,8 +238,9 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                                  consumer: consumer);
             channel.CallbackException += (sender, ea) =>
             {
-                _consumerChannels[QueueConsumerMode.Normal].Dispose();
-                _consumerChannels[QueueConsumerMode.Normal] = CreateConsumerChannel(queueName, bindConsumer);
+                var key = new Tuple<string, QueueConsumerMode>(queueName, QueueConsumerMode.Normal);
+                _consumerChannels[key].Dispose();
+                _consumerChannels[key] = CreateConsumerChannel(queueName, bindConsumer);
             };
             return channel;
         }
@@ -271,8 +273,9 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                                      consumer: consumer);
             channel.CallbackException += (sender, ea) =>
             {
-                _consumerChannels[QueueConsumerMode.Retry].Dispose();
-                _consumerChannels[QueueConsumerMode.Retry] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
+                var key = new Tuple<string, QueueConsumerMode>(queueName, QueueConsumerMode.Retry);
+                _consumerChannels[key].Dispose();
+                _consumerChannels[key] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
             };
             return channel;
         }
@@ -301,8 +304,9 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                                      consumer: consumer);
             channel.CallbackException += (sender, ea) =>
             {
-                _consumerChannels[QueueConsumerMode.Fail].Dispose();
-                _consumerChannels[QueueConsumerMode.Fail] = CreateFailConsumerChannel(queueName, bindConsumer);
+                var key = new Tuple<string, QueueConsumerMode>(queueName, QueueConsumerMode.Fail);
+                _consumerChannels[key].Dispose();
+                _consumerChannels[key] = CreateFailConsumerChannel(queueName, bindConsumer);
             };
             return channel;
         }
