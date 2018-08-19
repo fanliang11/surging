@@ -9,6 +9,7 @@ using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Sel
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Attributes;
+using Surging.Core.KestrelHttpServer;
 using Surging.Core.ProxyGenerator.Implementation;
 using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
@@ -70,5 +71,6 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<ApiResult<UserModel>> GetApiResult();
 
         Task<string> GetUser(List<int> idList);
+
     }
 }

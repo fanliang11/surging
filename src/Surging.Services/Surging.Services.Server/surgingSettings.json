@@ -29,24 +29,24 @@
     "ReloadOnChange": true
   },
   "EventBus_Kafka": {
-    "Servers": "localhost:9092",
-    "MaxQueueBuffering": 10,
-    "MaxSocketBlocking": 10,
-    "EnableAutoCommit": false,
-    "LogConnectionClose": false,
-    "OffsetReset": "earliest",
-    "GroupID": "surgingdemo"
+    "Servers": "${EventBusConnection}|localhost:9092",
+    "MaxQueueBuffering": "${MaxQueueBuffering}|10",
+    "MaxSocketBlocking": "${MaxSocketBlocking}|10",
+    "EnableAutoCommit": "${EnableAutoCommit}|false",
+    "LogConnectionClose": "${LogConnectionClose}|false",
+    "OffsetReset": "${OffsetReset}|earliest",
+    "GroupID": "${EventBusGroupID}|surgingdemo"
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",
-    "EventBusUserName": "guest",
-    "EventBusPassword": "guest",
-    "VirtualHost": "/",
-    "MessageTTL": 30000,
-    "RetryCount": 1,
-    "FailCount": 3,
-    "BrokerName": "surging_demo",
-    "Port": "5672"
+    "EventBusUserName": "${EventBusUserName}|guest",
+    "EventBusPassword": "${EventBusPassword}|guest",
+    "VirtualHost": "${VirtualHost}|/",
+    "MessageTTL": "${MessageTTL}|30000",
+    "RetryCount": "${RetryCount}|1",
+    "FailCount": "${FailCount}|3",
+    "BrokerName": "${BrokerName}|surging_demo",
+    "Port": "${EventBusPort}|5672"
   },
   "Zookeeper": {
     "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181",
