@@ -554,7 +554,7 @@ namespace Surging.Core.CPlatform
             }
             else
             {
-                Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+                Assembly[] assemblies =AppDomain.CurrentDomain.GetAssemblies();
                 referenceAssemblies = GetFilterAssemblies(assemblies);
             }
             if (builder == null) throw new ArgumentNullException("builder");
