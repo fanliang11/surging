@@ -547,7 +547,16 @@ namespace Surging.Core.CPlatform
       this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
+            List<Assembly> referenceAssemblies = new List<Assembly>();
+            if (virtualPaths.Any())
+            {
+                referenceAssemblies= GetReferenceAssembly(virtualPaths);
+            }
+            else
+            {
+                Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+                referenceAssemblies = GetFilterAssemblies(assemblies);
+            }
             if (builder == null) throw new ArgumentNullException("builder");
             var packages = ConvertDictionary(AppConfig.ServerOptions.Packages);
             foreach (var moduleAssembly in referenceAssemblies)
@@ -646,6 +655,28 @@ namespace Surging.Core.CPlatform
                 abstractModules.Add(abstractModule);
             }
             return abstractModules;
+        }
+
+        private static List<Assembly> GetFilterAssemblies(Assembly[] assemblies)
+        {
+            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
+               string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
+            Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (!string.IsNullOrEmpty(relatedFile))
+            {
+                return
+                    assemblies.Where(
+                        a => !notRelatedRegex.IsMatch(a.FullName) && relatedRegex.IsMatch(a.FullName)).ToList();
+            }
+            else
+            {
+                return
+                    assemblies.Where(
+                        a => !notRelatedRegex.IsMatch(a.FullName)).ToList();
+            }
         }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)
