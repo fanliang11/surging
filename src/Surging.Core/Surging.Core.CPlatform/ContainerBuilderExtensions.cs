@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Configurations;
@@ -554,8 +555,10 @@ namespace Surging.Core.CPlatform
             }
             else
             {
-                Assembly[] assemblies =AppDomain.CurrentDomain.GetAssemblies();
-                referenceAssemblies = GetFilterAssemblies(assemblies);
+                string [] assemblyNames = DependencyContext.Default.GetDefaultAssemblyNames().Select(p => p.Name).ToArray();
+                assemblyNames = GetFilterAssemblies(assemblyNames);
+                foreach (var name in assemblyNames)
+                    referenceAssemblies.Add(Assembly.Load(name));
             }
             if (builder == null) throw new ArgumentNullException("builder");
             var packages = ConvertDictionary(AppConfig.ServerOptions.Packages);
@@ -657,25 +660,25 @@ namespace Surging.Core.CPlatform
             return abstractModules;
         }
 
-        private static List<Assembly> GetFilterAssemblies(Assembly[] assemblies)
+        private static  string[] GetFilterAssemblies(string[] assemblyNames)
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             if (!string.IsNullOrEmpty(relatedFile))
             {
                 return
-                    assemblies.Where(
-                        a => !notRelatedRegex.IsMatch(a.FullName) && relatedRegex.IsMatch(a.FullName)).ToList();
+                    assemblyNames.Where(
+                        name => !notRelatedRegex.IsMatch(name) && relatedRegex.IsMatch(name)).ToArray();
             }
             else
             {
                 return
-                    assemblies.Where(
-                        a => !notRelatedRegex.IsMatch(a.FullName)).ToList();
+                    assemblyNames.Where(
+                        name => !notRelatedRegex.IsMatch(name)).ToArray();
             }
         }
 
