@@ -551,11 +551,12 @@ namespace Surging.Core.CPlatform
             List<Assembly> referenceAssemblies = new List<Assembly>();
             if (virtualPaths.Any())
             {
-                referenceAssemblies= GetReferenceAssembly(virtualPaths);
+                referenceAssemblies = GetReferenceAssembly(virtualPaths);
             }
             else
             {
-                string [] assemblyNames = DependencyContext.Default.GetDefaultAssemblyNames().Select(p => p.Name).ToArray();
+                string[] assemblyNames = DependencyContext
+                    .Default.GetDefaultAssemblyNames().Select(p => p.Name).ToArray();
                 assemblyNames = GetFilterAssemblies(assemblyNames);
                 foreach (var name in assemblyNames)
                     referenceAssemblies.Add(Assembly.Load(name));
@@ -575,12 +576,11 @@ namespace Surging.Core.CPlatform
                         else
                             p.Enable = false;
                     }
-
                     _modules.Add(p);
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               _modules,provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
+               _modules, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }
