@@ -24,9 +24,11 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
         public async Task Handle(UserEvent @event)
         {
             Console.WriteLine($"消费1。");
-            await _userService.Update(int.Parse(@event.UserId), new UserModel()
+            await _userService.Update(@event.UserId, new UserModel()
             {
-
+                Age = @event.Age,
+                Name = @event.Name,
+                UserId = @event.UserId
             });
             Console.WriteLine($"消费1失败。");
             throw new Exception();

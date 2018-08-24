@@ -12,6 +12,8 @@ namespace Surging.Core.EventBusRabbitMQ
 
         public static string BrokerName { get; internal set; }
 
+        public static ushort PrefetchCount { get; set; } 
+
         public static int RetryCount { get; internal set; } = 3;
 
         public static int FailCount { get; internal set; } = 3;

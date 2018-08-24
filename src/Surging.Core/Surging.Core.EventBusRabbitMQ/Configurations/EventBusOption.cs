@@ -22,6 +22,8 @@ namespace Surging.Core.EventBusRabbitMQ.Configurations
 
         public int FailCount { get; set; } = 3;
 
+        public ushort PrefetchCount { get; set; }
+
         public int MessageTTL { get; set; } = 30 * 1000;
     }
 }
