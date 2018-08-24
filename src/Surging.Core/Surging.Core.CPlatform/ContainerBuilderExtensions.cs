@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Configurations;
@@ -547,7 +548,19 @@ namespace Surging.Core.CPlatform
       this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
+            List<Assembly> referenceAssemblies = new List<Assembly>();
+            if (virtualPaths.Any())
+            {
+                referenceAssemblies = GetReferenceAssembly(virtualPaths);
+            }
+            else
+            {
+                string[] assemblyNames = DependencyContext
+                    .Default.GetDefaultAssemblyNames().Select(p => p.Name).ToArray();
+                assemblyNames = GetFilterAssemblies(assemblyNames);
+                foreach (var name in assemblyNames)
+                    referenceAssemblies.Add(Assembly.Load(name));
+            }
             if (builder == null) throw new ArgumentNullException("builder");
             var packages = ConvertDictionary(AppConfig.ServerOptions.Packages);
             foreach (var moduleAssembly in referenceAssemblies)
@@ -563,12 +576,11 @@ namespace Surging.Core.CPlatform
                         else
                             p.Enable = false;
                     }
-
                     _modules.Add(p);
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               _modules,provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
+               _modules, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }
@@ -646,6 +658,28 @@ namespace Surging.Core.CPlatform
                 abstractModules.Add(abstractModule);
             }
             return abstractModules;
+        }
+
+        private static  string[] GetFilterAssemblies(string[] assemblyNames)
+        {
+            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
+               string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
+            Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (!string.IsNullOrEmpty(relatedFile))
+            {
+                return
+                    assemblyNames.Where(
+                        name => !notRelatedRegex.IsMatch(name) && relatedRegex.IsMatch(name)).ToArray();
+            }
+            else
+            {
+                return
+                    assemblyNames.Where(
+                        name => !notRelatedRegex.IsMatch(name)).ToArray();
+            }
         }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)
