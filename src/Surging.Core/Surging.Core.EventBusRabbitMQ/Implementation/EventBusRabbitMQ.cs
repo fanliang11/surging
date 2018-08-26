@@ -26,6 +26,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
         private readonly int _messageTTL;
         private readonly int _retryCount;
         private readonly int _rollbackCount;
+        private readonly ushort _prefetchCount;
         private readonly IRabbitMQPersistentConnection _persistentConnection;
         private readonly ILogger<EventBusRabbitMQ> _logger;
         private readonly IEventBusSubscriptionsManager _subsManager;
@@ -39,6 +40,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             BROKER_NAME = AppConfig.BrokerName;
             _messageTTL = AppConfig.MessageTTL;
             _retryCount = AppConfig.RetryCount;
+            _prefetchCount = AppConfig.PrefetchCount;
             _rollbackCount = AppConfig.FailCount;
             _consumerChannels = new Dictionary<Tuple<string,QueueConsumerMode>, IModel>();
             _exchanges = new Dictionary<QueueConsumerMode, string>();
@@ -233,9 +235,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicAck(ea.DeliveryTag, false);
             };
             if (bindConsumer)
+            {
+                channel.BasicQos(0, _prefetchCount, false);
                 channel.BasicConsume(queue: queueName,
                                   autoAck: false,
                                  consumer: consumer);
+            }
             channel.CallbackException += (sender, ea) =>
             {
                 var key = new Tuple<string, QueueConsumerMode>(queueName, QueueConsumerMode.Normal);
@@ -268,9 +273,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicAck(ea.DeliveryTag, false);
             };
             if (bindConsumer)
+            {
+                channel.BasicQos(0, _prefetchCount, false);
                 channel.BasicConsume(queue: retryQueueName,
                                       autoAck: false,
                                      consumer: consumer);
+            }
             channel.CallbackException += (sender, ea) =>
             {
                 var key = new Tuple<string, QueueConsumerMode>(queueName, QueueConsumerMode.Retry);
@@ -299,9 +307,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicAck(ea.DeliveryTag, false);
             };
             if (bindConsumer)
+            {
+                channel.BasicQos(0, _prefetchCount, false);
                 channel.BasicConsume(queue: failQueueName,
                                       autoAck: false,
                                      consumer: consumer);
+            }
             channel.CallbackException += (sender, ea) =>
             {
                 var key = new Tuple<string, QueueConsumerMode>(queueName, QueueConsumerMode.Fail);

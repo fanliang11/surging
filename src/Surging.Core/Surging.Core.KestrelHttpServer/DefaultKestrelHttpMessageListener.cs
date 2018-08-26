@@ -31,7 +31,9 @@ namespace Surging.Core.KestrelHttpServer
                 _host = new WebHostBuilder()
                  .UseContentRoot(Directory.GetCurrentDirectory())
                  .UseStartup<Startup>()
-                 .UseKestrel()
+                 .UseKestrel(options=> {
+                     options.Listen(ipEndPoint);
+                 })
                  .Configure(AppResolve)
                  .Build();
 
@@ -54,7 +56,7 @@ namespace Surging.Core.KestrelHttpServer
         {
             app.Run(async (context) =>
             {
-                await  Task.CompletedTask;
+               var keys= context.Request.Query.Keys; 
             });
         }
 

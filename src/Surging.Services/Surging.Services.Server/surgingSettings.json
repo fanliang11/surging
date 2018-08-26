@@ -18,7 +18,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;WSProtocolModule;EventBusKafkaModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;KestrelHttpModule;WSProtocolModule;EventBusRabbitMQModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -45,6 +45,7 @@
     "MessageTTL": "${MessageTTL}|30000",
     "RetryCount": "${RetryCount}|1",
     "FailCount": "${FailCount}|3",
+    "prefetchCount": "${PrefetchCount}|0",
     "BrokerName": "${BrokerName}|surging_demo",
     "Port": "${EventBusPort}|5672"
   },
