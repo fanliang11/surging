@@ -84,10 +84,6 @@ namespace Surging.Core.EventBusKafka.Implementation
             var containsKey = _subsManager.HasSubscriptionsForEvent<T>();
             if (!containsKey)
             {
-                if (!_consumerConnection.IsConnected)
-                {
-                    _consumerConnection.TryConnect();
-                }
                 var channel = _consumerConnection.CreateConnect() as Consumer<Null, string>;
                 channel.OnMessage += ConsumerClient_OnMessage;
                 channel.Subscribe(eventName);

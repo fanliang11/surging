@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Surging.Core.EventBusKafka.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace Surging.Core.EventBusKafka
     {
 
         public static IConfigurationRoot Configuration { get; set; }
+
+        public static KafkaOptions  Options { get; internal set; }
 
         private static IEnumerable<KeyValuePair<string, object>> _kafkaConsumerConfig;
 

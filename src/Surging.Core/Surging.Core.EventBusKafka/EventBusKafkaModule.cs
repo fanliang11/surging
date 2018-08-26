@@ -22,7 +22,7 @@ namespace Surging.Core.EventBusKafka
             serviceProvider.GetInstances<IServiceEngineLifetime>().ServiceEngineStarted.Register(() =>
              {
                  KafkaConsumerPersistentConnection connection= serviceProvider.GetInstances<IKafkaPersisterConnection>(KafkaConnectionType.Consumer.ToString()) as KafkaConsumerPersistentConnection;
-                 connection.Listening(TimeSpan.FromSeconds(1));
+                 connection.Listening(TimeSpan.FromMilliseconds(AppConfig.Options.Timeout));
              });
         }
 
@@ -38,14 +38,14 @@ namespace Surging.Core.EventBusKafka
 
         public  EventBusKafkaModule UseKafkaMQTransport(ContainerBuilderWrapper builder)
         {
-            var kafkaOptions = new KafkaOptions();
+            AppConfig.Options = new KafkaOptions();
             var section = CPlatform.AppConfig.GetSection("EventBus_Kafka");
             if (section.Exists())
-                kafkaOptions = section.Get<KafkaOptions>();
+                AppConfig.Options = section.Get<KafkaOptions>();
             else if (AppConfig.Configuration != null)
-                kafkaOptions = AppConfig.Configuration.Get<KafkaOptions>();
-            AppConfig.KafkaConsumerConfig = kafkaOptions.GetConsumerConfig();
-            AppConfig.KafkaProducerConfig = kafkaOptions.GetProducerConfig();
+                AppConfig.Options = AppConfig.Configuration.Get<KafkaOptions>();
+            AppConfig.KafkaConsumerConfig = AppConfig.Options.GetConsumerConfig();
+            AppConfig.KafkaProducerConfig = AppConfig.Options.GetProducerConfig();
             builder.RegisterType(typeof(Implementation.EventBusKafka)).As(typeof(IEventBus)).SingleInstance();
             builder.RegisterType(typeof(DefaultConsumeConfigurator)).As(typeof(IConsumeConfigurator)).SingleInstance();
             builder.RegisterType(typeof(InMemoryEventBusSubscriptionsManager)).As(typeof(IEventBusSubscriptionsManager)).SingleInstance();

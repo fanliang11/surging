@@ -319,13 +319,14 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 var eventType = _subsManager.GetEventTypeByName(eventName);
                 var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
                 var handlers = _subsManager.GetHandlersForEvent(eventName);
-
+                 var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
                 foreach (var handlerfactory in handlers)
                 {
+                    var handler = handlerfactory.DynamicInvoke();
+                    long retryCount = 1;
+                    var mode = QueueConsumerMode.Normal;
                     try
                     {
-                        var handler = handlerfactory.DynamicInvoke();
-                        var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
                         await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
                     }
                     catch
@@ -334,7 +335,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                         {
                             _persistentConnection.TryConnect();
                         }
-                        long retryCount = GetRetryCount(properties);
+                        retryCount = GetRetryCount(properties);
                         using (var channel = _persistentConnection.CreateModel())
                         {
                             if (retryCount > _retryCount)
@@ -346,7 +347,10 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                                     IDictionary<String, Object> headers = new Dictionary<String, Object>();
                                     if (!headers.ContainsKey("x-orig-routing-key"))
                                         headers.Add("x-orig-routing-key", GetOrigRoutingKey(properties, eventName));
-                                    channel.BasicPublish(_exchanges[QueueConsumerMode.Fail], eventName, CreateOverrideProperties(properties, headers), body);
+                                     mode = QueueConsumerMode.Fail;
+                                    retryCount = rollbackCount;
+                                    channel.BasicPublish(_exchanges[mode], eventName, CreateOverrideProperties(properties, headers), body);
+
                                 }
                             }
                             else
@@ -358,9 +362,23 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                                 }
                                 if (!headers.ContainsKey("x-orig-routing-key"))
                                     headers.Add("x-orig-routing-key", GetOrigRoutingKey(properties, eventName));
-
-                                channel.BasicPublish(_exchanges[QueueConsumerMode.Retry], eventName, CreateOverrideProperties(properties, headers), body);
+                                mode = QueueConsumerMode.Retry;
+                                channel.BasicPublish(_exchanges[mode], eventName, CreateOverrideProperties(properties, headers), body);
                             }
+                        }
+                    }
+                    finally
+                    {
+                        var baseConcreteType = typeof(BaseIntegrationEventHandler<>).MakeGenericType(eventType); 
+                       if (handler.GetType().BaseType== baseConcreteType)
+                        {
+                            var evt = (IntegrationEvent)integrationEvent;
+                            var context = new EventContext(evt)
+                            {
+                                Count = retryCount,
+                                Type = mode.ToString()
+                            };
+                            await (Task)baseConcreteType.GetMethod("Handled").Invoke(handler, new object[] { context });
                         }
                     }
                 }

@@ -17,6 +17,8 @@ namespace Surging.Core.EventBusKafka.Configurations
 
         public bool LogConnectionClose { get; set; } = false;
 
+        public int Timeout { get; set; } = 100;
+
         public int CommitInterval { get; set; } = 1000;
 
         public OffsetResetMode OffsetReset { get; set; } = OffsetResetMode.Earliest;

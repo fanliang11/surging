@@ -2,6 +2,7 @@
 using Confluent.Kafka.Serialization;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -9,9 +10,10 @@ using System.Threading;
 
 namespace Surging.Core.EventBusKafka.Implementation
 {
-   public class KafkaConsumerPersistentConnection : KafkaPersistentConnectionBase
+    public class KafkaConsumerPersistentConnection : KafkaPersistentConnectionBase
     {
         private readonly ILogger<KafkaConsumerPersistentConnection> _logger;
+        private ConcurrentBag<Consumer<Null, string>> _consumerClients;
         private Consumer<Null, string> _consumerClient;
         private readonly IDeserializer<string> _stringDeserializer;
         bool _disposed;
@@ -21,17 +23,20 @@ namespace Surging.Core.EventBusKafka.Implementation
         {
             _logger = logger;
             _stringDeserializer = new StringDeserializer(Encoding.UTF8);
+            _consumerClients = new ConcurrentBag<Consumer<Null, string>>();
         }
 
-        public override bool IsConnected => _consumerClient != null && !_disposed ;
+        public override bool IsConnected => _consumerClient != null && !_disposed;
 
         public override Action Connection(IEnumerable<KeyValuePair<string, object>> options)
         {
             return () =>
             {
                 _consumerClient = new Consumer<Null, string>(options, null, _stringDeserializer);
-                _consumerClient.OnConsumeError +=  OnConsumeError;
+                _consumerClient.OnConsumeError += OnConsumeError;
                 _consumerClient.OnError += OnConnectionException;
+                _consumerClients.Add(_consumerClient);
+
             };
         }
 
@@ -42,8 +47,21 @@ namespace Surging.Core.EventBusKafka.Implementation
                 TryConnect();
             }
             while (true)
-            { 
-                _consumerClient.Poll(timeout);
+            {
+                foreach (var client in _consumerClients)
+                {
+
+                    client.Poll(timeout);
+
+                    if (!client.Consume(out Message<Null, string> msg, (int)timeout.TotalMilliseconds))
+                    {
+                        continue;
+                    }
+                    if (msg.Offset % 5 == 0)
+                    {
+                        var committedOffsets = client.CommitAsync(msg).Result;
+                    }
+                }
             }
         }
 
