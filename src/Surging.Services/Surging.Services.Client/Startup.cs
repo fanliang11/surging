@@ -86,7 +86,7 @@ namespace Surging.Services.Client
                     UserId = 1,
                     Name = "fanly"
                 }).Wait();
-
+                 
                   userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
                     UserId = 1,

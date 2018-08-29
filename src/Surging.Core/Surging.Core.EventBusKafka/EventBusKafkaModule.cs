@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Engines;
+using System.Threading.Tasks;
 
 namespace Surging.Core.EventBusKafka
 {
@@ -21,9 +22,9 @@ namespace Surging.Core.EventBusKafka
             serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
             serviceProvider.GetInstances<IServiceEngineLifetime>().ServiceEngineStarted.Register(() =>
              {
-                 KafkaConsumerPersistentConnection connection= serviceProvider.GetInstances<IKafkaPersisterConnection>(KafkaConnectionType.Consumer.ToString()) as KafkaConsumerPersistentConnection;
+                 KafkaConsumerPersistentConnection connection = serviceProvider.GetInstances<IKafkaPersisterConnection>(KafkaConnectionType.Consumer.ToString()) as KafkaConsumerPersistentConnection;
                  connection.Listening(TimeSpan.FromMilliseconds(AppConfig.Options.Timeout));
-             });
+            });
         }
 
         /// <summary>

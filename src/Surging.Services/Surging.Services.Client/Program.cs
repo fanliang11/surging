@@ -40,7 +40,6 @@ namespace Surging.Services.Client
                     builder.AddMicroService(option =>
                     {
                         option.AddClient()
-                        .AddClientIntercepted(typeof(CacheProviderInterceptor))
                         .AddCache();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
