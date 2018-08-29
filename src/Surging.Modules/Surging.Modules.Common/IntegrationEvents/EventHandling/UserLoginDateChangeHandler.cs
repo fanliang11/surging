@@ -37,6 +37,7 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
         public override Task Handled(EventContext context)
         {
             Console.WriteLine($"调用{context.Count}次。类型:{context.Type}");
+            var model = context.Content as UserEvent;
             return Task.CompletedTask;
         }
     }

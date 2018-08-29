@@ -93,6 +93,12 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
 
                  foreach (var parameterInfo in method.GetParameters())
                  {
+                     //加入是否有默认值的判断，有默认值，并且用户没传，取默认值
+                     if (parameterInfo.HasDefaultValue && !parameters.ContainsKey(parameterInfo.Name))
+                     {
+                         list.Add(parameterInfo.DefaultValue);
+                         continue;
+                     }
                      var value = parameters[parameterInfo.Name];
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
