@@ -133,7 +133,7 @@ namespace Surging.ApiGateway.Controllers
                     {
                         dynamic instance = keyValue.Value;
                         instance.Payload = _authorizationServerProvider.GetPayloadString(author);
-                        RpcContext.GetContext().SetAttachment("payload", instance.Payload);
+                        RpcContext.GetContext().SetAttachment("payload", instance.Payload.ToString());
                         model.Remove(keyValue.Key);
                         model.Add(keyValue.Key, instance);
                     }
