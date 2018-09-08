@@ -9,6 +9,7 @@ using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Sel
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Attributes;
+using Surging.Core.KestrelHttpServer;
 using Surging.Core.ProxyGenerator.Implementation;
 using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
@@ -33,7 +34,8 @@ namespace Surging.IModuleServices.Common
         Task<IdentityUser> Save(IdentityUser requestData);
 
         [Authorization(AuthType = AuthorizationType.JWT)]
-        [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
+        [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = true)]
+        [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<int> GetUserId(string userName);
         
         Task<DateTime> GetUserLastSignInTime(int id);
@@ -43,7 +45,7 @@ new Surging.IModuleServices.Common.Models.UserModel
          {
             Name=""fanly"",
             Age=19
-         };", RequestCacheEnabled = false, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
+         };", RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<UserModel> GetUser(UserModel user);
 
@@ -70,5 +72,6 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<ApiResult<UserModel>> GetApiResult();
 
         Task<string> GetUser(List<int> idList);
+
     }
 }

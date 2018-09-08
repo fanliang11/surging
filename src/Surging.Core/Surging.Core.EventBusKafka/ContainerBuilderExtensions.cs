@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.EventBus.Events;
 using Microsoft.Extensions.Options;
 using Surging.Core.EventBusKafka.Configurations;
+using Microsoft.Extensions.Configuration;
 
 namespace Surging.Core.EventBusKafka
 {
@@ -24,9 +25,15 @@ namespace Surging.Core.EventBusKafka
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseKafkaMQTransport(this IServiceBuilder builder,Action<KafkaOptions> options)
         {
-            var kafkaOptions = new KafkaOptions();
-            options.Invoke(kafkaOptions);
-            AppConfig.KafkaConfig = kafkaOptions.GetConfig();
+            AppConfig.Options = new KafkaOptions();
+            var section = CPlatform.AppConfig.GetSection("Kafka");
+            if (section.Exists())
+                AppConfig.Options = section.Get<KafkaOptions>();
+            else if (AppConfig.Configuration != null)
+                AppConfig.Options = AppConfig.Configuration.Get<KafkaOptions>();
+            options.Invoke(AppConfig.Options);
+            AppConfig.KafkaConsumerConfig = AppConfig.Options.GetConsumerConfig();
+            AppConfig.KafkaProducerConfig = AppConfig.Options.GetProducerConfig();
             var services = builder.Services;
             builder.Services.RegisterType(typeof(Implementation.EventBusKafka)).As(typeof(IEventBus)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultConsumeConfigurator)).As(typeof(IConsumeConfigurator)).SingleInstance();

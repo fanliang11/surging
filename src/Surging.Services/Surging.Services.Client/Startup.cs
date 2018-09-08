@@ -83,13 +83,13 @@ namespace Surging.Services.Client
                 var apiResult =  userProxy.GetApiResult().GetAwaiter().GetResult();
                 userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
-                    UserId = "1",
+                    UserId = 1,
                     Name = "fanly"
                 }).Wait();
-
+                 
                   userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
-                    UserId = "1",
+                    UserId = 1,
                     Name = "fanly"
                 }).Wait();
 
@@ -123,9 +123,9 @@ namespace Surging.Services.Client
         {
             serviceProxyFactory.CreateProxy<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
             {
-                Age = "18",
+                Age = 18,
                 Name = "fanly",
-                UserId = "1"
+                UserId = 1
             });
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();

@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace Surging.Core.CPlatform.Engines.Implementation
 {

@@ -6,8 +6,8 @@ namespace Surging.Core.EventBusRabbitMQ
 {
    public  enum QueueConsumerMode
     {
-        Normal=0,
+        Normal = 0,
         Retry,
-        Rollback,
+        Fail,
     }
 }

@@ -178,8 +178,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
              ? invocation.ReturnValue as RemoteInvokeResultMessage : null;
             return new Tuple<RemoteInvokeResultMessage, object>(message, invocation.ReturnValue);
         }
-
-
+        
         private IInvocation GetInvocation(IDictionary<string, object> parameters, string serviceId, Type returnType)
         {
             var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();

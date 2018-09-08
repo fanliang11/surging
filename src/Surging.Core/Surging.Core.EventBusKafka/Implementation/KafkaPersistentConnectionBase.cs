@@ -13,12 +13,14 @@ namespace Surging.Core.EventBusKafka.Implementation
     public abstract class KafkaPersistentConnectionBase : IKafkaPersisterConnection
     {
         private readonly ILogger<KafkaPersistentConnectionBase> _logger;
-
+        private readonly IEnumerable<KeyValuePair<string, object>> _config;
         object sync_root = new object();
 
-        public KafkaPersistentConnectionBase(ILogger<KafkaPersistentConnectionBase> logger)
+        public KafkaPersistentConnectionBase(ILogger<KafkaPersistentConnectionBase> logger,
+            IEnumerable<KeyValuePair<string, object>> config)
         {
             this._logger = logger;
+            _config = config;
         }
         
 
@@ -39,7 +41,7 @@ namespace Surging.Core.EventBusKafka.Implementation
 
                 policy.Execute(() =>
                 {
-                    Connection(AppConfig.KafkaConfig);
+                    Connection(_config).Invoke();
                 });
 
                 if (IsConnected)
@@ -56,7 +58,6 @@ namespace Surging.Core.EventBusKafka.Implementation
 
         public abstract Action Connection(IEnumerable<KeyValuePair<string, object>> options);
         
- 
         public abstract object CreateConnect();
         public abstract void Dispose();
     }

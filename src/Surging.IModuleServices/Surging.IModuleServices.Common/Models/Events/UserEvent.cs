@@ -7,10 +7,10 @@ namespace Surging.IModuleServices.Common.Models.Events
 {
     public class UserEvent : IntegrationEvent
     {
-        public string UserId { get; set; }
+        public int UserId { get; set; }
 
         public string Name { get; set; }
 
-        public string Age { get; set; }
+        public int Age { get; set; }
     }
 }

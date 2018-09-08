@@ -2,7 +2,7 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|98",
+    "Port": "${Surging_Server_Port}|99",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
@@ -18,7 +18,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;EventBusRabbitMQModule;WSProtocolModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;KestrelHttpModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -28,13 +28,26 @@
     "RoutePath": "${Register_RoutePath}",
     "ReloadOnChange": true
   },
+  "EventBus_Kafka": {
+    "Servers": "${EventBusConnection}|localhost:9092",
+    "MaxQueueBuffering": "${MaxQueueBuffering}|10",
+    "MaxSocketBlocking": "${MaxSocketBlocking}|10",
+    "EnableAutoCommit": "${EnableAutoCommit}|false",
+    "LogConnectionClose": "${LogConnectionClose}|false",
+    "OffsetReset": "${OffsetReset}|earliest",
+    "GroupID": "${EventBusGroupID}|surgingdemo"
+  },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",
-    "EventBusUserName": "guest",
-    "EventBusPassword": "guest",
-    "VirtualHost": "/",
-    "BrokerName": "surging_demo",
-    "Port": "5672"
+    "EventBusUserName": "${EventBusUserName}|guest",
+    "EventBusPassword": "${EventBusPassword}|guest",
+    "VirtualHost": "${VirtualHost}|/",
+    "MessageTTL": "${MessageTTL}|30000",
+    "RetryCount": "${RetryCount}|1",
+    "FailCount": "${FailCount}|3",
+    "prefetchCount": "${PrefetchCount}|0",
+    "BrokerName": "${BrokerName}|surging_demo",
+    "Port": "${EventBusPort}|5672"
   },
   "Zookeeper": {
     "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181",

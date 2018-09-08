@@ -24,7 +24,6 @@ namespace Surging.Core.EventBusRabbitMQ
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseRabbitMQTransport(this IServiceBuilder builder)
         {
-            var services = builder.Services;
             builder.Services.RegisterType(typeof(Implementation.EventBusRabbitMQ)).As(typeof(IEventBus)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultConsumeConfigurator)).As(typeof(IConsumeConfigurator)).SingleInstance();
             builder.Services.RegisterType(typeof(InMemoryEventBusSubscriptionsManager)).As(typeof(IEventBusSubscriptionsManager)).SingleInstance();
@@ -42,11 +41,15 @@ namespace Surging.Core.EventBusRabbitMQ
                     HostName = option.EventBusConnection,
                     UserName = option.EventBusUserName,
                     Password = option.EventBusPassword,
-                    VirtualHost= option.VirtualHost,
+                    VirtualHost = option.VirtualHost,
                     Port = int.Parse(option.Port),
                 };
                 factory.RequestedHeartbeat = 60;
                 AppConfig.BrokerName = option.BrokerName;
+                AppConfig.MessageTTL = option.MessageTTL;
+                AppConfig.RetryCount = option.RetryCount;
+                AppConfig.FailCount = option.FailCount;
+                AppConfig.PrefetchCount = option.PrefetchCount;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();
             return builder;
