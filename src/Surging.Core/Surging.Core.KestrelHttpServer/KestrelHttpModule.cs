@@ -50,11 +50,11 @@ namespace Surging.Core.KestrelHttpServer
             {
                 var executor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Http.ToString());
                 var messageListener = provider.Resolve<KestrelHttpMessageListener>();
-                return new DefaultServiceHost(async endPoint =>
+                return new DefaultHttpServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
-                }, executor);
+                }, executor, messageListener);
 
             }).As<IServiceHost>();
         }

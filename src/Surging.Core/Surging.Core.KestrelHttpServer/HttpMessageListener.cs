@@ -141,41 +141,12 @@ namespace Surging.Core.KestrelHttpServer
             var elements = content.Split(';');
             var element = elements.Where(entry => entry.Trim().StartsWith(type)).FirstOrDefault()?.Trim();
             var name = element?.Substring(type.Length);
-            // Remove quotes
             if (!string.IsNullOrEmpty(name) && name.Length >= 2 && name[0] == '"' && name[name.Length - 1] == '"')
             {
                 name = name.Substring(1, name.Length - 2);
             }
             return name;
         }
-
-        //private  string GetFileName(string content)
-        //{
-        //    var elements = content.Split(';');
-        //    var element = elements.Where(entry => entry.Trim().StartsWith("filename=")).FirstOrDefault()?.Trim();
-        //    var fileName = element?.Substring("filename=".Length);
-        //    // Remove quotes
-        //    if (!string.IsNullOrEmpty(fileName) &&  fileName.Length >= 2 && fileName[0] == '"' && fileName[fileName.Length - 1] == '"')
-        //    {
-        //        fileName = fileName.Substring(1, fileName.Length - 2);
-        //    }
-        //    return fileName;
-        //}
-
-        //private static string GetBoundary(string contentType)
-        //{
-        //    // TODO: Strongly typed headers will take care of this for us
-        //    // TODO: Limit the length of boundary we accept. The spec says ~70 chars.
-        //    var elements = contentType.Split(' ');
-        //    var element = elements.Where(entry => entry.StartsWith("boundary=")).First();
-        //    var boundary = element.Substring("boundary=".Length);
-        //    // Remove quotes
-        //    if (boundary.Length >= 2 && boundary[0] == '"' && boundary[boundary.Length - 1] == '"')
-        //    {
-        //        boundary = boundary.Substring(1, boundary.Length - 2);
-        //    }
-        //    return boundary;
-        //}
 
         private string GetRoutePath(string path)
         {
