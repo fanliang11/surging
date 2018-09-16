@@ -9,20 +9,25 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Surging.Core.KestrelHttpServer.Builder;
+using Microsoft.AspNetCore.Http;
+using Surging.Core.CPlatform.Serialization;
 
 namespace Surging.Core.KestrelHttpServer
 {
-    public class DefaultKestrelHttpMessageListener : IMessageListener, IDisposable
+    public class KestrelHttpMessageListener : HttpMessageListener, IDisposable
     {
-        private readonly ILogger<DefaultKestrelHttpMessageListener> _logger;
+        private readonly ILogger<KestrelHttpMessageListener> _logger;
         private IWebHost _host;
+        private readonly ISerializer<string> _serializer;
+         
 
-        public event ReceivedDelegate Received;
-
-        public DefaultKestrelHttpMessageListener(ILogger<DefaultKestrelHttpMessageListener> logger)
+        public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger, ISerializer<string> serializer) :base(logger, serializer)
         {
             _logger = logger;
+            _serializer = serializer;
         }
+        
         public async Task StartAsync(EndPoint endPoint)
         {
             var ipEndPoint = endPoint as IPEndPoint; 
@@ -30,9 +35,13 @@ namespace Surging.Core.KestrelHttpServer
             {
                 _host = new WebHostBuilder()
                  .UseContentRoot(Directory.GetCurrentDirectory())
-                 .UseStartup<Startup>()
                  .UseKestrel(options=> {
                      options.Listen(ipEndPoint);
+
+                 })
+                 .ConfigureLogging((logger) => {
+                     logger.AddConfiguration(
+                            CPlatform.AppConfig.GetSection("Logging"));
                  })
                  .Configure(AppResolve)
                  .Build();
@@ -47,16 +56,12 @@ namespace Surging.Core.KestrelHttpServer
         }
         
 
-        public Task OnReceived(IMessageSender sender, TransportMessage message)
-        {
-            return Task.CompletedTask;
-        }
-
         private void AppResolve(IApplicationBuilder app)
-        {
+        { 
             app.Run(async (context) =>
             {
-               var keys= context.Request.Query.Keys; 
+                var sender =new HttpServerMessageSender(_serializer,context);
+                await OnReceived(sender,context);
             });
         }
 
@@ -64,5 +69,6 @@ namespace Surging.Core.KestrelHttpServer
         {
             _host.Dispose();
         }
+        
     }
 }

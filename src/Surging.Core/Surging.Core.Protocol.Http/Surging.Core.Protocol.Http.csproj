@@ -17,8 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetty.Codecs" Version="0.4.8" />
-    <PackageReference Include="DotNetty.Codecs.Http" Version="0.4.8" />
+    <PackageReference Include="DotNetty.Codecs" Version="0.5.0" />
+    <PackageReference Include="DotNetty.Codecs.Http" Version="0.5.0" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
   </ItemGroup>
 

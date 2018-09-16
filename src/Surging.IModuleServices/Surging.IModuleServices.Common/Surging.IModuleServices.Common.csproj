@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
-    <PackageReference Include="protobuf-net" Version="2.3.5" />
+    <PackageReference Include="protobuf-net" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>

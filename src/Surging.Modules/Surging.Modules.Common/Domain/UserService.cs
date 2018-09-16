@@ -3,6 +3,7 @@ using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
@@ -10,6 +11,7 @@ using Surging.IModuleServices.User;
 using Surging.Modules.Common.Repositories;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Surging.Modules.Common.Domain
@@ -105,6 +107,19 @@ namespace Surging.Modules.Common.Domain
         public Task<ApiResult<UserModel>> GetApiResult()
         {
             return Task.FromResult(new ApiResult<UserModel>() { Value = new UserModel { Name = "fanly" }, StatusCode = 200 });
+        }
+
+        public async Task<bool> UploadFile(HttpFormCollection form)
+        {
+            var files = form.Files;
+            foreach (var file in files)
+            {
+                using (var stream = new FileStream(Path.Combine(AppContext.BaseDirectory, file.FileName), FileMode.OpenOrCreate))
+                {
+                   await stream.WriteAsync(file.File, 0, (int)file.Length);
+                }
+            }
+            return true;
         }
 
         public Task<string> GetUser(List<int> idList)
