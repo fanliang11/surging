@@ -6,9 +6,11 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using RabbitMQ.Client.Framing;
+using Surging.Core.CPlatform.DependencyResolution;
 using Surging.Core.CPlatform.EventBus;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Attributes;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
 namespace Surging.Core.EventBusRabbitMQ.Implementation
 {
@@ -340,7 +343,8 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                     long retryCount = 1; 
                     try
                     {
-                        await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
+                        var fastInvoker = GetHandler($"{concreteType.FullName}.Handle", concreteType.GetMethod("Handle"));
+                        await (Task)fastInvoker(handler, new object[] { integrationEvent });
                     }
                     catch
                     {
@@ -389,7 +393,8 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                                 Count = retryCount,
                                 Type = mode.ToString()
                             };
-                            await (Task)baseConcreteType.GetMethod("Handled").Invoke(handler, new object[] { context });
+                            var fastInvoker = GetHandler($"{baseConcreteType.FullName}.Handled", baseConcreteType.GetMethod("Handled"));
+                            await (Task)fastInvoker(handler, new object[] { context });
                         }
                     }
                 }
@@ -484,6 +489,17 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 }
             }
             return retryCount;
+        }
+
+        private FastInvokeHandler GetHandler(string key, MethodInfo method)
+        {
+            var objInstance = ServiceResolver.Current.GetService(null, key);
+            if (objInstance == null)
+            {
+                objInstance = FastInvoke.GetMethodInvoker(method);
+                ServiceResolver.Current.Register(key, objInstance, null);
+            }
+            return objInstance as FastInvokeHandler;
         }
     }
 }
