@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
+    <ProjectReference Include="..\Surging.Core.Swagger\Surging.Core.Swagger.csproj" />
   </ItemGroup>
 
   <ItemGroup>
