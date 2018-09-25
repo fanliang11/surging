@@ -1,0 +1,52 @@
+﻿@{
+    Layout = "_Layout.cshtml";
+    var now = DateTime.Now;
+}
+@section HeadCSS
+    {
+    @RenderSection("HeadCSS", false)
+}
+<div id="wrapper" class="pc-feed-content">
+    <div class="work-page pc-switch-page" data-class="work-skin" style="left:0px;">
+        @Html.Partial("Partial/ManageNav")
+        <section id="work" class="pc-content">
+            @RenderBody()
+
+        </section>
+    </div>
+    <div class="pc-tools-bar hidden-xs">
+        <div class="row">
+
+            <div class="col-sm-12 tool-box tool-invite">
+                <a href="/PersonalCenter/view/partial/invite.html">
+                    <span>Powered by surging v0.14</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="overlay" id="ov-btmright">
+    <div id="app_wrap">
+    </div>
+</section>
+
+@section FootJS
+{
+<script src="~/assets/lib/seajs/dist/sea.js?t=201787"></script>
+<script src="~/assets/js/base/jquery.min.js"></script>
+<script src="~/assets/js/base/seajs-text.js"></script>
+<script src="~/assets/js/config.js"></script>
+<script type="text/javascript">
+    seajs.config({
+        debug: true,
+        base: '/'
+
+    });
+    seajs.use("common/view/main.guide.js", function(a) {
+            a.init({
+                time: "@DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")"
+            });
+        });
+</script>
+@RenderSection("FootJS", false)
+    }

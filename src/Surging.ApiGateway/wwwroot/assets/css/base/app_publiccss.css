@@ -1,0 +1,326 @@
+﻿ul,
+li {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.my-mfp-zoom-in.mfp-ready.mfp-bg {
+    opacity: .5 !important;
+}
+
+.app-dialog .mfp-close {
+    color: #fff;
+}
+
+.white-popup {
+    position: relative;
+    width: auto;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+}
+
+.app-frame {
+    height: 100%;
+    width: 100%;
+}
+
+    .app-frame .mCSB_scrollTools {
+        width: 4px;
+    }
+
+    .app-frame .mCSB_inside > .mCSB_container {
+        margin-right: 10px;
+    }
+
+    .app-frame > .app-inner {
+        height: 100%;
+    }
+
+        .app-frame > .app-inner > .app-wrapper {
+            float: left;
+            background-color: #FFF;
+            padding-left: 180px;
+            min-height: 100%;
+            width: 100%;
+            padding-right: 50px;
+        }
+
+    .app-frame .app-left-side {
+        width: 180px;
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        height: 100%;
+        z-index: 2;
+        float: left;
+    }
+
+        .app-frame .app-left-side .app-title {
+            margin: 10px 0;
+            padding: 10px 30px 15px 30px;
+            border-bottom: solid 1px #FFF;
+            color: #fff;
+        }
+
+            .app-frame .app-left-side .app-title > i {
+                font-size: 28px;
+                vertical-align: middle;
+                margin-right: 10px;
+            }
+
+    .app-frame .app-right-side {
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        width: 50px;
+        height: 100%;
+        padding: 17px;
+        padding-top: 18%;
+    }
+
+        .app-frame .app-right-side a {
+            text-decoration: none;
+            color: #fff;
+        }
+
+.app-left-nav ul a {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding: 12px 15px 12px 25px;
+    white-space: nowrap;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    color: #fff;
+}
+
+.app-left-nav ul li.nav-line {
+    height: 1px;
+    margin: 5px 0;
+    background-color: #138c74;
+}
+
+.app-left-nav ul > li > a:hover {
+    background-color: #148d75;
+}
+
+.app-left-nav ul a > i {
+    margin-right: 8px;
+    font-size: 20px;
+    vertical-align: middle;
+}
+
+.app-left-nav ul li.nav-subnav > h4 {
+    font-size: 16px;
+    padding: 5px 15px 0 25px;
+    color: #fff;
+}
+
+.app-left-nav ul li a > span.round {
+    color: #fff;
+    margin-left: 10px;
+    background-color: #e63c3c;
+}
+
+.app-wrapper {
+    padding-bottom: 40px;
+    color: #333;
+}
+
+.work-skin .dropdown-menu.black-menu {
+    min-width: 120px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background-color: #333d46;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.work-skin .dropdown-menu.black-menu > li > a {
+        padding-top: 7px;
+        padding-bottom: 7px;
+        text-align: center;
+        color: #fff;
+}
+
+.work-skin .dropdown-menu.black-menu > li > a:hover,
+.work-skin .dropdown-menu.black-menu > li > a:focus {
+            text-decoration: none;
+            color: #fff;
+            background-color: #414e58;
+}
+
+.app-tabs {
+    border-bottom: none;
+}
+
+.app-tabs > li > a {
+        margin-right: 5px;
+        padding: 3px 30px;
+}
+
+.paginator {
+    padding: 8px 5px 5px;
+    text-align: right;
+}
+
+.paginator a {
+        font-size: 14px;
+        position: relative;
+        margin: 0;
+        padding: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        color: #777;
+        border: none;
+        background-color: transparent;
+}
+
+.paginator a:hover {
+            color: #e87164;
+}
+
+.paginator .current {
+        font-size: 16px;
+        font-weight: 700;
+        padding: 5px;
+        color: #d32;
+    }
+
+.app-require {
+    color: red;
+}
+
+ul.simple-pagination {
+    list-style: none;
+}
+
+.simple-pagination {
+    display: block;
+    overflow: hidden;
+    margin: 10px 0;
+    padding: 0 5px 5px 0;
+    text-align: right;
+}
+
+.simple-pagination ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+.simple-pagination li {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        *display: inline;
+        *zoom: 1;
+}
+
+.simple-pagination .current.prev,
+.simple-pagination .current.prev:hover,
+.simple-pagination .current.next,
+.simple-pagination .current.next:hover {
+        cursor: not-allowed;
+        color: #999;
+        border-color: #ddd;
+        background-color: #fff;
+}
+
+.form-control[readonly] {
+    cursor: pointer;
+    background-color: #fff;
+}
+
+label.error {
+    display: inline;
+    margin-bottom: 0;
+}
+
+.bootstrap-select-searchbox input.form-control {
+    padding: 6px 8px;
+    height: 30px;
+}
+
+.selectpicker > li > a {
+    padding: 4px 15px;
+}
+
+
+section.active, section.active > #app_wrap {
+    height: 100%;
+}
+#nprogress .bar {
+    position: fixed;
+    z-index: 1031;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    -webkit-transition: all 500ms ease;
+    transition: all 500ms ease;
+    background: #f0ad4e;
+}
+
+#nprogress .spinner {
+    position: fixed;
+    z-index: 1031;
+    top: 10px;
+    right: 10px;
+    display: block;
+}
+
+#nprogress .spinner-icon {
+    box-sizing: border-box;
+    width: 30px;
+    height: 30px;
+    -webkit-animation: nprogress-spinner 400ms linear infinite;
+    animation: nprogress-spinner 400ms linear infinite;
+    border: solid 2px transparent;
+    border-top-color: #fefefe;
+    border-left-color: #fefefe;
+    border-radius: 50%;
+}
+
+.nprogress-custom-parent {
+    position: relative;
+    overflow: hidden;
+}
+
+    .nprogress-custom-parent #nprogress .spinner,
+    .nprogress-custom-parent #nprogress .bar {
+        position: absolute;
+    }
+
+@-webkit-keyframes nprogress-spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes nprogress-spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.form-horizontal .control-sm
+{
+    padding-top:4px;
+}

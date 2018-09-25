@@ -1,0 +1,342 @@
+﻿.app-board-dialog .modal-header {
+    color: #fff;
+    background-color: #1a5581;
+}
+
+.app-board-dialog {
+    min-height: inherit;
+}
+
+.app-board-dialog .btn {
+    padding: 6px 26px;
+}
+
+.app-board-dialog .modal-body {
+    padding: 10px;
+}
+
+.app-board-dialog .modal-footer {
+    padding: 15px;
+}
+
+.tooltipster-base .tooltipster-content {
+    padding: 10px 20px;
+}
+
+.app-board {
+    background-color: #3b75a5;
+    height: 100%;
+}
+
+.app-board .app-left-side .app-title {
+    border-bottom-color: #CCC
+}
+
+.app-board .app-left-side {
+    border: 1px solid #ccc;
+    width: 200px;
+}
+
+.app-board .app-left-side .app-title > i {
+    margin-right: 10px;
+}
+
+.app-board .app-left-side, .app-board .app-right-side {
+    background-color: #f9f9f9;
+}
+
+.app-board .app-wrapper {
+    margin-right: 0;
+    margin-left: 0;
+    padding-bottom: 40px;
+    padding-left: 200px;
+    min-height: 100%;
+    background-color: #fff;
+    box-shadow: none;
+}
+
+.app-board .app-wrapper .container {
+    position: relative;
+}
+
+.app-left-side.menu-min > .app-title > i {
+    margin-right: 0px;
+    margin-bottom: 10px;
+}
+
+.app-board .app-left-side .app-title,
+.app-left-nav ul li.nav-subnav h4 {
+    color: #585858;
+}
+
+.app-board .app-left-nav ul a {
+    padding: 12px 5px 12px 20px;
+    color: #585858;
+}
+
+    .app-board .app-left-nav ul a:hover, .app-board .app-left-nav ul .active {
+        color: #fff;
+        background-color: #3b75a5;
+    }
+
+.app-board .app-right-side {
+    background-color: #3b75a5;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    width: 50px;
+    height: 100%;
+    padding: 17px;
+    padding-top: 18%;
+    color: #FFF;
+}
+
+.app-board .app-right-side > a {
+    color: #FFF;
+    text-decoration: none;
+}
+
+
+.app-board .search-bar {
+    margin: 10px 0;
+}
+
+.app-board .search-bar > .navbar-header {
+    padding: 15px 5px;
+    color: #fff;
+}
+
+.app-left-side .sidebar-toggle {
+    position: relative;
+    margin-top: 10px;
+    padding: 10px 0;
+    text-align: center;
+    border-top: solid 1px #ccc;
+    background-color: #f2f2f2;
+}
+
+.app-left-side .sidebar-toggle:before {
+    position: absolute;
+    top: 20px;
+    right: 15px;
+    left: 15px;
+    display: block;
+    height: 0;
+    content: '';
+    border-color: inherit;
+    border-top: 1px solid #e0e0e0;
+}
+
+.app-left-side .sidebar-toggle > .icon {
+    font-size: 14px;
+    position: relative;
+    padding: 2px 5px;
+    cursor: pointer;
+    color: #AAA;
+    border: 1px solid #BBB;
+    border-radius: 100%;
+    background-color: #FFF;
+}
+
+.app-left-side .sidebar-toggle > .icon:hover {
+    background-color: #EFEFEF;
+    border-color: #999;
+    color: #999;
+}
+
+.app-board .app-left-side.menu-min,
+.app-board .app-left-side.menu-min.compact,
+.sidebar.menu-min.navbar-collapse {
+    width: 60px;
+}
+
+.app-board .app-left-side.menu-min + .app-wrapper {
+    padding-left: 60px;
+}
+
+.app-board .app-left-side.menu-min .app-left-nav li a {
+    line-height: 44px;
+    position: relative;
+    overflow: inherit;
+    height: 44px;
+    padding: 0;
+    text-align: center;
+}
+
+.app-board .app-left-side.menu-min .app-left-nav li a > i {
+    font-size: 20px;
+    margin: 0;
+}
+
+.app-board .app-left-side.menu-min .app-left-nav li .nav-level-span {
+    line-height: 44px;
+    position: absolute;
+    z-index: 1025;
+    top: 0;
+    left: 50px;
+    display: none;
+    width: 150px;
+    height: 44px;
+    padding-left: 20px;
+    text-align: left;
+    background-color: #3b75a5;
+}
+.app-left-side .app-left-nav .nav-level-span {
+    position: absolute;
+    padding-left: 12px;
+}
+.app-board .app-left-side.menu-min .app-left-nav li a:hover .nav-level-span,
+.app-board .app-left-side.menu-min .app-left-nav li a .nav-level-span:hover {
+    display: block;
+    opacity: .95;
+    filter: alpha(opacity=95);
+    -moz-opacity: .95;
+    -webkit-opacity: .95;
+    -khtml-opacity: .95;
+}
+
+.app-board .app-left-side.menu-min .app-title {
+    font-size: 22px;
+    line-height: 55px;
+    height: 55px;
+    padding: 0;
+    text-align: center;
+}
+
+.app-board .app-left-side.menu-min .app-title span {
+    display: none;
+}
+
+.app-board .board-box {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.app-board .board-box:hover {
+    cursor: pointer;
+}
+
+.app-board .board-box .board-unit {
+    position: relative;
+    margin: 8px 0;
+    margin-left: -2px;
+    padding: 10px;
+    background-color: #fff;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.app-board .board-box .board-unit:hover {
+    z-index: 11;
+    background-color: #fafafa;
+    box-shadow: 0 0 4px 2px rgba(0, 0, 0, .4);
+}
+
+.board-unit .board-avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.board-unit .board-head {
+    font-size: 12px;
+    position: relative;
+    min-height: 40px;
+    margin: 0 0 5px 0;
+    padding-left: 50px;
+}
+
+.board-unit .board-head h4 {
+    font-size: 14px;
+    margin: 0 0 5px 0;
+}
+
+.board-unit .board-body {
+    min-height: 131px;
+    padding: 0 2px;
+}
+
+.board-unit .board-text {
+    font-size: 12px;
+    overflow: hidden;
+    height: 55px;
+    padding: 2px 0 3px 0;
+    text-overflow: ellipsis;
+    color: #222;
+}
+
+.board-unit .board-pic {
+    padding: 3px 0;
+}
+
+    .board-unit .board-pic img {
+        min-width: 50px;
+        min-height: 50px;
+    }
+
+.board-unit .board-comment {
+    font-size: 12px;
+}
+
+.board-detail {
+    min-height: 500px;
+    background-color: #fff;
+}
+
+.board-detail .board-content {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    padding: 15px 0;
+    table-layout: fixed;
+    word-break: break-all;
+    color: #222;
+}
+
+.board-detail .board-content img {
+    width: 100%;
+}
+
+.board-detail .board-comment {
+    padding: 10px;
+}
+
+.app-board .nextmore {
+    padding: 10px 0;
+    border: none;
+}
+
+.app-board .nextmore > .inner {
+    border: none;
+    background-color: transparent;
+}
+
+.app-board .nextmore > .inner > a {
+    font-size: 20px;
+    margin: 10px 0;
+    color: #eee;
+}
+
+.app-board .nextmore > .inner > a:hover {
+    color: #fff;
+}
+.page-header {
+    border-bottom: 1px dotted #e2e2e2;
+    margin: 0 0 12px;
+    padding-bottom: 16px;
+    padding-top: 7px;
+}
+.page-header h1 {
+    color: #2679b5;
+    font-size: 24px;
+    font-weight: lighter;
+    margin: 0 8px;
+    padding: 0;
+}
+.page-content {
+   min-height:600px;
+}
+.app-left-nav ul{
+    margin:0px;
+    padding:0px;
+}

@@ -1,0 +1,47 @@
+﻿{ 
+    "CachingSettings": [
+      {
+        "Id": "ddlCache",
+        "Class": "Surging.Core.Caching.RedisCache.RedisContext,Surging.Core.Caching",
+        "Properties": [
+          {
+            "Name": "appRuleFile",
+            "Ref": "rule"
+          },
+          {
+            "Name": "dataContextPool",
+            "Ref": "ddls_sample",
+            "Maps": [
+              {
+                "Name": "Redis",
+                "Properties": [
+                  {
+                    "value": "127.0.0.1:6379::1"
+                  }
+                ]
+              },
+              {
+                "Name": "MemoryCache"
+              }
+            ]
+          },
+          {
+            "Name": "defaultExpireTime",
+            "value": "120"
+          },
+          {
+            "Name": "connectTimeout",
+            "Value": "120"
+          },
+          {
+            "Name": "minSize",
+            "Value": "1"
+          },
+          {
+            "Name": "maxSize",
+            "Value": "10"
+          }
+        ]
+      }
+    ]
+}

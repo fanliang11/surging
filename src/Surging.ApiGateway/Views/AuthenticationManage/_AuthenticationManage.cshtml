@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "认证管理";
+    Layout = "~/Views/Shared/_AppLayout.cshtml";
+}
+@section SubHeadCSS
+    {
+    <link href="~/apps/authmanage/assets/css/index.css" rel="stylesheet" />
+}
+<div class="app-frame app-board">
+    <div class="app-left-side  menu-min">
+        <h4 class="app-title"><i class="surging-icon-line"></i> <span>身份认证</span></h4>
+        <div style="position:relative;min-height:466px;" class="scrollbar">
+            <div class="content">
+                <nav class="app-left-nav">
+                    <ul>
+                        <li><a href="@Url.Action("Index",new { XPJAX=true})" title="服务令牌" class="board-group popup active" data-pjax=".page-content"><i class="surging-icon-token"></i><span class="nav-level-span">服务令牌</span></a></li>
+                        <li><a href="javascript:void(0)" class="board-group" title="黑白名单"><i class="surging-icon-blacklist"></i><span class="nav-level-span">黑白名单</span></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="sidebar-toggle  sidebar-collapse disk-size" style="z-index: 1;">
+            <i id="leftSide-toggle" class="icon icon-double-angle-right"></i>
+        </div>
+    </div>
+    <div class="app-wrapper">
+        <div class="page-content">
+            @RenderBody()
+        </div>
+    </div>
+    @*<div class="app-right-side">
+            <a href="/" data-pjax="#wrapper" data-mode="appsHome">返回首页 <i class="surging-icon-left"></i></a>
+        </div>*@
+    <div class="ace-settings-container" style="top:100px;" id="ace-settings-container">
+        <a href="/" class="btn btn-app btn-xs btn-info ace-settings-btn" data-pjax="#wrapper" data-mode="appsHome">
+            <i class="surging-icon-home bigger-150"></i>
+        </a>
+
+    </div>
+</div>
+@section SubFootJS
+    {
+    <script type="text/javascript">
+        seajs.use("apps_authmanage/modules/authenticationmanage.js", function(a) {
+            a.init({
+            });
+        });
+    </script>
+    @RenderSection("SubFootJS", false)
+}

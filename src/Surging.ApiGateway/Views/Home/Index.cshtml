@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "首页";
+    var isPjax = !string.IsNullOrEmpty( Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"]);
+    Layout = isPjax ? null : "~/Views/Shared/_ManagerLayout.cshtml";
+}
+<div class="pc-wrapper">
+    <div id="main">
+        <div class="pc-index">
+            <div class="index-wrap">
+                <div class="index-wrap-inner">
+                    <h3 class="index-head">运行概况</h3>
+                    <div class="alert alert-block alert-point">
+                        <button type="button" class="close" data-dismiss="alert">
+                            <i class="icon-remove"></i>
+                        </button>
+
+                        <i class="icon-ok green"></i>
+
+                        欢迎使用
+                        <strong class="green">
+                            Surging Gateway<small>(v0.14)</small>
+                        </strong>,基于.NET CORE Surging微服务网关
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="pc-app">
+        <!--<a class="back-home" style="color:#5891aa" href="/PersonalCenter/view/work/index.shtml" data-pjax="#wrapper" data-mode="appsHome"><i class="surging-icon-left"></i><span>展开应用</span></a>-->
+        <div class="app-wrap">
+            <a class="pc-app-btn pc-app-monitor" href="javascript:;" data-mode="apps" data-pjax="#app_wrap"><i class="app-icon"></i></a>
+            <a class="pc-app-btn pc-app-service" href="@Url.Action("Index","ServiceManage")" data-mode="apps" data-pjax="#app_wrap"><i class="app-icon"></i></a>
+            <a class="pc-app-btn pc-app-defend" href="javascript:;" data-mode="apps" data-pjax="#app_wrap"><i class="app-icon"></i></a>
+            <a class="pc-app-btn pc-app-identity" href="@Url.Action("Index","AuthenticationManage")" data-mode="apps" data-pjax="#app_wrap"><i class="app-icon"></i></a>
+            <a class="pc-app-btn pc-app-flowrate " href="javascript:;" data-mode="apps" data-pjax="#app_wrap"><i class="app-icon"></i></a>
+            <a class="pc-app-btn pc-app-diversion" href="javascript:;" data-mode="apps" data-pjax="#app_wrap"><i class="app-icon"></i></a>
+        </div>
+    </div>
+</div>
+@section FootJS
+    {
+
+}

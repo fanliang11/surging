@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  surging.apigateway:
+    image: ${DOCKER_REGISTRY}surgingapi
+    ports:
+      - 729:729
+    environment:
+      Register_Conn:"192.168.72.129:8500"
+    build:
+      context: .
+      dockerfile: Surging.ApiGateway/Dockerfile
