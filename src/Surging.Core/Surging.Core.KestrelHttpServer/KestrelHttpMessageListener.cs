@@ -79,21 +79,6 @@ namespace Surging.Core.KestrelHttpServer
                 options.IncludeXmlComments(xmlPath); 
 
             });
-            //  services.ConfigureSwaggerGen(options =>
-            //{
-            //    options.SwaggerDoc("v1", new Info
-            //    {
-            //        Version = "v1",
-            //        Title = "测试ASP.NET Core WebAPI生成文档（文档说明）",
-            //        Description = "A simple example ASP.NET Core Web API",
-            //        TermsOfService = "None",
-            //        Contact = new Contact { Name = "linyongjie", Email = "", Url = "https://docs.microsoft.com/zh-cn/aspnet/core/" },
-            //        License = new License { Name = "Swagger官网", Url = "http://swagger.io/" }
-            //    });
-
-            //    //var basePath = Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationBasePath; // 获取到应用程序的根路径
-            //    //options.IncludeXmlComments(basePath + "\\dotNetCore_Test1.xml");  //是需要设置 XML 注释文件的完整路径
-            //});
         }
 
         private void AppResolve(IApplicationBuilder app)

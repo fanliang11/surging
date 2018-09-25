@@ -189,7 +189,7 @@ namespace Surging.Core.SwaggerGen
             var operation = new Operation
             {
                 OperationId = serviceEntry.Descriptor.Id, 
-                Parameters= CreateParameters(serviceEntry),
+                Parameters= CreateParameters(serviceEntry,schemaRegistry),
                 Deprecated = isDeprecated ? true : (bool?)null
             };
             var filterContext = new OperationFilterContext(
@@ -292,7 +292,7 @@ namespace Surging.Core.SwaggerGen
                 .ToList();
         }
 
-        private IList<IParameter> CreateParameters( ServiceEntry serviceEntry)
+        private IList<IParameter> CreateParameters( ServiceEntry serviceEntry, ISchemaRegistry schemaRegistry)
         {
             MethodInfo methodInfo;
             ParameterInfo [] parameterInfo = null;
@@ -302,12 +302,13 @@ namespace Surging.Core.SwaggerGen
                 parameterInfo = methodInfo.GetParameters();
 
             };
-            return parameterInfo !=null ? parameterInfo.Select(p=> CreateParameter(p)).ToList():default(IList<IParameter>);
+            return parameterInfo !=null ? parameterInfo.Select(p=> CreateParameter(p,schemaRegistry)).ToList():default(IList<IParameter>);
         }
 
-        private IParameter CreateParameter(ParameterInfo  parameterInfo)
+        private IParameter CreateParameter(ParameterInfo  parameterInfo, ISchemaRegistry schemaRegistry)
         {
-           return  new BodyParameter { Name = parameterInfo.Name,Required = true };
+            var schema = schemaRegistry.GetOrRegister(parameterInfo.ParameterType);
+            return  new BodyParameter { Name = parameterInfo.Name,Schema=schema, Required = true };
         }
 
         private IParameter CreateParameter(
