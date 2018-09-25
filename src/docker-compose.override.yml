@@ -1,9 +1,0 @@
-version: '3'
-
-services:
-  surging.apigateway:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-      - "80"
-
