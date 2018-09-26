@@ -29,7 +29,7 @@ namespace Surging.Core.Protocol.WS
             try
             {
                 foreach (var entry in _entries)
-                    _wssv.AddWebSocketService(entry.Path, entry.Behavior);
+                    _wssv.AddWebSocketService(entry.Path, entry.FuncBehavior);
                 _wssv.KeepClean = false;  
                 _wssv.Start();
                 if (_logger.IsEnabled(LogLevel.Debug))
