@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Transport;
@@ -19,14 +20,22 @@ namespace Surging.Core.KestrelHttpServer
 
         #endregion Field
 
-        public HttpServiceHost(Func<EndPoint, Task<IMessageListener>> messageListenerFactory, IServiceExecutor serviceExecutor) : base(serviceExecutor)
+        public HttpServiceHost(Func<EndPoint, Task<IMessageListener>> messageListenerFactory, IServiceExecutor serviceExecutor, HttpMessageListener httpMessageListener) : base(serviceExecutor)
         {
             _messageListenerFactory = messageListenerFactory;
+            _serverMessageListener = httpMessageListener;
+            _serverMessageListener.Received += async (sender, message) =>
+            {
+                await Task.Run(() =>
+                {
+                    MessageListener.OnReceived(sender, message);
+                });
+            };
         }
 
         #region Overrides of ServiceHostAbstract
 
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+
         public override void Dispose()
         {
             (_serverMessageListener as IDisposable)?.Dispose();
@@ -39,32 +48,19 @@ namespace Surging.Core.KestrelHttpServer
         /// <returns>一个任务。</returns>
         public override async Task StartAsync(EndPoint endPoint)
         {
-            if (_serverMessageListener != null)
-                return;
-            _serverMessageListener = await _messageListenerFactory(endPoint);
-            _serverMessageListener.Received += async (sender, message) =>
-            {
-                await Task.Run(() =>
-                {
-                    MessageListener.OnReceived(sender, message);
-                });
-            };
+             await _messageListenerFactory(endPoint); 
         }
 
         public override async Task StartAsync(string ip, int port)
         {
-            if (_serverMessageListener != null)
-                return;
-            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort));
-            _serverMessageListener.Received += async (sender, message) =>
-            {
-                await Task.Run(() =>
-                {
-                    MessageListener.OnReceived(sender, message);
-                });
-            };
+            await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort));
         }
 
         #endregion Overrides of ServiceHostAbstract
+
+        private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
+        {
+            await ServiceExecutor.ExecuteAsync(sender, message);
+        }
     }
 } 

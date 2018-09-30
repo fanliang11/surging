@@ -15,6 +15,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
         private readonly IServiceExecutor _serviceExecutor;
 
+        public IServiceExecutor ServiceExecutor { get => _serviceExecutor; }
+
         /// <summary>
         /// 消息监听者。
         /// </summary>

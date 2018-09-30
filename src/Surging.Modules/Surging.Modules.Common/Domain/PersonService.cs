@@ -10,6 +10,8 @@ using Newtonsoft.Json.Linq;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.ProxyGenerator;
+using Surging.Core.KestrelHttpServer.Internal;
+using System.IO;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -107,6 +109,19 @@ namespace Surging.Modules.Common.Domain
         public   Task<string> GetUser(List<int> idList)
         {
             return Task.FromResult("type is List<int>");
+        }
+
+        public async Task<bool> UploadFile(HttpFormCollection form)
+        {
+            var files = form.Files;
+            foreach (var file in files)
+            {
+                using (var stream = new FileStream(Path.Combine(AppContext.BaseDirectory, file.FileName), FileMode.Create))
+                {
+                    await stream.WriteAsync(file.File, 0, (int)file.Length);
+                }
+            }
+            return true;
         }
 
         #endregion Implementation of IUserService

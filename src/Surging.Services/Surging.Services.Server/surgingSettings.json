@@ -1,6 +1,6 @@
 {
   "Surging": {
-    "Ip": "${Surging_Server_IP}|127.0.0.1",
+    "Ip": "${Surging_Server_IP}|192.168.249.103",
     "WatchInterval": 30,
     "Port": "${Surging_Server_Port}|99",
     "MappingIp": "${Mapping_ip}",
@@ -18,7 +18,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;KestrelHttpModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages

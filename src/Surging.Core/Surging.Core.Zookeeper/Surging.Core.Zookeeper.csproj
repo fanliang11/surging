@@ -17,8 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="ZooKeeperNetEx" Version="3.4.10.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
+    <PackageReference Include="ZooKeeperNetEx" Version="3.4.12" />
   </ItemGroup>
 
   <ItemGroup>

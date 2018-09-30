@@ -4,6 +4,7 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
+using Surging.Core.CPlatform.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -24,6 +25,8 @@ namespace Surging.Core.KestrelHttpServer
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
+            builder.RegisterType(typeof(HttpExecutor)).As(typeof(IServiceExecutor))
+  .Named<IServiceExecutor>(CommunicationProtocol.Http.ToString()).SingleInstance();
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Http)
             {
                 RegisterDefaultProtocol(builder);
@@ -38,18 +41,20 @@ namespace Surging.Core.KestrelHttpServer
         {
             builder.Register(provider =>
             {
-                return new DefaultKestrelHttpMessageListener(
-                    provider.Resolve<ILogger<DefaultKestrelHttpMessageListener>>()
+                return new KestrelHttpMessageListener(
+                    provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
+                    provider.Resolve<ISerializer<string>>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
             {
-                var messageListener = provider.Resolve<DefaultKestrelHttpMessageListener>();
-                return new DefaultServiceHost(async endPoint =>
+                var executor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Http.ToString());
+                var messageListener = provider.Resolve<KestrelHttpMessageListener>();
+                return new DefaultHttpServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
-                }, null);
+                }, executor, messageListener);
 
             }).As<IServiceHost>();
         }
@@ -58,18 +63,20 @@ namespace Surging.Core.KestrelHttpServer
         {
             builder.Register(provider =>
             {
-                return new DefaultKestrelHttpMessageListener(
-                    provider.Resolve<ILogger<DefaultKestrelHttpMessageListener>>()
+                return new KestrelHttpMessageListener(
+                    provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
+                    provider.Resolve<ISerializer<string>>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
             {
-                var messageListener = provider.Resolve<DefaultKestrelHttpMessageListener>();
+                var executor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Http.ToString());
+                var messageListener = provider.Resolve<KestrelHttpMessageListener>(); 
                 return new HttpServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
-                }, null);
+                }, executor, messageListener);
 
             }).As<IServiceHost>();
         }

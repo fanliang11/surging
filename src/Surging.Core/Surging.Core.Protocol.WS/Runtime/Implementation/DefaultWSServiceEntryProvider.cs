@@ -78,7 +78,8 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
                 {
                     Behavior = behavior,
                     Type = behavior.GetType(),
-                    Path = path
+                    Path = path,
+                    FuncBehavior= () => _serviceProvider.GetInstances(service) as WebSocketBehavior,
                 };
             return result;
         }

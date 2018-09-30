@@ -4,7 +4,7 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace Surging.Core.KestrelHttpServer
+namespace Surging.Core.KestrelHttpServer.Internal
 {
     public class FileStreamResult : FileResult
     {
