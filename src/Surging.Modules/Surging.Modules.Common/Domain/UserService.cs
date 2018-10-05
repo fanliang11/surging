@@ -3,6 +3,7 @@ using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.KestrelHttpServer;
 using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
@@ -125,6 +126,25 @@ namespace Surging.Modules.Common.Domain
         public Task<string> GetUser(List<int> idList)
         {
             return Task.FromResult("type is List<int>");
+        }
+
+        public async Task<IActionResult> DownFile(string fileName,string contentType)
+        {
+            string uploadPath = Path.Combine("D:", fileName); 
+            if (File.Exists(uploadPath))
+            {
+                using (var stream = new FileStream(uploadPath, FileMode.Open))
+                {
+                    var bytes = new Byte[stream.Length];
+                    await stream.ReadAsync(bytes, 0, bytes.Length);
+                    stream.Dispose();
+                    return new FileContentResult(bytes, contentType, fileName);
+                }
+            }
+            else
+            {
+                throw new FileNotFoundException(fileName);
+            }
         }
         #endregion Implementation of IUserService
     }

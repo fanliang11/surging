@@ -38,9 +38,8 @@ namespace Surging.Core.KestrelHttpServer
 
         public async Task OnReceived(IMessageSender sender, HttpContext context)
         {
-       
             var routePath = GetRoutePath(context.Request.Path.ToString());
-            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key.ToLower(), p => (object)p.Value.ToString());
+            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key,p => (object)p.Value.ToString());
             parameters.Remove("servicekey", out object serviceKey);
             if (context.Request.HasFormContentType)
             {
