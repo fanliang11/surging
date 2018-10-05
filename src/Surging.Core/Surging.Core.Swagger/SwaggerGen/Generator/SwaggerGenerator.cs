@@ -317,7 +317,8 @@ namespace Surging.Core.SwaggerGen
 
         private IParameter CreateBodyParameter(ParameterInfo  parameterInfo, ISchemaRegistry schemaRegistry)
         {
-            var schema = schemaRegistry.GetOrRegister(parameterInfo.ParameterType);
+            
+            var schema = schemaRegistry.GetOrRegister(parameterInfo.Name,typeof(IDictionary<,>).MakeGenericType(typeof(string), parameterInfo.ParameterType));
             return  new BodyParameter { Name = parameterInfo.Name,Schema=schema, Required = true };
         }
         private IParameter CreateNonBodyParameter(ParameterInfo parameterInfo, ISchemaRegistry schemaRegistry)
