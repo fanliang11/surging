@@ -317,7 +317,7 @@ namespace Surging.Core.SwaggerGen
             {
                 Name = "servicekey",
                 In = "query",
-                Required = true,
+                Required = false,
             };
             var schema = new Schema();
             schema.Description = "ServiceKey";

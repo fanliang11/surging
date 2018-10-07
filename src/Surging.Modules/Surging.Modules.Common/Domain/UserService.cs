@@ -130,7 +130,7 @@ namespace Surging.Modules.Common.Domain
 
         public async Task<IActionResult> DownFile(string fileName,string contentType)
         {
-            string uploadPath = Path.Combine("D:", fileName); 
+            string uploadPath = Path.Combine(AppContext.BaseDirectory, fileName); 
             if (File.Exists(uploadPath))
             {
                 using (var stream = new FileStream(uploadPath, FileMode.Open))
