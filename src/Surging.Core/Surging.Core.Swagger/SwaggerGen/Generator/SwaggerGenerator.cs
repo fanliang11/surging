@@ -57,8 +57,6 @@ namespace Surging.Core.SwaggerGen
 
             var entry = _serviceEntryProvider.GetALLEntries();
 
-          
-
             var schemaRegistry = _schemaRegistryFactory.Create();
 
             var swaggerDoc = new SwaggerDocument
@@ -72,16 +70,6 @@ namespace Surging.Core.SwaggerGen
                 SecurityDefinitions = _options.SecurityDefinitions.Any() ? _options.SecurityDefinitions : null,
                 Security = _options.SecurityRequirements.Any() ? _options.SecurityRequirements : null
             };
-
-            //var filterContext = new DocumentFilterContext(
-            //    _apiDescriptionsProvider.ApiDescriptionGroups,
-            //    applicableApiDescriptions,
-            //    schemaRegistry);
-
-            //foreach (var filter in _options.DocumentFilters)
-            //{
-            //    filter.Apply(swaggerDoc, filterContext);
-            //}
 
             return swaggerDoc;
         }
@@ -201,6 +189,7 @@ namespace Surging.Core.SwaggerGen
                 Responses = CreateResponses(serviceEntry,methodInfo, schemaRegistry),
 
             };
+
             var filterContext = new OperationFilterContext(
              null,
              schemaRegistry,
@@ -311,8 +300,8 @@ namespace Surging.Core.SwaggerGen
             };
              return parameterInfo !=null && parameterInfo.Any(p =>
              ! UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(p.ParameterType) && p.ParameterType.Name != "HttpFormCollection") 
-             ? parameterInfo.Select(p=> CreateBodyParameter(p,schemaRegistry)).ToList():
-             parameterInfo.Select(p => CreateNonBodyParameter(p, schemaRegistry)).ToList();
+             ? new List<IParameter> { CreateServiceKeyParameter() }.Union(parameterInfo.Select(p=> CreateBodyParameter(p,schemaRegistry))).ToList():
+            new List<IParameter> { CreateServiceKeyParameter() }.Union(parameterInfo.Select(p => CreateNonBodyParameter(p, schemaRegistry))).ToList();
         }
 
         private IParameter CreateBodyParameter(ParameterInfo  parameterInfo, ISchemaRegistry schemaRegistry)
@@ -321,6 +310,21 @@ namespace Surging.Core.SwaggerGen
             var schema = schemaRegistry.GetOrRegister(parameterInfo.Name,typeof(IDictionary<,>).MakeGenericType(typeof(string), parameterInfo.ParameterType));
             return  new BodyParameter { Name = parameterInfo.Name,Schema=schema, Required = true };
         }
+
+        private IParameter CreateServiceKeyParameter()
+        {
+            var nonBodyParam = new NonBodyParameter
+            {
+                Name = "servicekey",
+                In = "query",
+                Required = true,
+            };
+            var schema = new Schema();
+            schema.Description = "ServiceKey";
+            nonBodyParam.PopulateFrom(schema);
+            return nonBodyParam;
+        }
+
         private IParameter CreateNonBodyParameter(ParameterInfo parameterInfo, ISchemaRegistry schemaRegistry)
         {
             var nonBodyParam = new NonBodyParameter

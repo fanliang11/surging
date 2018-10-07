@@ -141,6 +141,8 @@ namespace Surging.Core.Swagger
 
         public IDictionary<string, Response> Responses { get; set; }
 
+        public string ServiceKey { get; set; }
+
         public IList<string> Schemes { get; set; }
 
         public bool? Deprecated { get; set; }
