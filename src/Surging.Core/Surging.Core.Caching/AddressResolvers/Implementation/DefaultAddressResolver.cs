@@ -92,35 +92,40 @@ new ConcurrentDictionary<string, ServiceCache>();
         private void ServiceCacheManager_Removed(object sender, ServiceCacheEventArgs e)
         {
             var key = GetKey(e.Cache.CacheDescriptor);
-            var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
-            ServiceCache value;
-            _concurrent.TryRemove(key, out value);
-            ConsistentHash<ConsistentHashNode> hash;
-            redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
-            if (hash != null)
-                foreach (var node in e.Cache.CacheEndpoint)
-                {
-                    var hashNode = node as ConsistentHashNode;
-                    hash.Remove(hashNode);
-                    hash.Add(hashNode);
-                }
-
+            if (CacheContainer.IsRegistered<RedisContext>(e.Cache.CacheDescriptor.Prefix))
+            {
+                var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
+                ServiceCache value;
+                _concurrent.TryRemove(key, out value);
+                ConsistentHash<ConsistentHashNode> hash;
+                redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
+                if (hash != null)
+                    foreach (var node in e.Cache.CacheEndpoint)
+                    {
+                        var hashNode = node as ConsistentHashNode;
+                        hash.Remove(hashNode);
+                        hash.Add(hashNode);
+                    }
+            }
         }
 
         private void ServiceCacheManager_Add(object sender, ServiceCacheEventArgs e)
         {
             var key = GetKey(e.Cache.CacheDescriptor);
-            var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
-            _concurrent.GetOrAdd(key, e.Cache);
-            ConsistentHash<ConsistentHashNode> hash;
-            redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
-            if (hash != null)
-                foreach (var node in e.Cache.CacheEndpoint)
-                {
-                    var hashNode = node as ConsistentHashNode;
-                    hash.Remove(hashNode);
-                    hash.Add(hashNode);
-                }
+            if (CacheContainer.IsRegistered<RedisContext>(e.Cache.CacheDescriptor.Prefix))
+            {
+                var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
+                _concurrent.GetOrAdd(key, e.Cache);
+                ConsistentHash<ConsistentHashNode> hash;
+                redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
+                if (hash != null)
+                    foreach (var node in e.Cache.CacheEndpoint)
+                    {
+                        var hashNode = node as ConsistentHashNode;
+                        hash.Remove(hashNode);
+                        hash.Add(hashNode);
+                    }
+            }
         }
     }
 }

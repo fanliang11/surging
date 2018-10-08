@@ -1,22 +1,15 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform.Messages;
-using Surging.Core.CPlatform.Transport;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Surging.Core.KestrelHttpServer.Builder;
-using Microsoft.AspNetCore.Http;
-using Surging.Core.CPlatform.Serialization;
 using Microsoft.Extensions.DependencyInjection;
-using Surging.Core.Swagger;
+using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Serialization;
+using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.Swagger.Builder;
 using Surging.Core.Swagger.SwaggerUI;
-using Autofac;
+using System;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -25,13 +18,16 @@ namespace Surging.Core.KestrelHttpServer
         private readonly ILogger<KestrelHttpMessageListener> _logger;
         private IWebHost _host;
         private readonly ISerializer<string> _serializer;
+        private readonly IServiceSchemaProvider _serviceSchemaProvider;
 
 
         public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger, 
-            ISerializer<string> serializer) :base(logger, serializer)
+            ISerializer<string> serializer,
+            IServiceSchemaProvider serviceSchemaProvider) :base(logger, serializer)
         {
             _logger = logger;
             _serializer = serializer;
+            _serviceSchemaProvider = serviceSchemaProvider;
         }
         
         public async Task StartAsync(EndPoint endPoint)
@@ -65,30 +61,30 @@ namespace Surging.Core.KestrelHttpServer
         public void ConfigureServices(IServiceCollection services)
         {
              services.AddMvc();
-            services.AddSwaggerGen(options =>
+            if (AppConfig.SwaggerOptions != null)
             {
-
-                options.SwaggerDoc("v1", new Info
+                services.AddSwaggerGen(options =>
                 {
-                    Version = "v1",
-                    Title = " API 文档",
-                    Description = "by bj eland"
+                    options.SwaggerDoc(AppConfig.SwaggerOptions.Version, AppConfig.SwaggerOptions);
+                    var xmlPaths = _serviceSchemaProvider.GetSchemaFilesPath();
+                    foreach (var xmlPath in xmlPaths)
+                        options.IncludeXmlComments(xmlPath);
                 });
-                var basePath = AppContext.BaseDirectory;
-                var xmlPath = Path.Combine(basePath, "Surging.IModuleServices.Common.xml"); 
-                options.IncludeXmlComments(xmlPath); 
-
-            });
+            }
         }
 
         private void AppResolve(IApplicationBuilder app)
         {
             app.UseStaticFiles();
             app.UseMvc();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoApi");
-            });
+            if (AppConfig.SwaggerOptions != null)
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint($"/swagger/{AppConfig.SwaggerOptions.Version}/swagger.json", AppConfig.SwaggerOptions.Title);
+                });
+            }
        
             app.Run(async (context) =>
             {

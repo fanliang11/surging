@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer
 {
-    public abstract class FileResult
+    public abstract class FileResult: ActionResult
     {
         private string _fileDownloadName;
         

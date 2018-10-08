@@ -1,8 +1,8 @@
 {
   "Surging": {
-    "Ip": "${Surging_Server_IP}|192.168.249.103",
+    "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|99",
+    "Port": "${Surging_Server_Port}|98",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
@@ -18,7 +18,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;KestrelHttpModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -27,6 +27,20 @@
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
     "ReloadOnChange": true
+  },
+  "Swagger": {
+    "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",
+    "Title": "${SwaggerTitle}|Surging Demo",
+    "Description": "${SwaggerDes}|surging demo",
+    "Contact": {
+      "Name": "API Support",
+      "Url": "https://github.com/dotnetcore/surging",
+      "Email": "fanliang1@hotmail.com"
+    },
+    "License": {
+      "Name": "MIT",
+      "Url": "https://github.com/dotnetcore/surging/blob/master/LICENSE"
+    }
   },
   "EventBus_Kafka": {
     "Servers": "${EventBusConnection}|localhost:9092",

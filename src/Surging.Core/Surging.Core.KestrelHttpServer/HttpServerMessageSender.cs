@@ -18,33 +18,51 @@ namespace Surging.Core.KestrelHttpServer
             _serializer = serializer;
             _context = httpContext;
         }
-
+        
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var text = _serializer.Serialize(message.Content);
-            var data = Encoding.UTF8.GetBytes(text);
-            var contentLength = data.Length;
-            _context.Response.Headers.Add("Content-Type", "application/json");
-            _context.Response.Headers.Add("Content-Length", contentLength.ToString());
-            await _context.Response.WriteAsync(text);
+            var httpMessage = message.GetContent<HttpResultMessage<Object>>();
+            var actionResult= httpMessage.Entity as IActionResult;
+            if (actionResult == null)
+            {
+                var text = _serializer.Serialize(message.Content);
+                var data = Encoding.UTF8.GetBytes(text);
+                var contentLength = data.Length;
+                _context.Response.Headers.Add("Content-Type", "application/json");
+                _context.Response.Headers.Add("Content-Length", contentLength.ToString());
+                await _context.Response.WriteAsync(text);
+            }
+            else
+            {
+                await actionResult.ExecuteResultAsync(new ActionContext
+                {
+                    HttpContext = _context,
+                    Message = message
+                });
+            }
         }
 
         public async Task SendAsync(TransportMessage message)
         {
-            var text = _serializer.Serialize(message);
-            var data = Encoding.UTF8.GetBytes(_serializer.Serialize(text));
-            var  contentLength = data.Length;
-            _context.Response.Headers.Add("Content-type", "application/json");
-            _context.Response.Headers.Add("Content-Length", contentLength.ToString());
-           await  _context.Response.WriteAsync(text);
-           
-           
+            var actionResult = message.GetContent<IActionResult>();
+            if (actionResult == null)
+            {
+                var text = _serializer.Serialize(message);
+                var data = Encoding.UTF8.GetBytes(_serializer.Serialize(text));
+                var contentLength = data.Length;
+                _context.Response.Headers.Add("Content-type", "application/json");
+                _context.Response.Headers.Add("Content-Length", contentLength.ToString());
+                await _context.Response.WriteAsync(text);
+            }
+            else
+            {
+                await actionResult.ExecuteResultAsync(new ActionContext
+                {
+                    HttpContext = _context,
+                    Message = message
+                });
+            }
         }
-
-        private async Task WriteResponse(HttpContext context, TransportMessage message)
-        {
-            await context.Response.WriteAsync("hello, world");
-            await context.Response.Body.FlushAsync();
-        }
+        
     }
 }

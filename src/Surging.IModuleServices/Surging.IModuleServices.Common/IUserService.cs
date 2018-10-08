@@ -95,26 +95,61 @@ new Surging.IModuleServices.Common.Models.UserModel
         [InterceptMethod(CachingMethod.Remove, "GetUser_id_{0}", "GetUserName_name_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis)]
         Task<bool> Update(int id, UserModel model);
 
+        /// <summary>
+        /// 测试List参数调用
+        /// </summary>
+        /// <param name="users">用户列表</param>
+        /// <returns>返回是否成功</returns>
         Task<bool> Get(List<UserModel> users);
 
-        
+        /// <summary>
+        /// 测试无参数调用
+        /// </summary>
+        /// <returns>返回是否成功</returns>
         [Command(Strategy = StrategyType.Injection,ShuntStrategy = AddressSelectorMode.Polling, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return false;",FallBackName = "GetDictionaryMethodBreaker", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<bool> GetDictionary();
 
-       
+       /// <summary>
+       /// 测试异常
+       /// </summary>
+       /// <returns></returns>
         Task TryThrowException();
 
-       
+        /// <summary>
+        /// 测试基于eventbus 推送消息
+        /// </summary>
+        /// <param name="evt1">Event 模型</param>
+        /// <returns></returns>
         Task PublishThroughEventBusAsync(IntegrationEvent evt1);
 
-        
+        /// <summary>
+        /// 测试无参调用，返回泛型结果
+        /// </summary>
+        /// <returns></returns>
         [Command(Strategy = StrategyType.Injection,  ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 2500, BreakerRequestVolumeThreshold = 3, Injection = @"return null;", RequestCacheEnabled = false)]
         Task<ApiResult<UserModel>> GetApiResult();
 
+        /// <summary>
+        /// 测试参数list参数
+        /// </summary>
+        /// <param name="idList">list 类型参数</param>
+        /// <returns></returns>
         Task<string> GetUser(List<int> idList);
 
+        /// <summary>
+        /// 测试上传文件
+        /// </summary>
+        /// <param name="form">HttpFormCollection 类型参数</param>
+        /// <returns></returns>
         Task<bool> UploadFile(HttpFormCollection form);
 
+        /// <summary>
+        /// 测试下载文件
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="contentType">Content-Type</param>
+        /// <returns></returns>
+        Task<IActionResult> DownFile(string fileName, string contentType);
     }
 }

@@ -31,9 +31,12 @@ namespace Surging.Core.SwaggerGen
         public IDictionary<string, Schema> Definitions { get; private set; }
 
         public Schema GetOrRegister(Type type)
+       => GetOrRegister(null, type);
+
+        public Schema GetOrRegister(string paramName, Type type)
         {
             var referencedTypes = new Queue<Type>();
-            var schema = CreateSchema(type, referencedTypes);
+            var schema = CreateSchema(paramName,type, referencedTypes);
 
             // Ensure all referenced types have a corresponding definition
             while (referencedTypes.Any())
@@ -46,13 +49,17 @@ namespace Surging.Core.SwaggerGen
                 // and prevents a stack overflow by ensuring the above condition is met if the same
                 // type ends up back on the referencedTypes queue via recursion within 'CreateInlineSchema'
                 Definitions.Add(schemaId, null);
-                Definitions[schemaId] = CreateInlineSchema(referencedType, referencedTypes);
+                Definitions[schemaId] = CreateInlineSchema(paramName, referencedType, referencedTypes);
             }
 
             return schema;
         }
 
-        private Schema CreateSchema(Type type, Queue<Type> referencedTypes)
+        private Schema CreateSchema(Type type, Queue<Type> referencedTypes) =>
+            CreateSchema(null, type, referencedTypes);
+      
+
+        private Schema CreateSchema(string paramName, Type type, Queue<Type> referencedTypes)
         {
             // If Option<T> (F#), use the type argument
             if (type.IsFSharpOption())
@@ -71,7 +78,7 @@ namespace Surging.Core.SwaggerGen
 
             return createReference
                 ? CreateReferenceSchema(type, referencedTypes)
-                : CreateInlineSchema(type, referencedTypes);
+                : CreateInlineSchema(paramName, type, referencedTypes);
         }
 
         private Schema CreateReferenceSchema(Type type, Queue<Type> referencedTypes)
@@ -80,7 +87,7 @@ namespace Surging.Core.SwaggerGen
             return new Schema { Ref = "#/definitions/" + _schemaIdManager.IdFor(type) };
         }
 
-        private Schema CreateInlineSchema(Type type, Queue<Type> referencedTypes)
+        private Schema CreateInlineSchema(string paramName, Type type, Queue<Type> referencedTypes)
         {
             Schema schema;
 
@@ -96,7 +103,7 @@ namespace Surging.Core.SwaggerGen
                 if (jsonContract is JsonPrimitiveContract)
                     schema = CreatePrimitiveSchema((JsonPrimitiveContract)jsonContract);
                 else if (jsonContract is JsonDictionaryContract)
-                    schema = CreateDictionarySchema((JsonDictionaryContract)jsonContract, referencedTypes);
+                    schema = CreateDictionarySchema(paramName,(JsonDictionaryContract)jsonContract, referencedTypes);
                 else if (jsonContract is JsonArrayContract)
                     schema = CreateArraySchema((JsonArrayContract)jsonContract, referencedTypes);
                 else if (jsonContract is JsonObjectContract && type != typeof(object))
@@ -171,7 +178,7 @@ namespace Surging.Core.SwaggerGen
             };
         }
 
-        private Schema CreateDictionarySchema(JsonDictionaryContract dictionaryContract, Queue<Type> referencedTypes)
+        private Schema CreateDictionarySchema(string paramName, JsonDictionaryContract dictionaryContract, Queue<Type> referencedTypes)
         {
             var keyType = dictionaryContract.DictionaryKeyType ?? typeof(object);
             var valueType = dictionaryContract.DictionaryValueType ?? typeof(object);
@@ -185,6 +192,16 @@ namespace Surging.Core.SwaggerGen
                         (name) => dictionaryContract.DictionaryKeyResolver(name),
                         (name) => CreateSchema(valueType, referencedTypes)
                     )
+                };
+            }
+            else if(!string.IsNullOrEmpty(paramName))
+            {
+                return new Schema
+                {
+                    Type = "object",
+                    Properties = new Dictionary<string, Schema> { {paramName,
+                       CreateSchema(valueType, referencedTypes) } }
+                
                 };
             }
             else

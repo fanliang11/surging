@@ -77,17 +77,17 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                var v =  userProxy.GetUserId("fanly").GetAwaiter().GetResult();
-                var fa=   userProxy.GetUserName(1).GetAwaiter().GetResult();
+                var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
+                var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
                 var v1 = userProxy.GetUserLastSignInTime(1).Result;
-                var apiResult =  userProxy.GetApiResult().GetAwaiter().GetResult();
+                var apiResult = userProxy.GetApiResult().GetAwaiter().GetResult();
                 userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
                     UserId = 1,
                     Name = "fanly"
                 }).Wait();
-                 
-                  userProxy.PublishThroughEventBusAsync(new UserEvent
+
+                userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
                     UserId = 1,
                     Name = "fanly"
