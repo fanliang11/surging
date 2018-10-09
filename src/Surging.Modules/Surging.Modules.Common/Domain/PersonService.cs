@@ -13,6 +13,7 @@ using Surging.Core.ProxyGenerator;
 using Surging.Core.KestrelHttpServer.Internal;
 using System.IO;
 using Surging.Core.KestrelHttpServer;
+using Surging.Core.Common;
 
 namespace Surging.Modules.Common.Domain
 {

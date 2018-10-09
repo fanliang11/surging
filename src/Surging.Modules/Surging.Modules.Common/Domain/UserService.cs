@@ -1,4 +1,5 @@
 ﻿
+using Surging.Core.Common;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;

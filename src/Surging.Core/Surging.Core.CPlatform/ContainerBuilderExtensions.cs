@@ -599,12 +599,17 @@ namespace Surging.Core.CPlatform
         public static IEnumerable<string> GetDataContractName(this IServiceBuilder builder)
         {
             var namespaces = new List<string>();
-            var referenceAssemblies = builder.GetInterfaceService();
-            referenceAssemblies.ForEach(p =>
+            var assemblies = builder.GetInterfaceService()
+                .Select(p=>p.Assembly)
+                .Union(GetSystemModules())
+                .Distinct()
+                .ToList();
+       
+            assemblies.ForEach(assembly =>
             {
-                namespaces.AddRange(p.Assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() != null).Select(n => n.Namespace));
+                namespaces.AddRange(assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() != null).Select(n => n.Namespace));
             });
-            return namespaces.Distinct();
+            return namespaces;
         }
 
         private static IDictionary<string, string> ConvertDictionary(List<ModulePackage> list)
@@ -645,7 +650,22 @@ namespace Surging.Core.CPlatform
             }
             return result;
         }
-        
+
+        private static List<Assembly> GetSystemModules()
+        {
+            var assemblies = new List<Assembly>();
+            var referenceAssemblies = GetReferenceAssembly();
+            foreach (var referenceAssembly in referenceAssemblies)
+            {
+                var abstractModules = GetAbstractModules(referenceAssembly);
+                if(abstractModules.Any(p =>p.GetType().IsSubclassOf(typeof(SystemModule))))
+                {
+                    assemblies.Add(referenceAssembly);
+                }
+            }
+            return assemblies;
+        }
+
         private static List<AbstractModule> GetAbstractModules(Assembly assembly)
         {
             var abstractModules = new List<AbstractModule>();
