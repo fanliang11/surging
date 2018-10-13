@@ -22,6 +22,8 @@ namespace Surging.Core.EventBusKafka.Implementation
         private readonly IKafkaPersisterConnection _producerConnection;
         private readonly IKafkaPersisterConnection _consumerConnection;
 
+        public event EventHandler OnShutdown;
+
         public EventBusKafka( ILogger<EventBusKafka> logger,
             IEventBusSubscriptionsManager subsManager,
             CPlatformContainer serviceProvider)

@@ -13,5 +13,7 @@ namespace Surging.Core.CPlatform.EventBus.Implementation
             where TH : IIntegrationEventHandler<T>;
 
         void Publish(IntegrationEvent @event);
+
+        event EventHandler OnShutdown;
     }
 }
