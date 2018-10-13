@@ -30,7 +30,6 @@ namespace Surging.Services.Server
     {
         static void Main(string[] args)
         {
-            Environment.SetEnvironmentVariable("io.netty.allocator.numDirectArenas", "0");
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var host = new ServiceHostBuilder()
                 .RegisterServices(builder =>
