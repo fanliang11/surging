@@ -143,7 +143,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                             _consumerChannels[key].Close();
                             _consumerChannels.Remove(key);
                         }
-                        _consumerChannels.Add(new Tuple<string, QueueConsumerMode>(queueName, mode),
+                        _consumerChannels.Add(key,
                             CreateConsumerChannel(queueConsumerAttr, eventName, mode));
                         channel.QueueBind(queue: queueName,
                                           exchange: _exchanges[mode],
