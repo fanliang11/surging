@@ -70,15 +70,6 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.QueueUnbind(queue: tuple.Item1,
                     exchange: BROKER_NAME,
                     routingKey: tuple.Item2);
-
-                if (_subsManager.IsEmpty)
-                { 
-                    foreach (var key in _consumerChannels.Keys)
-                    {
-                        _consumerChannels[key].Close();
-                    };
-                  
-                }
             }
         }
 
@@ -149,13 +140,14 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                         var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
                         if (_consumerChannels.ContainsKey(key))
                         {
+                            _consumerChannels[key].Close();
                             _consumerChannels.Remove(key);
                         }
                         _consumerChannels.Add(new Tuple<string, QueueConsumerMode>(queueName, mode),
                             CreateConsumerChannel(queueConsumerAttr, eventName, mode));
                         channel.QueueBind(queue: queueName,
                                           exchange: _exchanges[mode],
-                                          routingKey: eventName);
+                                          routingKey: eventName); 
                     }
                 }
             }
@@ -253,13 +245,15 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicConsume(queue: queueName,
                                   autoAck: false,
                                  consumer: consumer);
+                channel.CallbackException += (sender, ea) =>
+                {
+                    var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                    _consumerChannels[key].Dispose();
+                    _consumerChannels[key] = CreateConsumerChannel(queueName, bindConsumer);
+                };
             }
-            channel.CallbackException += (sender, ea) =>
-            {
-                var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
-                _consumerChannels[key].Dispose();
-                _consumerChannels[key] = CreateConsumerChannel(queueName, bindConsumer);
-            };
+            else
+                channel.Close();
             return channel;
         }
 
@@ -292,13 +286,17 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicConsume(queue: retryQueueName,
                                       autoAck: false,
                                      consumer: consumer);
+                channel.CallbackException += (sender, ea) =>
+              {
+                  var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                  _consumerChannels[key].Dispose();
+                  _consumerChannels[key] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
+              };
             }
-            channel.CallbackException += (sender, ea) =>
-            {
-                var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
-                _consumerChannels[key].Dispose();
-                _consumerChannels[key] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
-            };
+            else
+                channel.Close();
+
+
             return channel;
         }
 
@@ -327,13 +325,16 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicConsume(queue: failQueueName,
                                       autoAck: false,
                                      consumer: consumer);
+                channel.CallbackException += (sender, ea) =>
+                {
+                    var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                    _consumerChannels[key].Dispose();
+                    _consumerChannels[key] = CreateFailConsumerChannel(queueName, bindConsumer);
+                };
             }
-            channel.CallbackException += (sender, ea) =>
-            {
-                var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
-                _consumerChannels[key].Dispose();
-                _consumerChannels[key] = CreateFailConsumerChannel(queueName, bindConsumer);
-            };
+            else
+                channel.Close();
+
             return channel;
         }
 
