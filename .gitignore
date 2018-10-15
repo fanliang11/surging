@@ -263,3 +263,6 @@ paket-files/
 __pycache__/
 *.pyc
 
+surging.client.bat
+surging.services.bat
+新人快速安装入门.docx

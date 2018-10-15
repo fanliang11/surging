@@ -60,6 +60,9 @@ namespace Surging.Services.Server
 
             using (host.Run())
             {
+                //var user = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<Surging.IModuleServices.Common.IUserService>("User");
+                //var model =  user.GetUser(new IModuleServices.Common.Models.UserModel { Name = "sxf359", Age = 45 });
+                //Console.WriteLine($"获取服务器用户名：" + );
                 Console.WriteLine($"服务端启动成功，{DateTime.Now}。");
             }
         }
