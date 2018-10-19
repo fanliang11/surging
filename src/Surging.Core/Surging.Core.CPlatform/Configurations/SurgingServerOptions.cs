@@ -16,6 +16,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public double WatchInterval { get; set; } = 20d;
 
+        public bool Libuv { get; set; } = true;
+
         public IPEndPoint IpEndpoint { get; set; }
 
         public List<ModulePackage> Packages { get; set; } = new List<ModulePackage>();
