@@ -78,7 +78,6 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout,int hashCode)
         {
-            var serviceInvokeInfo = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             CancellationTokenSource source = new CancellationTokenSource();
             var token = source.Token;
             var invokeMessage = new RemoteInvokeMessage
@@ -126,14 +125,14 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         private async Task ExecuteExceptionFilter(Exception ex, RemoteInvokeMessage invokeMessage, CancellationToken token)
         {
-                foreach (var filter in exceptionFilters)
+            foreach (var filter in exceptionFilters)
+            {
+                await filter.ExecuteExceptionFilterAsync(new RpcActionExecutedContext
                 {
-                    await filter.ExecuteExceptionFilterAsync(new RpcActionExecutedContext
-                    {
-                        Exception = ex,
-                        InvokeMessage = invokeMessage
-                    }, token);
-                }
+                    Exception = ex,
+                    InvokeMessage = invokeMessage
+                }, token);
+            }
         }
 
         private int GetHashCode(ServiceCommand command, IDictionary<string, object> parameters)

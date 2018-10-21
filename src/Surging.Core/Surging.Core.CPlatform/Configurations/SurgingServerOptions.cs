@@ -1,8 +1,6 @@
 ﻿using Surging.Core.CPlatform.Support;
-using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Surging.Core.CPlatform.Configurations
 {
@@ -16,7 +14,7 @@ namespace Surging.Core.CPlatform.Configurations
 
         public double WatchInterval { get; set; } = 20d;
 
-        public bool Libuv { get; set; } = true;
+        public bool Libuv { get; set; } = false;
 
         public IPEndPoint IpEndpoint { get; set; }
 
