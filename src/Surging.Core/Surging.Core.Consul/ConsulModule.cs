@@ -7,6 +7,7 @@ using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -37,7 +38,8 @@ namespace Surging.Core.Consul
                .UseConsulServiceSubscribeManager(builder, configInfo)
               .UseConsulCommandManager(builder, configInfo)
               .UseConsulCacheManager(builder, configInfo)
-              .UseConsulWatch(builder, configInfo);
+              .UseConsulWatch(builder, configInfo)
+              .UseConsulMqttRouteManager(builder,configInfo);
         }
 
         public ConsulModule UseConsulRouteManager(ContainerBuilderWrapper builder, ConfigInfo configInfo)
@@ -105,6 +107,19 @@ namespace Surging.Core.Consul
             return this;
         }
 
+        public ConsulModule UseConsulMqttRouteManager(ContainerBuilderWrapper builder, ConfigInfo configInfo)
+        {
+            UseMqttRouteManager(builder, provider =>
+           new ConsulMqttServiceRouteManager(
+               GetConfigInfo(configInfo),
+            provider.GetRequiredService<ISerializer<byte[]>>(),
+              provider.GetRequiredService<ISerializer<string>>(),
+              provider.GetRequiredService<IClientWatchManager>(),
+              provider.GetRequiredService<IMqttServiceFactory>(),
+              provider.GetRequiredService<ILogger<ConsulMqttServiceRouteManager>>()));
+            return this;
+        }
+
         /// <summary>
         /// 设置使用基于Consul的Watch机制
         /// </summary>
@@ -143,6 +158,12 @@ namespace Surging.Core.Consul
             return builder;
         }
 
+        public ContainerBuilderWrapper UseMqttRouteManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IMqttServiceRouteManager> factory)
+        {
+            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
         private ConfigInfo GetConfigInfo(ConfigInfo config)
         {
             ConsulOption option = null;
@@ -162,6 +183,7 @@ namespace Surging.Core.Consul
                     option.SubscriberPath ?? config.SubscriberPath,
                     option.CommandPath ?? config.CommandPath,
                     option.CachePath ?? config.CachePath,
+                    option.MqttRoutePath ?? config.MqttRoutePath,
                    option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
                     config.ReloadOnChange,
                     option.EnableChildrenMonitor != null ? bool.Parse(option.EnableChildrenMonitor) :

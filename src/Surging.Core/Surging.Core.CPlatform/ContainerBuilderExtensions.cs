@@ -17,6 +17,7 @@ using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -170,6 +171,18 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder UseRouteManager(this IServiceBuilder builder, IServiceRouteManager instance)
         {
             builder.Services.RegisterInstance(instance);
+            return builder;
+        }
+
+        /// <summary>
+        /// 设置mqtt服务路由管理者。
+        /// </summary>
+        /// <param name="builder">mqtt服务构建者。</param>
+        /// <param name="factory">mqtt服务路由管理者实例工厂。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseMqttRouteManager(this IServiceBuilder builder, Func<IServiceProvider, IMqttServiceRouteManager> factory)
+        {
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
             return builder;
         }
 
