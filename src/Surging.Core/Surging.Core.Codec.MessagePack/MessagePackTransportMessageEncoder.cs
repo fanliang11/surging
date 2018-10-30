@@ -16,7 +16,7 @@ namespace Surging.Core.Codec.MessagePack
                 Id = message.Id,
                 ContentType = message.ContentType,
             };
-            return SerializerUtilitys.Serialize(transportMessage);
+            return SerializerUtilitys.Serialize(transportMessage.ToArray());
         }
         #endregion Implementation of ITransportMessageEncoder
     }

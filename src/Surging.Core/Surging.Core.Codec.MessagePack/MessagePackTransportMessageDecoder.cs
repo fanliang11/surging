@@ -11,7 +11,7 @@ namespace Surging.Core.Codec.MessagePack
 
         public TransportMessage Decode(byte[] data)
         {
-            var message = SerializerUtilitys.Deserialize<MessagePackTransportMessage>(data);
+            var message =new MessagePackTransportMessage(SerializerUtilitys.Deserialize<object[]>(data));
             return message.GetTransportMessage();
         }
 

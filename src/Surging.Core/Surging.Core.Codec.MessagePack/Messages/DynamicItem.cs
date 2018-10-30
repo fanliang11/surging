@@ -34,6 +34,12 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 Content = SerializerUtilitys.Serialize(value);
         }
 
+        public DynamicItem(object [] objs)
+        {
+            TypeName = objs[0]?.ToString();
+            Content = objs[1] as byte[];
+        }
+
         #endregion Constructor
 
         #region Property

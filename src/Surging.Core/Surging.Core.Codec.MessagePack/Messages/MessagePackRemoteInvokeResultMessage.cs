@@ -18,6 +18,12 @@ namespace Surging.Core.Codec.MessagePack.Messages
         {
         }
 
+        public MessagePackRemoteInvokeResultMessage(object [] objs)
+        {
+            ExceptionMessage = objs[0]?.ToString();
+            Result =new DynamicItem(objs[1] as  object []);
+        }
+
         #endregion Constructor
 
         [Key(0)]
@@ -33,6 +39,16 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 ExceptionMessage = ExceptionMessage,
                 Result = Result?.Get()
             };
+        }
+
+        public object [] ToArray()
+        {
+            var result = new object[]
+            {
+               ExceptionMessage,
+               Result,
+            };
+            return result;
         }
     }
 }
