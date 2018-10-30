@@ -16,11 +16,11 @@ namespace Surging.Core.Codec.MessagePack.Messages
             object contentObject;
             if (transportMessage.IsInvokeMessage())
             {
-                contentObject = new MessagePackRemoteInvokeMessage(transportMessage.GetContent<RemoteInvokeMessage>()).ToArry();
+                contentObject = new MessagePackRemoteInvokeMessage(transportMessage.GetContent<RemoteInvokeMessage>());
             }
             else if (transportMessage.IsInvokeResultMessage())
             {
-                contentObject = new MessagePackRemoteInvokeResultMessage(transportMessage.GetContent<RemoteInvokeResultMessage>()).ToArray();
+                contentObject = new MessagePackRemoteInvokeResultMessage(transportMessage.GetContent<RemoteInvokeResultMessage>());
             }
             else
             {
@@ -28,13 +28,6 @@ namespace Surging.Core.Codec.MessagePack.Messages
             }
 
             Content = SerializerUtilitys.Serialize(contentObject);
-        }
-
-        public MessagePackTransportMessage(object [] obj)
-        {
-            Id = obj[0].ToString();
-            Content = obj[1] as byte[];
-            ContentType = obj[2].ToString();
         }
 
         public MessagePackTransportMessage()
@@ -60,17 +53,6 @@ namespace Surging.Core.Codec.MessagePack.Messages
             return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
         }
 
-        public object[] ToArray()
-        {
-            var result = new object[]
-            {
-                Id,
-                Content,
-                ContentType
-            };
-            return result;
-        }
-
         public TransportMessage GetTransportMessage()
         {
             var message = new TransportMessage
@@ -84,14 +66,12 @@ namespace Surging.Core.Codec.MessagePack.Messages
             if (IsInvokeMessage())
             {
                 contentObject =
-                   new MessagePackRemoteInvokeMessage(
-                       SerializerUtilitys.Deserialize<object[]>(Content))
-                       .GetRemoteInvokeMessage();
+                    SerializerUtilitys.Deserialize<MessagePackRemoteInvokeMessage>(Content).GetRemoteInvokeMessage();
             }
             else if (IsInvokeResultMessage())
             {
-                contentObject =new MessagePackRemoteInvokeResultMessage(
-                    SerializerUtilitys.Deserialize<object[]>(Content))
+                contentObject =
+                    SerializerUtilitys.Deserialize<MessagePackRemoteInvokeResultMessage>(Content)
                         .GetRemoteInvokeResultMessage();
             }
             else

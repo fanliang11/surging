@@ -34,12 +34,6 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 Content = SerializerUtilitys.Serialize(value);
         }
 
-        public DynamicItem(object [] objs)
-        {
-            TypeName = objs[0]?.ToString();
-            Content = objs[1] as byte[];
-        }
-
         #endregion Constructor
 
         #region Property
@@ -61,7 +55,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
             if (typeName == UtilityType.JObjectType || typeName == UtilityType.JArrayType)
             {
                 var content = SerializerUtilitys.Deserialize<string>(Content);
-                return JsonConvert.DeserializeObject(content,typeName);
+                return JsonConvert.DeserializeObject(content, typeName);
             }
             else
             {
