@@ -23,16 +23,21 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
         private readonly ILogger<DefaultWSServiceEntryProvider> _logger;
         private readonly CPlatformContainer _serviceProvider;
         private List<WSServiceEntry> _wSServiceEntries;
+        private WebSocketOptions _options;
 
         #endregion Field
 
         #region Constructor
 
-        public DefaultWSServiceEntryProvider(IServiceEntryProvider  serviceEntryProvider, ILogger<DefaultWSServiceEntryProvider> logger, CPlatformContainer serviceProvider)
+        public DefaultWSServiceEntryProvider(IServiceEntryProvider  serviceEntryProvider,
+            ILogger<DefaultWSServiceEntryProvider> logger,
+            CPlatformContainer serviceProvider,
+            WebSocketOptions options)
         {
             _types = serviceEntryProvider.GetTypes();
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _options = options;
         }
 
         #endregion Constructor
@@ -82,9 +87,9 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
                     Behavior = behavior,
                     Type = behavior.GetType(),
                     Path = path,
-                    FuncBehavior= (config) =>
+                    FuncBehavior = () =>
                     {
-                        return GetWebSocketBehavior(service, config, behaviorContract);
+                        return GetWebSocketBehavior(service, _options?.Behavior, behaviorContract);
                     }
                 };
             return result;

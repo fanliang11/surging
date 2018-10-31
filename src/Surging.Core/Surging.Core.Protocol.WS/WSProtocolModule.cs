@@ -34,7 +34,15 @@ namespace Surging.Core.Protocol.WS
             if (section.Exists())
                 options = section.Get<WebSocketOptions>();
             base.RegisterBuilder(builder);
-            builder.RegisterType(typeof(DefaultWSServiceEntryProvider)).As(typeof(IWSServiceEntryProvider)).SingleInstance();
+            builder.Register(provider =>
+            {
+                return new DefaultWSServiceEntryProvider(
+                       provider.Resolve<IServiceEntryProvider>(),
+                    provider.Resolve<ILogger<DefaultWSServiceEntryProvider>>(),
+                      provider.Resolve<CPlatformContainer>(),
+                      options
+                      );
+            }).As(typeof(IWSServiceEntryProvider)).SingleInstance();
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.WS)
             {
                 RegisterDefaultProtocol(builder, options);

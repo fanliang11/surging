@@ -14,6 +14,6 @@ namespace Surging.Core.Protocol.WS.Runtime
 
         public  WebSocketBehavior Behavior { get; set; }
 
-        public  Func<BehaviorOption, WebSocketBehavior> FuncBehavior { get; set; }
+        public  Func<WebSocketBehavior> FuncBehavior { get; set; }
     }
 }
