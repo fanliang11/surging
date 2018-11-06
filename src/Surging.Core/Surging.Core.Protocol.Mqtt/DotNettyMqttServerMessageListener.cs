@@ -1,5 +1,6 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Codecs.Mqtt;
+using DotNetty.Codecs.Mqtt.Packets;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -10,6 +11,7 @@ using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
+using Surging.Core.Protocol.Mqtt.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -103,37 +105,68 @@ namespace Surging.Core.Protocol.Mqtt
 
         private class ServerHandler : ChannelHandlerAdapter
         {
-            readonly Queue<object> receivedQueue = new Queue<object>();
-            readonly Queue<TaskCompletionSource<object>> readPromises = new Queue<TaskCompletionSource<object>>();
-            readonly TimeSpan defaultReadTimeout;
-            readonly object gate = new object();
-
-            volatile Exception registeredException;
+            private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
+            private readonly ILogger _logger;
+            private readonly ISerializer<string> _serializer;
+            private readonly MqttHandlerServiceBase _mqttHandlerService;
 
             public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, 
                 ILogger logger,
-                ISerializer<string> serializer) : this(readAction, logger, serializer,TimeSpan.Zero)
+                ISerializer<string> serializer)  
             {
+                _readAction = readAction;
+                _logger = logger;
+                _serializer = serializer;
+                _mqttHandlerService = new ServerMqttHandlerService(_readAction);
             }
-
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger, ISerializer<string> serializer,TimeSpan defaultReadTimeout)
-            {
-                this.defaultReadTimeout = defaultReadTimeout;
-            }
-
+             
             public override void ChannelRead(IChannelHandlerContext context, object message)
-            {
-                lock (this.gate)
+            { 
+                var buffer = message as Packet;
+                switch ( buffer.PacketType)
                 {
-                    if (this.readPromises.Count > 0)
-                    {
-                        TaskCompletionSource<object> promise = this.readPromises.Dequeue();
-                        promise.TrySetResult(message);
-                    }
-                    else
-                    {
-                        this.receivedQueue.Enqueue(message);
-                    }
+                    case PacketType.CONNECT:
+                        _mqttHandlerService.Connect(context, buffer as ConnectPacket);
+                        break;
+                    case PacketType.CONNACK:
+                        _mqttHandlerService.ConnAck(context, buffer as ConnAckPacket);
+                        break;
+                    case PacketType.PUBLISH:
+                        _mqttHandlerService.Disconnect(context, buffer as DisconnectPacket);
+                        break;
+                    case PacketType.PUBACK:
+                        _mqttHandlerService.PingReq(context, buffer as PingReqPacket);
+                        break;
+                    case PacketType.PUBREC:
+                        _mqttHandlerService.PingResp(context, buffer as PingRespPacket);
+                        break;
+                    case PacketType.PUBREL:
+                        _mqttHandlerService.PubAck(context, buffer as PubAckPacket);
+                        break;
+                    case PacketType.PUBCOMP:
+                        _mqttHandlerService.PubComp(context, buffer as PubCompPacket);
+                        break;
+                    case PacketType.SUBSCRIBE:
+                        _mqttHandlerService.PubRec(context, buffer as PubRecPacket);
+                        break;
+                    case PacketType.SUBACK:
+                        _mqttHandlerService.PubRel(context, buffer as PubRelPacket);
+                        break;
+                    case PacketType.UNSUBSCRIBE:
+                        _mqttHandlerService.Publish(context, buffer as PublishPacket);
+                        break;
+                    case PacketType.UNSUBACK:
+                        _mqttHandlerService.SubAck(context, buffer as SubAckPacket);
+                        break;
+                    case PacketType.PINGREQ:
+                        _mqttHandlerService.Subscribe(context, buffer as SubscribePacket);
+                        break;
+                    case PacketType.PINGRESP:
+                        _mqttHandlerService.UnsubAck(context, buffer as UnsubAckPacket);
+                        break;
+                    case PacketType.DISCONNECT:
+                        _mqttHandlerService.Unsubscribe(context, buffer as UnsubscribePacket);
+                        break;
                 }
             }
 
@@ -145,52 +178,10 @@ namespace Surging.Core.Protocol.Mqtt
 
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) => this.SetException(exception);
 
-            void SetException(Exception exception)
+            void SetException(Exception ex)
             {
-                this.registeredException = exception;
-
-                lock (this.gate)
-                {
-                    while (this.readPromises.Count > 0)
-                    {
-                        TaskCompletionSource<object> promise = this.readPromises.Dequeue();
-                        promise.TrySetException(exception);
-                    }
-                }
-            }
-
-            public async Task<object> ReceiveAsync(TimeSpan timeout = default(TimeSpan))
-            {
-                if (this.registeredException != null)
-                {
-                    throw this.registeredException;
-                }
-
-                var promise = new TaskCompletionSource<object>();
-
-                lock (this.gate)
-                {
-                    if (this.receivedQueue.Count > 0)
-                    {
-                        return this.receivedQueue.Dequeue();
-                    }
-
-                    this.readPromises.Enqueue(promise);
-                }
-
-                timeout = timeout <= TimeSpan.Zero ? this.defaultReadTimeout : timeout;
-                if (timeout > TimeSpan.Zero)
-                {
-                    Task task = await Task.WhenAny(promise.Task, Task.Delay(timeout));
-                    if (task != promise.Task)
-                    {
-                        throw new TimeoutException("ReceiveAsync timed out");
-                    }
-
-                    return promise.Task.Result;
-                }
-
-                return await promise.Task;
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError($"message:{ex.Message},Source:{ex.Source},Trace:{ex.StackTrace}");
             }
         }
     }
