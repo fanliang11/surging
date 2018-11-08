@@ -7,7 +7,7 @@
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
     "Libuv": true,
-    "MaxConcurrentRequests": 20,
+    "MaxConcurrentRequests": 20, 
     "ExecutionTimeoutInMilliseconds": 30000,
     "Protocol": "${Protocol}|None", //Http¡¢Tcp¡¢None
     "RootPath": "${RootPath}|D:\\userapp",
@@ -27,7 +27,8 @@
     "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
-    "ReloadOnChange": true
+    "ReloadOnChange": true,
+    "EnableChildrenMonitor": false
   },
   "Swagger": {
     "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",

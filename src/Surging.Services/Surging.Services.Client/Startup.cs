@@ -87,11 +87,11 @@ namespace Surging.Services.Client
                     Name = "fanly"
                 }).Wait();
 
-                userProxy.PublishThroughEventBusAsync(new UserEvent
-                {
-                    UserId = 1,
-                    Name = "fanly"
-                }).Wait();
+                //userProxy.PublishThroughEventBusAsync(new UserEvent
+                //{
+                //    UserId = 1,
+                //    Name = "fanly"
+                //}).Wait();
 
                 var r = await userProxy.GetDictionary();
                 var serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();

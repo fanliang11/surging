@@ -16,6 +16,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public bool Libuv { get; set; } = false;
 
+        public bool EnableRouteWatch { get; set; }
+
         public IPEndPoint IpEndpoint { get; set; }
 
         public List<ModulePackage> Packages { get; set; } = new List<ModulePackage>();

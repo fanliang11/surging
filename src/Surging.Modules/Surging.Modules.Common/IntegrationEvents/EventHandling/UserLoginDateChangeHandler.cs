@@ -12,7 +12,6 @@ using Surging.Core.EventBusRabbitMQ;
 
 namespace Surging.Modules.Common.IntegrationEvents.EventHandling
 {
-
     [QueueConsumer("UserLoginDateChangeHandler",QueueConsumerMode.Normal,QueueConsumerMode.Fail)]
     public  class UserLoginDateChangeHandler : BaseIntegrationEventHandler<UserEvent>
     {
