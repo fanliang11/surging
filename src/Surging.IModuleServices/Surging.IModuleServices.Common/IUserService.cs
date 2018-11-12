@@ -147,5 +147,11 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// <param name="contentType">Content-Type</param>
         /// <returns></returns>
         Task<IActionResult> DownFile(string fileName, string contentType);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        Task<Dictionary<string, object>> GetAllThings();
     }
 }

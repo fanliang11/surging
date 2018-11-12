@@ -129,6 +129,11 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult("type is List<int>");
         }
 
+        public async Task<Dictionary<string, object>> GetAllThings()
+        {
+            return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });
+        }
+
         public async Task<IActionResult> DownFile(string fileName,string contentType)
         {
             string uploadPath = Path.Combine(AppContext.BaseDirectory, fileName); 
