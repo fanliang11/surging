@@ -12,6 +12,7 @@ using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.Protocol.Mqtt.Implementation;
+using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -80,7 +81,7 @@ namespace Surging.Core.Protocol.Mqtt
             }
             bootstrap 
             .Option(ChannelOption.SoBacklog, 100)
-            .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+            .ChildOption(ChannelOption.RcvbufAllocator,new AdaptiveRecvByteBufAllocator())
             .Group(bossGroup, workerGroup)
             .Option(ChannelOption.TcpNodelay, true)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
@@ -89,6 +90,7 @@ namespace Surging.Core.Protocol.Mqtt
                 pipeline.AddLast(MqttEncoder.Instance,
                     new MqttDecoder(true, 256 * 1024), new ServerHandler(async (contenxt, message) =>
                 {
+                    await contenxt.WriteAsync(message);
                 }, _logger, _serializer));
             }));
             try
@@ -105,19 +107,19 @@ namespace Surging.Core.Protocol.Mqtt
 
         private class ServerHandler : ChannelHandlerAdapter
         {
-            private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
+            private readonly Action<IChannelHandlerContext, MqttMessage> _readAction;
             private readonly ILogger _logger;
             private readonly ISerializer<string> _serializer;
             private readonly MqttHandlerServiceBase _mqttHandlerService;
 
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, 
+            public ServerHandler(Action<IChannelHandlerContext, MqttMessage> readAction, 
                 ILogger logger,
                 ISerializer<string> serializer)  
             {
                 _readAction = readAction;
                 _logger = logger;
                 _serializer = serializer;
-                _mqttHandlerService = new ServerMqttHandlerService(_readAction);
+                _mqttHandlerService = new ServerMqttHandlerService(_readAction,logger);
             }
              
             public override void ChannelRead(IChannelHandlerContext context, object message)
