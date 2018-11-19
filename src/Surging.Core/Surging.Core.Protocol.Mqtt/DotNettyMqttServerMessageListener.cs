@@ -12,6 +12,7 @@ using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.Protocol.Mqtt.Implementation;
+using Surging.Core.Protocol.Mqtt.Internal.Channel;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using System;
 using System.Collections.Generic;
@@ -89,7 +90,7 @@ namespace Surging.Core.Protocol.Mqtt
                 IChannelPipeline pipeline = channel.Pipeline;
                 pipeline.AddLast(MqttEncoder.Instance,
                     new MqttDecoder(true, 256 * 1024), new ServerHandler(async (contenxt, message) =>
-                {
+                { 
                     await contenxt.WriteAsync(message);
                 }, _logger, _serializer));
             }));

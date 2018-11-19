@@ -1,7 +1,6 @@
 ﻿using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
-using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,42 +11,42 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
 {
     public class MqttChannel
     {
-        private volatile IChannel _channel;
-        private string _clientId;
-        private bool isWill;
-        private volatile SubscribeStatus _subscribeStatus;
-        private List<String> _topics;
-        private volatile SessionStatus _sessionStatus;
-        private volatile bool _cleanSession;
-        private ConcurrentDictionary<int, MqttMessage> _messages;
-        private List<int> _receives;
+        public IChannel Channel { get; set; }
+        public string ClientId { get; set; }
+        public bool IsWill { get; set; }
+        public SubscribeStatus SubscribeStatus { get; set; }
+        public List<string> Topics { get; set; }
+        public SessionStatus SessionStatus { get; set; }
+        public bool CleanSession { get; set; }
+        public ConcurrentDictionary<int, MqttMessage> Messages { get; set; }
+        public List<int> Receives { get; set; }
 
         public void AddRecevice(int messageId)
         {
-            _receives.Add(messageId);
+            Receives.Add(messageId);
         }
 
         public bool CheckRecevice(int messageId)
         {
-            return _receives.Contains(messageId);
+            return Receives.Contains(messageId);
         }
 
         public bool RemoveRecevice(int messageId)
         {
-            return _receives.Remove(messageId);
+            return Receives.Remove(messageId);
         }
 
 
         public void AddMqttMessage(int messageId, MqttMessage msg)
         {
-            _messages.AddOrUpdate(messageId, msg,(id,message)=>msg);
+            Messages.AddOrUpdate(messageId, msg,(id,message)=>msg);
         }
 
 
         public MqttMessage GetMqttMessage(int messageId)
         {
             MqttMessage mqttMessage = null;
-            _messages.TryGetValue(messageId, out mqttMessage);
+            Messages.TryGetValue(messageId, out mqttMessage);
             return mqttMessage;
         }
 
@@ -55,34 +54,34 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         public void RemoveMqttMessage(int messageId)
         {
             MqttMessage mqttMessage = null;
-            _messages.Remove(messageId,out mqttMessage);
+            Messages.Remove(messageId,out mqttMessage);
         }
 
         public bool IsLogin()
         {
             bool result = false;
-            if (_channel != null)
+            if (Channel != null)
             {
                 AttributeKey<object> _login = AttributeKey<object>.ValueOf("login");
-                result= _channel.Active && _channel.HasAttribute(_login);
+                result= Channel.Active && Channel.HasAttribute(_login);
             }
             return result;
         }
 
         public async Task Close()
         {
-            if (_channel != null)
-                await _channel.CloseAsync();
+            if (Channel != null)
+                await Channel.CloseAsync();
         }
 
         public bool IsActive()
         {
-            return _channel != null && _channel.Active;
+            return Channel != null && Channel.Active;
         }
-
+        
         public void AddTopic(params string[] topics)
         {
-            _topics.AddRange(topics);
+            Topics.AddRange(topics);
         }
     }
 }
