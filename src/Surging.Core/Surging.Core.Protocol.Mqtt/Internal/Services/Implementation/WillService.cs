@@ -5,9 +5,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Surging.Core.Protocol.Mqtt.Internal.Channel
+namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 {
-   public class WillService
+   public class WillService: IWillService
     {
         private static ConcurrentDictionary<String, MqttWillMessage> willMeaasges = new ConcurrentDictionary<String, MqttWillMessage>();
         private readonly ILogger _logger;
@@ -19,7 +19,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
 
         public void Add(string deviceid, MqttWillMessage willMessage)
         {
-            willMeaasges.AddOrUpdate(deviceid, willMessage,(id,message)=>willMessage);
+            willMeaasges.AddOrUpdate(deviceid, willMessage,(id,message)=>willMessage); 
         }
         
         public void SendWillMessage(string deviceId)

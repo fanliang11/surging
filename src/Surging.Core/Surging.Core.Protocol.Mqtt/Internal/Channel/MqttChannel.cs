@@ -1,6 +1,7 @@
 ﻿using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
+using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         public List<string> Topics { get; set; }
         public SessionStatus SessionStatus { get; set; }
         public bool CleanSession { get; set; }
-        public ConcurrentDictionary<int, MqttMessage> Messages { get; set; }
+        public ConcurrentDictionary<int, SendMqttMessage> Messages { get; set; }
         public List<int> Receives { get; set; }
 
         public void AddRecevice(int messageId)
@@ -37,15 +38,15 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         }
 
 
-        public void AddMqttMessage(int messageId, MqttMessage msg)
+        public void AddMqttMessage(int messageId, SendMqttMessage msg)
         {
             Messages.AddOrUpdate(messageId, msg,(id,message)=>msg);
         }
 
 
-        public MqttMessage GetMqttMessage(int messageId)
+        public SendMqttMessage GetMqttMessage(int messageId)
         {
-            MqttMessage mqttMessage = null;
+            SendMqttMessage mqttMessage = null;
             Messages.TryGetValue(messageId, out mqttMessage);
             return mqttMessage;
         }
@@ -53,7 +54,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
 
         public void RemoveMqttMessage(int messageId)
         {
-            MqttMessage mqttMessage = null;
+            SendMqttMessage mqttMessage = null;
             Messages.Remove(messageId,out mqttMessage);
         }
 
