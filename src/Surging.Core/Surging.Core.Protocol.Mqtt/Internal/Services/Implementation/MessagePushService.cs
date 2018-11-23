@@ -19,7 +19,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         {
             _scanRunnable = scanRunnable;
         }
-        protected void WriteWillMsg(MqttChannel mqttChannel, MqttWillMessage willMeaasge)
+        public void WriteWillMsg(MqttChannel mqttChannel, MqttWillMessage willMeaasge)
         {
             switch (willMeaasge.Qos)
             {
@@ -36,7 +36,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
              
         }
 
-        protected void SendQosConfirmMsg(QualityOfService qos, MqttChannel mqttChannel, String topic, byte[] bytes)
+        public void SendQosConfirmMsg(QualityOfService qos, MqttChannel mqttChannel, string topic, byte[] bytes)
         {
             if (mqttChannel.IsLogin())
             {
@@ -79,6 +79,46 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 channel.WriteAndFlushAsync(mqttPublishMessage);
             }
         }
+
+        public void SendPubBack(IChannel channel, int messageId)
+        {
+            var mqttPubAckMessage = new PubAckPacket() {
+                PacketId = messageId
+            };
+            channel.WriteAndFlushAsync(mqttPubAckMessage);
+        }
+
+        public void SendPubRec(MqttChannel mqttChannel, int messageId)
+        {
+            var mqttPubAckMessage = new PubRecPacket()
+            {
+                PacketId = messageId
+            };
+            var channel = mqttChannel.Channel;
+            channel.WriteAndFlushAsync(mqttPubAckMessage);
+            var sendMqttMessage = Enqueue(channel, messageId, null, null,1, ConfirmStatus.PUBREC);
+            mqttChannel.AddMqttMessage(messageId, sendMqttMessage);
+        }
+
+         
+        public void SendPubRel(IChannel channel, int messageId)
+        {
+            var mqttPubAckMessage = new PubRelPacket()
+            {
+                PacketId = messageId
+            }; 
+            channel.WriteAndFlushAsync(mqttPubAckMessage); 
+        }
+         
+        protected void SendToPubComp(IChannel channel, int messageId)
+        {
+            var mqttPubAckMessage = new PubCompPacket()
+            {
+                PacketId = messageId
+            };
+            channel.WriteAndFlushAsync(mqttPubAckMessage);
+        }
+
 
         private void SendQos0Msg(IChannel channel, String topic, byte[] byteBuf)
         {
