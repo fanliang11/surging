@@ -17,6 +17,6 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Enums
 
         public override int Qos { get; set;}
 
-        public string TopicName { get; set; }
+        public string Topic { get; set; }
     }
 }

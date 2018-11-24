@@ -21,5 +21,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         void SendPubRel(IChannel channel, int messageId);
 
         void SendToPubComp(IChannel channel, int messageId);
+
+        void SendQos0Msg(IChannel channel, String topic, byte[] byteBuf);
     }
 }

@@ -1,4 +1,5 @@
-﻿using DotNetty.Transport.Channels;
+﻿using DotNetty.Codecs.Mqtt.Packets;
+using DotNetty.Transport.Channels;
 using Surging.Core.Protocol.Mqtt.Internal.Channel;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using Surging.Core.Protocol.Mqtt.Internal.Messages;
@@ -11,15 +12,15 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
     public interface IChannelService
     {
         MqttChannel GetMqttChannel(string deviceId);
-        bool Connect(string s, MqttChannel build);
+        bool Connect(string deviceId, MqttChannel build);
         void Suscribe(String deviceId, params string[] topics);
         void Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
-        void Publish(IChannel channel, PublishMessage mqttPublishMessage);
+        void Publish(IChannel channel, PublishPacket mqttPublishMessage);
         void Close(string deviceId);
         void SendWillMsg(MqttWillMessage willMeaasge);
         string GetDeviceId(IChannel channel);
         void UnSubscribe(string deviceId, params string[] topics);
         void Pubrel(IChannel channel, int messageId);
-        void Pubrec(IChannel channel, int messageId);
+        void Pubrec(MqttChannel channel, int messageId);
     }
 }

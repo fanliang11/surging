@@ -63,7 +63,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
             bool result = false;
             if (Channel != null)
             {
-                AttributeKey<object> _login = AttributeKey<object>.ValueOf("login");
+                AttributeKey<string> _login = AttributeKey<string>.ValueOf("login");
                 result= Channel.Active && Channel.HasAttribute(_login);
             }
             return result;

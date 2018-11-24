@@ -69,7 +69,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             channel.WriteAndFlushAsync(mqttPublishMessage);
              return Enqueue(channel, messageId, topic, byteBuf, (int)QualityOfService.AtLeastOnce, ConfirmStatus.PUB);
         }
-
+        
         private void SendQos0Msg(IChannel channel, String topic, byte[] byteBuf, int messageId)
         {
             if (channel != null)
@@ -120,7 +120,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         }
 
 
-        private void SendQos0Msg(IChannel channel, String topic, byte[] byteBuf)
+        public void SendQos0Msg(IChannel channel, String topic, byte[] byteBuf)
         {
             if (channel != null)
             {

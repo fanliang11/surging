@@ -4,13 +4,11 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Messages
 {
-   public class SessionMessage
+   public  class RetainMessage
     {
-        public byte[] Message { get; set; } 
+        public byte[] ByteBuf { get; set; }
 
         public int QoS { get; set; }
-
-        public string Topic { get; set; }
-
+        public new string ToString => Encoding.UTF8.GetString(ByteBuf);
     }
 }
