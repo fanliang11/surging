@@ -6,6 +6,7 @@ using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services
 {
@@ -16,7 +17,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         void Suscribe(String deviceId, params string[] topics);
         void Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
         void Publish(IChannel channel, PublishPacket mqttPublishMessage);
-        void Close(string deviceId);
+        Task Close(string deviceId, bool isDisconnect);
         void SendWillMsg(MqttWillMessage willMeaasge);
         string GetDeviceId(IChannel channel);
         void UnSubscribe(string deviceId, params string[] topics);

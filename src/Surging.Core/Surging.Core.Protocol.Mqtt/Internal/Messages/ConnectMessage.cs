@@ -31,7 +31,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Enums
 
         public string ClientId { get; set; }
 
-        public string WillTopicName { get; set; }
+        public string WillTopic { get; set; }
 
         public byte[] WillMessage { get; set; }
     }

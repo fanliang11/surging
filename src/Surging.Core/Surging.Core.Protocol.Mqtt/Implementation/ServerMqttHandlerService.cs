@@ -4,35 +4,36 @@ using System.Text;
 using DotNetty.Codecs.Mqtt.Packets;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform.Messages;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using System.Linq;
-using DotNetty.Common.Utilities;
+using Surging.Core.Protocol.Mqtt.Internal.Services;
 
 namespace Surging.Core.Protocol.Mqtt.Implementation
 {
     public  class ServerMqttHandlerService : MqttHandlerServiceBase
     {
         private readonly ILogger _logger;
-        public ServerMqttHandlerService(Action<IChannelHandlerContext, MqttMessage> handler,
-            ILogger logger) : base(handler)
+        private readonly IChannelService _channelService;
+        public ServerMqttHandlerService(Action<IChannelHandlerContext, object> handler,
+            ILogger logger, IChannelService channelService) : base(handler)
         {
             _logger = logger;
+            _channelService = channelService;
         }
 
         public override void ConnAck(IChannelHandlerContext context, ConnAckPacket packet)
         {
-            _handler(context, new ConnAckMessage());
+            _handler(context, packet);
         }
 
         public override void Connect(IChannelHandlerContext context, ConnectPacket packet)
         {
-            _handler(context, new ConnectMessage());
+            _handler(context, packet);
         }
 
         public override void Disconnect(IChannelHandlerContext context, DisconnectPacket packet)
         {
-            _handler(context, new DisconnectMessage());
+            _channelService.Close(_channelService.GetDeviceId(context.Channel), true);
         }
 
         public override void PingReq(IChannelHandlerContext context, PingReqPacket packet)
@@ -42,60 +43,77 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                     _logger.LogInformation("收到来自：【" + context.Channel.RemoteAddress.ToString() + "】心跳");
-                _handler(context, new PingReqMessage());
+                _handler(context, packet);
             }
         }
 
         public override void PingResp(IChannelHandlerContext context, PingRespPacket packet)
         {
-            _handler(context, new PingRespMessage());
+            _handler(context, packet);
         }
 
         public override void PubAck(IChannelHandlerContext context, PubAckPacket packet)
         {
-            _handler(context, new PubAckMessage());
+            int messageId = packet.PacketId;
+            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+            var message = mqttChannel.GetMqttMessage(messageId);
+            message.ConfirmStatus = ConfirmStatus.COMPLETE;
         }
 
         public override void PubComp(IChannelHandlerContext context, PubCompPacket packet)
         {
-            _handler(context, new PubCompMessage());
+            int messageId = packet.PacketId;
+            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+            var message = mqttChannel.GetMqttMessage(messageId);
+            message.ConfirmStatus = ConfirmStatus.COMPLETE;
         }
 
         public override void Publish(IChannelHandlerContext context, PublishPacket packet)
         {
-            _handler(context, new PublishMessage());
+            _channelService.Publish(context.Channel, packet);
         }
 
         public override void PubRec(IChannelHandlerContext context, PubRecPacket packet)
         {
-            _handler(context, new PubRecMessage());
+            int messageId = packet.PacketId;
+            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+             var message= mqttChannel.GetMqttMessage(messageId);
+            message.ConfirmStatus=ConfirmStatus.PUBREL;
+            _channelService.Pubrec(mqttChannel, messageId);
         }
 
         public override void PubRel(IChannelHandlerContext context, PubRelPacket packet)
         {
-            _handler(context, new PubRelMessage());
+            int messageId = packet.PacketId;
+            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+            var message = mqttChannel.GetMqttMessage(messageId);
+            message.ConfirmStatus = ConfirmStatus.PUBREL;
+            _channelService.Pubrec(mqttChannel, messageId);
         }
 
         public override void SubAck(IChannelHandlerContext context, SubAckPacket packet)
         {
-            _handler(context, new SubAckMessage());
+            _handler(context, packet);
         }
 
         public override void Subscribe(IChannelHandlerContext context, SubscribePacket packet)
-        { 
-            _handler(context, new SubscribeMessage(packet.PacketId, packet.Requests
-                .Select(p=> 
-            new SubscriptionRequestData(p.TopicFilter,(int)p.QualityOfService) ).ToArray()));
+        {
+            var topics = packet.Requests.Select(p => p.TopicFilter).ToArray();
+            _channelService.Suscribe(_channelService.GetDeviceId(context.Channel), topics);
+            SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
+             ));
         }
 
         public override void UnsubAck(IChannelHandlerContext context, UnsubAckPacket packet)
         {
-            _handler(context, new UnsubAckMessage());
+            _handler(context, packet);
         }
 
         public override void Unsubscribe(IChannelHandlerContext context, UnsubscribePacket packet)
         {
-            _handler(context, new UnsubscribeMessage(packet.PacketId,packet.TopicFilters.ToArray()));
+            string [] topics = packet.TopicFilters.ToArray();
+            _channelService.UnSubscribe(_channelService.GetDeviceId(context.Channel), topics);
+            UnsubAck(context, UnsubAckPacket.InResponseTo(packet));
         }
     }
 }

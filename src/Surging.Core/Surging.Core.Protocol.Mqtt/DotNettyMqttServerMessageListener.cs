@@ -14,6 +14,7 @@ using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.Protocol.Mqtt.Implementation;
 using Surging.Core.Protocol.Mqtt.Internal.Channel;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
+using Surging.Core.Protocol.Mqtt.Internal.Services;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -31,7 +32,7 @@ namespace Surging.Core.Protocol.Mqtt
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private IChannel _channel;
         private readonly ISerializer<string> _serializer;
-
+        private readonly IChannelService _channelService;
         #endregion Field
 
         public event ReceivedDelegate Received;
@@ -39,12 +40,14 @@ namespace Surging.Core.Protocol.Mqtt
         #region Constructor
         public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger, 
             ITransportMessageCodecFactory codecFactory,
-            ISerializer<string> serializer)
+            ISerializer<string> serializer,
+            IChannelService channelService)
         {
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
             _serializer = serializer;
+            _channelService = channelService;
         }
         #endregion
 
@@ -91,8 +94,8 @@ namespace Surging.Core.Protocol.Mqtt
                 pipeline.AddLast(MqttEncoder.Instance,
                     new MqttDecoder(true, 256 * 1024), new ServerHandler(async (contenxt, message) =>
                 { 
-                    await contenxt.WriteAsync(message);
-                }, _logger, _serializer));
+                    await contenxt.WriteAndFlushAsync(message);
+                }, _logger, _serializer, _channelService));
             }));
             try
             {
@@ -108,19 +111,20 @@ namespace Surging.Core.Protocol.Mqtt
 
         private class ServerHandler : ChannelHandlerAdapter
         {
-            private readonly Action<IChannelHandlerContext, MqttMessage> _readAction;
+            private readonly Action<IChannelHandlerContext, object> _readAction;
             private readonly ILogger _logger;
             private readonly ISerializer<string> _serializer;
-            private readonly MqttHandlerServiceBase _mqttHandlerService;
+            private readonly MqttHandlerServiceBase _mqttHandlerService; 
 
-            public ServerHandler(Action<IChannelHandlerContext, MqttMessage> readAction, 
+            public ServerHandler(Action<IChannelHandlerContext, object> readAction, 
                 ILogger logger,
-                ISerializer<string> serializer)  
+                ISerializer<string> serializer,
+                IChannelService channelService)  
             {
                 _readAction = readAction;
                 _logger = logger;
                 _serializer = serializer;
-                _mqttHandlerService = new ServerMqttHandlerService(_readAction,logger);
+                _mqttHandlerService = new ServerMqttHandlerService(_readAction,logger, channelService);
             }
              
             public override void ChannelRead(IChannelHandlerContext context, object message)

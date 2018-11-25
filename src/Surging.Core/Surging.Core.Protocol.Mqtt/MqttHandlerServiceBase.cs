@@ -10,8 +10,8 @@ namespace Surging.Core.Protocol.Mqtt
 {
    public abstract class MqttHandlerServiceBase
     {
-        protected readonly Action<IChannelHandlerContext, MqttMessage> _handler;
-        public MqttHandlerServiceBase( Action<IChannelHandlerContext, MqttMessage> handler)
+        protected readonly Action<IChannelHandlerContext, object> _handler;
+        public MqttHandlerServiceBase( Action<IChannelHandlerContext, object> handler)
         {
             _handler = handler;
         }

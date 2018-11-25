@@ -11,10 +11,12 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
     {
         private static ConcurrentDictionary<String, MqttWillMessage> willMeaasges = new ConcurrentDictionary<String, MqttWillMessage>();
         private readonly ILogger _logger;
+        private readonly IChannelService _channelService;
 
-        public WillService(ILogger logger)
+        public WillService(ILogger logger, IChannelService channelService)
         {
             _logger = logger;
+            _channelService = channelService;
         }
 
         public void Add(string deviceid, MqttWillMessage willMessage)
@@ -24,13 +26,20 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         
         public void SendWillMessage(string deviceId)
         {
-            willMeaasges.TryGetValue(deviceId, out MqttWillMessage willMessage);
-            if (!willMessage.WillRetain)
+            if (!string.IsNullOrEmpty(deviceId))
             {
-                Remove(deviceId);
-                if (_logger.IsEnabled(LogLevel.Information))
-                    _logger.LogInformation($"deviceId:{deviceId} 的遗嘱消息[" + willMessage.WillMessage + "] 已经被删除");
+                willMeaasges.TryGetValue(deviceId, out MqttWillMessage willMessage);
+                if (willMeaasges != null)
+                {
+                    _channelService.SendWillMsg(willMessage);
+                    if (!willMessage.WillRetain)
+                    {
+                        Remove(deviceId);
+                        if (_logger.IsEnabled(LogLevel.Information))
+                            _logger.LogInformation($"deviceId:{deviceId} 的遗嘱消息[" + willMessage.WillMessage + "] 已经被删除");
 
+                    }
+                }
             }
         }
         

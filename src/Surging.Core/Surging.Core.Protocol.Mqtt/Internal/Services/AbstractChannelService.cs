@@ -10,12 +10,14 @@ using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using System.Collections;
 using System.Linq;
 using DotNetty.Codecs.Mqtt.Packets;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services
 {
     public abstract class AbstractChannelService : IChannelService
     {
         private readonly AttributeKey<string> _loginAttrKey = AttributeKey<string>.ValueOf("login");
+        private readonly AttributeKey<string> _deviceIdAttrKey = AttributeKey<string>.ValueOf("deviceId");
         private readonly IMessagePushService _messagePushService;
         private readonly ConcurrentDictionary<string, IEnumerable<MqttChannel>> _topics = new ConcurrentDictionary<string, IEnumerable<MqttChannel>>();
         private readonly ConcurrentDictionary<string, MqttChannel> _mqttChannels = new ConcurrentDictionary<String, MqttChannel>();
@@ -27,6 +29,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
 
         public ConcurrentDictionary<string, MqttChannel> MqttChannels { get {
                 return _mqttChannels;
+            }
+        }
+
+        public AttributeKey<string> DeviceIdAttrKey
+        {
+            get
+            {
+                return _deviceIdAttrKey;
             }
         }
 
@@ -54,7 +64,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
             }
         }
 
-        public abstract void Close(string deviceId);
+        public abstract Task Close(string deviceId, bool isDisconnect);
 
         public abstract bool Connect(string deviceId, MqttChannel build);
 
