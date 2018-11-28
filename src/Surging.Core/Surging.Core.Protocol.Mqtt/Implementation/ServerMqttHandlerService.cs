@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using System.Linq;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
+using Surging.Core.Protocol.Mqtt.Internal.Runtime;
 
 namespace Surging.Core.Protocol.Mqtt.Implementation
 {
@@ -14,11 +15,13 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
     {
         private readonly ILogger _logger;
         private readonly IChannelService _channelService;
+        private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
         public ServerMqttHandlerService(Action<IChannelHandlerContext, object> handler,
-            ILogger logger, IChannelService channelService) : base(handler)
+            ILogger logger, IChannelService channelService, IMqttBehaviorProvider mqttBehaviorProvider) : base(handler)
         {
             _logger = logger;
             _channelService = channelService;
+            _mqttBehaviorProvider = mqttBehaviorProvider;
         }
 
         public override void ConnAck(IChannelHandlerContext context, ConnAckPacket packet)
@@ -26,9 +29,66 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             _handler(context, packet);
         }
 
-        public override void Connect(IChannelHandlerContext context, ConnectPacket packet)
+        public override void Login(IChannelHandlerContext context, ConnectPacket packet)
         {
-            _handler(context, packet);
+            string deviceId = packet.ClientId;
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                ConnAck(context, new ConnAckPacket
+                {
+                    ReturnCode = ConnectReturnCode.RefusedIdentifierRejected
+                });
+                return;
+            }
+            var mqttBehavior = _mqttBehaviorProvider.GetMqttBehavior();
+            if (mqttBehavior != null)
+            {
+                if (packet.HasPassword && packet.HasUsername
+                        && mqttBehavior.Authorized(packet.Username, packet.Username))
+                {
+                    var mqttChannel = _channelService.GetMqttChannel(deviceId);
+                    if (mqttChannel == null || mqttChannel.SessionStatus == SessionStatus.CLOSE)
+                    {
+                        byte[] bytes = new byte[packet.WillMessage.ReadableBytes];
+                        packet.WillMessage.ReadBytes(bytes);
+                        _channelService.Login(context.Channel, deviceId, new ConnectMessage
+                        {
+                            CleanSession = packet.CleanSession,
+                            ClientId = packet.ClientId,
+                            Duplicate = packet.Duplicate,
+                            HasPassword = packet.HasPassword,
+                            HasUsername = packet.HasUsername,
+                            HasWill = packet.HasWill,
+                            KeepAliveInSeconds = packet.KeepAliveInSeconds,
+                            Password = packet.Password,
+                            ProtocolLevel = packet.ProtocolLevel,
+                            ProtocolName = packet.ProtocolName,
+                            Qos = (int)packet.QualityOfService,
+                            RetainRequested = packet.RetainRequested,
+                            Username = packet.Username,
+                            WillMessage = bytes,
+                            WillQualityOfService = (int)packet.WillQualityOfService,
+                            WillRetain = packet.WillRetain,
+                            WillTopic = packet.WillTopicName
+
+                        });
+                    }
+                }
+                else
+                {
+                    ConnAck(context, new ConnAckPacket
+                    {
+                        ReturnCode = ConnectReturnCode.RefusedBadUsernameOrPassword
+                    });
+                }
+            }
+            else
+            {
+                ConnAck(context, new ConnAckPacket
+                {
+                    ReturnCode = ConnectReturnCode.RefusedServerUnavailable
+                });
+            }
         }
 
         public override void Disconnect(IChannelHandlerContext context, DisconnectPacket packet)

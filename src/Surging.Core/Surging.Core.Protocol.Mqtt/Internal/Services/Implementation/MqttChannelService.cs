@@ -119,7 +119,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             int messageId = mqttPublishMessage.PacketId;
             if (channel.HasAttribute(LoginAttrKey) && mqttChannel != null)
             {
-                bool isRetain;
+                bool isRetain= mqttPublishMessage.RetainRequested;
                 switch (mqttPublishMessage.QualityOfService)
                 {
                     case QualityOfService.AtLeastOnce:
@@ -129,23 +129,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                         Pubrec(mqttChannel, messageId);
                         break;
                 }
-                if ((isRetain = mqttPublishMessage.RetainRequested) && mqttPublishMessage.QualityOfService != QualityOfService.AtMostOnce)
-                {
-                    SaveRetain(mqttPublishMessage.TopicName,
-                            new RetainMessage
-                            {
-                                ByteBuf = bytes,
-                                QoS = (int)mqttPublishMessage.QualityOfService
-                            }, false);
-                }
-                else if (mqttPublishMessage.RetainRequested && mqttPublishMessage.QualityOfService == QualityOfService.AtMostOnce)
+                 if (isRetain)
                 {
                     SaveRetain(mqttPublishMessage.TopicName,
                            new RetainMessage
                            {
                                ByteBuf = bytes,
                                QoS = (int)mqttPublishMessage.QualityOfService
-                           }, true);
+                           }, mqttPublishMessage.QualityOfService == QualityOfService.AtMostOnce?true:false);
                 }
                 if (!mqttChannel.CheckRecevice(messageId))
                 {
@@ -153,6 +144,19 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                     mqttChannel.AddRecevice(messageId);
                 }
             }
+        }
+
+        public override void Publish(string deviceId, MqttWillMessage willMessage)
+        {
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                var mqttChannel = GetMqttChannel(deviceId);
+                if (mqttChannel.SessionStatus == SessionStatus.OPEN)
+                {
+                    _messagePushService.WriteWillMsg(mqttChannel, willMessage);
+                }
+            }
+            else { SendWillMsg(willMessage); }
         }
 
         private void PushMessage(string topic, int qos, byte[] bytes, bool isRetain)

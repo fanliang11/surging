@@ -130,5 +130,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
 
         public abstract void UnSubscribe(string deviceId, params string[] topics);
 
+        public abstract void Publish(string deviceId, MqttWillMessage willMessage);
+       
     }
 }

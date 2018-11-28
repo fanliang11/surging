@@ -14,6 +14,7 @@ using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.Protocol.Mqtt.Implementation;
 using Surging.Core.Protocol.Mqtt.Internal.Channel;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
+using Surging.Core.Protocol.Mqtt.Internal.Runtime;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace Surging.Core.Protocol.Mqtt
         private IChannel _channel;
         private readonly ISerializer<string> _serializer;
         private readonly IChannelService _channelService;
+        private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
         #endregion Field
 
         public event ReceivedDelegate Received;
@@ -41,13 +43,15 @@ namespace Surging.Core.Protocol.Mqtt
         public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger, 
             ITransportMessageCodecFactory codecFactory,
             ISerializer<string> serializer,
-            IChannelService channelService)
+            IChannelService channelService,
+            IMqttBehaviorProvider mqttBehaviorProvider)
         {
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
             _serializer = serializer;
             _channelService = channelService;
+            _mqttBehaviorProvider = mqttBehaviorProvider;
         }
         #endregion
 
@@ -66,7 +70,7 @@ namespace Surging.Core.Protocol.Mqtt
         public async Task StartAsync(EndPoint endPoint)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
+                _logger.LogDebug($"准备启动Mqtt服务主机，监听地址：{endPoint}。");
             IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
             IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
@@ -85,7 +89,7 @@ namespace Surging.Core.Protocol.Mqtt
             }
             bootstrap 
             .Option(ChannelOption.SoBacklog, 100)
-            .ChildOption(ChannelOption.RcvbufAllocator,new AdaptiveRecvByteBufAllocator())
+            .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
             .Group(bossGroup, workerGroup)
             .Option(ChannelOption.TcpNodelay, true)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
@@ -95,7 +99,7 @@ namespace Surging.Core.Protocol.Mqtt
                     new MqttDecoder(true, 256 * 1024), new ServerHandler(async (contenxt, message) =>
                 { 
                     await contenxt.WriteAndFlushAsync(message);
-                }, _logger, _serializer, _channelService));
+                }, _logger, _serializer, _channelService,_mqttBehaviorProvider));
             }));
             try
             {
@@ -119,12 +123,13 @@ namespace Surging.Core.Protocol.Mqtt
             public ServerHandler(Action<IChannelHandlerContext, object> readAction, 
                 ILogger logger,
                 ISerializer<string> serializer,
-                IChannelService channelService)  
+                IChannelService channelService,
+                IMqttBehaviorProvider mqttBehaviorProvider)  
             {
                 _readAction = readAction;
                 _logger = logger;
                 _serializer = serializer;
-                _mqttHandlerService = new ServerMqttHandlerService(_readAction,logger, channelService);
+                _mqttHandlerService = new ServerMqttHandlerService(_readAction,logger, channelService, mqttBehaviorProvider);
             }
              
             public override void ChannelRead(IChannelHandlerContext context, object message)
@@ -133,10 +138,7 @@ namespace Surging.Core.Protocol.Mqtt
                 switch ( buffer.PacketType)
                 {
                     case PacketType.CONNECT:
-                        _mqttHandlerService.Connect(context, buffer as ConnectPacket);
-                        break;
-                    case PacketType.CONNACK:
-                        _mqttHandlerService.ConnAck(context, buffer as ConnAckPacket);
+                        _mqttHandlerService.Login(context, buffer as ConnectPacket);
                         break;
                     case PacketType.PUBLISH:
                         _mqttHandlerService.Disconnect(context, buffer as DisconnectPacket);

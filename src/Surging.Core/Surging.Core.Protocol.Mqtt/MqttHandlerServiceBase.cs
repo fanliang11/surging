@@ -15,8 +15,8 @@ namespace Surging.Core.Protocol.Mqtt
         {
             _handler = handler;
         }
-         
-       public abstract void Connect(IChannelHandlerContext context, ConnectPacket packet);
+
+        public abstract void Login(IChannelHandlerContext context, ConnectPacket packet);
 
         public abstract void ConnAck(IChannelHandlerContext context, ConnAckPacket packet);
 

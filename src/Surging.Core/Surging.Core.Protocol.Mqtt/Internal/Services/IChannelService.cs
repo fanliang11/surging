@@ -17,6 +17,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         void Suscribe(String deviceId, params string[] topics);
         void Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
         void Publish(IChannel channel, PublishPacket mqttPublishMessage);
+        void Publish(string deviceId, MqttWillMessage willMessage);
         Task Close(string deviceId, bool isDisconnect);
         void SendWillMsg(MqttWillMessage willMeaasge);
         string GetDeviceId(IChannel channel);
