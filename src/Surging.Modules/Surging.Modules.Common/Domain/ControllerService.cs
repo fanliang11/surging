@@ -11,24 +11,23 @@ namespace Surging.Modules.Common.Domain
 {
     public class ControllerService : MqttBehavior, IControllerService
     {
-        public override bool Authorized(string username, string password)
+        public override async Task<bool> Authorized(string username, string password)
         {
             bool result = false;
             if (username == "admin" && password == "123456")
                 result= true;
-            return result;
+            return await Task.FromResult(result);
         }
 
         public async Task Publish(string deviceId, WillMessage message)
         {
-              base.Publish(deviceId, new MqttWillMessage
+              await base.Publish(deviceId, new MqttWillMessage
             {
-                 WillMessage = message.Message,
+                WillMessage = message.Message,
                 Qos = message.Qos,
                 Topic = message.Topic,
-                WillRetain = message.WillRetain 
+                WillRetain = message.WillRetain
             });
-              await Task.CompletedTask;
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             if (mqttBehavior != null)
             {
                 if (packet.HasPassword && packet.HasUsername
-                        && mqttBehavior.Authorized(packet.Username, packet.Password))
+                        && await mqttBehavior.Authorized(packet.Username, packet.Password))
                 {
                     var mqttChannel = _channelService.GetMqttChannel(deviceId);
                     if (mqttChannel == null || mqttChannel.SessionStatus == SessionStatus.CLOSE)
