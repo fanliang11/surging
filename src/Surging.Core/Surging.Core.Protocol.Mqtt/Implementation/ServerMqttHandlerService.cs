@@ -8,33 +8,34 @@ using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using System.Linq;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using Surging.Core.Protocol.Mqtt.Internal.Runtime;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Implementation
 {
-    public  class ServerMqttHandlerService : MqttHandlerServiceBase
+    public  class ServerMqttHandlerService
     {
         private readonly ILogger _logger;
         private readonly IChannelService _channelService;
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
-        public ServerMqttHandlerService(Action<IChannelHandlerContext, object> handler,
-            ILogger logger, IChannelService channelService, IMqttBehaviorProvider mqttBehaviorProvider) : base(handler)
+        public ServerMqttHandlerService(
+            ILogger logger, IChannelService channelService, IMqttBehaviorProvider mqttBehaviorProvider)
         {
             _logger = logger;
             _channelService = channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
         }
 
-        public override void ConnAck(IChannelHandlerContext context, ConnAckPacket packet)
+        public async Task ConnAck(IChannelHandlerContext context, ConnAckPacket packet)
         {
-            _handler(context, packet);
+           await context.WriteAndFlushAsync(packet);
         }
 
-        public override void Login(IChannelHandlerContext context, ConnectPacket packet)
+        public async Task Login(IChannelHandlerContext context, ConnectPacket packet)
         {
             string deviceId = packet.ClientId;
             if (string.IsNullOrEmpty(deviceId))
             {
-                ConnAck(context, new ConnAckPacket
+               await ConnAck(context, new ConnAckPacket
                 {
                     ReturnCode = ConnectReturnCode.RefusedIdentifierRejected
                 });
@@ -55,7 +56,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
                             bytes = new byte[packet.WillMessage.ReadableBytes];
                             packet.WillMessage.ReadBytes(bytes);
                         }
-                        _channelService.Login(context.Channel, deviceId, new ConnectMessage
+                       await _channelService.Login(context.Channel, deviceId, new ConnectMessage
                         {
                             CleanSession = packet.CleanSession,
                             ClientId = packet.ClientId,
@@ -80,7 +81,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
                 }
                 else
                 {
-                    ConnAck(context, new ConnAckPacket
+                  await  ConnAck(context, new ConnAckPacket
                     {
                         ReturnCode = ConnectReturnCode.RefusedBadUsernameOrPassword
                     });
@@ -88,99 +89,99 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             }
             else
             {
-                ConnAck(context, new ConnAckPacket
+               await ConnAck(context, new ConnAckPacket
                 {
                     ReturnCode = ConnectReturnCode.RefusedServerUnavailable
                 });
             }
         }
 
-        public override void Disconnect(IChannelHandlerContext context, DisconnectPacket packet)
+        public async Task Disconnect(IChannelHandlerContext context, DisconnectPacket packet)
         {
-            _channelService.Close(_channelService.GetDeviceId(context.Channel), true);
+            await _channelService.Close(await _channelService.GetDeviceId(context.Channel), true);
         }
 
-        public override void PingReq(IChannelHandlerContext context, PingReqPacket packet)
+        public async Task  PingReq(IChannelHandlerContext context, PingReqPacket packet)
         {
             var channel = context.Channel;
             if (channel.Open && channel.Active && channel.IsWritable)
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                     _logger.LogInformation("收到来自：【" + context.Channel.RemoteAddress.ToString() + "】心跳");
-                PingResp(context, PingRespPacket.Instance);
+                await PingResp(context, PingRespPacket.Instance);
             }
         }
 
-        public override void PingResp(IChannelHandlerContext context, PingRespPacket packet)
+        public async Task PingResp(IChannelHandlerContext context, PingRespPacket packet)
         {
-            _handler(context, packet);
+           await context.WriteAndFlushAsync(packet);
         }
 
-        public override void PubAck(IChannelHandlerContext context, PubAckPacket packet)
+        public async Task PubAck(IChannelHandlerContext context, PubAckPacket packet)
         {
             int messageId = packet.PacketId;
-            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+            var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
             var message = mqttChannel.GetMqttMessage(messageId);
             message.ConfirmStatus = ConfirmStatus.COMPLETE;
         }
 
-        public override void PubComp(IChannelHandlerContext context, PubCompPacket packet)
+        public async Task PubComp(IChannelHandlerContext context, PubCompPacket packet)
         {
             int messageId = packet.PacketId;
-            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+            var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
             var message = mqttChannel.GetMqttMessage(messageId);
             message.ConfirmStatus = ConfirmStatus.COMPLETE;
         }
 
-        public override void Publish(IChannelHandlerContext context, PublishPacket packet)
+        public async Task Publish(IChannelHandlerContext context, PublishPacket packet)
         {
-            _channelService.Publish(context.Channel, packet);
+            await _channelService.Publish(context.Channel, packet);
         }
 
-        public override void PubRec(IChannelHandlerContext context, PubRecPacket packet)
+        public async Task PubRec(IChannelHandlerContext context, PubRecPacket packet)
         {
             int messageId = packet.PacketId;
-            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+            var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
              var message= mqttChannel.GetMqttMessage(messageId);
             message.ConfirmStatus=ConfirmStatus.PUBREL;
-            _channelService.Pubrec(mqttChannel, messageId);
+            await _channelService.Pubrec(mqttChannel, messageId);
         }
 
-        public override void PubRel(IChannelHandlerContext context, PubRelPacket packet)
+        public async Task PubRel(IChannelHandlerContext context, PubRelPacket packet)
         {
             int messageId = packet.PacketId;
-            var mqttChannel = _channelService.GetMqttChannel(_channelService.GetDeviceId(context.Channel));
+            var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
             var message = mqttChannel.GetMqttMessage(messageId);
             message.ConfirmStatus = ConfirmStatus.PUBREL;
-            _channelService.Pubrec(mqttChannel, messageId);
+            await _channelService.Pubrec(mqttChannel, messageId);
         }
 
-        public override void SubAck(IChannelHandlerContext context, SubAckPacket packet)
+        public async Task SubAck(IChannelHandlerContext context, SubAckPacket packet)
         {
-            _handler(context, packet);
+           await  context.WriteAndFlushAsync(packet);
         }
 
-        public override void Subscribe(IChannelHandlerContext context, SubscribePacket packet)
+        public async Task Subscribe(IChannelHandlerContext context, SubscribePacket packet)
         {
             if (packet != null)
             {
                 var topics = packet.Requests.Select(p => p.TopicFilter).ToArray();
-                _channelService.Suscribe(_channelService.GetDeviceId(context.Channel), topics);
-                SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
+               await _channelService.Suscribe(await _channelService.GetDeviceId(context.Channel), topics);
+                await  SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
                  ));
             }
         }
 
-        public override void UnsubAck(IChannelHandlerContext context, UnsubAckPacket packet)
+        public  async Task UnsubAck(IChannelHandlerContext context, UnsubAckPacket packet)
         {
-            _handler(context, packet);
+           await context.WriteAndFlushAsync(packet);
         }
 
-        public override void Unsubscribe(IChannelHandlerContext context, UnsubscribePacket packet)
+        public  async Task Unsubscribe(IChannelHandlerContext context, UnsubscribePacket packet)
         {
             string [] topics = packet.TopicFilters.ToArray();
-            _channelService.UnSubscribe(_channelService.GetDeviceId(context.Channel), topics);
-            UnsubAck(context, UnsubAckPacket.InResponseTo(packet));
+            await _channelService.UnSubscribe(await _channelService.GetDeviceId(context.Channel), topics);
+            await  UnsubAck(context, UnsubAckPacket.InResponseTo(packet));
         }
     }
 }

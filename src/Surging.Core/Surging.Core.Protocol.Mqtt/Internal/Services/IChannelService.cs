@@ -14,15 +14,15 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
     {
         MqttChannel GetMqttChannel(string deviceId);
         bool Connect(string deviceId, MqttChannel build);
-        void Suscribe(String deviceId, params string[] topics);
-        void Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
-        void Publish(IChannel channel, PublishPacket mqttPublishMessage);
-        void Publish(string deviceId, MqttWillMessage willMessage);
+        Task Suscribe(String deviceId, params string[] topics);
+        Task Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
+        Task Publish(IChannel channel, PublishPacket mqttPublishMessage);
+        Task Publish(string deviceId, MqttWillMessage willMessage);
         Task Close(string deviceId, bool isDisconnect);
-        void SendWillMsg(MqttWillMessage willMeaasge);
-        string GetDeviceId(IChannel channel);
-        void UnSubscribe(string deviceId, params string[] topics);
-        void Pubrel(IChannel channel, int messageId);
-        void Pubrec(MqttChannel channel, int messageId);
+        Task SendWillMsg(MqttWillMessage willMeaasge);
+        ValueTask<string> GetDeviceId(IChannel channel);
+        ValueTask UnSubscribe(string deviceId, params string[] topics);
+        Task Pubrel(IChannel channel, int messageId);
+        Task Pubrec(MqttChannel channel, int messageId);
     }
 }

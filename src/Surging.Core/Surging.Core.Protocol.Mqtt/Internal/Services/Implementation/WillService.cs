@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 {
@@ -25,14 +26,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             willMeaasges.AddOrUpdate(deviceid, willMessage,(id,message)=>willMessage); 
         }
         
-        public void SendWillMessage(string deviceId)
+        public async Task SendWillMessage(string deviceId)
         {
             if (!string.IsNullOrEmpty(deviceId))
             {
                 willMeaasges.TryGetValue(deviceId, out MqttWillMessage willMessage);
                 if (willMeaasges != null)
                 {
-                    _serviceProvider.GetInstances<IChannelService>().SendWillMsg(willMessage);
+                   await _serviceProvider.GetInstances<IChannelService>().SendWillMsg(willMessage);
                     if (!willMessage.WillRetain)
                     {
                         Remove(deviceId);

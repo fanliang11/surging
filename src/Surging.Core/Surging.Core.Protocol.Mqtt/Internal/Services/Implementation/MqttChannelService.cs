@@ -104,16 +104,16 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             return true;
         }
 
-        public override void Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage)
+        public override async Task Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage)
         {
             channel.GetAttribute(LoginAttrKey).Set("login");
             channel.GetAttribute(DeviceIdAttrKey).Set(deviceId);
-            Init(channel,mqttConnectMessage);
+            await Init(channel,mqttConnectMessage);
         }
 
-        public override void Publish(IChannel channel, PublishPacket mqttPublishMessage)
+        public override async Task Publish(IChannel channel, PublishPacket mqttPublishMessage)
         {
-            MqttChannel mqttChannel = GetMqttChannel(this.GetDeviceId(channel));
+            MqttChannel mqttChannel = GetMqttChannel(await this.GetDeviceId(channel));
             var buffer = mqttPublishMessage.Payload;
             byte[] bytes = new byte[buffer.ReadableBytes];
             buffer.ReadBytes(bytes);
@@ -124,10 +124,10 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 switch (mqttPublishMessage.QualityOfService)
                 {
                     case QualityOfService.AtLeastOnce:
-                        _messagePushService.SendPubBack(channel, messageId);
+                       await _messagePushService.SendPubBack(channel, messageId);
                         break;
                     case QualityOfService.ExactlyOnce:
-                        Pubrec(mqttChannel, messageId);
+                       await Pubrec(mqttChannel, messageId);
                         break;
                 }
                 if (isRetain)
@@ -139,24 +139,24 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                                QoS = (int)mqttPublishMessage.QualityOfService
                            }, mqttPublishMessage.QualityOfService == QualityOfService.AtMostOnce ? true : false);
                 }
-                PushMessage(mqttPublishMessage.TopicName, (int)mqttPublishMessage.QualityOfService, bytes, isRetain); 
+               await PushMessage(mqttPublishMessage.TopicName, (int)mqttPublishMessage.QualityOfService, bytes, isRetain); 
             }
         }
 
-        public override void Publish(string deviceId, MqttWillMessage willMessage)
+        public override async Task Publish(string deviceId, MqttWillMessage willMessage)
         {
             if (!string.IsNullOrEmpty(deviceId))
             {
                 var mqttChannel = GetMqttChannel(deviceId);
                 if (mqttChannel.SessionStatus == SessionStatus.OPEN)
                 {
-                    _messagePushService.WriteWillMsg(mqttChannel, willMessage);
+                   await _messagePushService.WriteWillMsg(mqttChannel, willMessage);
                 }
             }
-            else { SendWillMsg(willMessage); }
+            else { await SendWillMsg(willMessage); }
         }
 
-        private void PushMessage(string topic, int qos, byte[] bytes, bool isRetain)
+        private async Task PushMessage(string topic, int qos, byte[] bytes, bool isRetain)
         {
             Topics.TryGetValue(topic, out IEnumerable<MqttChannel> mqttChannels);
             if (mqttChannels.Any())
@@ -169,7 +169,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                             {
                                 if (mqttChannel.IsActive())
                                 {
-                                    SendMessage(mqttChannel, qos,
+                                   await SendMessage(mqttChannel, qos,
                                        topic, bytes);
                                 }
                                 else
@@ -202,24 +202,24 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             }
         }
 
-        public override void Pubrec(MqttChannel channel, int messageId)
+        public override async Task Pubrec(MqttChannel channel, int messageId)
         {
-            _messagePushService.SendPubRec(channel, messageId);
+           await _messagePushService.SendPubRec(channel, messageId);
         }
 
-        public override void Pubrel(IChannel channel, int messageId)
+        public override async Task Pubrel(IChannel channel, int messageId)
         {
-            if (MqttChannels.TryGetValue(this.GetDeviceId(channel), out MqttChannel mqttChannel))
+            if (MqttChannels.TryGetValue(await this.GetDeviceId(channel), out MqttChannel mqttChannel))
             {
                 if (mqttChannel.IsLogin())
                 {
                     mqttChannel.RemoveMqttMessage(messageId);
-                    _messagePushService.SendToPubComp(channel, messageId);
+                   await _messagePushService.SendToPubComp(channel, messageId);
                 }
             }
         }
 
-        public override void SendWillMsg(MqttWillMessage willMeaasge)
+        public override async Task SendWillMsg(MqttWillMessage willMeaasge)
         {
             Topics.TryGetValue(willMeaasge.Topic, out IEnumerable<MqttChannel> mqttChannels);
             if (mqttChannels.Any())
@@ -237,7 +237,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                             });
                             break;
                         case SessionStatus.OPEN:
-                            _messagePushService.WriteWillMsg(mqttChannel, willMeaasge);
+                           await _messagePushService.WriteWillMsg(mqttChannel, willMeaasge);
                             break;
 
                     }
@@ -245,7 +245,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             }
         }
 
-        public override void Suscribe(string deviceId, params string[] topics)
+        public override async Task Suscribe(string deviceId, params string[] topics)
         {
             if (!string.IsNullOrEmpty(deviceId))
             {
@@ -257,13 +257,13 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                     foreach (var topic in topics)
                     {
                         this.AddChannel(topic, mqttChannel);
-                        this.SendRetain(topic, mqttChannel);
+                        await this.SendRetain(topic, mqttChannel);
                     }
                 }
             }
         }
 
-        public override void UnSubscribe(string deviceId, params string[] topics)
+        public override ValueTask UnSubscribe(string deviceId, params string[] topics)
         {
             if (MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel))
             {
@@ -272,9 +272,10 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                     RemoveChannel(topic, mqttChannel);
                 }
             }
+            return new ValueTask();
         }
 
-        public void SendRetain(string topic, MqttChannel mqttChannel)
+        public async Task SendRetain(string topic, MqttChannel mqttChannel)
         {
             Retain.TryGetValue(topic, out ConcurrentQueue<RetainMessage> retainMessages);
             if (retainMessages!=null && !retainMessages.IsEmpty)
@@ -284,7 +285,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 {
                     if (retainMessages.TryDequeue(out RetainMessage retainMessage))
                     {
-                        SendMessage(mqttChannel, retainMessage.QoS, topic, retainMessage.ByteBuf);
+                       await SendMessage(mqttChannel, retainMessage.QoS, topic, retainMessage.ByteBuf);
                     }
                 }
             }
@@ -313,25 +314,25 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             return topics;
         }
 
-        private void SendMessage(MqttChannel mqttChannel,int qos, string topic,byte [] byteBuf)
+        private async Task SendMessage(MqttChannel mqttChannel,int qos, string topic,byte [] byteBuf)
         {
             switch (qos)
             {
                 case 0:
-                    _messagePushService.SendQos0Msg(mqttChannel.Channel, topic, byteBuf);
+                   await _messagePushService.SendQos0Msg(mqttChannel.Channel, topic, byteBuf);
                     break;
                 case 1:
-                    _messagePushService.SendQosConfirmMsg(QualityOfService.AtLeastOnce, mqttChannel, topic, byteBuf);
+                   await _messagePushService.SendQosConfirmMsg(QualityOfService.AtLeastOnce, mqttChannel, topic, byteBuf);
                     break;
                 case 2:
-                    _messagePushService.SendQosConfirmMsg(QualityOfService.ExactlyOnce, mqttChannel, topic, byteBuf);
+                  await  _messagePushService.SendQosConfirmMsg(QualityOfService.ExactlyOnce, mqttChannel, topic, byteBuf);
                     break;
             }
         }
 
-        private void Init(IChannel channel, ConnectMessage mqttConnectMessage)
+        private async Task Init(IChannel channel, ConnectMessage mqttConnectMessage)
         {
-            String deviceId = GetDeviceId(channel);
+            String deviceId = await GetDeviceId(channel);
             MqttChannel mqttChannel = new MqttChannel()
             {
                 Channel = channel,
@@ -373,22 +374,11 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                         return;
                     }
                 }
-                if (mqttConnectMessage.CleanSession)
+                await channel.WriteAndFlushAsync(new ConnAckPacket
                 {
-                    channel.WriteAndFlushAsync(new ConnAckPacket
-                    {
-                        ReturnCode = ConnectReturnCode.Accepted,
-                        SessionPresent = false
-                    });
-                }
-                else
-                {
-                    channel.WriteAndFlushAsync(new ConnAckPacket
-                    {
-                        ReturnCode = ConnectReturnCode.Accepted,
-                        SessionPresent = true
-                    });
-                }
+                    ReturnCode = ConnectReturnCode.Accepted,
+                    SessionPresent = !mqttConnectMessage.CleanSession
+                }); 
                 var sessionMessages = _clientSessionService.GetMessages(mqttConnectMessage.ClientId);
                 if (sessionMessages != null && !sessionMessages.IsEmpty)
                 {
@@ -397,13 +387,13 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                         switch (sessionMessage.QoS)
                         {
                             case 0:
-                                _messagePushService.SendQos0Msg(channel, sessionMessage.Topic, sessionMessage.Message);
+                                await _messagePushService.SendQos0Msg(channel, sessionMessage.Topic, sessionMessage.Message);
                                 break;
                             case 1:
-                                _messagePushService.SendQosConfirmMsg(QualityOfService.AtLeastOnce, GetMqttChannel(deviceId), sessionMessage.Topic, sessionMessage.Message);
+                                await _messagePushService.SendQosConfirmMsg(QualityOfService.AtLeastOnce, GetMqttChannel(deviceId), sessionMessage.Topic, sessionMessage.Message);
                                 break;
                             case 2:
-                                _messagePushService.SendQosConfirmMsg(QualityOfService.ExactlyOnce, GetMqttChannel(deviceId), sessionMessage.Topic, sessionMessage.Message);
+                                await _messagePushService.SendQosConfirmMsg(QualityOfService.ExactlyOnce, GetMqttChannel(deviceId), sessionMessage.Topic, sessionMessage.Message);
                                 break;
                         }
                     }

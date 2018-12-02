@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services
 {
@@ -9,7 +10,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
     {
         void Add(string deviceid, MqttWillMessage willMessage);
 
-        void SendWillMessage(string deviceId);
+        Task SendWillMessage(string deviceId);
 
         void Remove(string deviceid);
     }

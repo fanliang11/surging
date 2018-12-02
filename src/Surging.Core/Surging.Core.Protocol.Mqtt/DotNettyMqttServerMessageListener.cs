@@ -1,6 +1,7 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Codecs.Mqtt;
 using DotNetty.Codecs.Mqtt.Packets;
+using DotNetty.Common.Utilities;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -79,7 +80,7 @@ namespace Surging.Core.Protocol.Mqtt
                 workerGroup = new MultithreadEventLoopGroup();
                 bootstrap.Channel<TcpServerSocketChannel>();
             }
-            bootstrap 
+            bootstrap
             .Option(ChannelOption.SoBacklog, 100)
             .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
             .Group(bossGroup, workerGroup)
@@ -88,10 +89,11 @@ namespace Surging.Core.Protocol.Mqtt
             {
                 IChannelPipeline pipeline = channel.Pipeline;
                 pipeline.AddLast(MqttEncoder.Instance,
-                    new MqttDecoder(true, 256 * 1024), new ServerHandler(async (contenxt, message) =>
-                { 
-                    await contenxt.WriteAndFlushAsync(message);
-                }, _logger, _channelService,_mqttBehaviorProvider));
+                    new MqttDecoder(true, 256 * 1024), new ServerHandler(async (context, packetType, message) =>
+                {
+                    var mqttHandlerService = new ServerMqttHandlerService(_logger, _channelService, _mqttBehaviorProvider);
+                    await ChannelWrite(context, message, packetType, mqttHandlerService);
+                }, _logger, _channelService, _mqttBehaviorProvider));
             }));
             try
             {
@@ -105,67 +107,71 @@ namespace Surging.Core.Protocol.Mqtt
             }
         }
 
+        public async Task ChannelWrite(IChannelHandlerContext context,object message, PacketType packetType, ServerMqttHandlerService mqttHandlerService)
+        {
+            switch (packetType)
+            {
+                case PacketType.CONNECT:
+                   await mqttHandlerService.Login(context, message as ConnectPacket);
+                    break;
+                case PacketType.PUBLISH:
+                    await mqttHandlerService.Publish(context, message as PublishPacket);
+                    break;
+                case PacketType.PUBACK:
+                    await mqttHandlerService.PubAck(context, message as PubAckPacket);
+                    break;
+                case PacketType.PUBREC:
+                    await mqttHandlerService.PubRec(context, message as PubRecPacket);
+                    break;
+                case PacketType.PUBREL:
+                    await mqttHandlerService.PubRel(context, message as PubRelPacket);
+                    break;
+                case PacketType.PUBCOMP:
+                    await mqttHandlerService.PubComp(context, message as PubCompPacket);
+                    break;
+                case PacketType.SUBSCRIBE:
+                    await mqttHandlerService.Subscribe(context, message as SubscribePacket);
+                    break;
+                case PacketType.SUBACK:
+                    await mqttHandlerService.SubAck(context, message as SubAckPacket);
+                    break;
+                case PacketType.UNSUBSCRIBE:
+                    await mqttHandlerService.Unsubscribe(context, message as UnsubscribePacket);
+                    break;
+                case PacketType.UNSUBACK:
+                    await mqttHandlerService.UnsubAck(context, message as UnsubAckPacket);
+                    break;
+                case PacketType.PINGREQ:
+                    await mqttHandlerService.PingReq(context, message as PingReqPacket);
+                    break;
+                case PacketType.PINGRESP:
+                    await mqttHandlerService.PingResp(context, message as PingRespPacket);
+                    break;
+                case PacketType.DISCONNECT:
+                    await mqttHandlerService.Disconnect(context, message as DisconnectPacket);
+                    break;
+            }
+        }
+
         private class ServerHandler : ChannelHandlerAdapter
         {
-            private readonly Action<IChannelHandlerContext, object> _readAction;
-            private readonly ILogger _logger;
-            private readonly MqttHandlerServiceBase _mqttHandlerService; 
+            private readonly Action<IChannelHandlerContext, PacketType, object> _readAction;
+            private readonly ILogger _logger; 
 
-            public ServerHandler(Action<IChannelHandlerContext, object> readAction, 
+            public ServerHandler(Action<IChannelHandlerContext,PacketType, object> readAction, 
                 ILogger logger,
                 IChannelService channelService,
                 IMqttBehaviorProvider mqttBehaviorProvider)  
             {
                 _readAction = readAction;
                 _logger = logger;
-                _mqttHandlerService = new ServerMqttHandlerService(_readAction,logger, channelService, mqttBehaviorProvider);
             }
              
             public override void ChannelRead(IChannelHandlerContext context, object message)
             { 
                 var buffer = message as Packet;
-                switch ( buffer.PacketType)
-                {
-                    case PacketType.CONNECT:
-                        _mqttHandlerService.Login(context, buffer as ConnectPacket);
-                        break;
-                    case PacketType.PUBLISH:
-                        _mqttHandlerService.Publish(context, buffer as PublishPacket);
-                        break;
-                    case PacketType.PUBACK:
-                        _mqttHandlerService.PubAck(context, buffer as PubAckPacket);
-                        break;
-                    case PacketType.PUBREC:
-                        _mqttHandlerService.PubRec(context, buffer as PubRecPacket);
-                        break;
-                    case PacketType.PUBREL:
-                        _mqttHandlerService.PubRel(context, buffer as PubRelPacket);
-                        break;
-                    case PacketType.PUBCOMP:
-                        _mqttHandlerService.PubComp(context, buffer as PubCompPacket);
-                        break;
-                    case PacketType.SUBSCRIBE:
-                        _mqttHandlerService.Subscribe(context, buffer as SubscribePacket);
-                        break;
-                    case PacketType.SUBACK:
-                        _mqttHandlerService.SubAck(context, buffer as SubAckPacket);
-                        break;
-                    case PacketType.UNSUBSCRIBE:
-                        _mqttHandlerService.Unsubscribe(context, buffer as UnsubscribePacket);
-                        break;
-                    case PacketType.UNSUBACK:
-                        _mqttHandlerService.UnsubAck(context, buffer as UnsubAckPacket);
-                        break;
-                    case PacketType.PINGREQ:
-                        _mqttHandlerService.PingReq(context, buffer as PingReqPacket);
-                        break;
-                    case PacketType.PINGRESP:
-                        _mqttHandlerService.PingResp(context, buffer as PingRespPacket);
-                        break;
-                    case PacketType.DISCONNECT:
-                        _mqttHandlerService.Disconnect(context, buffer as DisconnectPacket);
-                        break;
-                }
+                _readAction(context, buffer.PacketType, buffer);
+                ReferenceCountUtil.Release(message);
             }
 
             public override void ChannelInactive(IChannelHandlerContext context)
@@ -175,7 +181,7 @@ namespace Surging.Core.Protocol.Mqtt
             }
 
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) {
-                _mqttHandlerService.Disconnect(context,   DisconnectPacket.Instance);
+                _readAction.Invoke(context,PacketType.DISCONNECT,DisconnectPacket.Instance);
                 this.SetException(exception);
             }
 

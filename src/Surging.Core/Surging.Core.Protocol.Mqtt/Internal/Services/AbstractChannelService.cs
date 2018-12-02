@@ -82,7 +82,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
             return result;
         }
 
-        public string GetDeviceId(IChannel channel)
+        public async ValueTask<string> GetDeviceId(IChannel channel)
         {
             string deviceId = null;
             if (channel != null)
@@ -90,7 +90,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
                 AttributeKey<string> deviceIdAttrKey = AttributeKey<string>.ValueOf("deviceId");
                 deviceId = channel.GetAttribute<string>(deviceIdAttrKey).Get();
             }
-            return deviceId;
+            return await new ValueTask<string>(deviceId);
         }
 
         public bool AddChannel(string topic, MqttChannel mqttChannel)
@@ -117,20 +117,20 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
             return channel;
         }
 
-        public abstract void Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
+        public abstract Task Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
 
-        public abstract void Publish(IChannel channel, PublishPacket mqttPublishMessage);
+        public abstract Task Publish(IChannel channel, PublishPacket mqttPublishMessage);
 
-        public abstract  void Pubrec(MqttChannel channel, int messageId);
+        public abstract Task Pubrec(MqttChannel channel, int messageId);
 
-        public abstract void Pubrel(IChannel channel, int messageId);
+        public abstract Task Pubrel(IChannel channel, int messageId);
 
-        public abstract void SendWillMsg(MqttWillMessage willMeaasge);
-        public abstract  void Suscribe(string deviceId, params string[] topics);
+        public abstract Task SendWillMsg(MqttWillMessage willMeaasge);
+        public abstract Task Suscribe(string deviceId, params string[] topics);
 
-        public abstract void UnSubscribe(string deviceId, params string[] topics);
+        public abstract ValueTask UnSubscribe(string deviceId, params string[] topics);
 
-        public abstract void Publish(string deviceId, MqttWillMessage willMessage);
+        public abstract Task Publish(string deviceId, MqttWillMessage willMessage);
        
     }
 }
