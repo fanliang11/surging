@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 {
-   public class MessagePushService
+   public class MessagePushService:IMessagePushService
     {
         private readonly ScanRunnable _scanRunnable;
         public MessagePushService(ScanRunnable scanRunnable)
@@ -74,7 +74,8 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         {
             if (channel != null)
             {
-                var mqttPublishMessage = new PublishPacket(QualityOfService.AtMostOnce, false, false);
+                var mqttPublishMessage = new PublishPacket(QualityOfService.AtMostOnce, true, true);
+                mqttPublishMessage.TopicName = topic;
                 mqttPublishMessage.Payload = Unpooled.WrappedBuffer(byteBuf);
                 channel.WriteAndFlushAsync(mqttPublishMessage);
             }
@@ -110,7 +111,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             channel.WriteAndFlushAsync(mqttPubAckMessage); 
         }
          
-        protected void SendToPubComp(IChannel channel, int messageId)
+        public void SendToPubComp(IChannel channel, int messageId)
         {
             var mqttPubAckMessage = new PubCompPacket()
             {

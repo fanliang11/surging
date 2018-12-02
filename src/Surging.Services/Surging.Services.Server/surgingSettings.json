@@ -13,13 +13,14 @@
     "RootPath": "${RootPath}|D:\\userapp",
     "Ports": {
       "HttpPort": "${HttpPort}|280",
-      "WSPort": "${WSPort}|96"
+      "WSPort": "${WSPort}|96",
+      "MQTTPort": "${MQTTPort}|97"
     },
     "RequestCacheEnabled": false,
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages

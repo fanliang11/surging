@@ -44,13 +44,17 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             if (mqttBehavior != null)
             {
                 if (packet.HasPassword && packet.HasUsername
-                        && mqttBehavior.Authorized(packet.Username, packet.Username))
+                        && mqttBehavior.Authorized(packet.Username, packet.Password))
                 {
                     var mqttChannel = _channelService.GetMqttChannel(deviceId);
                     if (mqttChannel == null || mqttChannel.SessionStatus == SessionStatus.CLOSE)
                     {
-                        byte[] bytes = new byte[packet.WillMessage.ReadableBytes];
-                        packet.WillMessage.ReadBytes(bytes);
+                        byte[] bytes = null;
+                        if (packet.WillMessage != null)
+                        {
+                            bytes = new byte[packet.WillMessage.ReadableBytes];
+                            packet.WillMessage.ReadBytes(bytes);
+                        }
                         _channelService.Login(context.Channel, deviceId, new ConnectMessage
                         {
                             CleanSession = packet.CleanSession,
@@ -103,7 +107,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                     _logger.LogInformation("收到来自：【" + context.Channel.RemoteAddress.ToString() + "】心跳");
-                _handler(context, packet);
+                PingResp(context, PingRespPacket.Instance);
             }
         }
 
@@ -158,10 +162,13 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
 
         public override void Subscribe(IChannelHandlerContext context, SubscribePacket packet)
         {
-            var topics = packet.Requests.Select(p => p.TopicFilter).ToArray();
-            _channelService.Suscribe(_channelService.GetDeviceId(context.Channel), topics);
-            SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
-             ));
+            if (packet != null)
+            {
+                var topics = packet.Requests.Select(p => p.TopicFilter).ToArray();
+                _channelService.Suscribe(_channelService.GetDeviceId(context.Channel), topics);
+                SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
+                 ));
+            }
         }
 
         public override void UnsubAck(IChannelHandlerContext context, UnsubAckPacket packet)

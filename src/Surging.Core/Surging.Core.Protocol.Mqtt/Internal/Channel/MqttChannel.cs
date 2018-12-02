@@ -20,30 +20,12 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         public SessionStatus SessionStatus { get; set; }
         public bool CleanSession { get; set; }
         public ConcurrentDictionary<int, SendMqttMessage> Messages { get; set; }
-        public List<int> Receives { get; set; }
-
-        public void AddRecevice(int messageId)
-        {
-            Receives.Add(messageId);
-        }
-
-        public bool CheckRecevice(int messageId)
-        {
-            return Receives.Contains(messageId);
-        }
-
-        public bool RemoveRecevice(int messageId)
-        {
-            return Receives.Remove(messageId);
-        }
-
-
+    
         public void AddMqttMessage(int messageId, SendMqttMessage msg)
         {
             Messages.AddOrUpdate(messageId, msg,(id,message)=>msg);
         }
-
-
+        
         public SendMqttMessage GetMqttMessage(int messageId)
         {
             SendMqttMessage mqttMessage = null;

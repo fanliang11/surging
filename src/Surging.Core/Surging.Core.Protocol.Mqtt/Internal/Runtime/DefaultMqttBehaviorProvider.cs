@@ -33,9 +33,8 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
         {
             if (_mqttBehavior == null)
             {
-                _mqttBehavior = _serviceEntryProvider.GetTypes()
-                    .Select(type=> _serviceProvider.GetInstances(type) as MqttBehavior).SingleOrDefault(); 
-              
+                 _mqttBehavior = _serviceEntryProvider.GetTypes()
+                    .Select(type=> _serviceProvider.GetInstances(type) as MqttBehavior ).Where(p=>p!=null).FirstOrDefault(); 
             }
             return _mqttBehavior;
         }

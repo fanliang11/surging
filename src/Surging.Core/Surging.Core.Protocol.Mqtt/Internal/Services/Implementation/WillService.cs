@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
 using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using System;
 using System.Collections.Concurrent;
@@ -9,14 +10,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 {
    public class WillService: IWillService
     {
-        private static ConcurrentDictionary<String, MqttWillMessage> willMeaasges = new ConcurrentDictionary<String, MqttWillMessage>();
-        private readonly ILogger _logger;
-        private readonly IChannelService _channelService;
+        private  ConcurrentDictionary<String, MqttWillMessage> willMeaasges = new ConcurrentDictionary<String, MqttWillMessage>();
+        private readonly ILogger<WillService> _logger;
+        private readonly CPlatformContainer _serviceProvider;
 
-        public WillService(ILogger logger, IChannelService channelService)
+        public WillService(ILogger<WillService> logger,  CPlatformContainer serviceProvider)
         {
             _logger = logger;
-            _channelService = channelService;
+            _serviceProvider = serviceProvider;
         }
 
         public void Add(string deviceid, MqttWillMessage willMessage)
@@ -31,7 +32,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 willMeaasges.TryGetValue(deviceId, out MqttWillMessage willMessage);
                 if (willMeaasges != null)
                 {
-                    _channelService.SendWillMsg(willMessage);
+                    _serviceProvider.GetInstances<IChannelService>().SendWillMsg(willMessage);
                     if (!willMessage.WillRetain)
                     {
                         Remove(deviceId);

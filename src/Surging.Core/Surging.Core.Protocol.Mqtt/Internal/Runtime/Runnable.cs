@@ -11,6 +11,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
         public Runnable()
         {
             var watcherThread = new Thread(s => ((Runnable)s).Run());
+            watcherThread.IsBackground = true;
             watcherThread.Start(this);
             _runnableThread = watcherThread;
         }

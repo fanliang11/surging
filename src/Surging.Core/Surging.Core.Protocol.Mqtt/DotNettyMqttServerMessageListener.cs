@@ -29,10 +29,7 @@ namespace Surging.Core.Protocol.Mqtt
         #region Field
 
         private readonly ILogger<DotNettyMqttServerMessageListener> _logger;
-        private readonly ITransportMessageDecoder _transportMessageDecoder;
-        private readonly ITransportMessageEncoder _transportMessageEncoder;
         private IChannel _channel;
-        private readonly ISerializer<string> _serializer;
         private readonly IChannelService _channelService;
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
         #endregion Field
@@ -41,15 +38,10 @@ namespace Surging.Core.Protocol.Mqtt
 
         #region Constructor
         public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger, 
-            ITransportMessageCodecFactory codecFactory,
-            ISerializer<string> serializer,
             IChannelService channelService,
             IMqttBehaviorProvider mqttBehaviorProvider)
         {
             _logger = logger;
-            _transportMessageEncoder = codecFactory.GetEncoder();
-            _transportMessageDecoder = codecFactory.GetDecoder();
-            _serializer = serializer;
             _channelService = channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
         }
@@ -99,7 +91,7 @@ namespace Surging.Core.Protocol.Mqtt
                     new MqttDecoder(true, 256 * 1024), new ServerHandler(async (contenxt, message) =>
                 { 
                     await contenxt.WriteAndFlushAsync(message);
-                }, _logger, _serializer, _channelService,_mqttBehaviorProvider));
+                }, _logger, _channelService,_mqttBehaviorProvider));
             }));
             try
             {
@@ -117,18 +109,15 @@ namespace Surging.Core.Protocol.Mqtt
         {
             private readonly Action<IChannelHandlerContext, object> _readAction;
             private readonly ILogger _logger;
-            private readonly ISerializer<string> _serializer;
             private readonly MqttHandlerServiceBase _mqttHandlerService; 
 
             public ServerHandler(Action<IChannelHandlerContext, object> readAction, 
                 ILogger logger,
-                ISerializer<string> serializer,
                 IChannelService channelService,
                 IMqttBehaviorProvider mqttBehaviorProvider)  
             {
                 _readAction = readAction;
                 _logger = logger;
-                _serializer = serializer;
                 _mqttHandlerService = new ServerMqttHandlerService(_readAction,logger, channelService, mqttBehaviorProvider);
             }
              
@@ -141,40 +130,40 @@ namespace Surging.Core.Protocol.Mqtt
                         _mqttHandlerService.Login(context, buffer as ConnectPacket);
                         break;
                     case PacketType.PUBLISH:
-                        _mqttHandlerService.Disconnect(context, buffer as DisconnectPacket);
+                        _mqttHandlerService.Publish(context, buffer as PublishPacket);
                         break;
                     case PacketType.PUBACK:
-                        _mqttHandlerService.PingReq(context, buffer as PingReqPacket);
+                        _mqttHandlerService.PubAck(context, buffer as PubAckPacket);
                         break;
                     case PacketType.PUBREC:
-                        _mqttHandlerService.PingResp(context, buffer as PingRespPacket);
+                        _mqttHandlerService.PubRec(context, buffer as PubRecPacket);
                         break;
                     case PacketType.PUBREL:
-                        _mqttHandlerService.PubAck(context, buffer as PubAckPacket);
+                        _mqttHandlerService.PubRel(context, buffer as PubRelPacket);
                         break;
                     case PacketType.PUBCOMP:
                         _mqttHandlerService.PubComp(context, buffer as PubCompPacket);
                         break;
                     case PacketType.SUBSCRIBE:
-                        _mqttHandlerService.PubRec(context, buffer as PubRecPacket);
-                        break;
-                    case PacketType.SUBACK:
-                        _mqttHandlerService.PubRel(context, buffer as PubRelPacket);
-                        break;
-                    case PacketType.UNSUBSCRIBE:
-                        _mqttHandlerService.Publish(context, buffer as PublishPacket);
-                        break;
-                    case PacketType.UNSUBACK:
-                        _mqttHandlerService.SubAck(context, buffer as SubAckPacket);
-                        break;
-                    case PacketType.PINGREQ:
                         _mqttHandlerService.Subscribe(context, buffer as SubscribePacket);
                         break;
-                    case PacketType.PINGRESP:
+                    case PacketType.SUBACK:
+                        _mqttHandlerService.SubAck(context, buffer as SubAckPacket);
+                        break;
+                    case PacketType.UNSUBSCRIBE:
+                        _mqttHandlerService.Unsubscribe(context, buffer as UnsubscribePacket);
+                        break;
+                    case PacketType.UNSUBACK:
                         _mqttHandlerService.UnsubAck(context, buffer as UnsubAckPacket);
                         break;
+                    case PacketType.PINGREQ:
+                        _mqttHandlerService.PingReq(context, buffer as PingReqPacket);
+                        break;
+                    case PacketType.PINGRESP:
+                        _mqttHandlerService.PingResp(context, buffer as PingRespPacket);
+                        break;
                     case PacketType.DISCONNECT:
-                        _mqttHandlerService.Unsubscribe(context, buffer as UnsubscribePacket);
+                        _mqttHandlerService.Disconnect(context, buffer as DisconnectPacket);
                         break;
                 }
             }
@@ -185,7 +174,10 @@ namespace Surging.Core.Protocol.Mqtt
                 base.ChannelInactive(context);
             }
 
-            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) => this.SetException(exception);
+            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) {
+                _mqttHandlerService.Disconnect(context,   DisconnectPacket.Instance);
+                this.SetException(exception);
+            }
 
             void SetException(Exception ex)
             {

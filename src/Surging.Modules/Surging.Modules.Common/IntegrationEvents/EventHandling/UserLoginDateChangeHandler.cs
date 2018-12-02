@@ -20,7 +20,7 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
         public UserLoginDateChangeHandler()
         {
             _userService = ServiceLocator.GetService<IUserService>("User");
-        }
+         }
         public override async Task Handle(UserEvent @event)
         {
             Console.WriteLine($"消费1。");

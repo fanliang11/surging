@@ -18,10 +18,10 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
     { 
         private readonly IMessagePushService _messagePushService;
         private readonly IClientSessionService _clientSessionService;
-        private readonly ILogger _logger;
+        private readonly ILogger<MqttChannelService> _logger;
         private readonly IWillService _willService;
         public MqttChannelService(IMessagePushService messagePushService, IClientSessionService clientSessionService, 
-            ILogger logger, IWillService willService) : base(messagePushService)
+            ILogger<MqttChannelService> logger, IWillService willService) : base(messagePushService)
         {
             _messagePushService = messagePushService;
             _clientSessionService = clientSessionService;
@@ -31,7 +31,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 
         public override async Task Close(string deviceId, bool isDisconnect)
         {
-            if (string.IsNullOrEmpty(deviceId))
+            if (!string.IsNullOrEmpty(deviceId))
             {
                 MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel);
                 if (mqttChannel != null)
@@ -39,6 +39,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                     mqttChannel.SessionStatus = SessionStatus.CLOSE;
                     await mqttChannel.Close(); 
                     mqttChannel.Channel = null;
+                    //MqttChannels.AddOrUpdate(deviceId, mqttChannel,(key,value)=> mqttChannel);
                 }
                 if (!mqttChannel.CleanSession)
                 {
@@ -119,7 +120,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             int messageId = mqttPublishMessage.PacketId;
             if (channel.HasAttribute(LoginAttrKey) && mqttChannel != null)
             {
-                bool isRetain= mqttPublishMessage.RetainRequested;
+                bool isRetain = mqttPublishMessage.RetainRequested;
                 switch (mqttPublishMessage.QualityOfService)
                 {
                     case QualityOfService.AtLeastOnce:
@@ -129,20 +130,16 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                         Pubrec(mqttChannel, messageId);
                         break;
                 }
-                 if (isRetain)
+                if (isRetain)
                 {
                     SaveRetain(mqttPublishMessage.TopicName,
                            new RetainMessage
                            {
                                ByteBuf = bytes,
                                QoS = (int)mqttPublishMessage.QualityOfService
-                           }, mqttPublishMessage.QualityOfService == QualityOfService.AtMostOnce?true:false);
+                           }, mqttPublishMessage.QualityOfService == QualityOfService.AtMostOnce ? true : false);
                 }
-                if (!mqttChannel.CheckRecevice(messageId))
-                {
-                    PushMessage(mqttPublishMessage.TopicName, (int)mqttPublishMessage.QualityOfService, bytes, isRetain);
-                    mqttChannel.AddRecevice(messageId);
-                }
+                PushMessage(mqttPublishMessage.TopicName, (int)mqttPublishMessage.QualityOfService, bytes, isRetain); 
             }
         }
 
@@ -250,15 +247,18 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 
         public override void Suscribe(string deviceId, params string[] topics)
         {
-            MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel);
-            mqttChannel.SubscribeStatus = SubscribeStatus.Yes;
-            mqttChannel.AddTopic(topics);
-            if (mqttChannel.IsLogin())
+            if (!string.IsNullOrEmpty(deviceId))
             {
-                foreach (var topic in topics)
+                MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel);
+                mqttChannel.SubscribeStatus = SubscribeStatus.Yes;
+                mqttChannel.AddTopic(topics);
+                if (mqttChannel.IsLogin())
                 {
-                    this.AddChannel(topic, mqttChannel);
-                    this.SendRetain(topic, mqttChannel);
+                    foreach (var topic in topics)
+                    {
+                        this.AddChannel(topic, mqttChannel);
+                        this.SendRetain(topic, mqttChannel);
+                    }
                 }
             }
         }
@@ -277,7 +277,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         public void SendRetain(string topic, MqttChannel mqttChannel)
         {
             Retain.TryGetValue(topic, out ConcurrentQueue<RetainMessage> retainMessages);
-            if (!retainMessages.IsEmpty)
+            if (retainMessages!=null && !retainMessages.IsEmpty)
             {
                 var count = retainMessages.Count;
                 for (int i = 0; i < count; i++)
@@ -313,7 +313,6 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             return topics;
         }
 
-
         private void SendMessage(MqttChannel mqttChannel,int qos, string topic,byte [] byteBuf)
         {
             switch (qos)
@@ -342,7 +341,6 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 IsWill = mqttConnectMessage.HasWill,
                 SubscribeStatus = SubscribeStatus.No,
                 Messages = new ConcurrentDictionary<int, SendMqttMessage>(),
-                Receives = new List<int>(),
                 Topics = new List<string>()
             };
             if (Connect(deviceId, mqttChannel))
@@ -368,7 +366,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 else
                 {
                     _willService.Remove(mqttConnectMessage.ClientId);
-                    if (!mqttConnectMessage.WillRetain && mqttConnectMessage.WillQualityOfService == 0)
+                    if (!mqttConnectMessage.WillRetain && mqttConnectMessage.WillQualityOfService != 0)
                     {
                         if (_logger.IsEnabled(LogLevel.Error))
                             _logger.LogError($"WillRetain 设置为false,WillQos必须设置为AtMostOnce");

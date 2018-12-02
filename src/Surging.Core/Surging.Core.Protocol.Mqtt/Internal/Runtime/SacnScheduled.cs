@@ -11,16 +11,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
 {
     public class SacnScheduled: ScanRunnable
     {
-        private readonly long time;
 
-        public SacnScheduled(long time)
+        public SacnScheduled()
         {
-            this.time = time;
         }
 
         private bool CheckTime(long time)
         {
-            return DateTime.Now.Ticks/10000 - time >= 10 * 1000;
+            return DateTime.Now.Millisecond - time >= 10 * 1000;
         }
          
         public override void Execute(SendMqttMessage poll)
