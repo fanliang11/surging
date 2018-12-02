@@ -81,7 +81,7 @@ namespace Surging.Core.Protocol.Mqtt
                 bootstrap.Channel<TcpServerSocketChannel>();
             }
             bootstrap
-            .Option(ChannelOption.SoBacklog, 100)
+            .Option(ChannelOption.SoBacklog, 8192)
             .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
             .Group(bossGroup, workerGroup)
             .Option(ChannelOption.TcpNodelay, true)
