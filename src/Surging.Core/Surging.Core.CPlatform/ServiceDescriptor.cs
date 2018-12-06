@@ -112,6 +112,45 @@ namespace Surging.Core.CPlatform
             return descriptor.GetMetadata("AuthType", AuthorizationType.AppSecret.ToString());
         }
 
+        public static int MqttPort(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata<int>("MqttPort",97);
+        }
+
+        
+        public static ServiceDescriptor MqttPort(this ServiceDescriptor descriptor, int MqttPort)
+        {
+            descriptor.Metadatas["MqttPort"] = MqttPort;
+
+            return descriptor;
+        }
+
+        public static int HttpPort(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata<int>("HttpPort", 280);
+        }
+
+
+        public static ServiceDescriptor HttpPort(this ServiceDescriptor descriptor, int HttpPort)
+        {
+            descriptor.Metadatas["HttpPort"] = HttpPort;
+
+            return descriptor;
+        }
+
+        public static int WsPort(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata<int>("WsPort", 96);
+        }
+
+
+        public static ServiceDescriptor WsPort(this ServiceDescriptor descriptor, int WsPort)
+        {
+            descriptor.Metadatas["WsPort"] = WsPort;
+
+            return descriptor;
+        }
+
         /// <summary>
         /// 设置授权类型
         /// </summary>

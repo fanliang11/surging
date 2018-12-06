@@ -45,10 +45,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         /// <returns>服务条目集合。</returns>
         public IEnumerable<ServiceEntry> CreateServiceEntry(Type service)
         {
-            var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>() ;
+            var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>();
             foreach (var methodInfo in service.GetTypeInfo().GetMethods())
             {
-                yield return Create(methodInfo,service.Name, routeTemplate.RouteTemplate);
+                yield return Create(methodInfo, service.Name, routeTemplate.RouteTemplate);
             }
         }
         #endregion Implementation of IClrServiceEntryFactory
@@ -64,17 +64,17 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 Id = serviceId,
                 RoutePath = RoutePatternParser.Parse(routeTemplate, serviceName, method.Name)
             };
-
+            serviceDescriptor = SetPorts(serviceDescriptor);
             var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
             foreach (var descriptorAttribute in descriptorAttributes)
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
             var authorization = attributes.Where(p => p is AuthorizationFilterAttribute).FirstOrDefault();
-            if(authorization != null)
-            serviceDescriptor.EnableAuthorization(true);
             if (authorization != null)
-            { 
+                serviceDescriptor.EnableAuthorization(true);
+            if (authorization != null)
+            {
                 serviceDescriptor.AuthType(((authorization as AuthorizationAttribute)?.AuthType)
                     ?? AuthorizationType.AppSecret);
             }
@@ -82,9 +82,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
-                 RoutePath= serviceDescriptor.RoutePath,
-                 MethodName=method.Name,
-                  Type= method.DeclaringType,
+                RoutePath = serviceDescriptor.RoutePath,
+                MethodName = method.Name,
+                Type = method.DeclaringType,
                 Attributes = attributes,
                 Func = (key, parameters) =>
              {
@@ -108,6 +108,18 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                  return Task.FromResult(result);
              }
             };
+        }
+
+        private ServiceDescriptor SetPorts(ServiceDescriptor serviceDescriptor)
+        {
+            var ports = AppConfig.ServerOptions.Ports;
+            if (serviceDescriptor.WsPort() != ports.WSPort)
+                serviceDescriptor.WsPort(ports.WSPort);
+            if (serviceDescriptor.HttpPort() != ports.HttpPort)
+                serviceDescriptor.HttpPort(ports.HttpPort);
+            if (serviceDescriptor.MqttPort() != ports.MQTTPort)
+                serviceDescriptor.HttpPort(ports.MQTTPort);
+            return serviceDescriptor;
         }
 
         private FastInvokeHandler GetHandler(string key, MethodInfo method)
