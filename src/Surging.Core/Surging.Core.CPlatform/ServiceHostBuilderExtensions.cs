@@ -124,20 +124,26 @@ namespace Surging.Core.CPlatform
             {
                 if (AppConfig.ServerOptions.EnableRouteWatch)
                     new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
-                        () => RegisterRoutes(mapper, mappingIp, mappingPort, serviceToken));
+                        () => RegisterRoutes(mapper, mappingIp, mappingPort, serviceToken,
+                        Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
                 else
-                    RegisterRoutes(mapper, mappingIp, mappingPort, serviceToken);
+                    RegisterRoutes(mapper, mappingIp, mappingPort, serviceToken,0);
             }
         }
 
-        public static void RegisterRoutes(IContainer mapper, string mappingIp, int mappingPort, string serviceToken)
+        public static void RegisterRoutes(IContainer mapper, string mappingIp, int mappingPort, string serviceToken,decimal processorTime)
         {
             var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
+            var ports = AppConfig.ServerOptions.Ports;
             var addess = new IpAddressModel
             {
                 Ip = mappingIp,
+                 WanIp = AppConfig.ServerOptions.WanIp,
+                HttpPort = ports.HttpPort==0? default(int?) : ports.HttpPort,
+                MqttPort=ports.MQTTPort == 0 ? default(int?) : ports.MQTTPort,
+                WsPort=ports.WSPort == 0 ? default(int?): ports.WSPort,
                 Port = mappingPort,
-                ProcessorTime = Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero),
+                ProcessorTime =processorTime,
             };
             RpcContext.GetContext().SetAttachment("Host", addess);
             var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>

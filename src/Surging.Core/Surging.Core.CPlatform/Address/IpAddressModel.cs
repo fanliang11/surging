@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Text;
@@ -42,6 +43,18 @@ namespace Surging.Core.CPlatform.Address
         /// ¶Ë¿Ú¡£
         /// </summary>
         public int Port { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string WanIp { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? WsPort { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? MqttPort { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? HttpPort { get; set; }
 
         #endregion Property
 

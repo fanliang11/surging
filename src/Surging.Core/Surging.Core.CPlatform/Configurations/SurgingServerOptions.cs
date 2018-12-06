@@ -12,6 +12,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public int MappingPort { get; set; }
 
+        public string WanIp { get; set; }
+
         public double WatchInterval { get; set; } = 20d;
 
         public bool Libuv { get; set; } = false;

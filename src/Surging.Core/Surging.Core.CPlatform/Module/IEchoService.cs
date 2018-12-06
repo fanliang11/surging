@@ -8,6 +8,6 @@ namespace Surging.Core.CPlatform.Module
     [ServiceBundle("")]
     public interface IEchoService: IServiceKey
     {
-        Task<IpAddressEntryModel> Locate(string routePath, string key);
+        Task<IpAddressModel> Locate(string routePath, string key);
     }
 }

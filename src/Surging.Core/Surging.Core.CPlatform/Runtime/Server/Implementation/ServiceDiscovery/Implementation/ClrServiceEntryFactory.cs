@@ -64,7 +64,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 Id = serviceId,
                 RoutePath = RoutePatternParser.Parse(routeTemplate, serviceName, method.Name)
             };
-            serviceDescriptor = SetPorts(serviceDescriptor);
             var descriptorAttributes = method.GetCustomAttributes<ServiceDescriptorAttribute>();
             foreach (var descriptorAttribute in descriptorAttributes)
             {
@@ -109,19 +108,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
              }
             };
         }
-
-        private ServiceDescriptor SetPorts(ServiceDescriptor serviceDescriptor)
-        {
-            var ports = AppConfig.ServerOptions.Ports;
-            if (serviceDescriptor.WsPort() != ports.WSPort)
-                serviceDescriptor.WsPort(ports.WSPort);
-            if (serviceDescriptor.HttpPort() != ports.HttpPort)
-                serviceDescriptor.HttpPort(ports.HttpPort);
-            if (serviceDescriptor.MqttPort() != ports.MQTTPort)
-                serviceDescriptor.HttpPort(ports.MQTTPort);
-            return serviceDescriptor;
-        }
-
+        
         private FastInvokeHandler GetHandler(string key, MethodInfo method)
         {
             var objInstance = ServiceResolver.Current.GetService(null, key);
