@@ -9,6 +9,7 @@ using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.Protocol.Mqtt.Implementation;
 using Surging.Core.Protocol.Mqtt.Internal.Channel;
 using Surging.Core.Protocol.Mqtt.Internal.Runtime;
+using Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using Surging.Core.Protocol.Mqtt.Internal.Services.Implementation;
 using System;
@@ -32,6 +33,7 @@ namespace Surging.Core.Protocol.Mqtt
         {
             base.RegisterBuilder(builder);
             builder.RegisterType(typeof(DefaultMqttServiceFactory)).As(typeof(IMqttServiceFactory)).SingleInstance();
+            builder.RegisterType(typeof(DefaultMqttBrokerEntryManager)).As(typeof(IMqttBrokerEntryManger)).SingleInstance();
             builder.Register(provider =>
             {
                 return new WillService(

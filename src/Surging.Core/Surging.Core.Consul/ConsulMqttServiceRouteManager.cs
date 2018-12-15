@@ -115,6 +115,25 @@ namespace Surging.Core.Consul
             await base.SetRoutesAsync(routes);
         }
 
+        public override async Task RemoveByTopicAsync(string topic, IEnumerable<AddressModel> endpoint)
+        {
+            var routes = await GetRoutesAsync();
+            try
+            {
+                var route = routes.Where(p => p.MqttDescriptor.Topic == topic).SingleOrDefault();
+                if(route !=null)
+                { 
+                    route.MqttEndpoint = route.MqttEndpoint.Except(endpoint);
+                    await base.SetRoutesAsync(new MqttServiceRoute[] { route });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+           
+        }
+
         protected override async Task SetRoutesAsync(IEnumerable<MqttServiceDescriptor> routes)
         {
 

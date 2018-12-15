@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform;
+﻿using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using System.Linq;
 
-namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
+namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
 {
     public class DefaultMqttBehaviorProvider : IMqttBehaviorProvider
     {

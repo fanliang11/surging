@@ -141,6 +141,17 @@ namespace Surging.Core.Zookeeper
             await base.SetRoutesAsync(routes);
         }
 
+        public override async Task RemoveByTopicAsync(string topic, IEnumerable<AddressModel> endpoint)
+        {
+            var routes = await GetRoutesAsync();
+            var route = routes.Where(p => p.MqttDescriptor.Topic == topic).SingleOrDefault();
+            if (route != null)
+            {
+                route.MqttEndpoint = route.MqttEndpoint.Except(endpoint);
+                await base.SetRoutesAsync(new MqttServiceRoute[] { route });
+            }
+        }
+
         public override async Task SetRoutesAsync(IEnumerable<MqttServiceRoute> routes)
         {
             var hostAddr = RpcContext.GetContext().GetAttachment("Host") as AddressModel;

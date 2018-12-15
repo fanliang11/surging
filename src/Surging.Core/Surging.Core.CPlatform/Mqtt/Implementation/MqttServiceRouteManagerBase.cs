@@ -63,6 +63,8 @@ namespace Surging.Core.CPlatform.Mqtt.Implementation
 
         public abstract Task RemveAddressAsync(IEnumerable<AddressModel> addresses);
 
+        public abstract Task RemoveByTopicAsync(string topic, IEnumerable<AddressModel> endpoint);
+
 
         public virtual Task SetRoutesAsync(IEnumerable<MqttServiceRoute> routes)
         {

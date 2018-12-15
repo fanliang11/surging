@@ -23,7 +23,10 @@ namespace Surging.Core.CPlatform.Mqtt
         /// <param name="routes">服务路由集合。</param>
         /// <returns>一个任务。</returns>
         Task SetRoutesAsync(IEnumerable<MqttServiceRoute> routes);
-        
+
+        Task RemoveByTopicAsync(string topic, IEnumerable<AddressModel> endpoint);
+
+
         Task RemveAddressAsync(IEnumerable<AddressModel> addresses);
         /// <summary>
         /// 清空所有的服务路由。
