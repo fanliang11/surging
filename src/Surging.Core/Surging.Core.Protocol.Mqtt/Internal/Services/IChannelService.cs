@@ -21,7 +21,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         Task Close(string deviceId, bool isDisconnect);
         Task SendWillMsg(MqttWillMessage willMeaasge);
         ValueTask<string> GetDeviceId(IChannel channel);
-        ValueTask UnSubscribe(string deviceId, params string[] topics);
+        Task UnSubscribe(string deviceId, params string[] topics);
         Task Pubrel(IChannel channel, int messageId);
         Task Pubrec(MqttChannel channel, int messageId);
     }

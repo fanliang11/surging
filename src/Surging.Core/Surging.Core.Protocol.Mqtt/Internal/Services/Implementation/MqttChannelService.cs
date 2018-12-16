@@ -11,6 +11,7 @@ using DotNetty.Codecs.Mqtt.Packets;
 using Microsoft.Extensions.Logging;
 using DotNetty.Buffers;
 using System.Threading.Tasks;
+using Surging.Core.Protocol.Mqtt.Internal.Runtime;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 {
@@ -21,7 +22,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         private readonly ILogger<MqttChannelService> _logger;
         private readonly IWillService _willService;
         public MqttChannelService(IMessagePushService messagePushService, IClientSessionService clientSessionService, 
-            ILogger<MqttChannelService> logger, IWillService willService) : base(messagePushService)
+            ILogger<MqttChannelService> logger, IWillService willService, IMqttBrokerEntryManger mqttBrokerEntryManger) : base(messagePushService, mqttBrokerEntryManger)
         {
             _messagePushService = messagePushService;
             _clientSessionService = clientSessionService;
@@ -72,7 +73,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 {     
                     if (!isDisconnect)
                     {  
-                        _willService.SendWillMessage(deviceId);
+                       await _willService.SendWillMessage(deviceId);
                     }
                 }
 
@@ -257,22 +258,23 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                     foreach (var topic in topics)
                     {
                         this.AddChannel(topic, mqttChannel);
+                        await RegisterMqttBroker(topic);
                         await this.SendRetain(topic, mqttChannel);
                     }
                 }
             }
         }
 
-        public override ValueTask UnSubscribe(string deviceId, params string[] topics)
+        public override async Task UnSubscribe(string deviceId, params string[] topics)
         {
             if (MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel))
             {
                 foreach (var topic in topics)
                 {
                     RemoveChannel(topic, mqttChannel);
+                    await RegisterMqttBroker(topic);
                 }
-            }
-            return new ValueTask();
+            } 
         }
 
         public async Task SendRetain(string topic, MqttChannel mqttChannel)

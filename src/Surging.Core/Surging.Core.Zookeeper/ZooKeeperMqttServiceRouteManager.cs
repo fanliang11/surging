@@ -5,6 +5,7 @@ using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Mqtt.Implementation;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.Zookeeper.Configurations;
 using Surging.Core.Zookeeper.WatcherProvider;
 using System;
@@ -154,7 +155,7 @@ namespace Surging.Core.Zookeeper
 
         public override async Task SetRoutesAsync(IEnumerable<MqttServiceRoute> routes)
         {
-            var hostAddr = RpcContext.GetContext().GetAttachment("Host") as AddressModel;
+            var hostAddr = NetUtils.GetHostAddress();
             var serviceRoutes = await GetRoutes(routes.Select(p => p.MqttDescriptor.Topic));
             if (serviceRoutes.Count() > 0)
             {

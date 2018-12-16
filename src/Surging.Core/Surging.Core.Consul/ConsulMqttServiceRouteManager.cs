@@ -7,8 +7,10 @@ using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Mqtt.Implementation;
+using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,10 +29,11 @@ namespace Surging.Core.Consul
         private readonly ISerializer<string> _stringSerializer;
         private readonly IClientWatchManager _manager;
         private MqttServiceRoute[] _routes;
+        private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
 
         public ConsulMqttServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IMqttServiceFactory mqttServiceFactory,
-       ILogger<ConsulMqttServiceRouteManager> logger) : base(stringSerializer)
+       ILogger<ConsulMqttServiceRouteManager> logger,IServiceHeartbeatManager serviceHeartbeatManager) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
@@ -38,6 +41,7 @@ namespace Surging.Core.Consul
             _mqttServiceFactory = mqttServiceFactory;
             _logger = logger;
             _manager = manager;
+            _serviceHeartbeatManager = serviceHeartbeatManager;
             _consul = new ConsulClient(config =>
             {
                 config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
@@ -75,7 +79,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<MqttServiceRoute> routes)
         {
-            var hostAddr = RpcContext.GetContext().GetAttachment("Host") as AddressModel;
+            var hostAddr = NetUtils.GetHostAddress();
             var mqttServiceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.MqttRoutePath}{p.MqttDescriptor.Topic}"));
             foreach (var route in routes)
             {
@@ -218,9 +222,13 @@ namespace Surging.Core.Consul
 
         private async Task<MqttServiceRoute> GetRoute(string path)
         {
-            MqttServiceRoute result = null;
+            MqttServiceRoute result = null;  
             var watcher = new NodeMonitorWatcher(_consul, _manager, path,
-                 async (oldData, newData) => await NodeChange(oldData, newData));
+                async (oldData, newData) => await NodeChange(oldData, newData),tmpPath=> {
+                    var index = tmpPath.LastIndexOf("/");
+                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                }); 
+         
             var queryResult = await _consul.KV.Keys(path);
             if (queryResult.Response != null)
             {
@@ -238,21 +246,26 @@ namespace Surging.Core.Consul
         {
             if (_routes != null && _routes.Length > 0)
                 return;
-            var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.MqttRoutePath,
+            Action<string[]> action = null;
+            if (_configInfo.EnableChildrenMonitor)
+            {
+                var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.MqttRoutePath,
              async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                (result) => ConvertPaths(result).Result);
+                action = currentData => watcher.SetCurrentData(currentData);
+            }
             if (_consul.KV.Keys(_configInfo.MqttRoutePath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.MqttRoutePath);
                 var keys = await _consul.KV.Keys(_configInfo.MqttRoutePath);
                 var childrens = result;
-                watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.MqttRoutePath}{key}").ToArray());
+                action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.MqttRoutePath}{key}").ToArray());
                 _routes = await GetRoutes(keys.Response);
             }
             else
             {
                 if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
-                    _logger.LogWarning($"无法获取Mqtt路由信息，因为节点：{_configInfo.MqttRoutePath}，不存在。");
+                    _logger.LogWarning($"无法获取路由信息，因为节点：{_configInfo.MqttRoutePath}，不存在。");
                 _routes = new MqttServiceRoute[0];
             }
         }

@@ -118,7 +118,8 @@ namespace Surging.Core.Consul
               provider.GetRequiredService<ISerializer<string>>(),
               provider.GetRequiredService<IClientWatchManager>(),
               provider.GetRequiredService<IMqttServiceFactory>(),
-              provider.GetRequiredService<ILogger<ConsulMqttServiceRouteManager>>()));
+              provider.GetRequiredService<ILogger<ConsulMqttServiceRouteManager>>(),
+              provider.GetRequiredService<IServiceHeartbeatManager>()));
             return this;
         }
 

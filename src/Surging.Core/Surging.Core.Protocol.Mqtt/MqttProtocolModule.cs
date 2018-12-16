@@ -52,7 +52,8 @@ namespace Surging.Core.Protocol.Mqtt
                         provider.Resolve<IMessagePushService>(),
                         provider.Resolve<IClientSessionService>(),
                         provider.Resolve<ILogger<MqttChannelService>>(),
-                        provider.Resolve<IWillService>()
+                        provider.Resolve<IWillService>(),
+                        provider.Resolve<IMqttBrokerEntryManger>()
                     );
             }).As(typeof(IChannelService)).SingleInstance();
             builder.RegisterType(typeof(DefaultMqttBehaviorProvider)).As(typeof(IMqttBehaviorProvider)).SingleInstance();

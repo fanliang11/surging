@@ -11,6 +11,11 @@ using System.Collections;
 using System.Linq;
 using DotNetty.Codecs.Mqtt.Packets;
 using System.Threading.Tasks;
+using Surging.Core.Protocol.Mqtt.Internal.Runtime;
+using System.Net;
+using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services
 {
@@ -22,9 +27,12 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         private readonly ConcurrentDictionary<string, IEnumerable<MqttChannel>> _topics = new ConcurrentDictionary<string, IEnumerable<MqttChannel>>();
         private readonly ConcurrentDictionary<string, MqttChannel> _mqttChannels = new ConcurrentDictionary<String, MqttChannel>();
         protected readonly  ConcurrentDictionary<String, ConcurrentQueue<RetainMessage>> _retain = new ConcurrentDictionary<String, ConcurrentQueue<RetainMessage>>();
-        public AbstractChannelService(IMessagePushService messagePushService)
+        private readonly IMqttBrokerEntryManger _mqttBrokerEntryManger;
+        
+        public AbstractChannelService(IMessagePushService messagePushService, IMqttBrokerEntryManger mqttBrokerEntryManger)
         {
             _messagePushService = messagePushService;
+            _mqttBrokerEntryManger = mqttBrokerEntryManger;
         }
 
         public ConcurrentDictionary<string, MqttChannel> MqttChannels { get {
@@ -117,6 +125,20 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
             return channel;
         }
 
+        protected async Task RegisterMqttBroker(string topic)
+        {
+            var addresses = await _mqttBrokerEntryManger.GetMqttBrokerAddress(topic);
+            var host = NetUtils.GetHostAddress();
+            if (!addresses.Any(p => p.ToString() == host.ToString()))
+                await _mqttBrokerEntryManger.Register(topic, host);
+        }
+
+        protected async Task CancellationReg(string topic)
+        {
+            if (Topics.Count == 0)
+                await _mqttBrokerEntryManger.CancellationReg(topic, NetUtils.GetHostAddress());
+        }
+
         public abstract Task Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
 
         public abstract Task Publish(IChannel channel, PublishPacket mqttPublishMessage);
@@ -128,7 +150,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         public abstract Task SendWillMsg(MqttWillMessage willMeaasge);
         public abstract Task Suscribe(string deviceId, params string[] topics);
 
-        public abstract ValueTask UnSubscribe(string deviceId, params string[] topics);
+        public abstract Task UnSubscribe(string deviceId, params string[] topics);
 
         public abstract Task Publish(string deviceId, MqttWillMessage willMessage);
        
