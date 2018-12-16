@@ -18,6 +18,13 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         private readonly IServiceRouteManager _serviceRouteManager;
         private readonly int _timeout = 30000;
         private readonly Timer _timer;
+        private EventHandler<HealthCheckEventArgs> _removed;
+
+        public event EventHandler<HealthCheckEventArgs> Removed
+        {
+            add { _removed += value; }
+            remove { _removed -= value; }
+        }
 
         public DefaultHealthCheckService(IServiceRouteManager serviceRouteManager)
         {
@@ -97,6 +104,15 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             });
         }
 
+        protected void OnRemoved(params HealthCheckEventArgs[] args)
+        {
+            if (_removed == null)
+                return;
+
+            foreach (var arg in args)
+                _removed(this, arg);
+        }
+
         #endregion Implementation of IHealthCheckService
 
         #region Implementation of IDisposable
@@ -135,7 +151,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                     var ipAddress = p as IpAddressModel;
                     _dictionary.TryRemove(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out MonitorEntry value);
                 });
-
+                OnRemoved(addresses.Select(p => new HealthCheckEventArgs(p)).ToArray());
             }
         }
 

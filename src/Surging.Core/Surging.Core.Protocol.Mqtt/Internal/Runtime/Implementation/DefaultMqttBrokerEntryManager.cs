@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Mqtt;
+using Surging.Core.CPlatform.Mqtt.Implementation;
+using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
+using Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
 {
@@ -18,10 +21,13 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
             new ConcurrentDictionary<string, IEnumerable<AddressModel>>();
 
         public DefaultMqttBrokerEntryManager(IMqttServiceRouteManager mqttServiceRouteManager,
-                ILogger<DefaultMqttBrokerEntryManager> logger)
+                ILogger<DefaultMqttBrokerEntryManager> logger, IHealthCheckService healthCheckService)
         {
             _mqttServiceRouteManager = mqttServiceRouteManager;
             _logger = logger;
+            _mqttServiceRouteManager.Changed += MqttRouteManager_Removed;
+            _mqttServiceRouteManager.Removed += MqttRouteManager_Removed;
+            healthCheckService.Removed += MqttRouteManager_Removed;
         }
 
         public async Task CancellationReg(string topic, AddressModel addressModel)
@@ -32,7 +38,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
         public async ValueTask<IEnumerable<AddressModel>> GetMqttBrokerAddress(string topic)
         {
             _brokerEntries.TryGetValue(topic, out IEnumerable<AddressModel> addresses);
-            if (!addresses.Any())
+            if (addresses==null || !addresses.Any())
             {
                 var routes = await _mqttServiceRouteManager.GetRoutesAsync();
                 var route=  routes.Where(p => p.MqttDescriptor.Topic == topic).SingleOrDefault();
@@ -56,6 +62,22 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
                   }
             }
             });
+        }
+
+        private static string GetCacheKey(MqttDescriptor descriptor)
+        {
+            return descriptor.Topic;
+        }
+
+        private void MqttRouteManager_Removed(object sender, MqttServiceRouteEventArgs e)
+        {
+            var key = GetCacheKey(e.Route.MqttDescriptor);
+            _brokerEntries.TryRemove(key, out IEnumerable<AddressModel> value);
+        }
+
+        private void MqttRouteManager_Removed(object sender, HealthCheckEventArgs e)
+        {
+            _mqttServiceRouteManager.RemveAddressAsync(new AddressModel[] { e.Address });
         }
     }
 }

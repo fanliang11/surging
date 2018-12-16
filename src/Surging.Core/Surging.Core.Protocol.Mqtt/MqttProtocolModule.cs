@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -34,6 +35,7 @@ namespace Surging.Core.Protocol.Mqtt
             base.RegisterBuilder(builder);
             builder.RegisterType(typeof(DefaultMqttServiceFactory)).As(typeof(IMqttServiceFactory)).SingleInstance();
             builder.RegisterType(typeof(DefaultMqttBrokerEntryManager)).As(typeof(IMqttBrokerEntryManger)).SingleInstance();
+            builder.RegisterType(typeof(MqttRemoteInvokeService)).As(typeof(IMqttRemoteInvokeService)).SingleInstance();
             builder.Register(provider =>
             {
                 return new WillService(
@@ -53,7 +55,9 @@ namespace Surging.Core.Protocol.Mqtt
                         provider.Resolve<IClientSessionService>(),
                         provider.Resolve<ILogger<MqttChannelService>>(),
                         provider.Resolve<IWillService>(),
-                        provider.Resolve<IMqttBrokerEntryManger>()
+                        provider.Resolve<IMqttBrokerEntryManger>(),
+                         provider.Resolve<IMqttRemoteInvokeService>(),
+                         provider.Resolve<IServiceIdGenerator>()
                     );
             }).As(typeof(IChannelService)).SingleInstance();
             builder.RegisterType(typeof(DefaultMqttBehaviorProvider)).As(typeof(IMqttBehaviorProvider)).SingleInstance();
