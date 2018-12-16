@@ -40,7 +40,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             var addressEntry = _concurrent.GetOrAdd(key, k =>
             {
                 var len = context.Address.Count();
-                len = len < 10 ? len * 10 : len;
+                len = len>1 && len < 10 ? len * 10 : len;
                 return new ConsistentHash<AddressModel>(_hashAlgorithm, len);
             });
             AddressModel addressModel;
