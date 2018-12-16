@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Address;
+﻿using Newtonsoft.Json;
+using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Serialization;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,8 @@ namespace Surging.Core.CPlatform.Mqtt
         /// <summary>
         /// 地址类型。
         /// </summary>
-        public string Type { get; set; }
+        [JsonIgnore]
+        public string Type { get; set; } 
 
         /// <summary>
         /// 地址值。
