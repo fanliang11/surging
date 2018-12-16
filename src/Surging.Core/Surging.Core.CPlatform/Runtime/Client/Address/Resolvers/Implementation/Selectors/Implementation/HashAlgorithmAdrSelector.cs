@@ -37,17 +37,17 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         protected override async Task<AddressModel> SelectAsync(AddressSelectContext context)
         {
             var key = GetCacheKey(context.Descriptor);
-            var addressEntry = _concurrent.GetOrAdd(key, k => {
+            var addressEntry = _concurrent.GetOrAdd(key, k =>
+            {
                 var len = context.Address.Count();
-                len = len < 10 ? len * 3 : len;
+                len = len < 10 ? len * 10 : len;
                 return new ConsistentHash<AddressModel>(_hashAlgorithm, len);
-                
-                });
+            });
             AddressModel addressModel;
             do
             {
                 addressModel = addressEntry.GetItemNode(context.Item);
-            } while (await _healthCheckService.IsHealth(addressModel) == false) ;
+            } while (await _healthCheckService.IsHealth(addressModel) == false);
 
             return addressModel;
         }
