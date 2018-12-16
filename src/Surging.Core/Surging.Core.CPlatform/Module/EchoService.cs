@@ -20,7 +20,7 @@ namespace Surging.Core.CPlatform.Module
             _serviceRouteProvider = serviceRouteProvider;
         }
 
-        public async Task<string> Locate(string routePath,string key)
+        public async Task<IpAddressModel> Locate(string routePath,string key)
         {
             var route= await _serviceRouteProvider.SearchRoute(routePath);
             AddressModel result = new IpAddressModel();
@@ -32,8 +32,9 @@ namespace Surging.Core.CPlatform.Module
                     Descriptor = route.ServiceDescriptor,
                     HashCode = _hashAlgorithm.Hash(key)
                 });
-            }
-            return result.ToString();
+            } 
+            var ipAddress = result as IpAddressModel;
+            return ipAddress;
         }
     }
 }

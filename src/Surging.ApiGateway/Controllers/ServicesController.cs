@@ -39,6 +39,7 @@ namespace Surging.ApiGateway.Controllers
         public async Task<ServiceResult<object>> Path([FromServices]IServicePartProvider servicePartProvider, string path, [FromBody]Dictionary<string, object> model)
         {
             string serviceKey = this.Request.Query["servicekey"];
+            path = path.IndexOf("/") < 0 ? $"/{path}" : path;
             if (model == null)
             {
                 model = new Dictionary<string, object>();

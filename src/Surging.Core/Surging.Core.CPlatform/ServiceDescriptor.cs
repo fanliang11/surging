@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Filters.Implementation;
+﻿using Newtonsoft.Json;
+using Surging.Core.CPlatform.Filters.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -111,6 +112,7 @@ namespace Surging.Core.CPlatform
         {
             return descriptor.GetMetadata("AuthType", AuthorizationType.AppSecret.ToString());
         }
+        
 
         /// <summary>
         /// 设置授权类型
@@ -196,9 +198,10 @@ namespace Surging.Core.CPlatform
         /// </summary>
         public string RoutePath { get; set; }
 
+
         /// <summary>
         /// 元数据。
-        /// </summary>
+        /// </summary> 
         public IDictionary<string, object> Metadatas { get; set; }
 
         /// <summary>

@@ -33,7 +33,8 @@ namespace Surging.Core.Consul
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IClientWatchManager>(),
                 provider.GetRequiredService<IServiceRouteFactory>(),
-                provider.GetRequiredService<ILogger<ConsulServiceRouteManager>>()));
+                provider.GetRequiredService<ILogger<ConsulServiceRouteManager>>(),
+                 provider.GetRequiredService<IServiceHeartbeatManager>()));
         }
 
         public static IServiceBuilder UseConsulCacheManager(this IServiceBuilder builder, ConfigInfo configInfo)
@@ -65,7 +66,8 @@ namespace Surging.Core.Consul
                     provider.GetRequiredService <IServiceRouteManager>(),
                     provider.GetRequiredService<IClientWatchManager>(),
                     provider.GetRequiredService<IServiceEntryManager>(),
-                    provider.GetRequiredService<ILogger<ConsulServiceCommandManager>>());
+                    provider.GetRequiredService<ILogger<ConsulServiceCommandManager>>(),
+                      provider.GetRequiredService<IServiceHeartbeatManager>());
                 return result;
             });
         }

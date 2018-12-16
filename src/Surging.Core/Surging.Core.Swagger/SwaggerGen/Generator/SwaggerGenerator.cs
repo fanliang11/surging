@@ -75,13 +75,16 @@ namespace Surging.Core.SwaggerGen
         }
 
         private Dictionary<string, PathItem> CreatePathItems(
-            IEnumerable<ServiceEntry>  apiDescriptions,
+            IEnumerable<ServiceEntry> apiDescriptions,
             ISchemaRegistry schemaRegistry)
         {
+
             return apiDescriptions
-                .OrderBy(p=>p.RoutePath)
+                .OrderBy(p => p.RoutePath)
                 .GroupBy(apiDesc => apiDesc.Descriptor.RoutePath)
-                .ToDictionary(entry => "/" + entry.Key, entry => CreatePathItem(entry, schemaRegistry));
+                .ToDictionary(entry =>
+                     entry.Key.IndexOf("/") == 0 ? entry.Key : $"/{entry.Key}"
+                     , entry => CreatePathItem(entry, schemaRegistry));
         }
 
         private Dictionary<string, PathItem> CreatePathItems(

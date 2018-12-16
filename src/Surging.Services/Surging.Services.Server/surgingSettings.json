@@ -6,6 +6,7 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
+    "WanIp": "${Mapping_Port}|192.168.249.103",
     "Libuv": true,
     "MaxConcurrentRequests": 20,
     "ExecutionTimeoutInMilliseconds": 30000,
@@ -28,7 +29,8 @@
     "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
-    "ReloadOnChange": true
+    "ReloadOnChange": true,
+    "EnableChildrenMonitor": false
   },
   "Swagger": {
     "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",

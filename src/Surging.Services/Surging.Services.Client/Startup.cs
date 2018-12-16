@@ -80,6 +80,7 @@ namespace Surging.Services.Client
                 var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
                 var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
                 var v1 = userProxy.GetUserLastSignInTime(1).Result;
+                var things = userProxy.GetAllThings().Result;
                 var apiResult = userProxy.GetApiResult().GetAwaiter().GetResult();
                 userProxy.PublishThroughEventBusAsync(new UserEvent
                 {

@@ -119,29 +119,43 @@ namespace Surging.Core.CPlatform
 
         public static void ConfigureRoute(IContainer mapper,string mappingIp,int mappingPort,string serviceToken)
         {
-            var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
              AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
-                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(), () =>
+            {
+                if (AppConfig.ServerOptions.EnableRouteWatch)
+                    new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
+                        () => RegisterRoutes(mapper, mappingIp, mappingPort, serviceToken,
+                        Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
+                else
+                    RegisterRoutes(mapper, mappingIp, mappingPort, serviceToken,0);
+            }
+        }
+
+        public static void RegisterRoutes(IContainer mapper, string mappingIp, int mappingPort, string serviceToken,decimal processorTime)
+        {
+            var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
+            var ports = AppConfig.ServerOptions.Ports;
+            var addess = new IpAddressModel
+            {
+                Ip = mappingIp,
+                 WanIp = AppConfig.ServerOptions.WanIp,
+                HttpPort = ports.HttpPort==0? default(int?) : ports.HttpPort,
+                MqttPort=ports.MQTTPort == 0 ? default(int?) : ports.MQTTPort,
+                WsPort=ports.WSPort == 0 ? default(int?): ports.WSPort,
+                Port = mappingPort,
+                ProcessorTime =processorTime,
+            };
+            RpcContext.GetContext().SetAttachment("Host", addess);
+            var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
+            {
+                i.Descriptor.Token = serviceToken;
+                return new ServiceRoute
                 {
-                    var addess = new IpAddressModel
-                    {
-                        Ip = mappingIp,
-                        Port = mappingPort,
-                        ProcessorTime = Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero),
-                    };
-                    RpcContext.GetContext().SetAttachment("Host", addess);
-                    var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-                    {
-                        i.Descriptor.Token = serviceToken;
-                        return new ServiceRoute
-                        {
-                            Address = new[] { addess },
-                            ServiceDescriptor = i.Descriptor
-                        };
-                    }).ToList();
-                    mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors).Wait();
-                });
+                    Address = new[] { addess },
+                    ServiceDescriptor = i.Descriptor
+                };
+            }).ToList();
+            mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors).Wait();
         }
     }
 }
