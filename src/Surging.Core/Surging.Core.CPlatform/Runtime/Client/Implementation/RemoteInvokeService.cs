@@ -38,7 +38,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
         public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context, CancellationToken cancellationToken)
         {
             var invokeMessage = context.InvokeMessage;
-            var address = await ResolverAddress(context,context.HashCode);
+            var address = await ResolverAddress(context,context.Item);
             try
             {
                 var endPoint = address.CreateEndPoint();
@@ -62,7 +62,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
         public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context, int requestTimeout)
         {
             var invokeMessage = context.InvokeMessage;
-            var address = await ResolverAddress(context,context.HashCode);
+            var address = await ResolverAddress(context,context.Item);
             try
             {
                 var endPoint = address.CreateEndPoint();
@@ -83,7 +83,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             }
         }
 
-        private async ValueTask<AddressModel> ResolverAddress(RemoteInvokeContext context,int hashCode)
+        private async ValueTask<AddressModel> ResolverAddress(RemoteInvokeContext context,string item)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -94,7 +94,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             if (string.IsNullOrEmpty(context.InvokeMessage.ServiceId))
                 throw new ArgumentException("服务Id不能为空。", nameof(context.InvokeMessage.ServiceId));
             var invokeMessage = context.InvokeMessage; 
-            var address = await _addressResolver.Resolver(invokeMessage.ServiceId, hashCode);
+            var address = await _addressResolver.Resolver(invokeMessage.ServiceId, item);
             if (address == null)
                 throw new CPlatformException($"无法解析服务Id：{invokeMessage.ServiceId}的地址信息。");
             return address;

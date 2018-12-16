@@ -30,7 +30,7 @@ namespace Surging.Core.CPlatform.Module
                 {
                     Address = route.Address,
                     Descriptor = route.ServiceDescriptor,
-                    HashCode = _hashAlgorithm.Hash(key)
+                    Item = key,
                 });
             } 
             var ipAddress = result as IpAddressModel;

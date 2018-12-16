@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.HashAlgorithms;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
@@ -15,9 +16,16 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
    public class HashAlgorithmAdrSelector : AddressSelectorBase
     {
         private readonly IHealthCheckService _healthCheckService;
-        public HashAlgorithmAdrSelector(IHealthCheckService healthCheckService)
+        private readonly ConcurrentDictionary<string, ConsistentHash<AddressModel>> _concurrent =
+    new ConcurrentDictionary<string, ConsistentHash<AddressModel>>();
+        private readonly IHashAlgorithm _hashAlgorithm;
+        public HashAlgorithmAdrSelector(IServiceRouteManager serviceRouteManager, IHealthCheckService healthCheckService, IHashAlgorithm hashAlgorithm)
         {
             _healthCheckService = healthCheckService;
+            _hashAlgorithm = hashAlgorithm;
+            //路由发生变更时重建地址条目。
+            serviceRouteManager.Changed += ServiceRouteManager_Removed;
+            serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
         #region Overrides of AddressSelectorBase
@@ -28,16 +36,35 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// <returns>地址模型。</returns>
         protected override async Task<AddressModel> SelectAsync(AddressSelectContext context)
         {
-            var address = context.Address.ToList();
-            var index = context.HashCode%address.Count;
-            while (await _healthCheckService.IsHealth(address[index]) == false)
+            var key = GetCacheKey(context.Descriptor);
+            var addressEntry = _concurrent.GetOrAdd(key, k => {
+                var len = context.Address.Count();
+                len = len < 10 ? len * 3 : len;
+                return new ConsistentHash<AddressModel>(_hashAlgorithm, len);
+                
+                });
+            AddressModel addressModel;
+            do
             {
-                address.RemoveAt(index);
-                index = context.HashCode % address.Count;
-            }
-           
-            return address[index];
+                addressModel = addressEntry.GetItemNode(context.Item);
+            } while (await _healthCheckService.IsHealth(addressModel) == false) ;
+
+            return addressModel;
         }
         #endregion Overrides of AddressSelectorBase
+
+        #region Private Method
+        private static string GetCacheKey(ServiceDescriptor descriptor)
+        {
+            return descriptor.Id;
+        }
+
+        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
+        {
+            var key = GetCacheKey(e.Route.ServiceDescriptor); 
+            _concurrent.TryRemove(key, out ConsistentHash<AddressModel> value);
+        }
+
+        #endregion
     }
 }
