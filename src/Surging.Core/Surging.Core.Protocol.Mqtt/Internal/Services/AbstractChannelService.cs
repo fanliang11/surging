@@ -133,7 +133,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
                 await _mqttBrokerEntryManger.Register(topic, host);
         }
 
-        protected async Task CancellationReg(string topic)
+        protected async Task  BrokerCancellationReg(string topic)
         {
             if (Topics.Count == 0)
                 await _mqttBrokerEntryManger.CancellationReg(topic, NetUtils.GetHostAddress());

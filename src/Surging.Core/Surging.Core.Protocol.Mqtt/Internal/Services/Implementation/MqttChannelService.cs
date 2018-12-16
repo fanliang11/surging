@@ -272,7 +272,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 foreach (var topic in topics)
                 {
                     RemoveChannel(topic, mqttChannel);
-                    await RegisterMqttBroker(topic);
+                    await BrokerCancellationReg(topic);
                 }
             } 
         }
