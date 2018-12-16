@@ -132,10 +132,10 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 switch (mqttPublishMessage.QualityOfService)
                 {
                     case QualityOfService.AtLeastOnce:
-                       await _messagePushService.SendPubBack(channel, messageId);
+                        await _messagePushService.SendPubBack(channel, messageId);
                         break;
                     case QualityOfService.ExactlyOnce:
-                       await Pubrec(mqttChannel, messageId);
+                        await Pubrec(mqttChannel, messageId);
                         break;
                 }
                 if (isRetain)
@@ -147,35 +147,29 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                                QoS = (int)mqttPublishMessage.QualityOfService
                            }, mqttPublishMessage.QualityOfService == QualityOfService.AtMostOnce ? true : false);
                 }
-                await Task.Factory.StartNew(async () =>
+                await PushMessage(mqttPublishMessage.TopicName, (int)mqttPublishMessage.QualityOfService, bytes, isRetain);
+                await RemotePublishMessage("", new MqttWillMessage
                 {
-                    await PushMessage(mqttPublishMessage.TopicName, (int)mqttPublishMessage.QualityOfService, bytes, isRetain);
-                    await RemotePublishMessage("", new MqttWillMessage
-                    {
-                        Qos = (int)mqttPublishMessage.QualityOfService,
-                        Topic = mqttPublishMessage.TopicName,
-                        WillMessage = Encoding.Default.GetString(bytes),
-                        WillRetain = mqttPublishMessage.RetainRequested
-                    });
-                }, TaskCreationOptions.LongRunning);
+                    Qos = (int)mqttPublishMessage.QualityOfService,
+                    Topic = mqttPublishMessage.TopicName,
+                    WillMessage = Encoding.Default.GetString(bytes),
+                    WillRetain = mqttPublishMessage.RetainRequested
+                });
             }
         }
 
         public override async Task Publish(string deviceId, MqttWillMessage willMessage)
         {
-            await Task.Factory.StartNew(async () =>
-            {
-                if (!string.IsNullOrEmpty(deviceId))
+            if (!string.IsNullOrEmpty(deviceId))
             {
                 var mqttChannel = GetMqttChannel(deviceId);
                 if (mqttChannel.SessionStatus == SessionStatus.OPEN)
                 {
-                   await _messagePushService.WriteWillMsg(mqttChannel, willMessage);
+                    await _messagePushService.WriteWillMsg(mqttChannel, willMessage);
                 }
             }
             else { await SendWillMsg(willMessage); }
             await RemotePublishMessage(deviceId, willMessage);
-            }, TaskCreationOptions.LongRunning);
         }
 
         private async Task PushMessage(string topic, int qos, byte[] bytes, bool isRetain)
@@ -244,7 +238,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         public override async Task SendWillMsg(MqttWillMessage willMeaasge)
         {
             Topics.TryGetValue(willMeaasge.Topic, out IEnumerable<MqttChannel> mqttChannels);
-            if (mqttChannels.Any())
+            if (mqttChannels!=null && mqttChannels.Any())
             {
                 foreach (var mqttChannel in mqttChannels)
                 {
