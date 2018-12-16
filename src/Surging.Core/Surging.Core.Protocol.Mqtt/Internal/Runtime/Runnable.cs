@@ -8,12 +8,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
     public abstract  class Runnable 
     {
        private volatile Thread _runnableThread;
+        private readonly Timer _timer;
         public Runnable()
         {
-            var watcherThread = new Thread(s => ((Runnable)s).Run());
-            watcherThread.IsBackground = true;
-            watcherThread.Start(this);
-            _runnableThread = watcherThread;
+            var timeSpan = TimeSpan.FromSeconds(3);
+            _timer = new Timer(s =>
+           {
+               Run();
+           }, null, timeSpan, timeSpan);
         }
 
         public abstract void Run();

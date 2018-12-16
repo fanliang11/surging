@@ -21,21 +21,17 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
 
         public override void Run()
         {
-            for (; ; )
+            if (!_queue.IsEmpty)
             {
-                if (!_queue.IsEmpty)
+                List<SendMqttMessage> list = new List<SendMqttMessage>();
+                for (; (_queue.TryDequeue(out SendMqttMessage poll));)
                 {
-                    List<SendMqttMessage> list = new List<SendMqttMessage>(); 
-                    for (; ( _queue.TryDequeue(out SendMqttMessage poll));)
+                    if (poll.ConfirmStatus != ConfirmStatus.COMPLETE)
                     {
-                        if (poll.ConfirmStatus != ConfirmStatus.COMPLETE)
-                        {
-                            list.Add(poll);
-                            Execute(poll);
-                        }
-                        break;
+                        list.Add(poll);
+                        Execute(poll);
                     }
-                    Enqueue(list);
+                    break;
                 }
             }
         }
