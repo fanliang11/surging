@@ -106,7 +106,7 @@ namespace Surging.Services.Client
                     for (var i = 0; i < 10000; i++)
                     {
                         //var a = userProxy.GetDictionary().Result;
-                        var a = userProxy.GetDictionary().Result;
+                        var a = await userProxy.GetDictionary();
                         //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();
