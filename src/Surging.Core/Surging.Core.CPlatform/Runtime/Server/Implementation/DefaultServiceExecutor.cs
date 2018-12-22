@@ -115,7 +115,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         {
             try
             {
-                var cancelTokenSource = new CancellationTokenSource();
                 var result = await entry.Func(remoteInvokeMessage.ServiceKey, remoteInvokeMessage.Parameters);
                 var task = result as Task;
 
