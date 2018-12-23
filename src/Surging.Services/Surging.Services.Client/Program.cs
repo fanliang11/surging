@@ -43,6 +43,11 @@ namespace Surging.Services.Client
                         .AddCache();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
+                }) 
+                .ConfigureLogging(logger =>
+                {
+                    logger.AddConfiguration(
+                        Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
                 .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
@@ -50,7 +55,6 @@ namespace Surging.Services.Client
                 build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
                 .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
-                .UseNLog(LogLevel.Error)
                 .UseClient()
                 .UseStartup<Startup>()
                 .Build();

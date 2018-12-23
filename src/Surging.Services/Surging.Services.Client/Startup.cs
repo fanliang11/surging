@@ -79,6 +79,7 @@ namespace Surging.Services.Client
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
                 var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
                 var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
+                  userProxy.Try().GetAwaiter().GetResult();
                 var v1 = userProxy.GetUserLastSignInTime(1).Result;
                 var things = userProxy.GetAllThings().Result;
                 var apiResult = userProxy.GetApiResult().GetAwaiter().GetResult();

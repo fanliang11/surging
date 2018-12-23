@@ -58,7 +58,9 @@ namespace Surging.IModuleServices.Common
         [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = true)]
         [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<int> GetUserId(string userName);
-        
+
+        Task Try();
+
         /// <summary>
         /// 获取用户最后次sign时间
         /// </summary>
