@@ -8,6 +8,7 @@
     "Token": "true",
     "WanIp": "${Mapping_Port}|192.168.249.103",
     "Libuv": true,
+    "SoBacklog": 100,
     "MaxConcurrentRequests": 20,
     "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http¡¢Tcp¡¢None

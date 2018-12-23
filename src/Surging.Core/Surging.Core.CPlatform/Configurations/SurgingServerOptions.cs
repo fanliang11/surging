@@ -18,6 +18,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public bool Libuv { get; set; } = false;
 
+        public int SoBacklog { get; set; } = 8192;
+
         public bool EnableRouteWatch { get; set; }
 
         public IPEndPoint IpEndpoint { get; set; }
