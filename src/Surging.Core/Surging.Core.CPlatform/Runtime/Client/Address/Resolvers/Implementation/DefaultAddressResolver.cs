@@ -73,6 +73,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 if (descriptor != null)
                 {
                     _concurrent.GetOrAdd(serviceId, descriptor);
+                    _serviceHeartbeatManager.AddWhitelist(serviceId);
                 }
                 else
                 {
@@ -106,7 +107,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 _logger.LogInformation($"根据服务id：{serviceId}，找到以下可用地址：{string.Join(",", address.Select(i => i.ToString()))}。");
             var command = await _commandProvider.GetCommand(serviceId);
             var addressSelector = _addressSelectors[command.ShuntStrategy.ToString()];
-            _serviceHeartbeatManager.AddWhitelist(serviceId);
+           
             return await addressSelector.SelectAsync(new AddressSelectContext
             {
                 Descriptor = descriptor.ServiceDescriptor,

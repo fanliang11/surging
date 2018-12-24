@@ -33,5 +33,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
         Task MarkFailure(AddressModel address);
 
         event EventHandler<HealthCheckEventArgs> Removed;
+
+        event EventHandler<HealthCheckEventArgs> Changed;
     }
 }

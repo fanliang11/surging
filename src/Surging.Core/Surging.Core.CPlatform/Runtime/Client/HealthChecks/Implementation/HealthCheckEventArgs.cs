@@ -11,7 +11,15 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         {
             Address = address;
         }
-         
+
+        public HealthCheckEventArgs(AddressModel address,bool health)
+        {
+            Address = address;
+            Health = health;
+        }
+
         public AddressModel Address { get; private set; }
+
+        public bool Health { get; private set; }
     }
 }

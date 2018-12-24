@@ -45,23 +45,7 @@ namespace Surging.Core.CPlatform.HashAlgorithms
             get { return _virtualNodeReplicationFactor; }
         }
         #endregion
-
-        /// <summary>
-        /// 初始化节点服务器
-        /// </summary>
-        /// <param name="nodes">节点</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public void Initialize(IEnumerable<T> nodes)
-        {
-            foreach (var node in nodes)
-            {
-                AddNode(node);
-            }
-            _nodeKeysInRing = _ring.Keys.ToArray();
-        }
+        
 
         /// <summary>
         /// 添加节点
@@ -71,9 +55,9 @@ namespace Surging.Core.CPlatform.HashAlgorithms
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public void Add(T node)
+        public void Add(T node,string value)
         {
-            AddNode(node);
+            AddNode(node,value);
             _nodeKeysInRing = _ring.Keys.ToArray();
         }
 
@@ -85,7 +69,7 @@ namespace Surging.Core.CPlatform.HashAlgorithms
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public void Remove(T node)
+        public void Remove(string node)
         {
             RemoveNode(node);
             _nodeKeysInRing = _ring.Keys.ToArray();
@@ -115,11 +99,11 @@ namespace Surging.Core.CPlatform.HashAlgorithms
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        private void AddNode(T node)
+        private void AddNode(T node,string value)
         {
             for (var i = 0; i < _virtualNodeReplicationFactor; i++)
             {
-                var hashOfVirtualNode = _hashAlgorithm.Hash(node.GetHashCode().ToString(CultureInfo.InvariantCulture) + i);
+                var hashOfVirtualNode = _hashAlgorithm.Hash(value.ToString(CultureInfo.InvariantCulture) + i);
                 _ring[hashOfVirtualNode] = node;
             }
         }
@@ -132,11 +116,11 @@ namespace Surging.Core.CPlatform.HashAlgorithms
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        private void RemoveNode(T node)
+        private void RemoveNode(string value)
         {
             for (var i = 0; i < _virtualNodeReplicationFactor; i++)
             {
-                var hashOfVirtualNode = _hashAlgorithm.Hash(node.GetHashCode().ToString() + i);
+                var hashOfVirtualNode = _hashAlgorithm.Hash(value.ToString() + i);
                 _ring.Remove(hashOfVirtualNode);
             }
         }

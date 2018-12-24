@@ -20,10 +20,18 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         private readonly Timer _timer;
         private EventHandler<HealthCheckEventArgs> _removed;
 
+        private EventHandler<HealthCheckEventArgs> _changed;
+
         public event EventHandler<HealthCheckEventArgs> Removed
         {
             add { _removed += value; }
             remove { _removed -= value; }
+        }
+
+        public event EventHandler<HealthCheckEventArgs> Changed
+        {
+            add { _changed += value; }
+            remove { _changed -= value; }
         }
 
         public DefaultHealthCheckService(IServiceRouteManager serviceRouteManager)
@@ -82,11 +90,13 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         /// </summary>
         /// <param name="address">地址模型。</param>
         /// <returns>健康返回true，否则返回false。</returns>
-        public ValueTask<bool> IsHealth(AddressModel address)
+        public async ValueTask<bool> IsHealth(AddressModel address)
         {
             var ipAddress = address as IpAddressModel;
             MonitorEntry entry;
-            return !_dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out entry) ? new ValueTask<bool>(Check(address, _timeout)) : new ValueTask<bool>(entry.Health);
+            var isHealth= !_dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out entry) ? await  Check(address, _timeout) :entry.Health;
+            OnChanged(new HealthCheckEventArgs(address,isHealth));
+            return isHealth;
         }
 
         /// <summary>
@@ -111,6 +121,15 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
 
             foreach (var arg in args)
                 _removed(this, arg);
+        }
+
+        protected void OnChanged(params HealthCheckEventArgs[] args)
+        {
+            if (_changed == null)
+                return;
+
+            foreach (var arg in args)
+                _changed(this, arg);
         }
 
         #endregion Implementation of IHealthCheckService

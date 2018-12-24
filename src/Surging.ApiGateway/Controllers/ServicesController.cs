@@ -83,7 +83,7 @@ namespace Surging.ApiGateway.Controllers
                     }
                     else
                     {
-                        result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
+                       result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
                         result.StatusCode = (int)ServiceStatusCode.Success;
                     }
                 }
