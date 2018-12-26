@@ -12,8 +12,8 @@ namespace Surging.Services.Server
     {
         public Startup(IConfigurationBuilder config)
         {
-            ConfigureEventBus(config);
-            ConfigureCache(config);
+          ConfigureEventBus(config);
+          //  ConfigureCache(config);
         }
 
         public IContainer ConfigureServices(ContainerBuilder builder)
