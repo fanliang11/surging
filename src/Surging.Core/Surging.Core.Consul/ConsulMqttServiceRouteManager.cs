@@ -98,7 +98,7 @@ namespace Surging.Core.Consul
                     route.MqttEndpoint = addresses;
                 }
             }
-            await RemoveExceptRoutesAsync(routes, hostAddr);
+           
             await base.SetRoutesAsync(routes);
         }
 
