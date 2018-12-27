@@ -75,7 +75,7 @@ namespace Surging.Core.CPlatform.Utilities
         public static string GetHostAddress(string hostAddress)
         {
             var result = hostAddress;
-            if(!IsValidAddress(hostAddress) || IsAnyHost(hostAddress))
+            if(IsValidAddress(hostAddress) || IsAnyHost(hostAddress))
             {
                 result = GetAnyHostAddress();
             }

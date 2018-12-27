@@ -175,7 +175,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         private async Task PushMessage(string topic, int qos, byte[] bytes, bool isRetain)
         {
             Topics.TryGetValue(topic, out IEnumerable<MqttChannel> mqttChannels);
-            if (mqttChannels.Any())
+            if (mqttChannels!=null && mqttChannels.Any())
             {
                 foreach (var mqttChannel in mqttChannels)
                 {

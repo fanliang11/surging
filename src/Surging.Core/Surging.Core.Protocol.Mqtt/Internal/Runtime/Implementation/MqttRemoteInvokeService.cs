@@ -78,25 +78,28 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
                 var invokeMessage = context.InvokeMessage;
                 var host = NetUtils.GetHostAddress();
                 var addresses = await _mqttBrokerEntryManger.GetMqttBrokerAddress(mqttContext.topic);
-                addresses = addresses.Except(new AddressModel[] { host });
-                foreach (var address in addresses)
+                if (addresses != null)
                 {
-                    try
+                    addresses = addresses.Except(new AddressModel[] { host });
+                    foreach (var address in addresses)
                     {
-                        var endPoint = address.CreateEndPoint();
-                        if (_logger.IsEnabled(LogLevel.Debug))
-                            _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
-                        var client = _transportClientFactory.CreateClient(endPoint);
-                         await client.SendAsync(invokeMessage).WithCancellation(requestTimeout);
-                    }
-                    catch (CommunicationException)
-                    {
-                        await _healthCheckService.MarkFailure(address);
-                    }
-                    catch (Exception exception)
-                    {
-                        _logger.LogError(exception, $"发起mqtt请求中发生了错误，服务Id：{invokeMessage.ServiceId}。");
-                    
+                        try
+                        {
+                            var endPoint = address.CreateEndPoint();
+                            if (_logger.IsEnabled(LogLevel.Debug))
+                                _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
+                            var client = _transportClientFactory.CreateClient(endPoint);
+                            await client.SendAsync(invokeMessage).WithCancellation(requestTimeout);
+                        }
+                        catch (CommunicationException)
+                        {
+                            await _healthCheckService.MarkFailure(address);
+                        }
+                        catch (Exception exception)
+                        {
+                            _logger.LogError(exception, $"发起mqtt请求中发生了错误，服务Id：{invokeMessage.ServiceId}。");
+
+                        }
                     }
                 }
             }
