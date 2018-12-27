@@ -264,7 +264,7 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ### 捐赠基金
 如果觉得这个框架不错，可以支持surging开源，请fanly喝一杯咖啡或吃一顿午餐或者是更好的社区发展，扫描下方二维码进行捐赠，并在付款说明填写您的改进意见。
 
-![](https://thumbnail10.baidupcs.com/thumbnail/350eadce2be0e2065d3def340b6fbd11?fid=2316242028-250528-76835675552405&rt=pr&sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-ESklz8binehxyryF%2fK0QL4d%2bMqg%3d&expires=8h&chkbd=0&chkv=0&dp-logid=8176385662332767639&dp-callid=0&time=1545192000&size=c10000_u10000&quality=90&vuk=2316242028&ft=image)
+![](https://github.com/dotnetcore/surging/blob/master/%E6%8D%90%E8%B5%A0.png)
 
 IDE:Visual Studio 2017 15.5,vscode
 <br/>
