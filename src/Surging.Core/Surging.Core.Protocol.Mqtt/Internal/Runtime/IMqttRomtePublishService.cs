@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
 {
-    [ServiceBundle("Device}")]
+    [ServiceBundle("Device")]
     public interface IMqttRomtePublishService : IServiceKey
     {
         [Command(ShuntStrategy = AddressSelectorMode.HashAlgorithm)]
