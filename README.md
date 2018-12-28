@@ -266,6 +266,11 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 
 ![](https://github.com/dotnetcore/surging/blob/master/%E6%8D%90%E8%B5%A0.png)
 
+
+## 捐赠明细
+
+surging 接受来自社区的捐赠，所有款项将通过 [捐赠明细表](Statement-of-Income-and-Expense.md) 进行公示，接受社区监督。
+
 IDE:Visual Studio 2017 15.5,vscode
 <br/>
 框架：.NET core 2.1
