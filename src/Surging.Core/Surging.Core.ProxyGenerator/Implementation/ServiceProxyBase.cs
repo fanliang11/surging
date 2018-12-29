@@ -104,7 +104,10 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 }
             }
             if (message != null)
-                result = _typeConvertibleService.Convert(message.Result, typeof(T));
+            {
+                if (message.Result == null) result = message.Result;
+                else  result = _typeConvertibleService.Convert(message.Result, typeof(T));
+            }
             return (T)result;
         }
 
