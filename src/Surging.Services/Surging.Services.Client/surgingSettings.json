@@ -7,7 +7,8 @@
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
     "Protocol": "${Protocol}|Tcp", //Http¡¢Tcp¡¢None
-    "RootPath": "${RootPath}|d:\\microsurging",
+    //"RootPath": "${RootPath}|d:\\microsurging",
+    "RootPath": "${RootPath}|F:\\github\\surging\\src\\Surging.Services\\Surging.Services.Client\\bin\\Release\\PublishOutput",
     "Ports": {
       "HttpPort": "${HttpPort}|180"
     },

@@ -15,16 +15,22 @@
  <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
  <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
  <PackageTags>MicroService surging</PackageTags>
- <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>  </PropertyGroup>
+ <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+ <GeneratePackageOnBuild>true</GeneratePackageOnBuild>  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.4.1" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.3" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.ApplicationInsights.HostingStartup" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.1.1" />
   </ItemGroup>
@@ -49,6 +55,7 @@
     <ProjectReference Include="..\Surging.Core\Surging.Core.Consul\Surging.Core.Consul.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.DotNetty\Surging.Core.DotNetty.csproj" />
+    <ProjectReference Include="..\Surging.Core\Surging.Core.KestrelHttpServer\Surging.Core.KestrelHttpServer.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
     <ProjectReference Include="..\Surging.Core\Surging.Core.Zookeeper\Surging.Core.Zookeeper.csproj" />
   </ItemGroup>
