@@ -206,7 +206,7 @@ namespace Surging.Core.Caching.RedisCache
                     {
                         db = dbs[dbs.Length - 1];
                     }
-                    hash.Add(new ConsistentHashNode()
+                    var node = new ConsistentHashNode()
                     {
                         Type = targetType,
                         Host = endpoints[0],
@@ -216,7 +216,8 @@ namespace Surging.Core.Caching.RedisCache
                         MaxSize = this._maxSize,
                         MinSize = this._minSize,
                         Db = db.ToString()
-                    });
+                    };
+                    hash.Add(node,string.Format("{0}:{1}",node.Host,node.Port));
                     dicHash.GetOrAdd(targetType.ToString(), hash);
                 });
             }
