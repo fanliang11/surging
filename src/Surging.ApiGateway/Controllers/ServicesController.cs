@@ -49,7 +49,7 @@ namespace Surging.ApiGateway.Controllers
                 model[n] = this.Request.Query[n].ToString();
             }
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
-            path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
+            path = String.Compare(path,GateWayAppConfig.TokenEndpointPath,true) ==0 ? 
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
             if( await GetAllowRequest(path)==false) return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
             if (servicePartProvider.IsPart(path))
@@ -100,7 +100,7 @@ namespace Surging.ApiGateway.Controllers
         private bool OnAuthorization(string path, Dictionary<string, object> model, ref ServiceResult<object> result)
         {
             bool isSuccess = true;
-            var route = _serviceRouteProvider.GetRouteByPath(path).Result;
+            var route = _serviceRouteProvider.GetRouteByPath(path).GetAwaiter().GetResult();
             if (route.ServiceDescriptor.EnableAuthorization())
             {
                 if(route.ServiceDescriptor.AuthType()== AuthorizationType.JWT.ToString())

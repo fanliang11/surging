@@ -53,9 +53,17 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             });
             AddressModel addressModel; 
             var IsHealth = false;
+            var index = 0;
+            var count = context.Address.Count();
             do
             {
                 addressModel = addressEntry.GetItemNode(context.Item);
+                if (count <= index)
+                {
+                    addressModel = null;
+                    break;
+                }
+                index++;
                 IsHealth = await _healthCheckService.IsHealth(addressModel);
                 if(!IsHealth)
                 {

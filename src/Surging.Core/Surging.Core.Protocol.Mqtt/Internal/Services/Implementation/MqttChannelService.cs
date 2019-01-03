@@ -169,6 +169,12 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 }
             }
             else { await SendWillMsg(willMessage); }
+            if (willMessage.WillRetain)
+                SaveRetain(willMessage.Topic, new RetainMessage
+                {
+                    ByteBuf = Encoding.UTF8.GetBytes(willMessage.WillMessage),
+                    QoS = willMessage.Qos
+                }, willMessage.Qos==0?true:false);
             await RemotePublishMessage(deviceId, willMessage);
         }
 
@@ -300,7 +306,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 var count = retainMessages.Count;
                 for (int i = 0; i < count; i++)
                 {
-                    if (retainMessages.TryDequeue(out RetainMessage retainMessage))
+                    if (retainMessages.TryPeek(out RetainMessage retainMessage))
                     {
                        await SendMessage(mqttChannel, retainMessage.QoS, topic, retainMessage.ByteBuf);
                     }
@@ -311,6 +317,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         private void SaveRetain(String topic, RetainMessage retainMessage, bool isClean)
         {
             Retain.TryGetValue(topic, out ConcurrentQueue<RetainMessage> retainMessages);
+            if (retainMessages == null) retainMessages=new ConcurrentQueue<RetainMessage>();
             if (!retainMessages.IsEmpty && isClean)
             {
                 retainMessages.Clear();
