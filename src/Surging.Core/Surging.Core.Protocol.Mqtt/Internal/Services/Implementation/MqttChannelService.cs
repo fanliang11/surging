@@ -302,15 +302,13 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         {
             Retain.TryGetValue(topic, out ConcurrentQueue<RetainMessage> retainMessages);
             if (retainMessages!=null && !retainMessages.IsEmpty)
-            {
-                var count = retainMessages.Count;
-                for (int i = 0; i < count; i++)
+            { 
+                var  messages= retainMessages.GetEnumerator();
+                while (messages.MoveNext())
                 {
-                    if (retainMessages.TryPeek(out RetainMessage retainMessage))
-                    {
-                       await SendMessage(mqttChannel, retainMessage.QoS, topic, retainMessage.ByteBuf);
-                    }
-                }
+                    var retainMessage = messages.Current;
+                    await SendMessage(mqttChannel, retainMessage.QoS, topic, retainMessage.ByteBuf); 
+                };
             }
         }
 
