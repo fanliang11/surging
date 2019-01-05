@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <PackageId>Surging.WebSocketCore</PackageId>
     <Description>.NET CORE version based on websocket-sharp</Description>
     <Authors>fanly</Authors>
