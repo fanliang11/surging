@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.Protocol.WS.Configurations;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using WebSocketCore.Server;

@@ -140,7 +140,7 @@ namespace Surging.Core.Swagger
         public IList<IParameter> Parameters { get; set; }
 
         public IDictionary<string, Response> Responses { get; set; }
-
+         
         public IList<string> Schemes { get; set; }
 
         public bool? Deprecated { get; set; }

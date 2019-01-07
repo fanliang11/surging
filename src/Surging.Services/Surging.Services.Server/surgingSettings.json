@@ -2,24 +2,28 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|99",
+    "Port": "${Surging_Server_Port}|98",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
+    "WanIp": "${Mapping_Port}|192.168.249.103",
+    "Libuv": true,
+    "SoBacklog": 100,
     "MaxConcurrentRequests": 20,
-    "ExecutionTimeoutInMilliseconds": 30000,
+    "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http、Tcp、None
     //"RootPath": "${RootPath}|D:\\userapp",
     "RootPath": "${RootPath}|F:\\github\\surging\\src\\Surging.Services\\Surging.Services.Server\\bin\\Release\\PublishOutput",
     "Ports": {
       "HttpPort": "${HttpPort}|280",
-      "WSPort": "${WSPort}|96"
+      "WSPort": "${WSPort}|96",
+      "MQTTPort": "${MQTTPort}|97"
     },
     "RequestCacheEnabled": false,
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;KestrelHttpModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -27,7 +31,8 @@
     "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
-    "ReloadOnChange": true
+    "ReloadOnChange": true,
+    "EnableChildrenMonitor": false
   },
   "Swagger": {
     "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",
@@ -51,6 +56,14 @@
     "LogConnectionClose": "${LogConnectionClose}|false",
     "OffsetReset": "${OffsetReset}|earliest",
     "GroupID": "${EventBusGroupID}|surgingdemo"
+  },
+  "WebSocket":{
+    "WaitTime": 2,
+    "KeepClean": false,
+    "Behavior": {
+      "IgnoreExtensions": true,
+      "EmitOnPing": false
+    }
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",

@@ -6,6 +6,7 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
+    "Libuv": true,
     "Protocol": "${Protocol}|Tcp", //Http¡¢Tcp¡¢None
     //"RootPath": "${RootPath}|d:\\microsurging",
     "RootPath": "${RootPath}|F:\\github\\surging\\src\\Surging.Services\\Surging.Services.Client\\bin\\Release\\PublishOutput",
@@ -24,7 +25,8 @@
     "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
-    "ReloadOnChange": true
+    "ReloadOnChange": true, 
+    "EnableChildrenMonitor": false
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",

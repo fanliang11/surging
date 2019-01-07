@@ -25,16 +25,7 @@ namespace Surging.ApiGateway
         {
             var host = new WebHostBuilder()
                 .UseUrls("http://*:729")
-                .UseKestrel(options =>
-                {
-                    options.Limits.MaxRequestBodySize = null;
-                    options.Limits.MaxConcurrentConnections =100;
-                    options.Limits.MaxConcurrentUpgradedConnections = 100; 
-                    options.Limits.MinRequestBodyDataRate =
-                        new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
-                    options.Limits.MinResponseDataRate =
-                        new MinDataRate(bytesPerSecond: 100, gracePeriod: TimeSpan.FromSeconds(10));
-                })
+                .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

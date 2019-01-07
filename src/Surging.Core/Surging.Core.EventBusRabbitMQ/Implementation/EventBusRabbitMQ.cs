@@ -36,7 +36,8 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
         private readonly IDictionary<QueueConsumerMode, string> _exchanges;
 
         private IDictionary<Tuple<string,QueueConsumerMode>, IModel> _consumerChannels;
-        private string _queueName;
+
+        public event EventHandler OnShutdown;
 
         public EventBusRabbitMQ(IRabbitMQPersistentConnection persistentConnection, ILogger<EventBusRabbitMQ> logger, IEventBusSubscriptionsManager subsManager)
         {
@@ -53,7 +54,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
-
+            _persistentConnection.OnRabbitConnectionShutdown += PersistentConnection_OnEventShutDown;
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 
@@ -69,15 +70,6 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.QueueUnbind(queue: tuple.Item1,
                     exchange: BROKER_NAME,
                     routingKey: tuple.Item2);
-
-                if (_subsManager.IsEmpty)
-                {
-                    _queueName = string.Empty;
-                    foreach (var key in _consumerChannels.Keys)
-                    {
-                        _consumerChannels[key].Close();
-                    };
-                }
             }
         }
 
@@ -138,27 +130,36 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                     foreach (var modeName in _modeNames)
                     {
                         var mode = Enum.Parse<QueueConsumerMode>(modeName);
+
                         string queueName = "";
 
                         if (mode != QueueConsumerMode.Normal)
                             queueName = $"{queueConsumerAttr.QueueName}@{mode.ToString()}";
                         else
                             queueName = queueConsumerAttr.QueueName;
-                        _consumerChannels.Add(new Tuple<string,QueueConsumerMode>(queueName, mode), 
+                        var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                        if (_consumerChannels.ContainsKey(key))
+                        {
+                            _consumerChannels[key].Close();
+                            _consumerChannels.Remove(key);
+                        }
+                        _consumerChannels.Add(key,
                             CreateConsumerChannel(queueConsumerAttr, eventName, mode));
                         channel.QueueBind(queue: queueName,
                                           exchange: _exchanges[mode],
-                                          routingKey: eventName);
+                                          routingKey: eventName); 
                     }
                 }
             }
-            _subsManager.AddSubscription<T, TH>(handler, queueConsumerAttr.QueueName);
+            if (!_subsManager.HasSubscriptionsForEvent<T>())
+                _subsManager.AddSubscription<T, TH>(handler, queueConsumerAttr.QueueName);
         }
 
         public void Unsubscribe<T, TH>()
             where TH : IIntegrationEventHandler<T>
         {
-            _subsManager.RemoveSubscription<T, TH>();
+            if (_subsManager.HasSubscriptionsForEvent<T>())
+                _subsManager.RemoveSubscription<T, TH>();
         }
 
         private static Func<IIntegrationEventHandler> FindHandlerByType(Type handlerType, IEnumerable<Func<IIntegrationEventHandler>> handlers)
@@ -244,13 +245,15 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicConsume(queue: queueName,
                                   autoAck: false,
                                  consumer: consumer);
+                channel.CallbackException += (sender, ea) =>
+                {
+                    var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                    _consumerChannels[key].Dispose();
+                    _consumerChannels[key] = CreateConsumerChannel(queueName, bindConsumer);
+                };
             }
-            channel.CallbackException += (sender, ea) =>
-            {
-                var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
-                _consumerChannels[key].Dispose();
-                _consumerChannels[key] = CreateConsumerChannel(queueName, bindConsumer);
-            };
+            else
+                channel.Close();
             return channel;
         }
 
@@ -283,13 +286,17 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicConsume(queue: retryQueueName,
                                       autoAck: false,
                                      consumer: consumer);
+                channel.CallbackException += (sender, ea) =>
+              {
+                  var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                  _consumerChannels[key].Dispose();
+                  _consumerChannels[key] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
+              };
             }
-            channel.CallbackException += (sender, ea) =>
-            {
-                var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
-                _consumerChannels[key].Dispose();
-                _consumerChannels[key] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
-            };
+            else
+                channel.Close();
+
+
             return channel;
         }
 
@@ -318,13 +325,16 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 channel.BasicConsume(queue: failQueueName,
                                       autoAck: false,
                                      consumer: consumer);
+                channel.CallbackException += (sender, ea) =>
+                {
+                    var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                    _consumerChannels[key].Dispose();
+                    _consumerChannels[key] = CreateFailConsumerChannel(queueName, bindConsumer);
+                };
             }
-            channel.CallbackException += (sender, ea) =>
-            {
-                var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
-                _consumerChannels[key].Dispose();
-                _consumerChannels[key] = CreateFailConsumerChannel(queueName, bindConsumer);
-            };
+            else
+                channel.Close();
+
             return channel;
         }
 
@@ -500,6 +510,11 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 ServiceResolver.Current.Register(key, objInstance, null);
             }
             return objInstance as FastInvokeHandler;
+        }
+
+        private void PersistentConnection_OnEventShutDown(object sender, ShutdownEventArgs reason)
+        {
+            OnShutdown(this,new EventArgs());
         }
     }
 }

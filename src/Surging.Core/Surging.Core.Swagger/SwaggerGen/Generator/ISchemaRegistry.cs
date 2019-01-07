@@ -7,6 +7,8 @@ namespace Surging.Core.SwaggerGen
     {
         Schema GetOrRegister(Type type);
 
+        Schema GetOrRegister(string parmName, Type type);
+
         IDictionary<string, Schema> Definitions { get; }
     }
 }

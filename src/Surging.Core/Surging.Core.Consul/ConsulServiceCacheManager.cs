@@ -134,7 +134,7 @@ namespace Surging.Core.Consul
         {
             ServiceCache result = null;
             var watcher = new NodeMonitorWatcher(_consul, _manager, path,
-                 async (oldData, newData) => await NodeChange(oldData, newData));
+                 async (oldData, newData) => await NodeChange(oldData, newData),null);
             var queryResult = await _consul.KV.Keys(path);
             if (queryResult.Response != null)
             {

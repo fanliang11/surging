@@ -39,6 +39,7 @@ namespace Surging.ApiGateway.Controllers
         public async Task<ServiceResult<object>> Path([FromServices]IServicePartProvider servicePartProvider, string path, [FromBody]Dictionary<string, object> model)
         {
             string serviceKey = this.Request.Query["servicekey"];
+            path = path.IndexOf("/") < 0 ? $"/{path}" : path;
             if (model == null)
             {
                 model = new Dictionary<string, object>();
@@ -48,7 +49,7 @@ namespace Surging.ApiGateway.Controllers
                 model[n] = this.Request.Query[n].ToString();
             }
             ServiceResult<object> result = ServiceResult<object>.Create(false,null);
-            path = path.ToLower() == GateWayAppConfig.TokenEndpointPath.ToLower() ? 
+            path = String.Compare(path,GateWayAppConfig.TokenEndpointPath,true) ==0 ? 
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
             if( await GetAllowRequest(path)==false) return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
             if (servicePartProvider.IsPart(path))
@@ -82,7 +83,7 @@ namespace Surging.ApiGateway.Controllers
                     }
                     else
                     {
-                        result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
+                       result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
                         result.StatusCode = (int)ServiceStatusCode.Success;
                     }
                 }
@@ -99,7 +100,7 @@ namespace Surging.ApiGateway.Controllers
         private bool OnAuthorization(string path, Dictionary<string, object> model, ref ServiceResult<object> result)
         {
             bool isSuccess = true;
-            var route = _serviceRouteProvider.GetRouteByPath(path).Result;
+            var route = _serviceRouteProvider.GetRouteByPath(path).GetAwaiter().GetResult();
             if (route.ServiceDescriptor.EnableAuthorization())
             {
                 if(route.ServiceDescriptor.AuthType()== AuthorizationType.JWT.ToString())

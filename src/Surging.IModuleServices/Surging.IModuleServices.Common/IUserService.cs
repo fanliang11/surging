@@ -1,22 +1,18 @@
-﻿using Newtonsoft.Json.Linq;
-using Surging.Core.Caching;
-using Surging.Core.CPlatform;
+﻿using Surging.Core.Caching;
+using Surging.Core.Common;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Ioc;
-using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Attributes;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.KestrelHttpServer.Internal;
-using Surging.Core.ProxyGenerator.Implementation;
 using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Surging.IModuleServices.Common
@@ -62,7 +58,9 @@ namespace Surging.IModuleServices.Common
         [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = true)]
         [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<int> GetUserId(string userName);
-        
+
+        Task Try();
+
         /// <summary>
         /// 获取用户最后次sign时间
         /// </summary>
@@ -144,5 +142,18 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// <returns></returns>
         Task<bool> UploadFile(HttpFormCollection form);
 
+        /// <summary>
+        /// 测试下载文件
+        /// </summary>
+        /// <param name="fileName">文件名</param>
+        /// <param name="contentType">Content-Type</param>
+        /// <returns></returns>
+        Task<IActionResult> DownFile(string fileName, string contentType);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        Task<Dictionary<string, object>> GetAllThings();
     }
 }

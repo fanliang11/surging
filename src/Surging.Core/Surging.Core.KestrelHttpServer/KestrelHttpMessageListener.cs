@@ -1,22 +1,15 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform.Messages;
-using Surging.Core.CPlatform.Transport;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Surging.Core.KestrelHttpServer.Builder;
-using Microsoft.AspNetCore.Http;
-using Surging.Core.CPlatform.Serialization;
 using Microsoft.Extensions.DependencyInjection;
-using Surging.Core.Swagger;
+using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Serialization;
+using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.Swagger.Builder;
 using Surging.Core.Swagger.SwaggerUI;
-using Surging.Core.KestrelHttpServer.Internal;
+using System;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -72,9 +65,7 @@ namespace Surging.Core.KestrelHttpServer
             {
                 services.AddSwaggerGen(options =>
                 {
-
                     options.SwaggerDoc(AppConfig.SwaggerOptions.Version, AppConfig.SwaggerOptions);
-
                     var xmlPaths = _serviceSchemaProvider.GetSchemaFilesPath();
                     foreach (var xmlPath in xmlPaths)
                         options.IncludeXmlComments(xmlPath);

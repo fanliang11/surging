@@ -1,8 +1,6 @@
 ﻿using Surging.Core.CPlatform.Support;
-using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Surging.Core.CPlatform.Configurations
 {
@@ -14,7 +12,15 @@ namespace Surging.Core.CPlatform.Configurations
 
         public int MappingPort { get; set; }
 
+        public string WanIp { get; set; }
+
         public double WatchInterval { get; set; } = 20d;
+
+        public bool Libuv { get; set; } = false;
+
+        public int SoBacklog { get; set; } = 8192;
+
+        public bool EnableRouteWatch { get; set; }
 
         public IPEndPoint IpEndpoint { get; set; }
 

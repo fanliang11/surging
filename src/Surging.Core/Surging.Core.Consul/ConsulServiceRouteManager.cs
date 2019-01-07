@@ -15,6 +15,8 @@ using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Runtime.Client;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.Consul
 {
@@ -27,12 +29,13 @@ namespace Surging.Core.Consul
         private readonly ILogger<ConsulServiceRouteManager> _logger;
         private readonly ISerializer<string> _stringSerializer;
         private readonly IClientWatchManager _manager;
-        private ServiceRoute[] _routes;
-        private readonly bool _enableChildrenMonitor;
+        private ServiceRoute[] _routes; 
+        private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
 
         public ConsulServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceRouteFactory serviceRouteFactory,
-       ILogger<ConsulServiceRouteManager> logger) : base(stringSerializer)
+       ILogger<ConsulServiceRouteManager> logger,
+       IServiceHeartbeatManager serviceHeartbeatManager) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
@@ -40,6 +43,7 @@ namespace Surging.Core.Consul
             _serviceRouteFactory = serviceRouteFactory;
             _logger = logger;
             _manager = manager;
+            _serviceHeartbeatManager = serviceHeartbeatManager;
             _consul = new ConsulClient(config =>
             {
                 config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
@@ -77,7 +81,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
-            var hostAddr = RpcContext.GetContext().GetAttachment("Host") as AddressModel;
+            var hostAddr = NetUtils.GetHostAddress();
             var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
             foreach (var route in routes)
             {
@@ -201,9 +205,13 @@ namespace Surging.Core.Consul
 
         private async Task<ServiceRoute> GetRoute(string path)
         {
-            ServiceRoute result = null;
+            ServiceRoute result = null;  
             var watcher = new NodeMonitorWatcher(_consul, _manager, path,
-                 async (oldData, newData) => await NodeChange(oldData, newData));
+                async (oldData, newData) => await NodeChange(oldData, newData),tmpPath=> {
+                    var index = tmpPath.LastIndexOf("/");
+                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                }); 
+         
             var queryResult = await _consul.KV.Keys(path);
             if (queryResult.Response != null)
             {
@@ -221,15 +229,20 @@ namespace Surging.Core.Consul
         {
             if (_routes != null && _routes.Length > 0)
                 return;
-            var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.RoutePath,
+            Action<string[]> action = null ;
+            if (_configInfo.EnableChildrenMonitor)
+            {
+                var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.RoutePath,
              async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                (result) => ConvertPaths(result).Result);
+                action = currentData => watcher.SetCurrentData(currentData);
+            }
             if (_consul.KV.Keys(_configInfo.RoutePath).Result.Response?.Count() > 0)
             {
                 var result = await _consul.GetChildrenAsync(_configInfo.RoutePath);
                 var keys = await _consul.KV.Keys(_configInfo.RoutePath);
                 var childrens = result;
-                watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.RoutePath}{key}").ToArray());
+                action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.RoutePath}{key}").ToArray());
                 _routes = await GetRoutes(keys.Response);
             }
             else

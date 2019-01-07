@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
@@ -53,7 +54,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
             if (!message.IsInvokeMessage())
                 return;
-
+          
             RemoteInvokeMessage remoteInvokeMessage;
             try
             {
@@ -79,7 +80,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 foreach(var attachment in remoteInvokeMessage.Attachments)
                 RpcContext.GetContext().SetAttachment(attachment.Key,attachment.Value);
             }
-            
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("准备执行本地逻辑。");
@@ -115,7 +115,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         {
             try
             {
-                var cancelTokenSource = new CancellationTokenSource();
                 var result = await entry.Func(remoteInvokeMessage.ServiceKey, remoteInvokeMessage.Parameters);
                 var task = result as Task;
 

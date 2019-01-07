@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Surging.Core.CPlatform.Configurations
+﻿namespace Surging.Core.CPlatform.Configurations
 {
-   public class ProtocolPortOptions
+    public class ProtocolPortOptions
     {
-        public int MQTTPort { get; set; } = 97;
+        public int MQTTPort { get; set; }
+    
+        public int HttpPort { get; set; }
 
-        public int HttpPort { get; set; } = 80;
-
-        public int WSPort { get; set; } = 96;
+        public int WSPort { get; set; }
     }
 }

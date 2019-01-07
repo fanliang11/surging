@@ -4,6 +4,7 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
@@ -70,10 +71,10 @@ namespace Surging.Core.Protocol.Http
             var bootstrap = new ServerBootstrap();
             bootstrap
             .Group(bossGroup, workerGroup)
-             .Channel<TcpServerSocketChannel>()
-                .Option(ChannelOption.SoReuseport, true)
+            .Channel<TcpServerSocketChannel>()
+            .Option(ChannelOption.SoReuseport, true)
             .ChildOption(ChannelOption.SoReuseaddr, true)
-             .Option(ChannelOption.SoBacklog, 8192)
+            .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
             {
                 IChannelPipeline pipeline = channel.Pipeline;
@@ -91,13 +92,13 @@ namespace Surging.Core.Protocol.Http
             {
                 _channel = await bootstrap.BindAsync(endPoint);
                 if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"Http服务主机启动成功，监听地址：{endPoint}。");
+                    _logger.LogDebug($"Http服务主机启动成功，监听地址：{endPoint}。");
             }
             catch
             {
                 _logger.LogError($"Http服务主机启动失败，监听地址：{endPoint}。 ");
             }
-        
+
         }
 
         public void CloseAsync()

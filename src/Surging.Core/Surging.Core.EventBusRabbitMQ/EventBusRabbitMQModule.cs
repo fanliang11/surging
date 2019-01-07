@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.EventBus.Implementation;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.EventBusRabbitMQ
 {
@@ -20,7 +21,15 @@ namespace Surging.Core.EventBusRabbitMQ
         public override void Initialize(CPlatformContainer serviceProvider)
         {
             base.Initialize(serviceProvider);
-            serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
+            new ServiceRouteWatch(serviceProvider.GetInstances<CPlatformContainer>(), () =>
+            {
+                var subscriptionAdapt = serviceProvider.GetInstances<ISubscriptionAdapt>();
+                serviceProvider.GetInstances<IEventBus>().OnShutdown += (sender, args) =>
+                 {
+                     subscriptionAdapt.Unsubscribe();
+                 };
+                serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
+            });
         }
 
         /// <summary>

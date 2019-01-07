@@ -14,11 +14,13 @@ namespace Surging.Core.Zookeeper.Configurations
         /// <param name="subscriberPath">订阅者配置路径</param>
         /// <param name="commandPath">服务命令配置路径</param>
         /// <param name="cachePath">缓存中心配置路径</param>
+        /// <param name="mqttRoutePath">mqtt路由配置路径</param>
         /// <param name="chRoot">根节点。</param>
         public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
-            string cachePath = "/services/serviceCaches",
+            string cachePath = "/services/serviceCaches", 
+            string mqttRoutePath = "services/mqttServiceRoutes/",
             string chRoot = null,
             bool reloadOnChange = false, bool enableChildrenMonitor = false) : this(connectionString,
                 TimeSpan.FromSeconds(20),
@@ -26,6 +28,7 @@ namespace Surging.Core.Zookeeper.Configurations
                 subscriberPath, 
                 commandPath,
                 cachePath, 
+                mqttRoutePath,
                 chRoot,
                 reloadOnChange, enableChildrenMonitor)
         {
@@ -40,11 +43,13 @@ namespace Surging.Core.Zookeeper.Configurations
         /// <param name="subscriberPath">订阅者配置路径</param>
         /// <param name="sessionTimeout">会话超时时间。</param>
         /// <param name="cachePath">缓存中心配置路径</param>
+        /// <param name="mqttRoutePath">mqtt路由配置路径</param>
         /// <param name="chRoot">根节点。</param>
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
             string cachePath = "/services/serviceCaches",
+            string mqttRoutePath = "services/mqttServiceRoutes/",
             string chRoot = null,
             bool reloadOnChange = false, bool enableChildrenMonitor = false)
         {
@@ -97,5 +102,11 @@ namespace Surging.Core.Zookeeper.Configurations
         /// 缓存中心配置中心
         /// </summary>
         public string CachePath { get; set; }
+
+
+        /// <summary>
+        /// Mqtt路由配置路径。
+        /// </summary>
+        public string MqttRoutePath { get; set; }
     }
 }
