@@ -1,4 +1,5 @@
-﻿using Surging.Core.Protocol.Mqtt.Internal.Messages;
+﻿using Surging.Core.Protocol.Mqtt.Internal.Enums;
+using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
@@ -19,9 +20,15 @@ namespace Surging.Modules.Common.Domain
             return await Task.FromResult(result);
         }
 
+       public async Task<bool> IsOnline(string deviceId)
+        {
+            var status= await base.GetDeviceStatus(deviceId);
+            return status == SessionStatus.OPEN;
+        }
+
         public async Task Publish(string deviceId, WillMessage message)
         {
-              await base.Publish(deviceId, new MqttWillMessage
+            await Publish(deviceId, new MqttWillMessage
             {
                 WillMessage = message.Message,
                 Qos = message.Qos,

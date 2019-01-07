@@ -180,6 +180,16 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         public abstract Task UnSubscribe(string deviceId, params string[] topics);
 
         public abstract Task Publish(string deviceId, MqttWillMessage willMessage);
-       
+
+        public ValueTask<SessionStatus?> GetDeviceStatus(string deviceId)
+        {
+            SessionStatus? result = null;
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel);
+                result = mqttChannel?.SessionStatus;
+            }
+            return new ValueTask<SessionStatus?>(result);
+        }
     }
 }

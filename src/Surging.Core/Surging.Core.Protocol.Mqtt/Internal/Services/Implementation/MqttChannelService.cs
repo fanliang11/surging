@@ -169,6 +169,12 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 }
             }
             else { await SendWillMsg(willMessage); }
+            if (willMessage.WillRetain)
+                SaveRetain(willMessage.Topic, new RetainMessage
+                {
+                    ByteBuf = Encoding.UTF8.GetBytes(willMessage.WillMessage),
+                    QoS = willMessage.Qos
+                }, willMessage.Qos==0?true:false);
             await RemotePublishMessage(deviceId, willMessage);
         }
 
@@ -295,22 +301,21 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         public async Task SendRetain(string topic, MqttChannel mqttChannel)
         {
             Retain.TryGetValue(topic, out ConcurrentQueue<RetainMessage> retainMessages);
-            if (retainMessages!=null && !retainMessages.IsEmpty)
+            if (retainMessages != null && !retainMessages.IsEmpty)
             {
-                var count = retainMessages.Count;
-                for (int i = 0; i < count; i++)
+                var messages = retainMessages.GetEnumerator();
+                while (messages.MoveNext())
                 {
-                    if (retainMessages.TryDequeue(out RetainMessage retainMessage))
-                    {
-                       await SendMessage(mqttChannel, retainMessage.QoS, topic, retainMessage.ByteBuf);
-                    }
-                }
+                    var retainMessage = messages.Current;
+                    await SendMessage(mqttChannel, retainMessage.QoS, topic, retainMessage.ByteBuf);
+                };
             }
         }
 
         private void SaveRetain(String topic, RetainMessage retainMessage, bool isClean)
         {
             Retain.TryGetValue(topic, out ConcurrentQueue<RetainMessage> retainMessages);
+            if (retainMessages == null) retainMessages=new ConcurrentQueue<RetainMessage>();
             if (!retainMessages.IsEmpty && isClean)
             {
                 retainMessages.Clear();

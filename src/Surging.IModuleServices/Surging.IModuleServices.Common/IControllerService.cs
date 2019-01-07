@@ -16,5 +16,8 @@ namespace Surging.IModuleServices.Common
     { 
         [Command(ShuntStrategy = AddressSelectorMode.HashAlgorithm)]
         Task Publish(string deviceId, WillMessage message);
+
+        [Command(ShuntStrategy = AddressSelectorMode.HashAlgorithm)]
+        Task<bool> IsOnline(string deviceId);
     }
 }
