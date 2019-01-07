@@ -47,6 +47,7 @@ namespace Surging.Core.KestrelHttpServer
                             CPlatform.AppConfig.GetSection("Logging"));
                  })
                  .Configure(AppResolve)
+                 .UseWebRoot(CPlatform.AppConfig.ServerOptions.WebRootPath)
                  .Build();
 
                await _host.RunAsync();

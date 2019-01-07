@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Support;
+using System;
 using System.Collections.Generic;
 using System.Net;
 
@@ -28,6 +29,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public CommunicationProtocol Protocol { get; set; }
         public string RootPath { get; set; }
+
+        public string WebRootPath { get; set; } = AppContext.BaseDirectory;
 
         public int Port { get; set; }
 
