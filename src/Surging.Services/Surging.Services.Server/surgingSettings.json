@@ -1,6 +1,6 @@
 {
   "Surging": {
-    "Ip": "${Surging_Server_IP}|127.0.0.1",
+    "Ip": "${Surging_Server_IP}|192.168.249.103",
     "WatchInterval": 30,
     "Port": "${Surging_Server_Port}|98",
     "MappingIp": "${Mapping_ip}",
@@ -10,10 +10,11 @@
     "Libuv": true,
     "SoBacklog": 100,
     "MaxConcurrentRequests": 20,
+    "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http¡¢Tcp¡¢None
     "RootPath": "${RootPath}|D:\\userapp",
-    "WebRootPath": "${WebRootPath}",
+    "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
     "Ports": {
       "HttpPort": "${HttpPort}|280",
       "WSPort": "${WSPort}|96",

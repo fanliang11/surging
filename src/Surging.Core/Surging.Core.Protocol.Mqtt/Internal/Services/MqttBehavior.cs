@@ -16,9 +16,9 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
             await GetService<IChannelService>().Publish(deviceId, willMessage);
         }
         
-        public async Task<SessionStatus?> GetDeviceStatus(string deviceId)
+        public async Task<bool> GetDeviceIsOnine(string deviceId)
         {
-           return  await this.GetService<IChannelService>().GetDeviceStatus(deviceId);
+           return  await this.GetService<IChannelService>().GetDeviceIsOnine(deviceId);
         }
 
         public abstract Task<bool> Authorized(string username, string password);

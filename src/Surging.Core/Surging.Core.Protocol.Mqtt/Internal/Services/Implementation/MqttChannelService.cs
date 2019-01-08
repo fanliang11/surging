@@ -17,19 +17,19 @@ using Surging.Core.CPlatform.Ids;
 namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 {
     public class MqttChannelService : AbstractChannelService
-    { 
+    {
         private readonly IMessagePushService _messagePushService;
         private readonly IClientSessionService _clientSessionService;
         private readonly ILogger<MqttChannelService> _logger;
         private readonly IWillService _willService;
-        public MqttChannelService(IMessagePushService messagePushService, IClientSessionService clientSessionService, 
-            ILogger<MqttChannelService> logger, IWillService willService, 
+        public MqttChannelService(IMessagePushService messagePushService, IClientSessionService clientSessionService,
+            ILogger<MqttChannelService> logger, IWillService willService,
             IMqttBrokerEntryManger mqttBrokerEntryManger,
             IMqttRemoteInvokeService mqttRemoteInvokeService,
-            IServiceIdGenerator serviceIdGenerator) : 
-            base(messagePushService, 
+            IServiceIdGenerator serviceIdGenerator) :
+            base(messagePushService,
                 mqttBrokerEntryManger,
-                mqttRemoteInvokeService, 
+                mqttRemoteInvokeService,
                 serviceIdGenerator)
         {
             _messagePushService = messagePushService;
@@ -46,7 +46,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 if (mqttChannel != null)
                 {
                     mqttChannel.SessionStatus = SessionStatus.CLOSE;
-                    await mqttChannel.Close(); 
+                    await mqttChannel.Close();
                     mqttChannel.Channel = null;
                 }
                 if (!mqttChannel.CleanSession)
@@ -77,23 +77,23 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                     }
                 }
                 if (mqttChannel.IsWill)
-                {     
+                {
                     if (!isDisconnect)
-                    {  
-                       await _willService.SendWillMessage(deviceId);
+                    {
+                        await _willService.SendWillMessage(deviceId);
                     }
                 }
 
             }
         }
-        
+
         public override bool Connect(string deviceId, MqttChannel channel)
         {
             var mqttChannel = GetMqttChannel(deviceId);
             if (mqttChannel != null)
             {
-                if (mqttChannel.SessionStatus == SessionStatus.OPEN) return false;
-                else if (mqttChannel.SessionStatus == SessionStatus.CLOSE)
+                if (mqttChannel.IsOnine()) return false;
+                else if (!mqttChannel.IsOnine())
                 {
                     if (mqttChannel.SubscribeStatus == SubscribeStatus.Yes)
                     {
@@ -101,7 +101,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                         foreach (var topic in topics)
                         {
                             Topics.TryGetValue(topic, out IEnumerable<MqttChannel> comparisonValue);
-                            var newValue = comparisonValue.Concat(new [] { channel });
+                            var newValue = comparisonValue.Concat(new[] { channel });
                             Topics.AddOrUpdate(topic, newValue, (key, value) => newValue);
                         }
                     }
@@ -116,7 +116,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         {
             channel.GetAttribute(LoginAttrKey).Set("login");
             channel.GetAttribute(DeviceIdAttrKey).Set(deviceId);
-            await Init(channel,mqttConnectMessage);
+            await Init(channel, mqttConnectMessage);
         }
 
         public override async Task Publish(IChannel channel, PublishPacket mqttPublishMessage)
@@ -163,7 +163,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             if (!string.IsNullOrEmpty(deviceId))
             {
                 var mqttChannel = GetMqttChannel(deviceId);
-                if (mqttChannel.SessionStatus == SessionStatus.OPEN)
+                if (mqttChannel.IsOnine())
                 {
                     await _messagePushService.WriteWillMsg(mqttChannel, willMessage);
                 }
@@ -174,51 +174,48 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 {
                     ByteBuf = Encoding.UTF8.GetBytes(willMessage.WillMessage),
                     QoS = willMessage.Qos
-                }, willMessage.Qos==0?true:false);
+                }, willMessage.Qos == 0 ? true : false);
             await RemotePublishMessage(deviceId, willMessage);
         }
 
         private async Task PushMessage(string topic, int qos, byte[] bytes, bool isRetain)
         {
             Topics.TryGetValue(topic, out IEnumerable<MqttChannel> mqttChannels);
-            if (mqttChannels!=null && mqttChannels.Any())
+            if (mqttChannels != null && mqttChannels.Any())
             {
                 foreach (var mqttChannel in mqttChannels)
                 {
-                    switch (mqttChannel.SessionStatus)
+                    if (mqttChannel.IsOnine())
                     {
-                        case SessionStatus.OPEN:
+                        if (mqttChannel.IsActive())
+                        {
+                            await SendMessage(mqttChannel, qos,
+                                topic, bytes);
+                        }
+                        else
+                        {
+                            if (!mqttChannel.CleanSession && !isRetain)
                             {
-                                if (mqttChannel.IsActive())
-                                {
-                                   await SendMessage(mqttChannel, qos,
-                                       topic, bytes);
-                                }
-                                else
-                                {
-                                    if (!mqttChannel.CleanSession && !isRetain)
-                                    {
-                                        _clientSessionService.SaveMessage(mqttChannel.ClientId,
-                                               new SessionMessage
-                                               {
-                                                   Message = bytes,
-                                                   QoS = qos,
-                                                   Topic = topic
-                                               });
-                                        break;
-                                    }
-                                }
+                                _clientSessionService.SaveMessage(mqttChannel.ClientId,
+                                       new SessionMessage
+                                       {
+                                           Message = bytes,
+                                           QoS = qos,
+                                           Topic = topic
+                                       });
+                                break;
                             }
-                            break;
-                        case SessionStatus.CLOSE:
-                            _clientSessionService.SaveMessage(mqttChannel.ClientId,
-                                             new SessionMessage
-                                             {
-                                                 Message = bytes,
-                                                 QoS = qos,
-                                                 Topic = topic
-                                             });
-                            break;
+                        }
+                    }
+                    else
+                    {
+                        _clientSessionService.SaveMessage(mqttChannel.ClientId,
+                                         new SessionMessage
+                                         {
+                                             Message = bytes,
+                                             QoS = qos,
+                                             Topic = topic
+                                         });
                     }
                 }
             }
@@ -226,7 +223,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 
         public override async Task Pubrec(MqttChannel channel, int messageId)
         {
-           await _messagePushService.SendPubRec(channel, messageId);
+            await _messagePushService.SendPubRec(channel, messageId);
         }
 
         public override async Task Pubrel(IChannel channel, int messageId)
@@ -236,7 +233,18 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 if (mqttChannel.IsLogin())
                 {
                     mqttChannel.RemoveMqttMessage(messageId);
-                   await _messagePushService.SendToPubComp(channel, messageId);
+                    await _messagePushService.SendToPubComp(channel, messageId);
+                }
+            }
+        }
+
+        public override async ValueTask PingReq(IChannel channel)
+        {
+            if (MqttChannels.TryGetValue(await this.GetDeviceId(channel), out MqttChannel mqttChannel))
+            {
+                if (mqttChannel.IsLogin())
+                {
+                    mqttChannel.PingReqTime = DateTime.Now;
                 }
             }
         }
@@ -244,28 +252,26 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         public override async Task SendWillMsg(MqttWillMessage willMeaasge)
         {
             Topics.TryGetValue(willMeaasge.Topic, out IEnumerable<MqttChannel> mqttChannels);
-            if (mqttChannels!=null && mqttChannels.Any())
+            if (mqttChannels != null && mqttChannels.Any())
             {
                 foreach (var mqttChannel in mqttChannels)
                 {
-                    switch (mqttChannel.SessionStatus)
+                    if (!mqttChannel.IsOnine())
                     {
-                        case SessionStatus.CLOSE:
-                            _clientSessionService.SaveMessage(mqttChannel.ClientId, new SessionMessage
-                            {
-                                Message = Encoding.UTF8.GetBytes(willMeaasge.WillMessage),
-                                QoS = willMeaasge.Qos,
-                                Topic = willMeaasge.Topic
-                            });
-                            break;
-                        case SessionStatus.OPEN:
-                           await _messagePushService.WriteWillMsg(mqttChannel, willMeaasge);
-                            break;
-
+                        _clientSessionService.SaveMessage(mqttChannel.ClientId, new SessionMessage
+                        {
+                            Message = Encoding.UTF8.GetBytes(willMeaasge.WillMessage),
+                            QoS = willMeaasge.Qos,
+                            Topic = willMeaasge.Topic
+                        });
+                    }
+                    else
+                    {
+                        await _messagePushService.WriteWillMsg(mqttChannel, willMeaasge);
                     }
                 }
             }
-        }
+        } 
 
         public override async Task Suscribe(string deviceId, params string[] topics)
         {
