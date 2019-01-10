@@ -35,9 +35,9 @@ namespace Surging.Core.KestrelHttpServer
             var ipEndPoint = endPoint as IPEndPoint; 
             try
             {
-                _host = new WebHostBuilder()
+               var hostBuilder = new WebHostBuilder()
                  .UseContentRoot(Directory.GetCurrentDirectory())
-                 .UseKestrel(options=> {
+                 .UseKestrel(options => {
                      options.Listen(ipEndPoint);
 
                  })
@@ -46,9 +46,11 @@ namespace Surging.Core.KestrelHttpServer
                      logger.AddConfiguration(
                             CPlatform.AppConfig.GetSection("Logging"));
                  })
-                 .Configure(AppResolve)
-                 .UseWebRoot(CPlatform.AppConfig.ServerOptions.WebRootPath)
-                 .Build();
+                 .Configure(AppResolve);
+
+                if (Directory.Exists(CPlatform.AppConfig.ServerOptions.WebRootPath))
+                    hostBuilder = hostBuilder.UseWebRoot(CPlatform.AppConfig.ServerOptions.WebRootPath); 
+                _host= hostBuilder.Build();
 
                await _host.RunAsync();
             }
