@@ -1,5 +1,6 @@
 ﻿using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
+using Surging.Core.CPlatform;
 using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using System;
@@ -18,6 +19,9 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         public SubscribeStatus SubscribeStatus { get; set; }
         public List<string> Topics { get; set; }
         public SessionStatus SessionStatus { get; set; }
+
+        public DateTime PingReqTime { get; set; } = DateTime.Now;
+
         public bool CleanSession { get; set; }
         public ConcurrentDictionary<int, SendMqttMessage> Messages { get; set; }
     
@@ -55,6 +59,11 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         {
             if (Channel != null)
                 await Channel.CloseAsync();
+        }
+
+        public bool IsOnine()
+        {
+            return (DateTime.Now - PingReqTime).TotalSeconds <= AppConfig.ServerOptions.DisconnTimeInterval && SessionStatus== SessionStatus.OPEN;
         }
 
         public bool IsActive()

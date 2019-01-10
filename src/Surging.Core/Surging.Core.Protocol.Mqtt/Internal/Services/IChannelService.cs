@@ -17,9 +17,10 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         Task Suscribe(String deviceId, params string[] topics);
         Task Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
         Task Publish(IChannel channel, PublishPacket mqttPublishMessage);
+        ValueTask PingReq(IChannel channel);
         Task Publish(string deviceId, MqttWillMessage willMessage);
         Task Close(string deviceId, bool isDisconnect);
-        ValueTask<SessionStatus?> GetDeviceStatus(string deviceId);
+        ValueTask<bool> GetDeviceIsOnine(string deviceId);
         Task SendWillMsg(MqttWillMessage willMeaasge);
         ValueTask<string> GetDeviceId(IChannel channel);
         Task UnSubscribe(string deviceId, params string[] topics);
