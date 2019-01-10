@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
@@ -52,7 +53,8 @@ namespace Surging.Core.KestrelHttpServer
                 return new KestrelHttpMessageListener(
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
-                    provider.Resolve<IServiceSchemaProvider>()
+                    provider.Resolve<IServiceSchemaProvider>(),
+                     provider.Resolve<IServiceEngineLifetime>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -75,7 +77,8 @@ namespace Surging.Core.KestrelHttpServer
                 return new KestrelHttpMessageListener(
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
-                    provider.Resolve<IServiceSchemaProvider>()
+                    provider.Resolve<IServiceSchemaProvider>(), 
+                     provider.Resolve<IServiceEngineLifetime>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
