@@ -36,8 +36,7 @@ namespace Surging.Core.CPlatform.Utilities
         private static bool IsValidAddress(string address)
         {
             return (address != null
-                    && !ANYHOST.Equals(address)
-                    && !LOCALHOST.Equals(address)
+                    && !ANYHOST.Equals(address) 
                     && address.IsMatch(IP_PATTERN));
         }
 
@@ -75,7 +74,7 @@ namespace Surging.Core.CPlatform.Utilities
         public static string GetHostAddress(string hostAddress)
         {
             var result = hostAddress;
-            if(!IsValidAddress(hostAddress) || IsAnyHost(hostAddress))
+            if((!IsValidAddress(hostAddress) && !IsLocalHost(hostAddress)) || IsAnyHost(hostAddress))
             {
                 result = GetAnyHostAddress();
             }
