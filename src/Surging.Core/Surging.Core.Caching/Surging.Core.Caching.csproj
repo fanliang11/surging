@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>0.9.5.1</Version>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Version>1.0.0.0</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Company />
@@ -11,11 +11,9 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.9.5.1</AssemblyVersion>
-    <FileVersion>0.9.5.1</FileVersion>
-    <PackageReleaseNotes>1. add KestrelHttpServer support
-2.add Swagger  support
-3. fix bug</PackageReleaseNotes>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PackageReleaseNotes>1. fix bug</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

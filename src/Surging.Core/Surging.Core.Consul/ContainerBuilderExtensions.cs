@@ -12,6 +12,7 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using System;
 using Microsoft.Extensions.Configuration;
+using Surging.Core.CPlatform.Mqtt;
 
 namespace Surging.Core.Consul
 {
@@ -71,6 +72,19 @@ namespace Surging.Core.Consul
             });
         }
 
+        public static IServiceBuilder UseConsulMqttRouteManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseMqttRouteManager(provider =>
+             new ConsulMqttServiceRouteManager(
+                 GetConfigInfo(configInfo),
+              provider.GetRequiredService<ISerializer<byte[]>>(),
+                provider.GetRequiredService<ISerializer<string>>(),
+                provider.GetRequiredService<IClientWatchManager>(),
+                provider.GetRequiredService<IMqttServiceFactory>(),
+                provider.GetRequiredService<ILogger<ConsulMqttServiceRouteManager>>(),
+                 provider.GetRequiredService<IServiceHeartbeatManager>()));
+        }
+
         public static IServiceBuilder UseConsulServiceSubscribeManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseSubscribeManager(provider =>
@@ -106,7 +120,9 @@ namespace Surging.Core.Consul
             return builder.UseConsulRouteManager(configInfo)
                 .UseConsulServiceSubscribeManager(configInfo)
                .UseConsulCommandManager(configInfo)
-               .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
+               .UseConsulCacheManager(configInfo)
+               .UseConsulWatch(configInfo)
+               .UseConsulMqttRouteManager(configInfo);
         }
 
         [Obsolete]
@@ -116,7 +132,8 @@ namespace Surging.Core.Consul
             return builder.UseConsulRouteManager(configInfo)
                 .UseConsulServiceSubscribeManager(configInfo)
                .UseConsulCommandManager(configInfo)
-               .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo);
+               .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo)
+               .UseConsulMqttRouteManager(configInfo);
         }
 
 
@@ -139,6 +156,7 @@ namespace Surging.Core.Consul
                     option.SubscriberPath ?? config.SubscriberPath,
                     option.CommandPath  ?? config.CommandPath,
                     option.CachePath ?? config.CachePath,
+                    option.MqttRoutePath ?? config.MqttRoutePath,
                    option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
                     config.ReloadOnChange,
                     option.EnableChildrenMonitor != null ? bool.Parse(option.EnableChildrenMonitor) :

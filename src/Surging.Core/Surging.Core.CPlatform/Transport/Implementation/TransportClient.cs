@@ -122,6 +122,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
                 //删除回调任务
                 TaskCompletionSource<TransportMessage> value;
                 _resultDictionary.TryRemove(id, out value);
+                value.TrySetCanceled();
             }
         }
 

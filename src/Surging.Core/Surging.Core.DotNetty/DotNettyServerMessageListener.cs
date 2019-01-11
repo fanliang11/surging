@@ -80,7 +80,7 @@ namespace Surging.Core.DotNetty
                 bootstrap.Channel<TcpServerSocketChannel>();
             } 
             bootstrap
-            .Option(ChannelOption.SoBacklog, 100)
+            .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
             .Group(bossGroup, workerGroup)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>

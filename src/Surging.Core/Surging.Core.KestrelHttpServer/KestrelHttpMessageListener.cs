@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.Swagger.Builder;
@@ -19,15 +20,17 @@ namespace Surging.Core.KestrelHttpServer
         private IWebHost _host;
         private readonly ISerializer<string> _serializer;
         private readonly IServiceSchemaProvider _serviceSchemaProvider;
+        private readonly IServiceEngineLifetime _lifetime;
 
 
         public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger, 
             ISerializer<string> serializer,
-            IServiceSchemaProvider serviceSchemaProvider) :base(logger, serializer)
+            IServiceSchemaProvider serviceSchemaProvider, IServiceEngineLifetime lifetime) :base(logger, serializer)
         {
             _logger = logger;
             _serializer = serializer;
             _serviceSchemaProvider = serviceSchemaProvider;
+            _lifetime = lifetime;
         }
         
         public async Task StartAsync(EndPoint endPoint)
@@ -35,9 +38,9 @@ namespace Surging.Core.KestrelHttpServer
             var ipEndPoint = endPoint as IPEndPoint; 
             try
             {
-                _host = new WebHostBuilder()
+               var hostBuilder = new WebHostBuilder()
                  .UseContentRoot(Directory.GetCurrentDirectory())
-                 .UseKestrel(options=> {
+                 .UseKestrel(options => {
                      options.Listen(ipEndPoint);
 
                  })
@@ -46,10 +49,16 @@ namespace Surging.Core.KestrelHttpServer
                      logger.AddConfiguration(
                             CPlatform.AppConfig.GetSection("Logging"));
                  })
-                 .Configure(AppResolve)
-                 .Build();
+                 .Configure(AppResolve);
 
-               await _host.RunAsync();
+                if (Directory.Exists(CPlatform.AppConfig.ServerOptions.WebRootPath))
+                    hostBuilder = hostBuilder.UseWebRoot(CPlatform.AppConfig.ServerOptions.WebRootPath); 
+                _host= hostBuilder.Build();
+                _lifetime.ServiceEngineStarted.Register(async () =>
+                {
+                    await _host.RunAsync();
+                });
+              
             }
             catch
             {

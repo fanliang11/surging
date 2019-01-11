@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -59,6 +60,12 @@ namespace Surging.Core.Zookeeper
             return builder;
         }
 
+        public ContainerBuilderWrapper UseMqttRouteManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IMqttServiceRouteManager> factory)
+        {
+            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
         /// <summary>
         /// 设置共享文件路由管理者。
         /// </summary>
@@ -76,6 +83,22 @@ namespace Surging.Core.Zookeeper
              provider.GetRequiredService<ILogger<ZooKeeperServiceRouteManager>>()));
             return this;
         }
+
+        public ZookeeperModule UseZooKeeperMqttRouteManager(ContainerBuilderWrapper builder, ConfigInfo configInfo)
+        {
+            UseMqttRouteManager(builder, provider =>
+          {
+              var result = new ZooKeeperMqttServiceRouteManager(
+                   GetConfigInfo(configInfo),
+                 provider.GetRequiredService<ISerializer<byte[]>>(),
+                   provider.GetRequiredService<ISerializer<string>>(),
+                   provider.GetRequiredService<IMqttServiceFactory>(),
+                   provider.GetRequiredService<ILogger<ZooKeeperMqttServiceRouteManager>>());
+              return result;
+          });
+            return this;
+        }
+
 
         /// <summary>
         /// 设置服务命令管理者。
@@ -145,6 +168,7 @@ namespace Surging.Core.Zookeeper
                     option.SubscriberPath ?? config.SubscriberPath,
                     option.CommandPath ?? config.CommandPath,
                     option.CachePath ?? config.CachePath,
+                    option.MqttRoutePath ?? config.MqttRoutePath,
                     option.ChRoot ?? config.ChRoot,
                     option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
                     config.ReloadOnChange,

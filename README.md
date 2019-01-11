@@ -261,6 +261,15 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ```C# 
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
+### 捐赠基金
+如果觉得这个框架不错，可以支持surging开源，请fanly喝一杯咖啡或吃一顿午餐或者是更好的社区发展，扫描下方二维码进行捐赠，并在付款说明填写您的改进意见。
+
+![](https://github.com/dotnetcore/surging/blob/master/%E6%8D%90%E8%B5%A0.png)
+
+
+## 捐赠明细
+
+surging 接受来自社区的捐赠，所有款项将通过 [捐赠明细表](Statement-of-Income-and-Expense.md) 进行公示，接受社区监督。
 
 IDE:Visual Studio 2017 15.5,vscode
 <br/>

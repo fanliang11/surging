@@ -30,8 +30,8 @@ namespace Surging.Modules.Common.Domain
 
         public Task<string> GetUserName(int id)
         {
-            this.GetService<IManagerService>().SayHello("fanly");
-            return Task.FromResult($"id:{id} is name fanly.");
+            //this.GetService<IManagerService>().SayHello("fanly");
+            return Task.FromResult<string>(null);
         }
 
         public Task<bool> Exists(int id)

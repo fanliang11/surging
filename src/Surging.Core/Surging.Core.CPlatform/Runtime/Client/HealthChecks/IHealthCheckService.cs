@@ -1,4 +1,6 @@
 ﻿using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation;
+using System;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
@@ -29,5 +31,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
         /// <param name="address">地址模型。</param>
         /// <returns>一个任务。</returns>
         Task MarkFailure(AddressModel address);
+
+        event EventHandler<HealthCheckEventArgs> Removed;
+
+        event EventHandler<HealthCheckEventArgs> Changed;
     }
 }

@@ -16,6 +16,7 @@ using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.Consul
 {
@@ -80,7 +81,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
-            var hostAddr = RpcContext.GetContext().GetAttachment("Host") as AddressModel;
+            var hostAddr = NetUtils.GetHostAddress();
             var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
             foreach (var route in routes)
             {
