@@ -23,7 +23,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
             var valueType = value.GetType();
             var code = Type.GetTypeCode(valueType);
 
-            if (code != TypeCode.Object)
+            if (code != TypeCode.Object && valueType.BaseType!=typeof(Enum))
                 TypeName = valueType.FullName;
             else
                 TypeName = valueType.AssemblyQualifiedName;

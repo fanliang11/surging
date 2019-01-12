@@ -152,6 +152,11 @@ namespace Surging.Modules.Common.Domain
                 throw new FileNotFoundException(fileName);
             }
         }
+
+        public async Task<Sex> SetSex(Sex sex)
+        {
+            return await Task.FromResult(sex);
+        }
         #endregion Implementation of IUserService
     }
 }
