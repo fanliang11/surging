@@ -180,11 +180,12 @@ namespace Surging.Core.Consul
              var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CachePath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                   (result) => ConvertPaths(result).Result);
-            if (_consul.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
+
+            // if connect Consul failed, exception threw. Issue #245
+            var childrens = await _consul.GetChildrenAsync(_configInfo.CachePath);
+            if (childrens != null && _consul.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
             {
-                var result = await _consul.GetChildrenAsync(_configInfo.CachePath);
                 var keys = await _consul.KV.Keys(_configInfo.CachePath);
-                var childrens = result; 
                 watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
                 _serviceCaches = await GetCaches(keys.Response);
             }
