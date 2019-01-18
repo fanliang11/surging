@@ -62,7 +62,7 @@ namespace Surging.Core.Protocol.Mqtt
             }).As(typeof(IChannelService)).SingleInstance();
             builder.RegisterType(typeof(DefaultMqttBehaviorProvider)).As(typeof(IMqttBehaviorProvider)).SingleInstance();
 
-            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Http)
+            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Mqtt)
             {
                 RegisterDefaultProtocol(builder);
             }
