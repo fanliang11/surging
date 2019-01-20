@@ -20,7 +20,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
         private readonly IRemoteInvokeService _remoteInvokeService;
         private readonly ITypeConvertibleService _typeConvertibleService;
         private readonly IServiceProvider _serviceProvider;
-        private Type[] _serviceTypes;
+        private Type[] _serviceTypes=new Type[0];
 
         #endregion Field
 
@@ -97,7 +97,8 @@ namespace Surging.Core.ProxyGenerator.Implementation
         public void RegisterProxType(string[] namespaces,params Type[] types)
         {
             var proxyGenerater = _serviceProvider.GetService<IServiceProxyGenerater>();
-            _serviceTypes = proxyGenerater.GenerateProxys(types, namespaces).ToArray();
+            var serviceTypes = proxyGenerater.GenerateProxys(types, namespaces).ToArray();
+            _serviceTypes= _serviceTypes.Except(serviceTypes).Concat(serviceTypes).ToArray();
             proxyGenerater.Dispose();
         }
 

@@ -11,9 +11,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
     {
         #region Field
 
-        private readonly IEnumerable<ServiceEntry> _serviceEntries;
+        private  IEnumerable<ServiceEntry> _serviceEntries;
 
-        private readonly IEnumerable<ServiceEntry> _allEntries;
+        private  IEnumerable<ServiceEntry> _allEntries;
 
         #endregion Field
 
@@ -21,7 +21,16 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
         public DefaultServiceEntryManager(IEnumerable<IServiceEntryProvider> providers)
         {
-            var list = new List<ServiceEntry>();
+            UpdateEntries(providers);
+        }
+
+        #endregion Constructor
+
+        #region Implementation of IServiceEntryManager
+
+        public void UpdateEntries(IEnumerable<IServiceEntryProvider> providers)
+        {
+             var list = new List<ServiceEntry>();
             var  allEntries = new List<ServiceEntry>();
             foreach (var provider in providers)
             {
@@ -37,10 +46,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             _serviceEntries = list.ToArray();
             _allEntries = allEntries;
         }
-
-        #endregion Constructor
-
-        #region Implementation of IServiceEntryManager
 
         /// <summary>
         /// 获取服务条目集合。

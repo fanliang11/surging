@@ -100,32 +100,15 @@ namespace Surging.Core.CPlatform
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
              AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
             {
+                var routeProvider = mapper.Resolve<IServiceRouteProvider>();
                 if (AppConfig.ServerOptions.EnableRouteWatch)
                     new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
-                        () => RegisterRoutes(mapper, serviceToken,
+                        () => routeProvider.RegisterRoutes(
                         Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
                 else
-                    RegisterRoutes(mapper, serviceToken,0);
+                    routeProvider.RegisterRoutes(0);
             }
         }
-
-        public static void RegisterRoutes(IContainer mapper, string serviceToken,decimal processorTime)
-        {
-            var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
-            var ports = AppConfig.ServerOptions.Ports;
-            var addess = NetUtils.GetHostAddress();
-            addess.ProcessorTime = processorTime;
-            RpcContext.GetContext().SetAttachment("Host", addess);
-            var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-            {
-                i.Descriptor.Token = serviceToken;
-                return new ServiceRoute
-                {
-                    Address = new[] { addess },
-                    ServiceDescriptor = i.Descriptor
-                };
-            }).ToList();
-            mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors).Wait();
-        }
+         
     }
 }

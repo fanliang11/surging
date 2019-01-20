@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
+using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,14 +21,19 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         private readonly ConcurrentDictionary<string, ServiceRoute> _serviceRoute =
        new ConcurrentDictionary<string, ServiceRoute>();
 
+        private readonly IServiceEntryManager _serviceEntryManager;
         private readonly ILogger<DefaultServiceRouteProvider> _logger;
         private readonly IServiceRouteManager _serviceRouteManager;
-        public DefaultServiceRouteProvider(IServiceRouteManager serviceRouteManager, ILogger<DefaultServiceRouteProvider> logger)
+        private readonly IServiceTokenGenerator _serviceTokenGenerator;
+        public DefaultServiceRouteProvider(IServiceRouteManager serviceRouteManager, ILogger<DefaultServiceRouteProvider> logger,
+            IServiceEntryManager serviceEntryManager, IServiceTokenGenerator serviceTokenGenerator)
         {
             _serviceRouteManager = serviceRouteManager;
             serviceRouteManager.Changed += ServiceRouteManager_Removed;
             serviceRouteManager.Removed += ServiceRouteManager_Removed;
             serviceRouteManager.Created += ServiceRouteManager_Add;
+            _serviceEntryManager = serviceEntryManager;
+            _serviceTokenGenerator = serviceTokenGenerator;
             _logger = logger;
         }
 
@@ -48,6 +56,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         }
 
 
+
         public ValueTask<ServiceRoute> GetRouteByPath(string path)
         {
             _serviceRoute.TryGetValue(path.ToLower(), out ServiceRoute route);
@@ -64,6 +73,24 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         public async Task<ServiceRoute> SearchRoute(string path)
         {
             return await SearchRouteAsync(path);
+        }
+
+        public async Task RegisterRoutes(decimal processorTime)
+        { 
+            var ports = AppConfig.ServerOptions.Ports;
+            var addess = NetUtils.GetHostAddress();
+            addess.ProcessorTime = processorTime;
+            RpcContext.GetContext().SetAttachment("Host", addess);
+            var addressDescriptors = _serviceEntryManager.GetEntries().Select(i =>
+            {
+                i.Descriptor.Token = _serviceTokenGenerator.GetToken();
+                return new ServiceRoute
+                {
+                    Address = new[] { addess },
+                    ServiceDescriptor = i.Descriptor
+                };
+            }).ToList();
+           await  _serviceRouteManager.SetRoutesAsync(addressDescriptors);
         }
 
         #region 私有方法
@@ -114,6 +141,8 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                 _serviceRoute.GetOrAdd(path, route);
             return route;
         }
+
+    
         #endregion
     }
 }
