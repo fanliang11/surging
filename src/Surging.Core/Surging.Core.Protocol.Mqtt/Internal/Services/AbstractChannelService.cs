@@ -104,9 +104,8 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         {
             string deviceId = null;
             if (channel != null)
-            {
-                AttributeKey<string> deviceIdAttrKey = AttributeKey<string>.ValueOf("deviceId");
-                deviceId = channel.GetAttribute<string>(deviceIdAttrKey).Get();
+            { 
+                deviceId = channel.GetAttribute<string>(DeviceIdAttrKey).Get();
             }
             return await new ValueTask<string>(deviceId);
         }
@@ -172,6 +171,8 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
 
         public abstract Task Pubrec(MqttChannel channel, int messageId);
 
+        public abstract ValueTask PingReq(IChannel channel);
+
         public abstract Task Pubrel(IChannel channel, int messageId);
 
         public abstract Task SendWillMsg(MqttWillMessage willMeaasge);
@@ -181,15 +182,15 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
 
         public abstract Task Publish(string deviceId, MqttWillMessage willMessage);
 
-        public ValueTask<SessionStatus?> GetDeviceStatus(string deviceId)
+        public ValueTask<bool> GetDeviceIsOnine(string deviceId)
         {
-            SessionStatus? result = null;
+            bool result = false;
             if (!string.IsNullOrEmpty(deviceId))
             {
                 MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel);
-                result = mqttChannel?.SessionStatus;
+                result = mqttChannel==null?false: mqttChannel.IsOnine();
             }
-            return new ValueTask<SessionStatus?>(result);
+            return new ValueTask<bool>(result);
         }
     }
 }

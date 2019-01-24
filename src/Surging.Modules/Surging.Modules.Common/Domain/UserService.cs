@@ -28,10 +28,10 @@ namespace Surging.Modules.Common.Domain
             this._repository = repository;
         }
 
-        public Task<string> GetUserName(int id)
+        public async Task<string> GetUserName(int id)
         {
-            //this.GetService<IManagerService>().SayHello("fanly");
-            return Task.FromResult<string>(null);
+           var text= await this.GetService<IManagerService>().SayHello("fanly");
+            return await Task.FromResult<string>(text);
         }
 
         public Task<bool> Exists(int id)
@@ -151,6 +151,11 @@ namespace Surging.Modules.Common.Domain
             {
                 throw new FileNotFoundException(fileName);
             }
+        }
+
+        public async Task<Sex> SetSex(Sex sex)
+        {
+            return await Task.FromResult(sex);
         }
         #endregion Implementation of IUserService
     }

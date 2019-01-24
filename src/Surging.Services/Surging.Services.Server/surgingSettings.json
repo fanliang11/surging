@@ -10,9 +10,11 @@
     "Libuv": true,
     "SoBacklog": 100,
     "MaxConcurrentRequests": 20,
+    "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http、Tcp、None
     "RootPath": "${RootPath}|D:\\userapp",
+    "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
     "Ports": {
       "HttpPort": "${HttpPort}|280",
       "WSPort": "${WSPort}|96",
@@ -22,7 +24,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages

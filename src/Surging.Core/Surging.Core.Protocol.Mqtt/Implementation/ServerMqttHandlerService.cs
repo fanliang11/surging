@@ -48,7 +48,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
                         && await mqttBehavior.Authorized(packet.Username, packet.Password))
                 {
                     var mqttChannel = _channelService.GetMqttChannel(deviceId);
-                    if (mqttChannel == null || mqttChannel.SessionStatus == SessionStatus.CLOSE)
+                    if (mqttChannel == null || !mqttChannel.IsOnine())
                     {
                         byte[] bytes = null;
                         if (packet.WillMessage != null)
@@ -108,6 +108,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                     _logger.LogInformation("收到来自：【" + context.Channel.RemoteAddress.ToString() + "】心跳");
+                await _channelService.PingReq(context.Channel);
                 await PingResp(context, PingRespPacket.Instance);
             }
         }

@@ -1,8 +1,11 @@
-﻿using Surging.Core.Protocol.Mqtt.Internal.Enums;
+﻿using Surging.Core.CPlatform.Utilities;
+using Surging.Core.Protocol.Mqtt.Internal.Enums;
 using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
+using Surging.Core.ProxyGenerator;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
+using Surging.IModuleServices.User;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,8 +25,8 @@ namespace Surging.Modules.Common.Domain
 
        public async Task<bool> IsOnline(string deviceId)
         {
-            var status= await base.GetDeviceStatus(deviceId);
-            return status == SessionStatus.OPEN;
+            var text = await GetService<IManagerService>().SayHello("fanly");
+            return  await base.GetDeviceIsOnine(deviceId);
         }
 
         public async Task Publish(string deviceId, WillMessage message)
