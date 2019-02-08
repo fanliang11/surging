@@ -77,7 +77,7 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                var e= userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
+                var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
                 var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
                 var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
                 userProxy.Try().GetAwaiter().GetResult();

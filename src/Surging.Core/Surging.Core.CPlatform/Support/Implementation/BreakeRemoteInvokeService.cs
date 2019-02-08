@@ -42,7 +42,8 @@ namespace Surging.Core.CPlatform.Support.Implementation
             var serviceInvokeInfos = _serviceInvokeListenInfo.GetOrAdd(serviceId,
                 new ServiceInvokeListenInfo() { FirstInvokeTime=DateTime.Now,
                 FinalRemoteInvokeTime =DateTime.Now });
-            var command = await _commandProvider.GetCommand(serviceId);
+            var vt =  _commandProvider.GetCommand(serviceId);
+            var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             var intervalSeconds = (DateTime.Now - serviceInvokeInfos.FinalRemoteInvokeTime).TotalSeconds;
             bool reachConcurrentRequest() => serviceInvokeInfos.ConcurrentRequests > command.MaxConcurrentRequests;
             bool reachRequestVolumeThreshold() => intervalSeconds <= 10

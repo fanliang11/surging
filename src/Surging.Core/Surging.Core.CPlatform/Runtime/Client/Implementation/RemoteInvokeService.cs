@@ -38,7 +38,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
         public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context, CancellationToken cancellationToken)
         {
             var invokeMessage = context.InvokeMessage;
-            var address = await ResolverAddress(context,context.Item);
+            AddressModel address = null;
+            var vt = ResolverAddress(context, context.Item);
+            address = vt.IsCompletedSuccessfully? vt.Result: await vt; 
             try
             {
                 var endPoint = address.CreateEndPoint();
@@ -62,7 +64,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
         public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context, int requestTimeout)
         {
             var invokeMessage = context.InvokeMessage;
-            var address = await ResolverAddress(context,context.Item);
+            AddressModel address = null;
+            var vt = ResolverAddress(context, context.Item);
+            address = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             try
             {
                 var endPoint = address.CreateEndPoint();
@@ -71,7 +75,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
                 var client = _transportClientFactory.CreateClient(endPoint);
                 using (var cts = new CancellationTokenSource())
                 {
-                    return await client.SendAsync(invokeMessage,cts.Token).WithCancellation(cts,requestTimeout);
+                    return await client.SendAsync(invokeMessage, cts.Token).WithCancellation(cts, requestTimeout);
                 }
             }
             catch (CommunicationException)
@@ -97,7 +101,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             if (string.IsNullOrEmpty(context.InvokeMessage.ServiceId))
                 throw new ArgumentException("服务Id不能为空。", nameof(context.InvokeMessage.ServiceId));
             var invokeMessage = context.InvokeMessage; 
-            var address = await _addressResolver.Resolver(invokeMessage.ServiceId, item);
+            var vt =  _addressResolver.Resolver(invokeMessage.ServiceId, item);
+            var address = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             if (address == null)
                 throw new CPlatformException($"无法解析服务Id：{invokeMessage.ServiceId}的地址信息。");
             return address;

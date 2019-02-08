@@ -90,9 +90,11 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             foreach (var addressModel in descriptor.Address)
             {
                 _healthCheckService.Monitor(addressModel);
-                if (!await _healthCheckService.IsHealth(addressModel))
+                var task = _healthCheckService.IsHealth(addressModel);
+                if (!(task.IsCompletedSuccessfully ? task.Result : await task))
+                {
                     continue;
-
+                }
                 address.Add(addressModel);
             }
 
@@ -105,15 +107,17 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation($"根据服务id：{serviceId}，找到以下可用地址：{string.Join(",", address.Select(i => i.ToString()))}。");
-            var command = await _commandProvider.GetCommand(serviceId);
+            var vtCommand = _commandProvider.GetCommand(serviceId);
+            var command = vtCommand.IsCompletedSuccessfully ? vtCommand.Result : await vtCommand;
             var addressSelector = _addressSelectors[command.ShuntStrategy.ToString()];
-           
-            return await addressSelector.SelectAsync(new AddressSelectContext
+
+            var vt = addressSelector.SelectAsync(new AddressSelectContext
             {
                 Descriptor = descriptor.ServiceDescriptor,
                 Address = address,
                 Item = item
             });
+            return vt.IsCompletedSuccessfully ? vt.Result : await vt;
         }
 
         private static string GetCacheKey(ServiceDescriptor descriptor)

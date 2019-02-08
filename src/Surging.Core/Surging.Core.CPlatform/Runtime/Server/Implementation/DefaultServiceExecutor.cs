@@ -124,7 +124,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 }
                 else
                 {
-                    await task;
+                    if (!task.IsCompletedSuccessfully)
+                        await task;
                     var taskType = task.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)
                         resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
