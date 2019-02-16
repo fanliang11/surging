@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Utilities;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -15,6 +16,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         public DynamicItem()
         { }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DynamicItem(object value)
         {
             if (value == null)
@@ -46,6 +48,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         #endregion Property
 
         #region Public Method
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Get()
         {
             if (Content == null || TypeName == null)

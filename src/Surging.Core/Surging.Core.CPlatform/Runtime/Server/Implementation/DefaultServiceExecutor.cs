@@ -9,6 +9,7 @@ using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -144,7 +145,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 resultMessage.StatusCode = exception.HResult;
             }
         }
-        
+         
         private async Task SendRemoteInvokeResult(IMessageSender sender, string messageId, RemoteInvokeResultMessage resultMessage)
         {
             try
@@ -163,6 +164,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string GetExceptionMessage(Exception exception)
         {
             if (exception == null)

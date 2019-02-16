@@ -13,6 +13,7 @@ using Surging.Core.CPlatform.Filters;
 using Autofac;
 using System.Threading;
 using Surging.Core.CPlatform.Filters.Implementation;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
@@ -136,6 +137,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private string GetHashItem(ServiceCommand command, IDictionary<string, object> parameters)
         {
             string result = "";

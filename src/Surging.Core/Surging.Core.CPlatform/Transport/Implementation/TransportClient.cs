@@ -5,6 +5,7 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,6 +49,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
         /// </summary>
         /// <param name="message">远程调用消息模型。</param>
         /// <returns>远程调用消息的传输消息。</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message, CancellationToken cancellationToken)
         {
             try
@@ -107,6 +109,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
         /// </summary>
         /// <param name="id">消息Id。</param>
         /// <returns>远程调用结果消息模型。</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task<RemoteInvokeResultMessage> RegisterResultCallbackAsync(string id, CancellationToken cancellationToken)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
