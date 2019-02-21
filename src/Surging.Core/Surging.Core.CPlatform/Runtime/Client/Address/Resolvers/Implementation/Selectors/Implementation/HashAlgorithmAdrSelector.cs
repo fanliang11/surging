@@ -37,7 +37,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         /// <param name="context">地址选择上下文。</param>
         /// <returns>地址模型。</returns>
-        protected override async Task<AddressModel> SelectAsync(AddressSelectContext context)
+        protected override async ValueTask<AddressModel> SelectAsync(AddressSelectContext context)
         {
             var key = GetCacheKey(context.Descriptor);
             var addressEntry = _concurrent.GetOrAdd(key, k =>

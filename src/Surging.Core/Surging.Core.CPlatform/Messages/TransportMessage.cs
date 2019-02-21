@@ -12,7 +12,6 @@ namespace Surging.Core.CPlatform.Messages
         public TransportMessage()
         {
         }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransportMessage(object content)
         {
@@ -22,7 +21,7 @@ namespace Surging.Core.CPlatform.Messages
             Content = content;
             ContentType = content.GetType().FullName;
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransportMessage(object content, string fullName)
         {
             if (content == null)
@@ -94,8 +93,7 @@ namespace Surging.Core.CPlatform.Messages
         /// 创建一个调用传输消息。
         /// </summary>
         /// <param name="invokeMessage">调用实例。</param>
-        /// <returns>调用传输消息。</returns> 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        /// <returns>调用传输消息。</returns>  
         public static TransportMessage CreateInvokeMessage(RemoteInvokeMessage invokeMessage)
         {
             return new TransportMessage(invokeMessage, MessagePackTransportMessageType.remoteInvokeMessageTypeName)
@@ -109,8 +107,7 @@ namespace Surging.Core.CPlatform.Messages
         /// </summary>
         /// <param name="id">消息Id。</param>
         /// <param name="invokeResultMessage">调用结果实例。</param>
-        /// <returns>调用结果传输消息。</returns> 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        /// <returns>调用结果传输消息。</returns>  
         public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
         {
             return new TransportMessage(invokeResultMessage, MessagePackTransportMessageType.remoteInvokeResultMessageTypeName)

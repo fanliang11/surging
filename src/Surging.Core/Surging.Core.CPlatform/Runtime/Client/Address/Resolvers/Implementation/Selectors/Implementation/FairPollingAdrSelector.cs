@@ -38,7 +38,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             return descriptor.Id;
         }
 
-        protected override async Task<AddressModel> SelectAsync(AddressSelectContext context)
+        protected override async ValueTask<AddressModel> SelectAsync(AddressSelectContext context)
         {
             var key = GetCacheKey(context.Descriptor);
             //根据服务id缓存服务地址。
