@@ -21,10 +21,10 @@
     ]
   },
   "Consul": {
-    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
+    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500,127.0.0.1:9500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
-    "ReloadOnChange": true, 
+    "ReloadOnChange": true,
     "EnableChildrenMonitor": false
   },
   "EventBus": {

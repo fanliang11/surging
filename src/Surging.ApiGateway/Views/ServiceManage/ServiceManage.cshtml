@@ -1,8 +1,7 @@
 ﻿
 @{
-    ViewBag.Title = "注册中心";
-    var isPjax = (!string.IsNullOrEmpty(Context.Request.Query["XPJAX"]) && bool.Parse(Context.Request.Query["XPJAX"]))
-              && (!string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"])) ;
+    ViewBag.Title = "服务管理";
+    var isPjax = !string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"]);
     Layout = isPjax ? null : "_ServiceManageLayout.cshtml";
     ViewBag.Selected = "Index";
 }
@@ -30,7 +29,8 @@
                     <button id="btnSearch" class="btn btn-primary">搜&#12288;索</button>
                 </div>
             </div>
-            <div><table id="dataService" class="table table-striped table-bordered table-hover dataTable">
+            <div>
+                <table id="dataService" class="table table-striped table-bordered table-hover dataTable">
                     <thead>
                         <tr role="row">
                             <th style="width: 6%"></th>
@@ -40,9 +40,7 @@
                             <th class="center">操作</th>
                         </tr>
                     </thead>
-                    <tbody id="">
-               
-                    </tbody>
+                    <tbody id=""></tbody>
                 </table>
             </div>
         </div>
@@ -52,18 +50,18 @@
 {
     @section SubFootJS
         {
-<script type="text/javascript">
-    seajs.use("apps_servicemange/view/register.guide.js", function(a) {
+        <script type="text/javascript">
+    seajs.use("apps_servicemange/view/address.guide.js", function(a) {
             a.init({
             });
         });
-</script>
+        </script>
     }
 }
 else
 {
     <script type="text/javascript">
-        seajs.use("apps_servicemange/view/register.guide.js", function (a) {
+        seajs.use("apps_servicemange/view/address.guide.js", function (a) {
             a.init({
             });
         });

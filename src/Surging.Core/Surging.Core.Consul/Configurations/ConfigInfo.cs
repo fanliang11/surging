@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Address;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Surging.Core.Consul.Configurations
 {
@@ -52,13 +53,23 @@ namespace Surging.Core.Consul.Configurations
             EnableChildrenMonitor = enableChildrenMonitor;
             if (!string.IsNullOrEmpty(connectionString))
             {
-                var address = connectionString.Split(":");
-                if (address.Length > 1)
+                var addresses = connectionString.Split(",");
+                if (addresses.Length > 1)
                 {
-                    int port;
-                    int.TryParse(address[1], out port);
-                    Host = address[0];
-                    Port = port;
+                    Addresses = addresses.Select(p => ConvertAddressModel(p));
+                }
+                else
+                {
+                    var address = ConvertAddressModel(connectionString);
+                    if (address !=null)
+                    { 
+                        var ipAddress=address as IpAddressModel;
+                        Host = ipAddress.Ip;
+                        Port = ipAddress.Port;
+                    }
+                    Addresses = new IpAddressModel[] {
+                        new IpAddressModel(Host,Port)
+                    };
                 }
             }
         }
@@ -104,6 +115,8 @@ namespace Surging.Core.Consul.Configurations
         /// </summary>
         public string MqttRoutePath { get; set; }
 
+        public IEnumerable<AddressModel> Addresses { get; set; }
+
         /// <summary>
         /// 缓存中心配置中心
         /// </summary>
@@ -117,6 +130,18 @@ namespace Surging.Core.Consul.Configurations
         /// 会话超时时间。
         /// </summary>
         public TimeSpan SessionTimeout { get; set; }
+
+        public AddressModel ConvertAddressModel(string connection)
+        {
+            var address = connection.Split(":");
+            if (address.Length > 1)
+            {
+                int port;
+                int.TryParse(address[1], out port);
+                return new IpAddressModel(address[0], port);
+            }
+            return null;
+        }
 
     }
 }

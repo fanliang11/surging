@@ -24,10 +24,4 @@
     <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Internal\Cluster\HealthChecks\" />
-    <Folder Include="Internal\Cluster\Implementation\Selectors\Implementation\" />
-    <Folder Include="Internal\Implementation\" />
-  </ItemGroup>
-
 </Project>
