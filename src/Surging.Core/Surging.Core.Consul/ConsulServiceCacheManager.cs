@@ -60,7 +60,6 @@ namespace Surging.Core.Consul
 
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
         }
 
         public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)

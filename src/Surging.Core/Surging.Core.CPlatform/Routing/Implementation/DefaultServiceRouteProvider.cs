@@ -117,7 +117,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         private async Task<ServiceRoute> SearchRouteAsync(string path)
         {
             var routes = await _serviceRouteManager.GetRoutesAsync();
-            var route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath.ToLower()== path.ToLower());
+            var route = routes.FirstOrDefault(i => String.Compare(i.ServiceDescriptor.RoutePath, path, true) == 0);
             if (route == null)
             {
                 if (_logger.IsEnabled(LogLevel.Warning))
@@ -131,7 +131,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         private async Task<ServiceRoute> GetRouteByPathAsync(string path)
         {
             var routes = await _serviceRouteManager.GetRoutesAsync();
-            var  route = routes.FirstOrDefault(i => i.ServiceDescriptor.RoutePath==path);
+            var  route = routes.FirstOrDefault(i => String.Compare(i.ServiceDescriptor.RoutePath, path,true) ==0);
             if (route == null)
             {
                 if (_logger.IsEnabled(LogLevel.Warning))

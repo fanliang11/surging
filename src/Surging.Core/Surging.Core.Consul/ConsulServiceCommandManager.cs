@@ -69,7 +69,6 @@ namespace Surging.Core.Consul
 
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>
