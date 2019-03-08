@@ -64,6 +64,11 @@ namespace Surging.Core.CPlatform
             return _container.Resolve(type) as T;
         }
 
+        public object GetInstancePerLifetimeScope(string name, Type type)
+        {
+           return string.IsNullOrEmpty(name) ? GetInstances(type) : _container.ResolveKeyed(name, type);
+        }
+
         public object GetInstances(string name,Type type)  
         {
             // var appConfig = AppConfig.DefaultInstance;

@@ -15,6 +15,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public string WanIp { get; set; }
 
+        public bool IsModuleSingleInstance { get; set; }
+
         public double WatchInterval { get; set; } = 20d;
 
         public int DisconnTimeInterval { get; set; } = 60;

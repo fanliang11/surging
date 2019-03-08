@@ -15,6 +15,7 @@
     "Protocol": "${Protocol}|None", //Http、Tcp、None
     "RootPath": "${RootPath}|D:\\userapp",
     "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
+    "IsModuleSingleInstance": false,
     "ReloadOnChange": false,
     "Ports": {
       "HttpPort": "${HttpPort}|280",
