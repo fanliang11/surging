@@ -88,7 +88,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 Func = (key, parameters) =>
              {
                  object instance = null;
-                 if (AppConfig.ServerOptions.IsModuleSingleInstance)
+                 if (AppConfig.ServerOptions.IsModulePerLifetimeScope)
                      instance = _serviceProvider.GetInstancePerLifetimeScope(key, method.DeclaringType);
                  else
                      instance = _serviceProvider.GetInstances(key, method.DeclaringType);
