@@ -19,15 +19,15 @@ namespace Surging.Core.Zookeeper.Configurations
         public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
-            string cachePath = "/services/serviceCaches", 
-            string mqttRoutePath = "services/mqttServiceRoutes/",
+            string cachePath = "/services/serviceCaches",
+            string mqttRoutePath = "/services/mqttServiceRoutes",
             string chRoot = null,
             bool reloadOnChange = false, bool enableChildrenMonitor = false) : this(connectionString,
                 TimeSpan.FromSeconds(20),
                 routePath,
-                subscriberPath, 
+                subscriberPath,
                 commandPath,
-                cachePath, 
+                cachePath,
                 mqttRoutePath,
                 chRoot,
                 reloadOnChange, enableChildrenMonitor)
@@ -49,7 +49,7 @@ namespace Surging.Core.Zookeeper.Configurations
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
             string cachePath = "/services/serviceCaches",
-            string mqttRoutePath = "services/mqttServiceRoutes/",
+            string mqttRoutePath = "/services/mqttServiceRoutes",
             string chRoot = null,
             bool reloadOnChange = false, bool enableChildrenMonitor = false)
         {
@@ -61,6 +61,7 @@ namespace Surging.Core.Zookeeper.Configurations
             ConnectionString = connectionString;
             RoutePath = routePath;
             SessionTimeout = sessionTimeout;
+            MqttRoutePath = mqttRoutePath;
             EnableChildrenMonitor = enableChildrenMonitor;
         }
 

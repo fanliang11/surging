@@ -32,6 +32,7 @@ namespace Surging.Core.Zookeeper
             var configInfo = new ConfigInfo(null);
             UseZooKeeperRouteManager(builder, configInfo)
               .UseZooKeeperCacheManager(builder, configInfo)
+                .UseZooKeeperMqttRouteManager(builder, configInfo)
                 .UseZooKeeperServiceSubscribeManager(builder, configInfo)
                 .UseZooKeeperCommandManager(builder, configInfo);
         }
