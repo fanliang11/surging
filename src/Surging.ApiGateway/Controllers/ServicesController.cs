@@ -129,15 +129,18 @@ namespace Surging.ApiGateway.Controllers
                 }
                 else
                 {
-                    var keyValue = model.FirstOrDefault();
                     var payload = _authorizationServerProvider.GetPayloadString(author);
                     RpcContext.GetContext().SetAttachment("payload", payload);
-                    if (!(keyValue.Value is IConvertible) || !typeof(IConvertible).GetTypeInfo().IsAssignableFrom(keyValue.Value.GetType()))
+                    if (model.Count>0)
                     {
-                        dynamic instance = keyValue.Value;
-                        instance.Payload = payload; 
-                        model.Remove(keyValue.Key);
-                        model.Add(keyValue.Key, instance);
+                        var keyValue = model.FirstOrDefault();
+                        if (!(keyValue.Value is IConvertible) || !typeof(IConvertible).GetTypeInfo().IsAssignableFrom(keyValue.Value.GetType()))
+                        {
+                            dynamic instance = keyValue.Value;
+                            instance.Payload = payload;
+                            model.Remove(keyValue.Key);
+                            model.Add(keyValue.Key, instance);
+                        }
                     }
                 }
             }
