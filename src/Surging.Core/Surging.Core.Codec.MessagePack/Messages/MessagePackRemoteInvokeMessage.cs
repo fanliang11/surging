@@ -3,6 +3,7 @@ using Surging.Core.CPlatform.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -64,6 +65,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         [Key(5)]
         public ParameterItem[] Attachments { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RemoteInvokeMessage GetRemoteInvokeMessage()
         {
             return new RemoteInvokeMessage

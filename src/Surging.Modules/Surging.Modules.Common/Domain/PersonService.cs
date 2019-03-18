@@ -146,6 +146,11 @@ namespace Surging.Modules.Common.Domain
 
         }
 
+        public async Task<Sex> SetSex(Sex sex)
+        {
+            return await Task.FromResult(sex);
+        }
+
         public async Task<Dictionary<string, object>> GetAllThings()
         {
             return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });

@@ -87,7 +87,11 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 Attributes = attributes,
                 Func = (key, parameters) =>
              {
-                 var instance = _serviceProvider.GetInstances(key, method.DeclaringType);
+                 object instance = null;
+                 if (AppConfig.ServerOptions.IsModulePerLifetimeScope)
+                     instance = _serviceProvider.GetInstancePerLifetimeScope(key, method.DeclaringType);
+                 else
+                     instance = _serviceProvider.GetInstances(key, method.DeclaringType);
                  var list = new List<object>();
 
                  foreach (var parameterInfo in method.GetParameters())

@@ -24,6 +24,20 @@ namespace Surging.ApiGateway.Controllers
             return View();
         }
 
+        public IActionResult ServiceManage()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> GetRegisterAddress([FromServices]IServiceRegisterProvider serviceRegisterProvide, string queryParam)
+        {
+            var list = await serviceRegisterProvide.GetAddressAsync(queryParam);
+            var result = ServiceResult<IEnumerable<ServiceAddressModel>>.Create(true, list);
+            return Json(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> GetAddress([FromServices]IServiceDiscoveryProvider serviceDiscoveryProvider, string queryParam)
         {

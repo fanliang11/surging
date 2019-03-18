@@ -7,7 +7,9 @@ using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
@@ -33,6 +35,7 @@ namespace Surging.Core.DotNetty
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ILogger<DotNettyTransportClientFactory> _logger;
         private readonly IServiceExecutor _serviceExecutor;
+        private readonly IHealthCheckService _healthCheckService;
         private readonly ConcurrentDictionary<EndPoint, Lazy<ITransportClient>> _clients = new ConcurrentDictionary<EndPoint, Lazy<ITransportClient>>();
         private readonly Bootstrap _bootstrap;
 
@@ -44,16 +47,17 @@ namespace Surging.Core.DotNetty
 
         #region Constructor
 
-        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, ILogger<DotNettyTransportClientFactory> logger)
-            : this(codecFactory, logger, null)
+        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger)
+            : this(codecFactory, healthCheckService, logger, null)
         {
         }
 
-        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, ILogger<DotNettyTransportClientFactory> logger, IServiceExecutor serviceExecutor)
+        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger, IServiceExecutor serviceExecutor)
         {
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
             _logger = logger;
+            _healthCheckService = healthCheckService;
             _serviceExecutor = serviceExecutor;
             _bootstrap = GetBootstrap();
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
@@ -79,7 +83,7 @@ namespace Surging.Core.DotNetty
         {
             var key = endPoint;
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"准备为服务端地址：{key}创建客户端。");
+                _logger.LogDebug($"准备为服务端地址：{key}创建客户端。"); 
             try
             {
                 return _clients.GetOrAdd(key
@@ -100,6 +104,9 @@ namespace Surging.Core.DotNetty
             catch
             {
                 _clients.TryRemove(key, out var value);
+                var ipEndPoint = endPoint as IPEndPoint;
+                if(ipEndPoint !=null)
+                _healthCheckService.MarkFailure(new IpAddressModel(ipEndPoint.Address.ToString(), ipEndPoint.Port));
                 throw;
             }
         }

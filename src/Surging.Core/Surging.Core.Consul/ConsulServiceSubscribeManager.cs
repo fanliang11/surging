@@ -1,6 +1,7 @@
 ﻿using Consul;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
+using Surging.Core.Consul.Internal;
 using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -16,18 +17,18 @@ namespace Surging.Core.Consul
 {
   public  class ConsulServiceSubscribeManager: ServiceSubscribeManagerBase, IDisposable
 {
-        private readonly ConsulClient _consul;
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly IServiceSubscriberFactory _serviceSubscriberFactory;
         private readonly ILogger<ConsulServiceSubscribeManager> _logger;
         private readonly ISerializer<string> _stringSerializer;
         private readonly IClientWatchManager _manager;
+        private readonly IConsulClientProvider _consulClientFactory;
         private ServiceSubscriber[] _subscribers;
 
         public ConsulServiceSubscribeManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceSubscriberFactory serviceSubscriberFactory,
-            ILogger<ConsulServiceSubscribeManager> logger):base(stringSerializer)
+            ILogger<ConsulServiceSubscribeManager> logger, IConsulClientProvider consulClientFactory) :base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
@@ -35,10 +36,7 @@ namespace Surging.Core.Consul
             _serviceSubscriberFactory = serviceSubscriberFactory;
             _logger = logger;
             _manager = manager;
-            _consul = new ConsulClient(config =>
-            {
-                config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-            },null, h => { h.UseProxy = false; h.Proxy = null; }); 
+            _consulClientFactory = consulClientFactory;
             EnterSubscribers().Wait();
         }
 
@@ -54,40 +52,47 @@ namespace Surging.Core.Consul
 
         public override async Task ClearAsync()
         {
-            var queryResult = await _consul.KV.List(_configInfo.SubscriberPath);
-            var response = queryResult.Response;
-            if (response != null)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                foreach (var result in response)
+                var queryResult = await client.KV.List(_configInfo.SubscriberPath);
+                var response = queryResult.Response;
+                if (response != null)
                 {
-                    await _consul.KV.DeleteCAS(result);
+                    foreach (var result in response)
+                    {
+                        await client.KV.DeleteCAS(result);
+                    }
                 }
             }
         }
         
         public void Dispose()
         {
-            _consul.Dispose();
         }
 
         protected override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriberDescriptor> subscribers)
         {
             subscribers = subscribers.ToArray();
-            if (_subscribers != null)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                var oldSubscriberIds = _subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var newSubscriberIds = subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var deletedSubscriberIds = oldSubscriberIds.Except(newSubscriberIds).ToArray();
-                foreach (var deletedSubscriberId in deletedSubscriberIds)
+                if (_subscribers != null)
                 {
-                    await _consul.KV.Delete($"{_configInfo.SubscriberPath}{deletedSubscriberId}");
+                    var oldSubscriberIds = _subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var newSubscriberIds = subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var deletedSubscriberIds = oldSubscriberIds.Except(newSubscriberIds).ToArray();
+                    foreach (var deletedSubscriberId in deletedSubscriberIds)
+                    {
+                        await client.KV.Delete($"{_configInfo.SubscriberPath}{deletedSubscriberId}");
+                    }
                 }
-            }
-            foreach (var serviceSubscriber in subscribers)
-            {
-                var nodeData = _serializer.Serialize(serviceSubscriber);
-                var keyValuePair = new KVPair($"{_configInfo.SubscriberPath}{serviceSubscriber.ServiceDescriptor.Id}") { Value = nodeData };
-                await _consul.KV.Put(keyValuePair);
+                foreach (var serviceSubscriber in subscribers)
+                {
+                    var nodeData = _serializer.Serialize(serviceSubscriber);
+                    var keyValuePair = new KVPair($"{_configInfo.SubscriberPath}{serviceSubscriber.ServiceDescriptor.Id}") { Value = nodeData };
+                    await client.KV.Put(keyValuePair);
+                }
             }
         }
 
@@ -125,11 +130,11 @@ namespace Surging.Core.Consul
         { 
             if (_subscribers != null)
                 return;
-            if (_consul.KV.Keys(_configInfo.SubscriberPath).Result.Response?.Count() > 0)
+            var client=await _consulClientFactory.GetClient();
+            if (client.KV.Keys(_configInfo.SubscriberPath).Result.Response?.Count() > 0)
             {
-                var result = await _consul.GetChildrenAsync(_configInfo.SubscriberPath);
-                var keys = await _consul.KV.Keys(_configInfo.SubscriberPath);
-                var childrens = result;
+                var result = await client.GetChildrenAsync(_configInfo.SubscriberPath);
+                var keys = await client.KV.Keys(_configInfo.SubscriberPath);
                 _subscribers = await GetSubscribers(keys.Response);
             }
             else
@@ -143,10 +148,11 @@ namespace Surging.Core.Consul
         private async Task<ServiceSubscriber> GetSubscriber(string path)
         {
             ServiceSubscriber result = null;
-            var queryResult = await _consul.KV.Keys(path);
+            var client = await _consulClientFactory.GetClient();
+            var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
             {
-                var data = (await _consul.GetDataAsync(path));
+                var data = (await client.GetDataAsync(path));
                 if (data != null)
                 {
                     result = await GetSubscriber(data);

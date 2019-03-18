@@ -27,18 +27,14 @@ namespace Surging.Core.CPlatform.Utilities
         }
 
         public static async Task<T> WithCancellation<T>(
-    this Task<T> task, int requestTimeout)
+    this Task<T> task, CancellationTokenSource cts, int requestTimeout)
         {
-            using (var cts = new CancellationTokenSource())
+            if (task == await Task.WhenAny(task, Task.Delay(requestTimeout, cts.Token)))
             {
-                if (task == await Task.WhenAny(task, Task.Delay(requestTimeout, cts.Token)))
-                {
-                    cts.Cancel();
-                   return await task;
-                }
+                cts.Cancel();
+                return await task;
             }
-
-            throw new TimeoutException(); 
+            throw new TimeoutException();
         }
     }
 }

@@ -163,7 +163,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             if (!string.IsNullOrEmpty(deviceId))
             {
                 var mqttChannel = GetMqttChannel(deviceId);
-                if (mqttChannel.IsOnine())
+                if (mqttChannel != null && mqttChannel.IsOnine())
                 {
                     await _messagePushService.WriteWillMsg(mqttChannel, willMessage);
                 }

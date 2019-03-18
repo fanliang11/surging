@@ -48,13 +48,13 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         /// <param name="context">地址选择上下文。</param>
         /// <returns>地址模型。</returns>
-        protected override Task<AddressModel> SelectAsync(AddressSelectContext context)
+        protected override ValueTask<AddressModel> SelectAsync(AddressSelectContext context)
         {
             var address = context.Address.ToArray();
             var length = address.Length;
 
             var index = _generate(0, length);
-            return Task.FromResult(address[index]);
+            return new ValueTask<AddressModel>(address[index]);
         }
 
         #endregion Overrides of AddressSelectorBase

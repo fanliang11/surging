@@ -588,10 +588,10 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
-        public static List<Type> GetInterfaceService(this IServiceBuilder builder)
+        public static List<Type> GetInterfaceService(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var types = new List<Type>();
-            var referenceAssemblies = GetReferenceAssembly();
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
             referenceAssemblies.ForEach(p =>
             {
                 types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface));
@@ -599,10 +599,10 @@ namespace Surging.Core.CPlatform
             return types;
         }
 
-        public static IEnumerable<string> GetDataContractName(this IServiceBuilder builder)
+        public static IEnumerable<string> GetDataContractName(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var namespaces = new List<string>();
-            var assemblies = builder.GetInterfaceService()
+            var assemblies = builder.GetInterfaceService(virtualPaths)
                 .Select(p => p.Assembly)
                 .Union(GetSystemModules())
                 .Distinct()

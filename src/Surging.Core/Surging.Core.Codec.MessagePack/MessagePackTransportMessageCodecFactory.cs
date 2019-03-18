@@ -1,4 +1,6 @@
 ﻿using Surging.Core.CPlatform.Transport.Codec;
+using System.Runtime.CompilerServices;
+
 namespace Surging.Core.Codec.MessagePack
 {
     public sealed class MessagePackTransportMessageCodecFactory : ITransportMessageCodecFactory
@@ -10,11 +12,13 @@ namespace Surging.Core.Codec.MessagePack
 
         #region Implementation of ITransportMessageCodecFactory
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ITransportMessageEncoder GetEncoder()
         {
             return _transportMessageEncoder;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ITransportMessageDecoder GetDecoder()
         {
             return _transportMessageDecoder;

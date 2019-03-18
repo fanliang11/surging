@@ -36,7 +36,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         /// <param name="context">地址选择上下文。</param>
         /// <returns>地址模型。</returns>
-        protected override async Task<AddressModel> SelectAsync(AddressSelectContext context)
+        protected override async ValueTask<AddressModel> SelectAsync(AddressSelectContext context)
         {
             var key = GetCacheKey(context.Descriptor);
             //根据服务id缓存服务地址。
@@ -44,9 +44,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             AddressModel addressModel;
             var index = 0;
             var len = context.Address.Count();
+            ValueTask<bool> vt;
             do
             {
-               
+
                 addressModel = addressEntry.GetAddress();
                 if (len <= index)
                 {
@@ -54,7 +55,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                     break;
                 }
                 index++;
-            } while (await _healthCheckService.IsHealth(addressModel) == false);
+                vt = _healthCheckService.IsHealth(addressModel);
+            } while (!(vt.IsCompletedSuccessfully ? vt.Result : await vt));
             return addressModel;
         }
 
@@ -65,6 +67,12 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         private static string GetCacheKey(ServiceDescriptor descriptor)
         {
             return descriptor.Id;
+        }
+
+        public async ValueTask<bool> CheckHealth(AddressModel addressModel)
+        {
+            var vt = _healthCheckService.IsHealth(addressModel);
+            return vt.IsCompletedSuccessfully ? vt.Result : await vt;
         }
 
         private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)

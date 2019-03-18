@@ -15,6 +15,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public string WanIp { get; set; }
 
+        public bool IsModulePerLifetimeScope { get; set; }
+
         public double WatchInterval { get; set; } = 20d;
 
         public int DisconnTimeInterval { get; set; } = 60;
@@ -35,6 +37,8 @@ namespace Surging.Core.CPlatform.Configurations
         public string WebRootPath { get; set; } = AppContext.BaseDirectory;
 
         public int Port { get; set; }
+
+        public bool ReloadOnChange { get; set; } = false;
 
         public ProtocolPortOptions Ports { get; set; } = new  ProtocolPortOptions();
 

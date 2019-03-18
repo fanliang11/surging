@@ -79,12 +79,12 @@ namespace Surging.Core.Caching.NetCache
 
         public void Add(string key, object value, long numOfMinutes)
         {
-            MemoryCache.Set(GetKeySuffix(key), value, numOfMinutes);
+            MemoryCache.Set(GetKeySuffix(key), value, numOfMinutes*60);
         }
 
         public async void AddAsync(string key, object value, long numOfMinutes)
         {
-            await Task.Run(() => MemoryCache.Set(GetKeySuffix(key), value, numOfMinutes));
+            await Task.Run(() => MemoryCache.Set(GetKeySuffix(key), value, numOfMinutes*60));
         }
 
         public void Add(string key, object value, TimeSpan timeSpan)

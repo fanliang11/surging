@@ -22,6 +22,7 @@ namespace Surging.Core.ApiGateWay
             services.RegisterType<FaultTolerantProvider>().As<IFaultTolerantProvider>().SingleInstance();
             services.RegisterType<DefaultHealthCheckService>().As<IHealthCheckService>().SingleInstance();
             services.RegisterType<ServiceDiscoveryProvider>().As<IServiceDiscoveryProvider>().SingleInstance();
+            services.RegisterType<ServiceRegisterProvider>().As<IServiceRegisterProvider>().SingleInstance();
             services.RegisterType<ServiceSubscribeProvider>().As<IServiceSubscribeProvider>().SingleInstance();
             services.RegisterType<ServiceCacheProvider>().As<IServiceCacheProvider>().SingleInstance();
             services.RegisterType<ServicePartProvider>().As<IServicePartProvider>().SingleInstance();

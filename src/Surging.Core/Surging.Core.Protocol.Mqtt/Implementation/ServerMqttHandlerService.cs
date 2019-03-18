@@ -123,7 +123,11 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             int messageId = packet.PacketId;
             var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
             var message = mqttChannel.GetMqttMessage(messageId);
-            message.ConfirmStatus = ConfirmStatus.COMPLETE;
+            if (message != null)
+            {
+                message.ConfirmStatus = ConfirmStatus.COMPLETE;
+            }
+            await context.WriteAndFlushAsync(packet);
         }
 
         public async Task PubComp(IChannelHandlerContext context, PubCompPacket packet)
@@ -131,7 +135,11 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             int messageId = packet.PacketId;
             var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
             var message = mqttChannel.GetMqttMessage(messageId);
-            message.ConfirmStatus = ConfirmStatus.COMPLETE;
+            if (message != null)
+            {
+                message.ConfirmStatus = ConfirmStatus.COMPLETE;
+            }
+            await context.WriteAndFlushAsync(packet);
         }
 
         public async Task Publish(IChannelHandlerContext context, PublishPacket packet)
@@ -144,7 +152,10 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             int messageId = packet.PacketId;
             var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
              var message= mqttChannel.GetMqttMessage(messageId);
-            message.ConfirmStatus=ConfirmStatus.PUBREL;
+            if (message != null)
+            {
+                message.ConfirmStatus = ConfirmStatus.PUBREC;
+            }
             await _channelService.Pubrec(mqttChannel, messageId);
         }
 
@@ -153,8 +164,11 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             int messageId = packet.PacketId;
             var mqttChannel = _channelService.GetMqttChannel(await _channelService.GetDeviceId(context.Channel));
             var message = mqttChannel.GetMqttMessage(messageId);
-            message.ConfirmStatus = ConfirmStatus.PUBREL;
-            await _channelService.Pubrec(mqttChannel, messageId);
+            if (message != null)
+            {
+                message.ConfirmStatus = ConfirmStatus.PUBREL;
+            }
+            await _channelService.Pubrel(context.Channel, messageId);
         }
 
         public async Task SubAck(IChannelHandlerContext context, SubAckPacket packet)
@@ -167,8 +181,8 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             if (packet != null)
             {
                 var topics = packet.Requests.Select(p => p.TopicFilter).ToArray();
-               await _channelService.Suscribe(await _channelService.GetDeviceId(context.Channel), topics);
-                await  SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
+                await _channelService.Suscribe(await _channelService.GetDeviceId(context.Channel), topics);
+                await SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
                  ));
             }
         }

@@ -6,15 +6,17 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
-    "WanIp": "${Mapping_Port}|192.168.249.103",
+    "WanIp": "${WanIp}|192.168.249.103",
     "Libuv": true,
     "SoBacklog": 100,
     "MaxConcurrentRequests": 20,
     "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,
-    "Protocol": "${Protocol}|None", //Http、Tcp、None
+    "Protocol": "${Protocol}|None", //Http銆乀cp銆丯one
     "RootPath": "${RootPath}|D:\\userapp",
     "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
+    "IsModulePerLifetimeScope": false,
+    "ReloadOnChange": false,
     "Ports": {
       "HttpPort": "${HttpPort}|280",
       "WSPort": "${WSPort}|96",
@@ -24,12 +26,12 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ZookeeperModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;"
       }
     ]
-  }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
+  }, //濡傛灉寮曠敤澶氫釜鍚岀被鍨嬬殑缁勪欢锛岄渶瑕侀厤缃甈ackages锛屽鏋滄槸鑷畾涔夋寜闇�寮曠敤锛屾棤闇�閰嶇疆Packages
   "Consul": {
-    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
+    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500,127.0.0.1:9500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
     "ReloadOnChange": true,

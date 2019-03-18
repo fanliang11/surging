@@ -1,72 +1,71 @@
-﻿using Surging.Core.CPlatform.Routing.Implementation;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Surging.Core.CPlatform.Routing;
-using System.Threading.Tasks;
-using Surging.Core.CPlatform.Serialization;
+﻿using Consul;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
-using Consul;
-using System.Threading;
-using System.Linq;
-using Surging.Core.Consul.WatcherProvider;
+using Surging.Core.Consul.Internal;
 using Surging.Core.Consul.Utilitys;
+using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform.Address;
-using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
+using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Consul
 {
     public class ConsulServiceRouteManager : ServiceRouteManagerBase, IDisposable
     {
-        private readonly ConsulClient _consul;
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly IServiceRouteFactory _serviceRouteFactory;
         private readonly ILogger<ConsulServiceRouteManager> _logger;
         private readonly ISerializer<string> _stringSerializer;
         private readonly IClientWatchManager _manager;
-        private ServiceRoute[] _routes; 
+        private ServiceRoute[] _routes;
+        private readonly IConsulClientProvider _consulClientProvider;
         private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
 
         public ConsulServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceRouteFactory serviceRouteFactory,
        ILogger<ConsulServiceRouteManager> logger,
-       IServiceHeartbeatManager serviceHeartbeatManager) : base(stringSerializer)
+       IServiceHeartbeatManager serviceHeartbeatManager, IConsulClientProvider consulClientProvider) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
             _stringSerializer = stringSerializer;
             _serviceRouteFactory = serviceRouteFactory;
             _logger = logger;
+            _consulClientProvider = consulClientProvider;
             _manager = manager;
             _serviceHeartbeatManager = serviceHeartbeatManager;
-            _consul = new ConsulClient(config =>
-            {
-                config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-            },null,h=> { h.UseProxy = false; h.Proxy = null; });
             EnterRoutes().Wait();
         }
 
         public override async Task ClearAsync()
         {
-            var queryResult = await _consul.KV.List(_configInfo.RoutePath);
-            var response = queryResult.Response;
-            if (response != null)
+            var clients = await _consulClientProvider.GetClients();
+            foreach (var client in clients)
             {
-                foreach (var result in response)
+                var queryResult = await client.KV.List(_configInfo.RoutePath);
+                var response = queryResult.Response;
+                if (response != null)
                 {
-                    await _consul.KV.DeleteCAS(result);
+                    foreach (var result in response)
+                    {
+                        await client.KV.DeleteCAS(result);
+                    }
                 }
             }
         }
 
         public void Dispose()
-        {
-            _consul.Dispose();
+        { 
         }
 
         /// <summary>
@@ -81,6 +80,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
+            await _consulClientProvider.Check();
             var hostAddr = NetUtils.GetHostAddress();
             var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
             foreach (var route in routes)
@@ -123,12 +123,15 @@ namespace Surging.Core.Consul
         
         protected override async Task SetRoutesAsync(IEnumerable<ServiceRouteDescriptor> routes)
         {
-           
-            foreach (var serviceRoute in routes)
+            var clients = await _consulClientProvider.GetClients();
+            foreach (var client in clients)
             {
-                var nodeData = _serializer.Serialize(serviceRoute);
-                var keyValuePair = new KVPair($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}") { Value = nodeData };
-                await _consul.KV.Put(keyValuePair);
+                foreach (var serviceRoute in routes)
+                {
+                    var nodeData = _serializer.Serialize(serviceRoute);
+                    var keyValuePair = new KVPair($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}") { Value = nodeData };
+                    await client.KV.Put(keyValuePair);
+                }
             }
         }
 
@@ -137,17 +140,20 @@ namespace Surging.Core.Consul
         private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes, AddressModel hostAddr)
         {
             routes = routes.ToArray();
-
-            if (_routes != null)
+            var clients = await _consulClientProvider.GetClients();
+            foreach (var client in clients)
             {
-                var oldRouteIds = _routes.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var newRouteIds = routes.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
-                foreach (var deletedRouteId in deletedRouteIds)
+                if (_routes != null)
                 {
-                    var addresses = _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p => p.Address).FirstOrDefault();
-                    if (addresses.Contains(hostAddr))
-                        await _consul.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
+                    var oldRouteIds = _routes.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var newRouteIds = routes.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
+                    foreach (var deletedRouteId in deletedRouteIds)
+                    {
+                        var addresses = _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p => p.Address).FirstOrDefault();
+                        if (addresses.Contains(hostAddr))
+                            await client.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
+                    }
                 }
             }
         }
@@ -205,17 +211,18 @@ namespace Surging.Core.Consul
 
         private async Task<ServiceRoute> GetRoute(string path)
         {
-            ServiceRoute result = null;  
-            var watcher = new NodeMonitorWatcher(_consul, _manager, path,
+            ServiceRoute result = null;
+            var client =await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
                 async (oldData, newData) => await NodeChange(oldData, newData),tmpPath=> {
                     var index = tmpPath.LastIndexOf("/");
                     return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
                 }); 
          
-            var queryResult = await _consul.KV.Keys(path);
+            var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
             {
-                var data = (await _consul.GetDataAsync(path));
+                var data = (await client.GetDataAsync(path));
                 if (data != null)
                 {
                     watcher.SetCurrentData(data);
@@ -225,22 +232,29 @@ namespace Surging.Core.Consul
             return result;
         }
 
+        private async ValueTask<ConsulClient> GetConsulClient()
+        {
+           var client=await  _consulClientProvider.GetClient();
+            return client;
+        }
+
         private async Task EnterRoutes()
         {
             if (_routes != null && _routes.Length > 0)
                 return;
             Action<string[]> action = null ;
+            var client =await GetConsulClient();
             if (_configInfo.EnableChildrenMonitor)
             {
-                var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.RoutePath,
+                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.RoutePath,
              async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                (result) => ConvertPaths(result).Result);
                 action = currentData => watcher.SetCurrentData(currentData);
             }
-            if (_consul.KV.Keys(_configInfo.RoutePath).Result.Response?.Count() > 0)
+            if (client.KV.Keys(_configInfo.RoutePath).Result.Response?.Count() > 0)
             {
-                var result = await _consul.GetChildrenAsync(_configInfo.RoutePath);
-                var keys = await _consul.KV.Keys(_configInfo.RoutePath);
+                var result = await client.GetChildrenAsync(_configInfo.RoutePath);
+                var keys = await client.KV.Keys(_configInfo.RoutePath);
                 var childrens = result;
                 action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.RoutePath}{key}").ToArray());
                 _routes = await GetRoutes(keys.Response);

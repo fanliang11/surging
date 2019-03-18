@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewBag.Title = "服务管理";
+    ViewBag.Title = "注册中心";
     var isPjax = (!string.IsNullOrEmpty(Context.Request.Query["XPJAX"]) && bool.Parse(Context.Request.Query["XPJAX"]))
               && (!string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"])) ;
     Layout = isPjax ? null : "_ServiceManageLayout.cshtml";
@@ -53,7 +53,7 @@
     @section SubFootJS
         {
 <script type="text/javascript">
-    seajs.use("apps_servicemange/view/address.guide.js", function(a) {
+    seajs.use("apps_servicemange/view/register.guide.js", function(a) {
             a.init({
             });
         });
@@ -63,7 +63,7 @@
 else
 {
     <script type="text/javascript">
-        seajs.use("apps_servicemange/view/address.guide.js", function (a) {
+        seajs.use("apps_servicemange/view/register.guide.js", function (a) {
             a.init({
             });
         });

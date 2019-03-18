@@ -1,6 +1,7 @@
 ﻿using Consul;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
+using Surging.Core.Consul.Internal;
 using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.WatcherProvider.Implementation;
@@ -17,50 +18,48 @@ namespace Surging.Core.Consul
 {
     public class ConsulServiceCacheManager : ServiceCacheManagerBase, IDisposable
     {
-        private readonly ConsulClient _consul;
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly ILogger<ConsulServiceCacheManager> _logger;
         private readonly IClientWatchManager _manager;
         private ServiceCache[] _serviceCaches;
         private readonly IServiceCacheFactory _serviceCacheFactory;
-        private readonly ISerializer<string> _stringSerializer; 
+        private readonly ISerializer<string> _stringSerializer;
+        private readonly IConsulClientProvider _consulClientFactory;
 
         public ConsulServiceCacheManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
         ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceCacheFactory serviceCacheFactory,
-        ILogger<ConsulServiceCacheManager> logger) : base(stringSerializer)
+        ILogger<ConsulServiceCacheManager> logger, IConsulClientProvider consulClientFactory) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
             _stringSerializer = stringSerializer;
             _serviceCacheFactory = serviceCacheFactory;
+            _consulClientFactory = consulClientFactory;
             _logger = logger;
             _manager = manager; 
-            _consul = new ConsulClient(config =>
-            {
-                config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-            }, null, h => { h.UseProxy = false; h.Proxy = null; });
             EnterCaches().Wait();
         }
 
         public override async Task ClearAsync()
         {
-
-            var queryResult = await _consul.KV.List(_configInfo.CachePath);
-
-            var response = queryResult.Response;
-            if (response != null)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                foreach (var result in response)
+                var queryResult = await client.KV.List(_configInfo.CachePath); 
+                var response = queryResult.Response;
+                if (response != null)
                 {
-                    await _consul.KV.DeleteCAS(result);
+                    foreach (var result in response)
+                    {
+                        await client.KV.DeleteCAS(result);
+                    }
                 }
             }
         }
 
         public void Dispose()
         {
-            _consul.Dispose();
         }
 
         public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)
@@ -104,11 +103,15 @@ namespace Surging.Core.Consul
 
         public override async Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors)
         {
-            foreach (var cacheDescriptor in cacheDescriptors)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                var nodeData = _serializer.Serialize(cacheDescriptor);
-                var keyValuePair = new KVPair($"{_configInfo.CachePath}{cacheDescriptor.CacheDescriptor.Id}") { Value = nodeData };
-                await _consul.KV.Put(keyValuePair);
+                foreach (var cacheDescriptor in cacheDescriptors)
+                {
+                    var nodeData = _serializer.Serialize(cacheDescriptor);
+                    var keyValuePair = new KVPair($"{_configInfo.CachePath}{cacheDescriptor.CacheDescriptor.Id}") { Value = nodeData };
+                    await client.KV.Put(keyValuePair);
+                }
             }
         }
 
@@ -133,12 +136,13 @@ namespace Surging.Core.Consul
         private async Task<ServiceCache> GetCache(string path)
         {
             ServiceCache result = null;
-            var watcher = new NodeMonitorWatcher(_consul, _manager, path,
+            var client = await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
                  async (oldData, newData) => await NodeChange(oldData, newData),null);
-            var queryResult = await _consul.KV.Keys(path);
+            var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
             {
-                var data = (await _consul.GetDataAsync(path));
+                var data = (await client.GetDataAsync(path));
                 if (data != null)
                 {
                     watcher.SetCurrentData(data);
@@ -157,17 +161,21 @@ namespace Surging.Core.Consul
 
             if (_serviceCaches != null)
             {
-                var oldCacheIds = _serviceCaches.Select(i => i.CacheDescriptor.Id).ToArray();
-                var newCacheIds = _serviceCaches.Select(i => i.CacheDescriptor.Id).ToArray();
-                var deletedCacheIds = oldCacheIds.Except(newCacheIds).ToArray();
-                foreach (var deletedCacheId in deletedCacheIds)
+                var clients = await _consulClientFactory.GetClients();
+                foreach (var client in clients)
                 {
-                    var endpoints = _serviceCaches.Where(p => p.CacheDescriptor.Id == deletedCacheId).Select(p => p.CacheEndpoint).FirstOrDefault();
-                    var nodePath = $"{path}{deletedCacheId}";
-                    foreach (var endpoint in endpoints)
+                    var oldCacheIds = _serviceCaches.Select(i => i.CacheDescriptor.Id).ToArray();
+                    var newCacheIds = _serviceCaches.Select(i => i.CacheDescriptor.Id).ToArray();
+                    var deletedCacheIds = oldCacheIds.Except(newCacheIds).ToArray();
+                    foreach (var deletedCacheId in deletedCacheIds)
                     {
-                        if (caches.Any(p => p.CacheEndpoint.Select(a => a.ToString()).Contains(endpoint.ToString())))
-                            await _consul.KV.Delete(nodePath);
+                        var endpoints = _serviceCaches.Where(p => p.CacheDescriptor.Id == deletedCacheId).Select(p => p.CacheEndpoint).FirstOrDefault();
+                        var nodePath = $"{path}{deletedCacheId}";
+                        foreach (var endpoint in endpoints)
+                        {
+                            if (caches.Any(p => p.CacheEndpoint.Select(a => a.ToString()).Contains(endpoint.ToString())))
+                                await client.KV.Delete(nodePath);
+                        }
                     }
                 }
             }
@@ -176,14 +184,15 @@ namespace Surging.Core.Consul
         private async Task EnterCaches()
         {
             if (_serviceCaches != null && _serviceCaches.Length > 0)
-                return; 
-             var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CachePath,
+                return;
+            var client =await GetConsulClient();
+             var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CachePath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                   (result) => ConvertPaths(result).Result);
-            if (_consul.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
+            if (client.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
             {
-                var result = await _consul.GetChildrenAsync(_configInfo.CachePath);
-                var keys = await _consul.KV.Keys(_configInfo.CachePath);
+                var result = await client.GetChildrenAsync(_configInfo.CachePath);
+                var keys = await client.KV.Keys(_configInfo.CachePath);
                 var childrens = result; 
                 watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
                 _serviceCaches = await GetCaches(keys.Response);
@@ -253,6 +262,12 @@ namespace Surging.Core.Consul
                     paths.Add(serviceId);
             }
             return paths.ToArray();
+        }
+
+        private async ValueTask<ConsulClient> GetConsulClient()
+        {
+            var client = await _consulClientFactory.GetClient();
+            return client;
         }
 
         private async Task NodeChange(byte[] oldData, byte[] newData)

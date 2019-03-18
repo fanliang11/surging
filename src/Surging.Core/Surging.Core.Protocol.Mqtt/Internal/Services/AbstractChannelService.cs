@@ -104,9 +104,8 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         {
             string deviceId = null;
             if (channel != null)
-            {
-                AttributeKey<string> deviceIdAttrKey = AttributeKey<string>.ValueOf("deviceId");
-                deviceId = channel.GetAttribute<string>(deviceIdAttrKey).Get();
+            { 
+                deviceId = channel.GetAttribute<string>(DeviceIdAttrKey).Get();
             }
             return await new ValueTask<string>(deviceId);
         }

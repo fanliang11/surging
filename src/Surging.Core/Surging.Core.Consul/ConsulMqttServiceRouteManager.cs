@@ -1,6 +1,7 @@
 ﻿using Consul;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
+using Surging.Core.Consul.Internal;
 using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.WatcherProvider.Implementation;
@@ -20,8 +21,7 @@ using System.Threading.Tasks;
 namespace Surging.Core.Consul
 {
     public class ConsulMqttServiceRouteManager : MqttServiceRouteManagerBase, IDisposable
-    {
-        private readonly ConsulClient _consul;
+    { 
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly IMqttServiceFactory _mqttServiceFactory;
@@ -29,11 +29,13 @@ namespace Surging.Core.Consul
         private readonly ISerializer<string> _stringSerializer;
         private readonly IClientWatchManager _manager;
         private MqttServiceRoute[] _routes;
+        private readonly IConsulClientProvider _consulClientFactory;
         private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
 
         public ConsulMqttServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IMqttServiceFactory mqttServiceFactory,
-       ILogger<ConsulMqttServiceRouteManager> logger,IServiceHeartbeatManager serviceHeartbeatManager) : base(stringSerializer)
+       ILogger<ConsulMqttServiceRouteManager> logger,IServiceHeartbeatManager serviceHeartbeatManager,
+       IConsulClientProvider consulClientFactory) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
@@ -42,29 +44,29 @@ namespace Surging.Core.Consul
             _logger = logger;
             _manager = manager;
             _serviceHeartbeatManager = serviceHeartbeatManager;
-            _consul = new ConsulClient(config =>
-            {
-                config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-            }, null, h => { h.UseProxy = false; h.Proxy = null; });
+            _consulClientFactory = consulClientFactory;
             EnterRoutes().Wait();
         }
 
         public override async Task ClearAsync()
         {
-            var queryResult = await _consul.KV.List(_configInfo.MqttRoutePath);
-            var response = queryResult.Response;
-            if (response != null)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                foreach (var result in response)
+                var queryResult = await client.KV.List(_configInfo.MqttRoutePath);
+                var response = queryResult.Response;
+                if (response != null)
                 {
-                    await _consul.KV.DeleteCAS(result);
+                    foreach (var result in response)
+                    {
+                        await client.KV.DeleteCAS(result);
+                    }
                 }
             }
         }
 
         public void Dispose()
         {
-            _consul.Dispose();
         }
 
         /// <summary>
@@ -140,12 +142,15 @@ namespace Surging.Core.Consul
 
         protected override async Task SetRoutesAsync(IEnumerable<MqttServiceDescriptor> routes)
         {
-
-            foreach (var serviceRoute in routes)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                var nodeData = _serializer.Serialize(serviceRoute);
-                var keyValuePair = new KVPair($"{_configInfo.MqttRoutePath}{serviceRoute.MqttDescriptor.Topic}") { Value = nodeData };
-                await _consul.KV.Put(keyValuePair);
+                foreach (var serviceRoute in routes)
+                {
+                    var nodeData = _serializer.Serialize(serviceRoute);
+                    var keyValuePair = new KVPair($"{_configInfo.MqttRoutePath}{serviceRoute.MqttDescriptor.Topic}") { Value = nodeData };
+                    await client.KV.Put(keyValuePair);
+                }
             }
         }
 
@@ -154,17 +159,20 @@ namespace Surging.Core.Consul
         private async Task RemoveExceptRoutesAsync(IEnumerable<MqttServiceRoute> routes, AddressModel hostAddr)
         {
             routes = routes.ToArray();
-
-            if (_routes != null)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                var oldRouteTopics = _routes.Select(i => i.MqttDescriptor.Topic).ToArray();
-                var newRouteTopics = routes.Select(i => i.MqttDescriptor.Topic).ToArray();
-                var deletedRouteTopics = oldRouteTopics.Except(newRouteTopics).ToArray();
-                foreach (var deletedRouteTopic in deletedRouteTopics)
+                if (_routes != null)
                 {
-                    var addresses = _routes.Where(p => p.MqttDescriptor.Topic == deletedRouteTopic).Select(p => p.MqttEndpoint).FirstOrDefault();
-                    if (addresses.Contains(hostAddr))
-                        await _consul.KV.Delete($"{_configInfo.MqttRoutePath}{deletedRouteTopic}");
+                    var oldRouteTopics = _routes.Select(i => i.MqttDescriptor.Topic).ToArray();
+                    var newRouteTopics = routes.Select(i => i.MqttDescriptor.Topic).ToArray();
+                    var deletedRouteTopics = oldRouteTopics.Except(newRouteTopics).ToArray();
+                    foreach (var deletedRouteTopic in deletedRouteTopics)
+                    {
+                        var addresses = _routes.Where(p => p.MqttDescriptor.Topic == deletedRouteTopic).Select(p => p.MqttEndpoint).FirstOrDefault();
+                        if (addresses.Contains(hostAddr))
+                            await client.KV.Delete($"{_configInfo.MqttRoutePath}{deletedRouteTopic}");
+                    }
                 }
             }
         }
@@ -222,17 +230,18 @@ namespace Surging.Core.Consul
 
         private async Task<MqttServiceRoute> GetRoute(string path)
         {
-            MqttServiceRoute result = null;  
-            var watcher = new NodeMonitorWatcher(_consul, _manager, path,
+            MqttServiceRoute result = null;
+            var client = await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
                 async (oldData, newData) => await NodeChange(oldData, newData),tmpPath=> {
                     var index = tmpPath.LastIndexOf("/");
                     return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
                 }); 
          
-            var queryResult = await _consul.KV.Keys(path);
+            var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
             {
-                var data = (await _consul.GetDataAsync(path));
+                var data = (await client.GetDataAsync(path));
                 if (data != null)
                 {
                     watcher.SetCurrentData(data);
@@ -247,17 +256,18 @@ namespace Surging.Core.Consul
             if (_routes != null && _routes.Length > 0)
                 return;
             Action<string[]> action = null;
+            var client =await GetConsulClient();
             if (_configInfo.EnableChildrenMonitor)
             {
-                var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.MqttRoutePath,
+                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.MqttRoutePath,
              async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                (result) => ConvertPaths(result).Result);
                 action = currentData => watcher.SetCurrentData(currentData);
             }
-            if (_consul.KV.Keys(_configInfo.MqttRoutePath).Result.Response?.Count() > 0)
+            if (client.KV.Keys(_configInfo.MqttRoutePath).Result.Response?.Count() > 0)
             {
-                var result = await _consul.GetChildrenAsync(_configInfo.MqttRoutePath);
-                var keys = await _consul.KV.Keys(_configInfo.MqttRoutePath);
+                var result = await client.GetChildrenAsync(_configInfo.MqttRoutePath);
+                var keys = await client.KV.Keys(_configInfo.MqttRoutePath);
                 var childrens = result;
                 action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.MqttRoutePath}{key}").ToArray());
                 _routes = await GetRoutes(keys.Response);
@@ -269,6 +279,7 @@ namespace Surging.Core.Consul
                 _routes = new MqttServiceRoute[0];
             }
         }
+         
 
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
         {
@@ -282,6 +293,12 @@ namespace Surging.Core.Consul
                     return false;
             }
             return true;
+        }
+
+        private async ValueTask<ConsulClient> GetConsulClient()
+        {
+            var client = await _consulClientFactory.GetClient();
+            return client;
         }
 
         /// <summary>

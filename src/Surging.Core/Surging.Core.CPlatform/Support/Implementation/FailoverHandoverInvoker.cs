@@ -28,12 +28,13 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         #endregion Constructor
 
-        public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string _serviceKey,bool decodeJOject)
+        public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string _serviceKey, bool decodeJOject)
         {
             var time = 0;
             T result = default(T);
             RemoteInvokeResultMessage message = null;
-            var command =await _commandProvider.GetCommand(serviceId);
+            var vtCommand = _commandProvider.GetCommand(serviceId);
+            var command = vtCommand.IsCompletedSuccessfully ? vtCommand.Result : await vtCommand;
             do
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
@@ -46,7 +47,8 @@ namespace Surging.Core.CPlatform.Support.Implementation
         public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string _serviceKey, bool decodeJOject)
         {
             var time = 0;
-            var command =await _commandProvider.GetCommand(serviceId);
+            var vtCommand = _commandProvider.GetCommand(serviceId);
+            var command = vtCommand.IsCompletedSuccessfully ? vtCommand.Result : await vtCommand;
             while (await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject) == null && ++time < command.FailoverCluster) ;
         }
     }

@@ -59,6 +59,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         {
             var mqttPublishMessage = new PublishPacket(QualityOfService.AtMostOnce, true, true);
             mqttPublishMessage.TopicName = topic;
+            mqttPublishMessage.PacketId = messageId;
             mqttPublishMessage.Payload = Unpooled.WrappedBuffer(byteBuf);
             await channel.WriteAndFlushAsync(mqttPublishMessage);
             return Enqueue(channel, messageId, topic, byteBuf, (int)QualityOfService.AtLeastOnce, ConfirmStatus.PUB);
@@ -68,9 +69,10 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
         {
             var mqttPublishMessage = new PublishPacket(QualityOfService.AtMostOnce, true, true);
             mqttPublishMessage.TopicName = topic;
+            mqttPublishMessage.PacketId = messageId;
             mqttPublishMessage.Payload = Unpooled.WrappedBuffer(byteBuf);
             await channel.WriteAndFlushAsync(mqttPublishMessage);
-            return Enqueue(channel, messageId, topic, byteBuf, (int)QualityOfService.AtLeastOnce, ConfirmStatus.PUB);
+            return Enqueue(channel, messageId, topic, byteBuf, (int)QualityOfService.ExactlyOnce, ConfirmStatus.PUB);
         }
         
         private async Task SendQos0Msg(IChannel channel, String topic, byte[] byteBuf, int messageId)

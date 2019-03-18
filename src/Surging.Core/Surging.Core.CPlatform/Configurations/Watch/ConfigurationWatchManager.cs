@@ -24,7 +24,7 @@ namespace Surging.Core.CPlatform.Configurations.Watch
             }, null, timeSpan, timeSpan);
         }
 
-        public   HashSet<ConfigurationWatch> DataWatches
+        public  HashSet<ConfigurationWatch> DataWatches
         {
             get
             {
@@ -51,7 +51,11 @@ namespace Surging.Core.CPlatform.Configurations.Watch
             {
                 try
                 {
-                    await watch.Process();
+                    var task= watch.Process();
+                    if (!task.IsCompletedSuccessfully)
+                        await task;
+                    else
+                        task.GetAwaiter().GetResult();
                 }
                 catch(Exception ex)
                 { 

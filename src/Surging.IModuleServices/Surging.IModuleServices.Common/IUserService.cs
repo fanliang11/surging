@@ -114,6 +114,8 @@ new Surging.IModuleServices.Common.Models.UserModel
        /// <returns></returns>
         Task TryThrowException();
 
+        Task<Sex> SetSex(Sex sex);
+
         /// <summary>
         /// 测试基于eventbus 推送消息
         /// </summary>

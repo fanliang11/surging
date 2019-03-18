@@ -2,6 +2,7 @@ using MessagePack;
 using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Messages;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -43,11 +44,13 @@ namespace Surging.Core.Codec.MessagePack.Messages
         [Key(2)]
         public string ContentType { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvokeMessage()
         {
             return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvokeResultMessage()
         {
             return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;

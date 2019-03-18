@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <TieredCompilation>true</TieredCompilation>
   </PropertyGroup>
