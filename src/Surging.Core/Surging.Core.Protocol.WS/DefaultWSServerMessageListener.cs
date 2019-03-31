@@ -37,6 +37,7 @@ namespace Surging.Core.Protocol.WS
                     _wssv.AddWebSocketService(entry.Path, entry.FuncBehavior);
                 _wssv.KeepClean = _options.KeepClean;
                 _wssv.WaitTime = TimeSpan.FromSeconds(_options.WaitTime); 
+                _wssv.AllowForwardedRequest = true;  
                 _wssv.Start();
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"WS服务主机启动成功，监听地址：{endPoint}。");
