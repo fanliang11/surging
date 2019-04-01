@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,15 +9,17 @@ namespace Surging.Core.CPlatform.Utilities
     internal interface IStrongBox<T>
     {
         ref T Value { get; }
+
+        bool RunContinuationsAsynchronously { get; set; }
     }
-    
+
     public enum ContinuationOptions
-    { 
+    {
         None,
-         
+
         ForceDefaultTaskScheduler
     }
-     
+
     public class ManualResetValueTaskSource<T> : IStrongBox<ManualResetValueTaskSourceLogic<T>>, IValueTaskSource<T>, IValueTaskSource
     {
         private ManualResetValueTaskSourceLogic<T> _logic;
@@ -32,21 +34,21 @@ namespace Surging.Core.CPlatform.Utilities
         public short Version => _logic.Version;
 
         public bool SetResult(T result)
-        { 
+        {
             lock (_cancellationCallback)
             {
                 if (_logic.Completed)
-                { 
+                {
                     return false;
                 }
 
-                _logic.SetResult(result); 
+                _logic.SetResult(result);
                 return true;
-            } 
+            }
         }
 
         public void SetException(Exception error)
-        { 
+        {
             if (Monitor.TryEnter(_cancellationCallback))
             {
                 if (_logic.Completed)
@@ -67,6 +69,8 @@ namespace Surging.Core.CPlatform.Utilities
         void IValueTaskSource.GetResult(short token) => _logic.GetResult(token);
 
         public ValueTaskSourceStatus GetStatus(short token) => _logic.GetStatus(token);
+
+        public bool RunContinuationsAsynchronously { get; set; } = true;
 
         public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) => _logic.OnCompleted(continuation, state, token, flags);
 
@@ -289,7 +293,22 @@ namespace Surging.Core.CPlatform.Utilities
             switch (cc)
             {
                 case null:
-                    _continuation(_continuationState);
+                    if (_parent.RunContinuationsAsynchronously)
+                    {
+                        var c = _continuation;
+                        if (_executionContext != null)
+                        {
+                            ThreadPool.QueueUserWorkItem(s => c(s), _continuationState);
+                        }
+                        else
+                        {
+                            ThreadPool.UnsafeQueueUserWorkItem(s => c(s),  _continuationState);
+                        }
+                    }
+                    else
+                    {
+                        _continuation(_continuationState);
+                    }
                     break;
 
                 case SynchronizationContext sc:
@@ -319,5 +338,3 @@ namespace Surging.Core.CPlatform.Utilities
         }
     }
 }
-
-
