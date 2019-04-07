@@ -26,7 +26,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ZookeeperModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -81,7 +81,7 @@
     "Port": "${EventBusPort}|5672"
   },
   "Zookeeper": {
-    "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181",
+    "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181", // "127.0.0.1:2181,127.0.0.1:2281",
     "SessionTimeout": 50,
     "ReloadOnChange": true
   },

@@ -11,6 +11,12 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Support;
 using Surging.Core.Zookeeper.Configurations;
+using Surging.Core.Zookeeper.Internal;
+using Surging.Core.Zookeeper.Internal.Cluster.HealthChecks;
+using Surging.Core.Zookeeper.Internal.Cluster.HealthChecks.Implementation;
+using Surging.Core.Zookeeper.Internal.Cluster.Implementation.Selectors;
+using Surging.Core.Zookeeper.Internal.Cluster.Implementation.Selectors.Implementation;
+using Surging.Core.Zookeeper.Internal.Implementation;
 using System;
 
 namespace Surging.Core.Zookeeper
@@ -30,11 +36,14 @@ namespace Surging.Core.Zookeeper
         {
             base.RegisterBuilder(builder);
             var configInfo = new ConfigInfo(null);
-            UseZooKeeperRouteManager(builder, configInfo)
-              .UseZooKeeperCacheManager(builder, configInfo)
-                .UseZooKeeperMqttRouteManager(builder, configInfo)
-                .UseZooKeeperServiceSubscribeManager(builder, configInfo)
-                .UseZooKeeperCommandManager(builder, configInfo);
+            UseZookeeperAddressSelector(builder)
+            .UseHealthCheck(builder)
+            .UseZookeeperClientProvider(builder, configInfo)
+            .UseZooKeeperRouteManager(builder, configInfo)
+            .UseZooKeeperCacheManager(builder, configInfo)
+            .UseZooKeeperMqttRouteManager(builder, configInfo)
+            .UseZooKeeperServiceSubscribeManager(builder, configInfo)
+            .UseZooKeeperCommandManager(builder, configInfo);
         }
 
         public ContainerBuilderWrapper UseRouteManager(ContainerBuilderWrapper builder, Func<IServiceProvider, IServiceRouteManager> factory)
@@ -67,6 +76,12 @@ namespace Surging.Core.Zookeeper
             return builder;
         }
 
+        public ContainerBuilderWrapper UseZooKeeperClientProvider(ContainerBuilderWrapper builder, Func<IServiceProvider, IZookeeperClientProvider> factory)
+        {
+            builder.RegisterAdapter(factory).InstancePerLifetimeScope();
+            return builder;
+        }
+
         /// <summary>
         /// 设置共享文件路由管理者。
         /// </summary>
@@ -81,7 +96,8 @@ namespace Surging.Core.Zookeeper
            provider.GetRequiredService<ISerializer<byte[]>>(),
              provider.GetRequiredService<ISerializer<string>>(),
              provider.GetRequiredService<IServiceRouteFactory>(),
-             provider.GetRequiredService<ILogger<ZooKeeperServiceRouteManager>>()));
+             provider.GetRequiredService<ILogger<ZooKeeperServiceRouteManager>>(),
+                  provider.GetRequiredService<IZookeeperClientProvider>()));
             return this;
         }
 
@@ -94,7 +110,8 @@ namespace Surging.Core.Zookeeper
                  provider.GetRequiredService<ISerializer<byte[]>>(),
                    provider.GetRequiredService<ISerializer<string>>(),
                    provider.GetRequiredService<IMqttServiceFactory>(),
-                   provider.GetRequiredService<ILogger<ZooKeeperMqttServiceRouteManager>>());
+                   provider.GetRequiredService<ILogger<ZooKeeperMqttServiceRouteManager>>(),
+                  provider.GetRequiredService<IZookeeperClientProvider>());
               return result;
           });
             return this;
@@ -117,7 +134,8 @@ namespace Surging.Core.Zookeeper
                    provider.GetRequiredService<ISerializer<string>>(),
                  provider.GetRequiredService<IServiceRouteManager>(),
                    provider.GetRequiredService<IServiceEntryManager>(),
-                   provider.GetRequiredService<ILogger<ZookeeperServiceCommandManager>>());
+                   provider.GetRequiredService<ILogger<ZookeeperServiceCommandManager>>(),
+                  provider.GetRequiredService<IZookeeperClientProvider>());
                return result;
            });
             return this;
@@ -132,7 +150,8 @@ namespace Surging.Core.Zookeeper
                   provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
                     provider.GetRequiredService<IServiceSubscriberFactory>(),
-                    provider.GetRequiredService<ILogger<ZooKeeperServiceSubscribeManager>>());
+                    provider.GetRequiredService<ILogger<ZooKeeperServiceSubscribeManager>>(),
+                  provider.GetRequiredService<IZookeeperClientProvider>());
                 return result;
             });
             return this;
@@ -146,10 +165,34 @@ namespace Surging.Core.Zookeeper
               provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IServiceCacheFactory>(),
-                provider.GetRequiredService<ILogger<ZookeeperServiceCacheManager>>()));
+                provider.GetRequiredService<ILogger<ZookeeperServiceCacheManager>>(),
+                  provider.GetRequiredService<IZookeeperClientProvider>()));
             return this;
         }
-        
+
+        public ZookeeperModule UseZookeeperClientProvider(ContainerBuilderWrapper builder, ConfigInfo configInfo)
+        {
+            UseZooKeeperClientProvider(builder, provider =>
+        new DefaultZookeeperClientProvider(
+            GetConfigInfo(configInfo),
+         provider.GetRequiredService<IHealthCheckService>(),
+           provider.GetRequiredService<IZookeeperAddressSelector>(),
+           provider.GetRequiredService<ILogger<DefaultZookeeperClientProvider>>()));
+            return this;
+        }
+
+        public ZookeeperModule UseZookeeperAddressSelector(ContainerBuilderWrapper builder)
+        {
+            builder.RegisterType<ZookeeperRandomAddressSelector>().As<IZookeeperAddressSelector>().SingleInstance();
+            return this;
+        }
+
+        public ZookeeperModule UseHealthCheck(ContainerBuilderWrapper builder)
+        {
+            builder.RegisterType<DefaultHealthCheckService>().As<IHealthCheckService>().SingleInstance();
+            return this;
+        }
+
         private static ConfigInfo GetConfigInfo(ConfigInfo config)
         {
             ZookeeperOption option = null;

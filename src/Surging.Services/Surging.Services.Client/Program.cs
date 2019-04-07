@@ -64,8 +64,8 @@ namespace Surging.Services.Client
                  Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
-                /// test Parallel
-                //var connectionCount = 200000;
+                /// test Parallel 
+                //var connectionCount = 300000;
                 //StartRequest(connectionCount);
                 //Console.ReadLine();
             }
@@ -76,16 +76,17 @@ namespace Surging.Services.Client
 
             var service = ServiceLocator.GetService<IServiceProxyFactory>();
             var userProxy = service.CreateProxy<IUserService>("User");
-            Parallel.For(0, connectionCount /1000, new ParallelOptions() { MaxDegreeOfParallelism = 10 },u =>
+            ThreadPool.SetMinThreads(100, 100);
+            Parallel.For(0, connectionCount /6000,new ParallelOptions() { MaxDegreeOfParallelism = 50 }, async u =>
              {
-                 for (var i = 0; i < 1000; i++)
-                     Test(userProxy, connectionCount);
+                 for (var i = 0; i < 6000; i++)
+                    await Test(userProxy, connectionCount);
              });
         }
 
-        public static void Test(IUserService userProxy,int connectionCount)
+        public static async Task Test(IUserService userProxy,int connectionCount)
         {
-            var a = userProxy.GetDictionary().Result;
+            var a =await userProxy.GetDictionary();
             IncreaseSuccessConnection(connectionCount);
         }
         

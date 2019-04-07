@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Address;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Surging.Core.Zookeeper.Configurations
@@ -63,6 +65,23 @@ namespace Surging.Core.Zookeeper.Configurations
             SessionTimeout = sessionTimeout;
             MqttRoutePath = mqttRoutePath;
             EnableChildrenMonitor = enableChildrenMonitor;
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                var addresses = connectionString.Split(",");
+                if (addresses.Length > 1)
+                {
+                    Addresses = addresses.Select(p => ConvertAddressModel(p));
+                }
+                else
+                {
+                    var address = ConvertAddressModel(connectionString);
+                    if (address != null)
+                    {
+                        var ipAddress = address as IpAddressModel;
+                        Addresses = new IpAddressModel[] { ipAddress};
+                    }
+                }
+            }
         }
 
         public bool EnableChildrenMonitor { get; set; }
@@ -99,6 +118,9 @@ namespace Surging.Core.Zookeeper.Configurations
         /// </summary>
         public string ChRoot { get; set; }
 
+
+        public IEnumerable<AddressModel> Addresses { get; set; }
+
         /// <summary>
         /// 缓存中心配置中心
         /// </summary>
@@ -109,5 +131,17 @@ namespace Surging.Core.Zookeeper.Configurations
         /// Mqtt路由配置路径。
         /// </summary>
         public string MqttRoutePath { get; set; }
+
+        public AddressModel ConvertAddressModel(string connection)
+        {
+            var address = connection.Split(":");
+            if (address.Length > 1)
+            {
+                int port;
+                int.TryParse(address[1], out port);
+                return new IpAddressModel(address[0], port);
+            }
+            return null;
+        }
     }
 }

@@ -11,28 +11,28 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using Surging.Core.Zookeeper.WatcherProvider;
+using Surging.Core.Zookeeper.Internal;
 
 namespace Surging.Core.Zookeeper
 {
     public class ZooKeeperServiceSubscribeManager : ServiceSubscribeManagerBase, IDisposable
-    {
-        private ZooKeeper _zooKeeper;
+    { 
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly IServiceSubscriberFactory _serviceSubscriberFactory;
         private ServiceSubscriber[] _subscribers;
-        private readonly ILogger<ZooKeeperServiceSubscribeManager> _logger;
-        private readonly ManualResetEvent _connectionWait = new ManualResetEvent(false);
+        private readonly ILogger<ZooKeeperServiceSubscribeManager> _logger; 
+        private readonly IZookeeperClientProvider _zookeeperClientProvider;
 
         public ZooKeeperServiceSubscribeManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IServiceSubscriberFactory serviceSubscriberFactory,
-            ILogger<ZooKeeperServiceSubscribeManager> logger) : base(stringSerializer)
+            ILogger<ZooKeeperServiceSubscribeManager> logger, IZookeeperClientProvider zookeeperClientProvider) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serviceSubscriberFactory = serviceSubscriberFactory;
             _serializer = serializer;
             _logger = logger;
-            CreateZooKeeper().Wait();
+            _zookeeperClientProvider = zookeeperClientProvider;
             EnterSubscribers().Wait();
         }
         
@@ -54,36 +54,40 @@ namespace Surging.Core.Zookeeper
         {
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("准备清空所有服务订阅配置。");
-            var path = _configInfo.SubscriberPath;
-            var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-
-            var index = 0;
-            while (childrens.Count() >1)
+            var zooKeepers = await _zookeeperClientProvider.GetZooKeepers();
+            foreach (var zooKeeper in zooKeepers)
             {
-                var nodePath = "/" + string.Join("/", childrens);
+                var path = _configInfo.SubscriberPath;
+                var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (await _zooKeeper.existsAsync(nodePath) != null)
+                var index = 0;
+                while (childrens.Count() > 1)
                 {
-                    var result = await _zooKeeper.getChildrenAsync(nodePath);
-                    if (result?.Children != null)
+                    var nodePath = "/" + string.Join("/", childrens);
+
+                    if (await zooKeeper.Item2.existsAsync(nodePath) != null)
                     {
-                        foreach (var child in result.Children)
+                        var result = await zooKeeper.Item2.getChildrenAsync(nodePath);
+                        if (result?.Children != null)
                         {
-                            var childPath = $"{nodePath}/{child}";
-                            if (_logger.IsEnabled(LogLevel.Debug))
-                                _logger.LogDebug($"准备删除：{childPath}。");
-                            await _zooKeeper.deleteAsync(childPath);
+                            foreach (var child in result.Children)
+                            {
+                                var childPath = $"{nodePath}/{child}";
+                                if (_logger.IsEnabled(LogLevel.Debug))
+                                    _logger.LogDebug($"准备删除：{childPath}。");
+                                await zooKeeper.Item2.deleteAsync(childPath);
+                            }
                         }
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug($"准备删除：{nodePath}。");
+                        await zooKeeper.Item2.deleteAsync(nodePath);
                     }
-                    if (_logger.IsEnabled(LogLevel.Debug))
-                        _logger.LogDebug($"准备删除：{nodePath}。");
-                    await _zooKeeper.deleteAsync(nodePath);
+                    index++;
+                    childrens = childrens.Take(childrens.Length - index).ToArray();
                 }
-                index++;
-                childrens = childrens.Take(childrens.Length - index).ToArray();
+                if (_logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation("路由配置清空完成。");
             }
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("路由配置清空完成。");
         }
 
         /// <summary>
@@ -95,49 +99,53 @@ namespace Surging.Core.Zookeeper
         {
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("准备添加服务订阅者。");
-            await CreateSubdirectory(_configInfo.SubscriberPath);
-
-            var path = _configInfo.SubscriberPath;
-            if (!path.EndsWith("/"))
-                path += "/";
-
-            subscribers = subscribers.ToArray();
-
-            if (_subscribers != null)
+            var zooKeepers = await _zookeeperClientProvider.GetZooKeepers();
+            foreach (var zooKeeper in zooKeepers)
             {
-                var oldSubscriberIds = _subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var newSubscriberIds = subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
-                var deletedSubscriberIds = oldSubscriberIds.Except(newSubscriberIds).ToArray();
-                foreach (var deletedSubscriberId in deletedSubscriberIds)
+                await CreateSubdirectory(zooKeeper, _configInfo.SubscriberPath);
+
+                var path = _configInfo.SubscriberPath;
+                if (!path.EndsWith("/"))
+                    path += "/";
+
+                subscribers = subscribers.ToArray();
+
+                if (_subscribers != null)
                 {
-                    var nodePath = $"{path}{deletedSubscriberId}";
-                    await _zooKeeper.deleteAsync(nodePath);
+                    var oldSubscriberIds = _subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var newSubscriberIds = subscribers.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var deletedSubscriberIds = oldSubscriberIds.Except(newSubscriberIds).ToArray();
+                    foreach (var deletedSubscriberId in deletedSubscriberIds)
+                    {
+                        var nodePath = $"{path}{deletedSubscriberId}";
+                        await zooKeeper.Item2.deleteAsync(nodePath);
+                    }
                 }
+
+                foreach (var serviceSubscriber in subscribers)
+                {
+                    var nodePath = $"{path}{serviceSubscriber.ServiceDescriptor.Id}";
+                    var nodeData = _serializer.Serialize(serviceSubscriber);
+                    if (await zooKeeper.Item2.existsAsync(nodePath) == null)
+                    {
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug($"节点：{nodePath}不存在将进行创建。");
+
+                        await zooKeeper.Item2.createAsync(nodePath, nodeData, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                    }
+                    else
+                    {
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug($"将更新节点：{nodePath}的数据。");
+
+                        var onlineData = (await zooKeeper.Item2.getDataAsync(nodePath)).Data;
+                        if (!DataEquals(nodeData, onlineData))
+                            await zooKeeper.Item2.setDataAsync(nodePath, nodeData);
+                    }
+                }
+                if (_logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation("服务订阅者添加成功。");
             }
-
-            foreach (var serviceSubscriber in subscribers)
-            {
-                var nodePath = $"{path}{serviceSubscriber.ServiceDescriptor.Id}";
-                var nodeData = _serializer.Serialize(serviceSubscriber);
-                if (await _zooKeeper.existsAsync(nodePath) == null)
-                {
-                    if (_logger.IsEnabled(LogLevel.Debug))
-                        _logger.LogDebug($"节点：{nodePath}不存在将进行创建。");
-
-                    await _zooKeeper.createAsync(nodePath, nodeData, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-                }
-                else
-                {
-                    if (_logger.IsEnabled(LogLevel.Debug))
-                        _logger.LogDebug($"将更新节点：{nodePath}的数据。");
-
-                    var onlineData = (await _zooKeeper.getDataAsync(nodePath)).Data;
-                    if (!DataEquals(nodeData, onlineData))
-                        await _zooKeeper.setDataAsync(nodePath, nodeData);
-                }
-            }
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("服务订阅者添加成功。");
         }
 
         public override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscribers)
@@ -155,32 +163,11 @@ namespace Surging.Core.Zookeeper
             await base.SetSubscribersAsync(subscribers);
         }
 
-        private async Task CreateZooKeeper()
-        {
-            if (_zooKeeper != null)
-                await _zooKeeper.closeAsync();
-            _zooKeeper = new ZooKeeper(_configInfo.ConnectionString, (int)_configInfo.SessionTimeout.TotalMilliseconds
-               , new ReconnectionWatcher(
-                    () =>
-                    {
-                        _connectionWait.Set();
-                    },
-                    () =>
-                    {
-                        _connectionWait.Close();
-                    },
-                    async () =>
-                    {
-                        _connectionWait.Reset();
-                        await CreateZooKeeper();
-                    }));
 
-        }
-
-        private async Task CreateSubdirectory(string path)
+        private async Task CreateSubdirectory((ManualResetEvent, ZooKeeper) zooKeeper, string path)
         {
-            _connectionWait.WaitOne();
-            if (await _zooKeeper.existsAsync(path) != null)
+            zooKeeper.Item1.WaitOne();
+            if (await zooKeeper.Item2.existsAsync(path) != null)
                 return;
 
             if (_logger.IsEnabled(LogLevel.Information))
@@ -192,9 +179,9 @@ namespace Surging.Core.Zookeeper
             foreach (var children in childrens)
             {
                 nodePath += children;
-                if (await _zooKeeper.existsAsync(nodePath) == null)
+                if (await zooKeeper.Item2.existsAsync(nodePath) == null)
                 {
-                    await _zooKeeper.createAsync(nodePath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                    await zooKeeper.Item2.createAsync(nodePath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                 }
                 nodePath += "/";
             }
@@ -215,9 +202,11 @@ namespace Surging.Core.Zookeeper
         private async Task<ServiceSubscriber> GetSubscriber(string path)
         {
             ServiceSubscriber result = null;
-            if (await _zooKeeper.existsAsync(path) != null)
+
+            var zooKeeper = await GetZooKeeper();
+            if (await zooKeeper.Item2.existsAsync(path) != null)
             {
-                var data = (await _zooKeeper.getDataAsync(path)).Data;
+                var data = (await zooKeeper.Item2.getDataAsync(path)).Data;
                 result = await GetSubscriber(data);
             }
             return result;
@@ -249,11 +238,12 @@ namespace Surging.Core.Zookeeper
         {
             if (_subscribers != null)
                 return;
-            _connectionWait.WaitOne();
+            var zooKeeper = await GetZooKeeper();
+            zooKeeper.Item1.WaitOne(); 
 
-            if (await _zooKeeper.existsAsync(_configInfo.SubscriberPath) != null)
+            if (await zooKeeper.Item2.existsAsync(_configInfo.SubscriberPath) != null)
             {
-                var result = await _zooKeeper.getChildrenAsync(_configInfo.SubscriberPath);
+                var result = await zooKeeper.Item2.getChildrenAsync(_configInfo.SubscriberPath);
                 var childrens = result.Children.ToArray();
                 _subscribers = await GetSubscribers(childrens);
             }
@@ -280,9 +270,13 @@ namespace Surging.Core.Zookeeper
         }
 
         public void Dispose()
+        { 
+        }
+
+        private async ValueTask<(ManualResetEvent, ZooKeeper)> GetZooKeeper()
         {
-            _connectionWait.Dispose();
-            _zooKeeper.closeAsync().Wait();
+            var zooKeeper = await _zookeeperClientProvider.GetZooKeeper();
+            return zooKeeper;
         }
     }
 }
