@@ -58,33 +58,37 @@ namespace Surging.ApiGateway.Controllers
                 result.StatusCode = (int)ServiceStatusCode.Success;
             }
             else
-            if ( OnAuthorization(path, model,ref result))
             {
-                if (path == GateWayAppConfig.AuthorizationRoutePath)
+                var auth = await OnAuthorization(path, model);
+                result = auth.Item2;
+                if (auth.Item1)
                 {
-                    var token = await _authorizationServerProvider.GenerateTokenCredential(model);
-                    if (token != null)
+                    if (path == GateWayAppConfig.AuthorizationRoutePath)
                     {
-                        result = ServiceResult<object>.Create(true, token);
-                        result.StatusCode = (int)ServiceStatusCode.Success;
+                        var token = await _authorizationServerProvider.GenerateTokenCredential(model);
+                        if (token != null)
+                        {
+                            result = ServiceResult<object>.Create(true, token);
+                            result.StatusCode = (int)ServiceStatusCode.Success;
+                        }
+                        else
+                        {
+                            result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                        }
                     }
                     else
                     {
-                        result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
-                    }
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(serviceKey))
-                    {
+                        if (!string.IsNullOrEmpty(serviceKey))
+                        {
 
-                        result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path, serviceKey));
-                        result.StatusCode = (int)ServiceStatusCode.Success;
-                    }
-                    else
-                    {
-                       result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
-                        result.StatusCode = (int)ServiceStatusCode.Success;
+                            result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path, serviceKey));
+                            result.StatusCode = (int)ServiceStatusCode.Success;
+                        }
+                        else
+                        {
+                            result = ServiceResult<object>.Create(true, await _serviceProxyProvider.Invoke<object>(model, path));
+                            result.StatusCode = (int)ServiceStatusCode.Success;
+                        }
                     }
                 }
             }
@@ -97,23 +101,24 @@ namespace Surging.ApiGateway.Controllers
             return !route.ServiceDescriptor.DisableNetwork();
         }
 
-        private bool OnAuthorization(string path, Dictionary<string, object> model, ref ServiceResult<object> result)
+        private async Task<(bool, ServiceResult<object>)> OnAuthorization(string path, Dictionary<string, object> model)
         {
             bool isSuccess = true;
-            var route = _serviceRouteProvider.GetRouteByPath(path).GetAwaiter().GetResult();
+            var route =await _serviceRouteProvider.GetRouteByPath(path);
+            var serviceResult = ServiceResult<object>.Create(false, null);
             if (route.ServiceDescriptor.EnableAuthorization())
             {
                 if(route.ServiceDescriptor.AuthType()== AuthorizationType.JWT.ToString())
                 {
-                    isSuccess= ValidateJwtAuthentication(route,model, ref result);
+                    isSuccess= ValidateJwtAuthentication(route,model, ref serviceResult);
                 }
                 else
                 {
-                    isSuccess = ValidateAppSecretAuthentication(route, path, model, ref result);
+                    isSuccess = ValidateAppSecretAuthentication(route, path, model, ref serviceResult);
                 }
 
             }
-            return isSuccess;
+            return new ValueTuple<bool, ServiceResult<object>>(isSuccess,serviceResult);
         }
 
         public bool ValidateJwtAuthentication(ServiceRoute route, Dictionary<string, object> model, ref ServiceResult<object> result)
