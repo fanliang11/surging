@@ -186,6 +186,7 @@ namespace Surging.Core.SwaggerGen
 
             var operation = new Operation
             {
+                Tags = new[] { serviceEntry.Type.Name },
                 OperationId = serviceEntry.Descriptor.Id, 
                 Parameters= CreateParameters(serviceEntry, methodInfo,schemaRegistry),
                 Deprecated = isDeprecated ? true : (bool?)null,
