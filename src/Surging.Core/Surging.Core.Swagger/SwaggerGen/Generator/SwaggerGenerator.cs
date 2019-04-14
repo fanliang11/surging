@@ -55,7 +55,12 @@ namespace Surging.Core.SwaggerGen
             if (!_options.SwaggerDocs.TryGetValue(documentName, out Info info))
                 throw new UnknownSwaggerDocument(documentName);
 
+
+
             var entry = _serviceEntryProvider.GetALLEntries();
+
+             entry = entry
+       .Where(apiDesc => _options.DocInclusionPredicateV2(documentName, apiDesc));
 
             var schemaRegistry = _schemaRegistryFactory.Create();
 

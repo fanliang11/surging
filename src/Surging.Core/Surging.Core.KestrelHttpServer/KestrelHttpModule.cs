@@ -54,7 +54,8 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
                     provider.Resolve<IServiceSchemaProvider>(),
-                     provider.Resolve<IServiceEngineLifetime>()
+                     provider.Resolve<IServiceEngineLifetime>(),
+                     provider.Resolve<IServiceEntryProvider>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -78,7 +79,8 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
                     provider.Resolve<IServiceSchemaProvider>(), 
-                     provider.Resolve<IServiceEngineLifetime>()
+                     provider.Resolve<IServiceEngineLifetime>(),
+                    provider.Resolve<IServiceEntryProvider>()
                       );
             }).SingleInstance();
             builder.Register(provider =>

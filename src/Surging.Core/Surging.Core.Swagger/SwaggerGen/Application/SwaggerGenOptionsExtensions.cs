@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Xml.XPath;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.Swagger;
 using Surging.Core.SwaggerGen;
 
@@ -35,6 +38,45 @@ namespace Microsoft.Extensions.DependencyInjection
             Func<string, ApiDescription, bool> predicate)
         {
             swaggerGenOptions.SwaggerGeneratorOptions.DocInclusionPredicate = predicate;
+        }
+
+        public static void DocInclusionPredicateV2(
+      this SwaggerGenOptions swaggerGenOptions,
+      Func<string, ServiceEntry, bool> predicate)
+        {
+            swaggerGenOptions.SwaggerGeneratorOptions.DocInclusionPredicateV2 = predicate;
+        }
+
+        public static void GenerateSwaggerDoc(
+      this SwaggerGenOptions swaggerGenOptions, IEnumerable<ServiceEntry> entries)
+        {
+
+            var result = new Dictionary<string, Info>();
+            var assemblies = entries.Select(p => p.Type.Assembly).Distinct();
+            foreach (var assembly in assemblies)
+            {
+                var version = assembly
+                    .GetCustomAttributes(true)
+                    .OfType<AssemblyFileVersionAttribute>().FirstOrDefault();
+
+                var title = assembly
+                  .GetCustomAttributes(true)
+                  .OfType<AssemblyTitleAttribute>().FirstOrDefault();
+
+                var des = assembly
+                  .GetCustomAttributes(true)
+                  .OfType<AssemblyDescriptionAttribute>().FirstOrDefault();
+
+                if (version == null || title == null)
+                    continue;
+                swaggerGenOptions.SwaggerDoc(title.Title, new Info()
+                {
+                    Title = title.Title,
+                    Version = version.Version,
+                    Description = des?.Description,
+
+                });
+            }
         }
 
         /// <summary>

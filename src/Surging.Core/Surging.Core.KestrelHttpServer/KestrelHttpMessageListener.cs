@@ -3,13 +3,16 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Engines;
+using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.Swagger.Builder;
 using Surging.Core.Swagger.SwaggerUI;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Surging.Core.KestrelHttpServer
@@ -21,16 +24,17 @@ namespace Surging.Core.KestrelHttpServer
         private readonly ISerializer<string> _serializer;
         private readonly IServiceSchemaProvider _serviceSchemaProvider;
         private readonly IServiceEngineLifetime _lifetime;
-
+        private readonly IServiceEntryProvider _serviceEntryProvider;
 
         public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger, 
             ISerializer<string> serializer,
-            IServiceSchemaProvider serviceSchemaProvider, IServiceEngineLifetime lifetime) :base(logger, serializer)
+            IServiceSchemaProvider serviceSchemaProvider, IServiceEngineLifetime lifetime, IServiceEntryProvider serviceEntryProvider) :base(logger, serializer)
         {
             _logger = logger;
             _serializer = serializer;
             _serviceSchemaProvider = serviceSchemaProvider;
             _lifetime = lifetime;
+            _serviceEntryProvider = serviceEntryProvider;
         }
         
         public async Task StartAsync(EndPoint endPoint)
@@ -75,6 +79,19 @@ namespace Surging.Core.KestrelHttpServer
                 services.AddSwaggerGen(options =>
                 {
                     options.SwaggerDoc(AppConfig.SwaggerOptions.Version, AppConfig.SwaggerOptions);
+                    options.GenerateSwaggerDoc(_serviceEntryProvider.GetALLEntries());
+                    options.DocInclusionPredicateV2((docName, apiDesc) =>
+                    {
+                        if (docName == AppConfig.SwaggerOptions.Version)
+                            return true;
+                        var assembly = apiDesc.Type.Assembly;
+
+                        var title = assembly
+                            .GetCustomAttributes(true)
+                            .OfType<AssemblyTitleAttribute>();
+
+                        return title.Any(v => v.Title== docName);
+                    });
                     var xmlPaths = _serviceSchemaProvider.GetSchemaFilesPath();
                     foreach (var xmlPath in xmlPaths)
                         options.IncludeXmlComments(xmlPath);
@@ -92,6 +109,7 @@ namespace Surging.Core.KestrelHttpServer
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint($"/swagger/{AppConfig.SwaggerOptions.Version}/swagger.json", AppConfig.SwaggerOptions.Title);
+                    c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries()); 
                 });
             }
        

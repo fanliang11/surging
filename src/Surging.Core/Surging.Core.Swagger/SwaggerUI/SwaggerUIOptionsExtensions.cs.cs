@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Runtime.Server;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Surging.Core.Swagger.SwaggerUI
@@ -44,6 +46,39 @@ namespace Surging.Core.Swagger.SwaggerUI
             var urls = new List<UrlDescriptor>(options.ConfigObject.Urls ?? Enumerable.Empty<UrlDescriptor>());
             urls.Add(new UrlDescriptor { Url = url, Name = name });
             options.ConfigObject.Urls = urls;
+        }
+
+        public static void SwaggerEndpoint(this SwaggerUIOptions options, IEnumerable<ServiceEntry> entries)
+        {
+
+            var list = new List<Info>();
+            var assemblies = entries.Select(p => p.Type.Assembly).Distinct();
+            foreach (var assembly in assemblies)
+            {
+                var version = assembly
+                    .GetCustomAttributes(true)
+                    .OfType<AssemblyFileVersionAttribute>().FirstOrDefault();
+
+                var title = assembly
+                  .GetCustomAttributes(true)
+                  .OfType<AssemblyTitleAttribute>().FirstOrDefault();
+
+                var des = assembly
+                  .GetCustomAttributes(true)
+                  .OfType<AssemblyDescriptionAttribute>().FirstOrDefault();
+
+                if (version == null || title == null)
+                    continue;
+
+                var info = new Info()
+                {
+                    Title = title.Title,
+                    Version = version.Version,
+                    Description = des?.Description,
+
+                };
+                options.SwaggerEndpoint($"/swagger/{info.Title}/swagger.json", info.Title);
+            }
         }
 
         /// <summary>

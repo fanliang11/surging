@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.Swagger;
 
 namespace Surging.Core.SwaggerGen
@@ -13,8 +14,9 @@ namespace Surging.Core.SwaggerGen
         {
             SwaggerDocs = new Dictionary<string, Info>();
             DocInclusionPredicate = DefaultDocInclusionPredicate;
+            DocInclusionPredicateV2 = DefaultDocInclusionPredicateV2;
             OperationIdSelector = DefaultOperationIdSelector;
-            TagsSelector = DefaultTagsSelector;
+           TagsSelector = DefaultTagsSelector;
             SortKeySelector = DefaultSortKeySelector;
             SecurityDefinitions = new Dictionary<string, SecurityScheme>();
             SecurityRequirements = new List<IDictionary<string, IEnumerable<string>>>();
@@ -26,6 +28,8 @@ namespace Surging.Core.SwaggerGen
         public IDictionary<string, Info> SwaggerDocs { get; set; }
 
         public Func<string, ApiDescription, bool> DocInclusionPredicate { get; set; }
+
+        public Func<string, ServiceEntry, bool> DocInclusionPredicateV2 { get; set; }
 
         public bool IgnoreObsoleteActions { get; set; }
 
@@ -52,6 +56,16 @@ namespace Surging.Core.SwaggerGen
         private bool DefaultDocInclusionPredicate(string documentName, ApiDescription apiDescription)
         {
             return apiDescription.GroupName == null || apiDescription.GroupName == documentName;
+        }
+
+        private bool DefaultDocInclusionPredicateV2(string documentName, ServiceEntry apiDescription)
+        {
+            var assembly = apiDescription.Type.Assembly;
+
+            var versions = assembly
+                        .GetCustomAttributes(true)
+                        .OfType<AssemblyVersionAttribute>();
+            return versions != null; 
         }
 
         private string DefaultOperationIdSelector(ApiDescription apiDescription)
