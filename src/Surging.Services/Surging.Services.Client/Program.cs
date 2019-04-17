@@ -64,23 +64,23 @@ namespace Surging.Services.Client
 
             using (host.Run())
             {
-                Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
+                // Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
                 /// test Parallel 
-                //var connectionCount = 300000;
-                //StartRequest(connectionCount);
-                //Console.ReadLine();
+                var connectionCount = 300000;
+                StartRequest(connectionCount);
+                Console.ReadLine();
             }
         }
 
         private static void StartRequest(int connectionCount)
         {
-            // var service = ServiceLocator.GetService<IServiceProxyFactory>();
-            var userProxy = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<IUserService>("User");
-            ServiceResolver.Current.Register("User", userProxy);
+            // var service = ServiceLocator.GetService<IServiceProxyFactory>(); 
             var sw = new Stopwatch();
             sw.Start();
+            var userProxy = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<IUserService>("User");
+            ServiceResolver.Current.Register("User", userProxy);
             var service = ServiceLocator.GetService<IServiceProxyFactory>();
             userProxy = ServiceResolver.Current.GetService<IUserService>("User");
             sw.Stop();
