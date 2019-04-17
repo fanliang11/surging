@@ -44,7 +44,7 @@ namespace Surging.Core.Consul
             _consulClientProvider = consulClientProvider;
             _manager = manager;
             _serviceHeartbeatManager = serviceHeartbeatManager;
-            EnterRoutes().Wait();
+             EnterRoutes().Wait();
         }
 
         public override async Task ClearAsync()

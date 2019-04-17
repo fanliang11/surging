@@ -7,6 +7,7 @@ using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.DependencyResolution;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;
@@ -19,6 +20,7 @@ using Surging.Core.ServiceHosting.Internal.Implementation;
 using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common;
 using System;
+using System.Diagnostics;
 //using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
@@ -43,7 +45,7 @@ namespace Surging.Services.Client
                         .AddCache();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
-                }) 
+                })
                 .ConfigureLogging(logger =>
                 {
                     logger.AddConfiguration(
@@ -56,12 +58,13 @@ namespace Surging.Services.Client
                 .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseClient()
+                .UseProxy()
                 .UseStartup<Startup>()
                 .Build();
 
             using (host.Run())
             {
-                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
+                Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
                 /// test Parallel 
@@ -73,15 +76,21 @@ namespace Surging.Services.Client
 
         private static void StartRequest(int connectionCount)
         {
-
+            // var service = ServiceLocator.GetService<IServiceProxyFactory>();
+            var userProxy = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<IUserService>("User");
+            ServiceResolver.Current.Register("User", userProxy);
+            var sw = new Stopwatch();
+            sw.Start();
             var service = ServiceLocator.GetService<IServiceProxyFactory>();
-            var userProxy = service.CreateProxy<IUserService>("User");
+            userProxy = ServiceResolver.Current.GetService<IUserService>("User");
+            sw.Stop();
+            Console.WriteLine($"代理所花{sw.ElapsedMilliseconds}ms");
             ThreadPool.SetMinThreads(100, 100);
-            Parallel.For(0, connectionCount /6000,new ParallelOptions() { MaxDegreeOfParallelism = 50 }, async u =>
-             {
-                 for (var i = 0; i < 6000; i++)
-                    await Test(userProxy, connectionCount);
-             });
+            Parallel.For(0, connectionCount / 6000, new ParallelOptions() { MaxDegreeOfParallelism = 50 }, async u =>
+               {
+                   for (var i = 0; i < 6000; i++)
+                       await Test(userProxy, connectionCount);
+               });
         }
 
         public static async Task Test(IUserService userProxy,int connectionCount)
