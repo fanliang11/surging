@@ -286,5 +286,5 @@ QQ群：615562965
 ![海克斯康](http://www.hexagonchina.com.cn/images/logo.png)
 ![格林斯达](http://www.glsd99.com/UploadFiles/Others/20140521151139_27186.jpg)
 ![星炬科技](http://www.cn-xingju.com.cn/imageRepository/b34fbb43-e98a-43f4-b665-65714684bafc.jpg)
-![恒赢智行](http://www.wintelia.com/resources/images/index/logo_head.png) 
+![恒赢智航](http://www.wintelia.com/resources/images/index/logo_head.png) 
 
