@@ -281,7 +281,7 @@ QQ群：615562965
 
 ## 谁在使用
 
-这些只是使用surging的公司的一部分，仅供参考。 如果您使用的是surging，请在此处 [https://github.com/dotnetcore/surging/issues/283](https://github.com/alibaba/nacos/issues/273) 添加您的公司，告诉我们您的方案，以使surging更好。.
+这些只是使用surging的公司的一部分，仅供参考。 如果您使用的是surging，请在[此处](https://github.com/alibaba/nacos/issues/273) 添加您的公司，告诉我们您的方案，以使surging更好。.
 
 ![海克斯康](http://www.hexagonchina.com.cn/images/logo.png)
 ![格林斯达](http://www.glsd99.com/UploadFiles/Others/20140521151139_27186.jpg)
