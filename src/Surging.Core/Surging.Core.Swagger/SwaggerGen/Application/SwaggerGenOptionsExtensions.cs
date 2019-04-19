@@ -258,6 +258,11 @@ namespace Microsoft.Extensions.DependencyInjection
             swaggerGenOptions.SchemaRegistryOptions.IgnoreObsoleteProperties = true;
         }
 
+        public static void IgnoreFullyQualified(this SwaggerGenOptions swaggerGenOptions)
+        {
+            swaggerGenOptions.SchemaRegistryOptions.IgnoreFullyQualified = true;
+        }
+
         /// <summary>
         /// Extend the Swagger Generator with "filters" that can modify Schemas after they're initially generated
         /// </summary>

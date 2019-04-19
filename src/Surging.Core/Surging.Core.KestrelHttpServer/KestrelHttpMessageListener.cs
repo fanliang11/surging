@@ -6,6 +6,7 @@ using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.KestrelHttpServer.Internal;
+using Surging.Core.Swagger;
 using Surging.Core.Swagger.Builder;
 using Surging.Core.Swagger.SwaggerUI;
 using System;
@@ -26,9 +27,9 @@ namespace Surging.Core.KestrelHttpServer
         private readonly IServiceEngineLifetime _lifetime;
         private readonly IServiceEntryProvider _serviceEntryProvider;
 
-        public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger, 
+        public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger,
             ISerializer<string> serializer,
-            IServiceSchemaProvider serviceSchemaProvider, IServiceEngineLifetime lifetime, IServiceEntryProvider serviceEntryProvider) :base(logger, serializer)
+            IServiceSchemaProvider serviceSchemaProvider, IServiceEngineLifetime lifetime, IServiceEntryProvider serviceEntryProvider) : base(logger, serializer)
         {
             _logger = logger;
             _serializer = serializer;
@@ -36,33 +37,35 @@ namespace Surging.Core.KestrelHttpServer
             _lifetime = lifetime;
             _serviceEntryProvider = serviceEntryProvider;
         }
-        
+
         public async Task StartAsync(EndPoint endPoint)
         {
-            var ipEndPoint = endPoint as IPEndPoint; 
+            var ipEndPoint = endPoint as IPEndPoint;
             try
             {
-               var hostBuilder = new WebHostBuilder()
-                 .UseContentRoot(Directory.GetCurrentDirectory())
-                 .UseKestrel(options => {
-                     options.Listen(ipEndPoint);
+                var hostBuilder = new WebHostBuilder()
+                  .UseContentRoot(Directory.GetCurrentDirectory())
+                  .UseKestrel(options =>
+                  {
+                      options.Listen(ipEndPoint);
 
-                 })
-                 .ConfigureServices(ConfigureServices)
-                 .ConfigureLogging((logger) => {
-                     logger.AddConfiguration(
-                            CPlatform.AppConfig.GetSection("Logging"));
-                 })
-                 .Configure(AppResolve);
+                  })
+                  .ConfigureServices(ConfigureServices)
+                  .ConfigureLogging((logger) =>
+                  {
+                      logger.AddConfiguration(
+                             CPlatform.AppConfig.GetSection("Logging"));
+                  })
+                  .Configure(AppResolve);
 
                 if (Directory.Exists(CPlatform.AppConfig.ServerOptions.WebRootPath))
-                    hostBuilder = hostBuilder.UseWebRoot(CPlatform.AppConfig.ServerOptions.WebRootPath); 
-                _host= hostBuilder.Build();
+                    hostBuilder = hostBuilder.UseWebRoot(CPlatform.AppConfig.ServerOptions.WebRootPath);
+                _host = hostBuilder.Build();
                 _lifetime.ServiceEngineStarted.Register(async () =>
                 {
                     await _host.RunAsync();
                 });
-              
+
             }
             catch
             {
@@ -73,16 +76,22 @@ namespace Surging.Core.KestrelHttpServer
 
         public void ConfigureServices(IServiceCollection services)
         {
-             services.AddMvc();
-            if (AppConfig.SwaggerOptions != null)
+            services.AddMvc();
+            var info = AppConfig.SwaggerConfig.Info == null
+                ? AppConfig.SwaggerOptions : AppConfig.SwaggerConfig.Info;
+            var swaggerOptions = AppConfig.SwaggerConfig.Options;
+            if (info != null)
             {
                 services.AddSwaggerGen(options =>
                 {
-                    options.SwaggerDoc(AppConfig.SwaggerOptions.Version, AppConfig.SwaggerOptions);
+
+                    options.SwaggerDoc(info.Version, info);
+                    if (swaggerOptions != null && swaggerOptions.IgnoreFullyQualified)
+                        options.IgnoreFullyQualified();
                     options.GenerateSwaggerDoc(_serviceEntryProvider.GetALLEntries());
                     options.DocInclusionPredicateV2((docName, apiDesc) =>
                     {
-                        if (docName == AppConfig.SwaggerOptions.Version)
+                        if (docName == info.Version)
                             return true;
                         var assembly = apiDesc.Type.Assembly;
 
@@ -90,7 +99,7 @@ namespace Surging.Core.KestrelHttpServer
                             .GetCustomAttributes(true)
                             .OfType<AssemblyTitleAttribute>();
 
-                        return title.Any(v => v.Title== docName);
+                        return title.Any(v => v.Title == docName);
                     });
                     var xmlPaths = _serviceSchemaProvider.GetSchemaFilesPath();
                     foreach (var xmlPath in xmlPaths)
@@ -103,16 +112,18 @@ namespace Surging.Core.KestrelHttpServer
         {
             app.UseStaticFiles();
             app.UseMvc();
-            if (AppConfig.SwaggerOptions != null)
+            var info = AppConfig.SwaggerConfig.Info == null
+                 ? AppConfig.SwaggerOptions : AppConfig.SwaggerConfig.Info;
+            if (info != null)
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint($"/swagger/{AppConfig.SwaggerOptions.Version}/swagger.json", AppConfig.SwaggerOptions.Title);
-                    c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries()); 
+                    c.SwaggerEndpoint($"/swagger/{info.Version}/swagger.json", info.Title);
+                    c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries());
                 });
             }
-       
+
             app.Run(async (context) =>
             {
                 var sender = new HttpServerMessageSender(_serializer, context);
@@ -124,6 +135,6 @@ namespace Surging.Core.KestrelHttpServer
         {
             _host.Dispose();
         }
-        
+
     }
 }

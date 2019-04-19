@@ -11,5 +11,10 @@ namespace Surging.Core.KestrelHttpServer
         {
             get;internal set;
         }
+
+        public static DocumentConfiguration SwaggerConfig
+        {
+            get; internal set;
+        }
     }
 }

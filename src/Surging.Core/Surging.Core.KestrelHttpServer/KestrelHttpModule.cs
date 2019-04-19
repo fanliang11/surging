@@ -31,11 +31,14 @@ namespace Surging.Core.KestrelHttpServer
             base.RegisterBuilder(builder);
             var section = CPlatform.AppConfig.GetSection("Swagger");
             if (section.Exists())
+            {
                 AppConfig.SwaggerOptions = section.Get<Info>();
+                AppConfig.SwaggerConfig = section.Get<DocumentConfiguration>();
+            }
             builder.RegisterType(typeof(DefaultServiceSchemaProvider)).As(typeof(IServiceSchemaProvider)).SingleInstance();
 
             builder.RegisterType(typeof(HttpExecutor)).As(typeof(IServiceExecutor))
-  .Named<IServiceExecutor>(CommunicationProtocol.Http.ToString()).SingleInstance();
+                .Named<IServiceExecutor>(CommunicationProtocol.Http.ToString()).SingleInstance();
             if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.Http)
             {
                 RegisterDefaultProtocol(builder);

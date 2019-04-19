@@ -13,7 +13,7 @@
     "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http、Tcp、None
-    "RootPath": "${RootPath}|D:\\userapp",
+    "RootPath": "${RootPath}|D:\\userapp1",
     "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
     "IsModulePerLifetimeScope": false,
     "ReloadOnChange": false,
@@ -38,17 +38,22 @@
     "EnableChildrenMonitor": false
   },
   "Swagger": {
-    "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",
-    "Title": "${SwaggerTitle}|Surging Demo",
-    "Description": "${SwaggerDes}|surging demo",
-    "Contact": {
-      "Name": "API Support",
-      "Url": "https://github.com/dotnetcore/surging",
-      "Email": "fanliang1@hotmail.com"
+    "Info": {
+      "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",
+      "Title": "${SwaggerTitle}|Surging Demo",
+      "Description": "${SwaggerDes}|surging demo",
+      "Contact": {
+        "Name": "API Support",
+        "Url": "https://github.com/dotnetcore/surging",
+        "Email": "fanliang1@hotmail.com"
+      },
+      "License": {
+        "Name": "MIT",
+        "Url": "https://github.com/dotnetcore/surging/blob/master/LICENSE"
+      }
     },
-    "License": {
-      "Name": "MIT",
-      "Url": "https://github.com/dotnetcore/surging/blob/master/LICENSE"
+    "Options": {
+      "IgnoreFullyQualified": true
     }
   },
   "EventBus_Kafka": {

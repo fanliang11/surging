@@ -32,6 +32,7 @@ namespace Surging.Core.SwaggerGen
         {
             target.CustomTypeMappings = new Dictionary<Type, Func<Schema>>(source.CustomTypeMappings);
             target.DescribeAllEnumsAsStrings = source.DescribeAllEnumsAsStrings;
+            target.IgnoreFullyQualified = source.IgnoreFullyQualified;
             target.DescribeStringEnumsInCamelCase = source.DescribeStringEnumsInCamelCase;
             target.UseReferencedDefinitionsForEnums = source.UseReferencedDefinitionsForEnums;
             target.SchemaIdSelector = source.SchemaIdSelector;
