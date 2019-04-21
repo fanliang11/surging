@@ -1,22 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <PackageId>Surging.Core.ServiceHosting</PackageId>
     <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
-    <Version>1.0.0.0</Version>
+    <Version>1.1.0.0</Version>
     <Authors>fanly</Authors>
     <Company />
     <Product>surging Micro Service Framework</Product>
-    <PackageReleaseNotes>1. add KestrelHttpServer support
-2.add Swagger  support
-3. fix bug</PackageReleaseNotes>
+    <PackageReleaseNotes>1.multiple register center cluster
+2. fix bug</PackageReleaseNotes>
     <PackageTags>MicroService surging</PackageTags>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

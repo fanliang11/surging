@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <PackageReleaseNotes>1. fix bug</PackageReleaseNotes>
-    <Version>1.0.0.0</Version>
+    <PackageReleaseNotes>1.multiple register center cluster
+2. fix bug</PackageReleaseNotes>
+    <Version>1.1.0.0</Version>
     <Authors>fanly</Authors>
     <Company>fanly</Company>
     <Product>surging Micro Service Framework</Product>
@@ -12,7 +13,7 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 

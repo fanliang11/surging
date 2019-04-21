@@ -2,18 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>1.0.0.0</Version>
+    <Version>1.1.0.0</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
     <Company />
-    <PackageReleaseNotes>1. fix bug
-</PackageReleaseNotes>
+    <PackageReleaseNotes>1.multiple register center cluster
+2. fix bug</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
     <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
   </PropertyGroup>
 
