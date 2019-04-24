@@ -1,0 +1,41 @@
+﻿@{
+    var isPjax = !string.IsNullOrEmpty(Context.Request.Headers["X-PJAX"]) && bool.Parse(Context.Request.Headers["X-PJAX"]);
+    Layout = isPjax ? null : "_Layout.cshtml"; ;
+    var now = DateTime.Now;
+}
+@if (isPjax)
+{
+    @RenderSection("SubHeadCSS", false)
+    @RenderBody()
+    @RenderSection("SubFootJS", false)
+}
+else
+{
+    <div id="wrapper" class="pc-feed-content" style="display:none;">
+    </div>
+    <section class="active" id="ov-btmright">
+        <div id="app_wrap">@RenderBody()</div>
+    </section>
+}
+<link rel="stylesheet" href="~/assets/css/base/ace/ace.min.css" />
+@section HeadCSS{
+    @RenderSection("SubHeadCSS", false)
+}
+@section FootJS{
+<script src="~/assets/lib/seajs/dist/sea.js?t=201787"></script>
+<script src="~/assets/js/base/seajs-text.js"></script>
+<script src="~/assets/js/base/jquery.min.js"></script>
+<script src="~/assets/js/config.js"></script>
+<script type="text/javascript">
+    seajs.config({
+        base: '/'
+
+    });
+    seajs.use("common/view/main.guide.js", function(a) {
+            a.init({
+                time: "@DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")"
+            });
+        });
+</script>
+  @RenderSection("SubFootJS", false)
+}

@@ -1,0 +1,11 @@
+# Site settings
+
+title: surging 
+SEOTitle: surging  
+header-img: logo.jpg
+email: fanliang1@hotmail.com
+description: "surging is The distributed micro service open-source framework based on .NET Core provides high-performance RPC Communications. "
+keyword: "microservices, surging"
+url: "https://surging.github.io"
+baseurl: ""
+theme: jekyll-theme-minimal

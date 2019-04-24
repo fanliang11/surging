@@ -1,0 +1,59 @@
+{
+  "Surging": {
+    "Ip": "${Surging_Server_IP}|127.0.0.1",
+    "WatchInterval": 30,
+    "Port": 98,
+    "MappingIp": "${Mapping_ip}",
+    "MappingPort": "${Mapping_Port}",
+    "Token": "true",
+    "Libuv": true,
+    "Protocol": "${Protocol}|Tcp", //Http¡¢Tcp¡¢None
+    "RootPath": "${RootPath}|d:\\microsurging",
+    "Ports": {
+      "HttpPort": "${HttpPort}|180"
+    },
+    "RequestCacheEnabled": false,
+    "Packages": [
+      {
+        "TypeName": "EnginePartModule",
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;ServiceProxyModule;EventBusRabbitMQModule;"
+      }
+    ]
+  },
+  "Consul": {
+    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500,127.0.0.1:9500",
+    "SessionTimeout": "${Register_SessionTimeout}|50",
+    "RoutePath": "${Register_RoutePath}",
+    "ReloadOnChange": true,
+    "EnableChildrenMonitor": false
+  },
+  "EventBus": {
+    "EventBusConnection": "${EventBusConnection}|localhost",
+    "EventBusUserName": "guest",
+    "EventBusPassword": "guest",
+    "VirtualHost": "/",
+    "BrokerName": "surging_demo",
+    "Port": "5672"
+  },
+  "Zookeeper": {
+    "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181",
+    "SessionTimeout": 50,
+    "ReloadOnChange": true
+  },
+  "Logging": {
+    "Debug": {
+      "LogLevel": {
+        "Default": "Information"
+      }
+    },
+    "Console": {
+      "IncludeScopes": true,
+      "LogLevel": {
+        "Default": "${LogLevel}|Debug"
+      }
+    },
+    "LogLevel": {
+      "Default": "${LogLevel}|Debug"
+    }
+  }
+}

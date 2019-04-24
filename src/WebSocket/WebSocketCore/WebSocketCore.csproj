@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <PackageId>Surging.WebSocketCore</PackageId>
+    <Description>.NET CORE version based on websocket-sharp</Description>
+    <Authors>fanly</Authors>
+    <Company>fanly</Company>
+    <Product>WebSocketCore Framework</Product>
+    <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
+    <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
+    <AssemblyVersion>1.9.2.0</AssemblyVersion>
+    <FileVersion>1.9.2.0</FileVersion>
+    <Version>1.9.2</Version>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,98 @@
+﻿@using Surging.Core.CPlatform.Support;
+@model Surging.Core.CPlatform.Support.ServiceCommandDescriptor
+@{
+
+    Layout = null;
+}
+
+<div class="modal-body" style="width: 680px;">
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>服务编号</label>
+        <div class="col-sm-9 control-sm">
+            @Html.LabelFor(p => p.ServiceId, Model.ServiceId)
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>强制熔断</label>
+        <div class="col-sm-9 control-sm">
+            @Html.RadioButtonFor(p => p.CircuitBreakerForceOpen, true, new { name = "CircuitBreakerForceOpen" }) <label>是</label>
+            @Html.RadioButtonFor(p => p.CircuitBreakerForceOpen, false, new { name = "CircuitBreakerForceOpen" }) <label>否</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>容错策略</label>
+        <div class="col-sm-9 control-sm">
+            @Html.DropDownListFor(p => p.Strategy, new SelectListItem[] {
+              new SelectListItem{ Text="Failover",Value=StrategyType.Failover.ToString(),Selected=true},
+               new SelectListItem{ Text="Injection",Value=StrategyType.Injection.ToString()},
+                  new SelectListItem{ Text="FallBack",Value=StrategyType.Injection.ToString()}
+           })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>超时时间</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.ExecutionTimeoutInMilliseconds, new { autocomplete = "off", placeholder = "超时时间", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>开启缓存</label>
+        <div class="col-sm-9 control-sm">
+            @Html.RadioButtonFor(p => p.RequestCacheEnabled, true, new { name = "RequestCacheEnabled" }) <label>是</label>
+            @Html.RadioButtonFor(p => p.RequestCacheEnabled, false, new { name = "RequestCacheEnabled" }) <label>否</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>错误率</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.BreakeErrorThresholdPercentage, new { autocomplete = "off", placeholder = "错误率", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>尝试请求</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.BreakeSleepWindowInMilliseconds, new { autocomplete = "off", placeholder = "尝试请求", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>关闭熔断</label>
+        <div class="col-sm-9 control-sm">
+            @Html.RadioButtonFor(p => p.BreakerForceClosed, true, new { name = "BreakerForceClosed" }) <label>是</label>
+            @Html.RadioButtonFor(p => p.BreakerForceClosed, false, new { name = "BreakerForceClosed" }) <label>否</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>熔断阚值</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.BreakerRequestVolumeThreshold, new { autocomplete = "off", placeholder = "熔断阚值", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>信号并发</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => p.MaxConcurrentRequests, new { autocomplete = "off", placeholder = "信号并发", @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right">命名空间</label>
+        <div class="col-sm-9">
+            <input type="text" name="InjectionNamespaces" autocomplete="off" placeholder="命名空间" class="form-control" value=" @(Model.InjectionNamespaces==null?"":string.Join(",", Model.InjectionNamespaces))" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right">回退实例名</label>
+        <div class="col-sm-9">
+            <input type="text" name="FallBackName" autocomplete="off" placeholder="命名空间" class="form-control" value=" @(Model.InjectionNamespaces==null?"":string.Join(",", Model.FallBackName))" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right">注入脚本</label>
+        <div class="col-sm-9">
+            @Html.TextAreaFor(p => p.Injection, new { autocomplete = "off", placeholder = "填写描述", @class = "form-control", style = "height: 120px;" })
+        </div>
+    </div>
+
+    @Html.HiddenFor(p => p.ServiceId)
+</div>
+

@@ -1,0 +1,119 @@
+﻿{
+  "CachingSettings": [
+    {
+      "Id": "ddlCache",
+      "Class": "Surging.Core.Caching.RedisCache.RedisContext,Surging.Core.Caching",
+      "Properties": [
+        {
+          "Name": "appRuleFile",
+          "Ref": "rule"
+        },
+        {
+          "Name": "dataContextPool",
+          "Ref": "ddls_sample",
+          "Maps": [
+            {
+              "Name": "Redis",
+              "Properties": [
+                {
+                  "value": "127.0.0.1:6379::1"
+                }
+              ]
+            },
+            {
+              "Name": "MemoryCache"
+            }
+          ]
+        },
+        {
+          "Name": "defaultExpireTime",
+          "value": "120"
+        },
+        {
+          "Name": "connectTimeout",
+          "Value": "120"
+        },
+        {
+          "Name": "minSize",
+          "Value": "1"
+        },
+        {
+          "Name": "maxSize",
+          "Value": "10"
+        }
+      ]
+    },
+    {
+      "Id": "surgingDemoCache",
+      "Class": "Surging.Core.Caching.RedisCache.RedisContext,Surging.Core.Caching",
+      "InitMethod": "",
+      "Maps": null,
+      "Properties": [
+        {
+          "Name": "appRuleFile",
+          "Ref": "rule",
+          "Value": "",
+          "Maps": null
+        },
+        {
+          "Name": "dataContextPool",
+          "Ref": "ddls_sample",
+          "Value": "",
+          "Maps": [
+            {
+              "Name": "Redis",
+              "Properties": [
+                {
+                  "Name": null,
+                  "Ref": null,
+                  "Value": "127.0.0.1:7000::1",
+                  "Maps": null
+                },
+                {
+                  "Name": null,
+                  "Ref": null,
+                  "Value": "127.0.0.1:7005::1",
+                  "Maps": null
+                },
+                {
+                  "Name": null,
+                  "Ref": null,
+                  "Value": "127.0.0.1:6379::1",
+                  "Maps": null
+                }
+              ]
+            },
+            {
+              "Name": "MemoryCache",
+              "Properties": null
+            }
+          ]
+        },
+        {
+          "Name": "defaultExpireTime",
+          "Ref": "",
+          "Value": "120",
+          "Maps": null
+        },
+        {
+          "Name": "connectTimeout",
+          "Ref": "",
+          "Value": "120",
+          "Maps": null
+        },
+        {
+          "Name": "minSize",
+          "Ref": "",
+          "Value": "1",
+          "Maps": null
+        },
+        {
+          "Name": "maxSize",
+          "Ref": "",
+          "Value": "10",
+          "Maps": null
+        }
+      ]
+    }
+  ]
+}

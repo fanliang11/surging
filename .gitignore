@@ -195,6 +195,7 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+!/node_modules/swagger-ui-dist/
 orleans.codegen.cs
 
 # Since there are multiple workflows, uncomment next line to ignore bower_components
@@ -262,3 +263,4 @@ paket-files/
 __pycache__/
 *.pyc
 
+/src/Surging.Core/Surging.Core.CPlatform/CPlatformResource.en-US.resources

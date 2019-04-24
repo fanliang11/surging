@@ -1,0 +1,23 @@
+﻿@using Surging.Core.CPlatform.Address;
+@model  Surging.Core.ApiGateWay.ServiceDiscovery.Implementation.ServiceAddressModel
+@{
+
+    Layout = null;
+}
+<div class="modal-body" style="width: 680px;">
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>服务编号</label>
+        <div class="col-sm-9 control-sm">
+            <label> @Model.Address.ToString()</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>服务令牌</label>
+        <div class="col-sm-9">
+            @Html.TextBoxFor(p => ((IpAddressModel)p.Address).Token, new {autocomplete = "off", placeholder = "令牌", @class = "form-control" })
+        </div>
+    </div> 
+
+    @Html.HiddenFor(p => ((IpAddressModel)p.Address).Ip)
+    @Html.HiddenFor(p => ((IpAddressModel)p.Address).Port)
+</div>

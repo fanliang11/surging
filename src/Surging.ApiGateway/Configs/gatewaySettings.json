@@ -1,0 +1,37 @@
+{
+  "AccessTokenExpireTimeSpan": "30",
+  "AuthorizationRoutePath": "api/user/authentication",
+  "AuthorizationServiceKey": "User",
+  "TokenEndpointPath": "api/oauth2/token",
+  "CacheMode": "ddlCache.Redis", //MemoryCache or  gateway.Redis save token
+  "AccessPolicy": {
+    "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
+    "AllowAnyHeader": true,
+    "AllowAnyMethod": true
+  },
+  "Register": {
+    "Provider": "Consul",
+    "Address": "${Register_Conn}|127.0.0.1:8500" //127.0.0.1:8500,127.0.0.1:9500
+  },
+  "ServicePart": {
+    "MainPath": "part/service/aggregation",
+    "EnableAuthorization": false,
+    "Services": [
+      {
+        "ServiceAggregation": [
+          {
+            "RoutePath": "api/user/GetUserName",
+            "ServiceKey": "User",
+            "Key": "Users"
+          },
+          {
+            "RoutePath": "api/user/GetUserName",
+            "ServiceKey": "User",
+            "Key": "Roles"
+          }
+        ],
+        "UrlMapping": "part/user/getuserrole"
+      }
+    ]
+  }
+}
