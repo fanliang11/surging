@@ -39,6 +39,13 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
+       public Task<UserModel> GetUserById(Guid id)
+        {
+            return Task.FromResult(new UserModel {
+
+            });
+        }
+
         public Task<int> GetUserId(string userName)
         {
             var xid = RpcContext.GetContext().GetAttachment("xid");
