@@ -28,8 +28,9 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
         {
             yield return EnumTypeConvert;
             yield return SimpleTypeConvert;
-            yield return ComplexTypeConvert;
             yield return GuidTypeConvert;
+            yield return ComplexTypeConvert;
+            
         }
 
         #endregion Implementation of ITypeConvertibleProvider
