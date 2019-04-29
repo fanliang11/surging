@@ -47,6 +47,19 @@ namespace Surging.Core.Swagger
         public Dictionary<string, object> Extensions { get; private set; }
     }
 
+    public class DocumentConfiguration
+    {
+        public Info Info { get; set; } = null;
+
+        public DocumentOptions Options { get; set; } = null;
+    }
+
+    public class DocumentOptions
+    {
+        public bool IgnoreFullyQualified { get; set; }
+    }
+
+
     public class Info
     {
         public Info()

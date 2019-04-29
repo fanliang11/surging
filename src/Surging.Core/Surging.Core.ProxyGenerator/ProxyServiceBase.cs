@@ -72,7 +72,6 @@ namespace Surging.Core.ProxyGenerator
                 {
                     result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
                     ServiceResolver.Current.Register(key, result);
-
                 }
                 return result;
             }
