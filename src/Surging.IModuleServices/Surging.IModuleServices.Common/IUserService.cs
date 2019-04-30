@@ -138,6 +138,13 @@ new Surging.IModuleServices.Common.Models.UserModel
         Task<string> GetUser(List<int> idList);
 
         /// <summary>
+        /// 测序guid
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<UserModel> GetUserById(Guid id);
+
+        /// <summary>
         /// 测试上传文件
         /// </summary>
         /// <param name="form">HttpFormCollection 类型参数</param>

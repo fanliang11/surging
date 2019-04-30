@@ -66,6 +66,15 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
+
+        public Task<UserModel> GetUserById(Guid id)
+        {
+            return Task.FromResult(new UserModel
+            {
+
+            });
+        }
+
         public Task<bool> GetDictionary()
         {
             return Task.FromResult<bool>(true);
