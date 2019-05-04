@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Transport
 {
@@ -12,6 +13,6 @@ namespace Surging.Core.CPlatform.Transport
         /// </summary>
         /// <param name="endPoint">终结点。</param>
         /// <returns>传输客户端实例。</returns>
-        ITransportClient CreateClient(EndPoint endPoint);
+        Task<ITransportClient> CreateClientAsync(EndPoint endPoint);
     }
 }
