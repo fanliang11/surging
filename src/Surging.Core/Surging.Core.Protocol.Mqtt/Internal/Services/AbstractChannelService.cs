@@ -158,7 +158,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
                     ServiceId = _publishServiceId,
                     Parameters = new Dictionary<string, object>() {
                            {"deviceId",deviceId},
-                           { "willMessage",willMessage}
+                           { "message",willMessage}
                        }
                 },
 
