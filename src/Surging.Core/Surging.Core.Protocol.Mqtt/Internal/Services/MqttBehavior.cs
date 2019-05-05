@@ -20,6 +20,11 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
             await GetService<IChannelService>().Publish(deviceId, willMessage);
         }
 
+        public async Task RemotePublish(string deviceId, MqttWillMessage willMessage)
+        {
+            await GetService<IChannelService>().RemotePublishMessage(deviceId, willMessage);
+        }
+
         public override T GetService<T>(string key)
         {
             if (ServiceLocator.Current.IsRegisteredWithKey<T>(key))
