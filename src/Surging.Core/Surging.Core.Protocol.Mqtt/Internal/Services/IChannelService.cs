@@ -19,6 +19,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         Task Publish(IChannel channel, PublishPacket mqttPublishMessage);
         ValueTask PingReq(IChannel channel);
         Task Publish(string deviceId, MqttWillMessage willMessage);
+        Task RemotePublishMessage(string deviceId, MqttWillMessage willMessage);
         Task Close(string deviceId, bool isDisconnect);
         ValueTask<bool> GetDeviceIsOnine(string deviceId);
         Task SendWillMsg(MqttWillMessage willMeaasge);
