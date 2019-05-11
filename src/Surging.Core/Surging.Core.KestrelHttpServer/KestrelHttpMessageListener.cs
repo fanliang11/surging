@@ -119,8 +119,9 @@ namespace Surging.Core.KestrelHttpServer
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint($"/swagger/{info.Version}/swagger.json", info.Title);
-                    c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries());
+                    var areaName = AppConfig.SwaggerConfig.Options?.IngressName;
+                    c.SwaggerEndpoint($"/swagger/{info.Version}/swagger.json", info.Title, areaName);
+                    c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries(), areaName);
                 });
             }
 
