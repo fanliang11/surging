@@ -54,6 +54,7 @@
     },
     "Options": {
       "IgnoreFullyQualified": false
+      // "IngressName": "Notice"
     }
   },
   "EventBus_Kafka": {

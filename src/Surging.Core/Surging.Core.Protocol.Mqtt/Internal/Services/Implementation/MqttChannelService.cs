@@ -175,7 +175,6 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                     ByteBuf = Encoding.UTF8.GetBytes(willMessage.WillMessage),
                     QoS = willMessage.Qos
                 }, willMessage.Qos == 0 ? true : false);
-            await RemotePublishMessage(deviceId, willMessage);
         }
 
         private async Task PushMessage(string topic, int qos, byte[] bytes, bool isRetain)

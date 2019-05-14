@@ -57,6 +57,8 @@ namespace Surging.Core.Swagger
     public class DocumentOptions
     {
         public bool IgnoreFullyQualified { get; set; }
+
+        public string IngressName { get; set; }
     }
 
 

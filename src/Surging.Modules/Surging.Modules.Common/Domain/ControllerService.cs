@@ -31,13 +31,15 @@ namespace Surging.Modules.Common.Domain
 
         public async Task Publish(string deviceId, WillMessage message)
         {
-            await Publish(deviceId, new MqttWillMessage
+            var willMessage = new MqttWillMessage
             {
                 WillMessage = message.Message,
                 Qos = message.Qos,
                 Topic = message.Topic,
                 WillRetain = message.WillRetain
-            });
+            };
+            await Publish(deviceId, willMessage);
+            await RemotePublish(deviceId, willMessage);
         }
     }
 }
