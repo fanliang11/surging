@@ -71,6 +71,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 else
                 {
                     MqttChannels.TryRemove(deviceId, out MqttChannel channel);
+                    mqttChannel.Topics.ForEach(async topic => { await BrokerCancellationReg(topic); });
                     if (mqttChannel.SubscribeStatus == SubscribeStatus.Yes)
                     {
                         RemoveSubTopic(mqttChannel);

@@ -144,8 +144,15 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
 
         protected async Task  BrokerCancellationReg(string topic)
         {
-            if (Topics.Count == 0)
+            if (Topics.ContainsKey(topic))
+            {
+                if (Topics["topic"].Count() == 0)
+                    await _mqttBrokerEntryManger.CancellationReg(topic, NetUtils.GetHostAddress());
+            }
+            else
+            {
                 await _mqttBrokerEntryManger.CancellationReg(topic, NetUtils.GetHostAddress());
+            }
         }
 
         public async Task RemotePublishMessage(string deviceId, MqttWillMessage willMessage)
