@@ -27,6 +27,7 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Consul\Surging.Core.Consul.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.DNS\Surging.Core.DNS.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DotNetty\Surging.Core.DotNetty.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusKafka\Surging.Core.EventBusKafka.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusRabbitMQ\Surging.Core.EventBusRabbitMQ.csproj" />

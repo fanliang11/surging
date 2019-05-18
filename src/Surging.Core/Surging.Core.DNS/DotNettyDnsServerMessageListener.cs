@@ -1,5 +1,8 @@
-﻿using DotNetty.Codecs.DNS;
+﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
+using DotNetty.Codecs.DNS;
 using DotNetty.Codecs.DNS.Messages;
+using DotNetty.Codecs.DNS.Records;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -46,27 +49,25 @@ namespace Surging.Core.DNS
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
-    
+
             var group = new MultithreadEventLoopGroup();
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(group)
                 .Channel<SocketDatagramChannel>()
-                .Option(ChannelOption.SoBroadcast, true)
-                .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
-                { 
-                IChannelPipeline pipeline = channel.Pipeline;
-                pipeline.AddLast(new DatagramDnsQueryDecoder()); ;
-                pipeline.AddLast(new DatagramDnsResponseEncoder()); ; 
-                pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
+                .Handler(new ActionChannelInitializer<IDatagramChannel>(channel =>
                 {
-                    
-                }, _logger, _serializer));
-            }));
+                    IChannelPipeline pipeline = channel.Pipeline;
+                    pipeline.AddLast(new DatagramDnsQueryDecoder());
+                    pipeline.AddLast(new DatagramDnsResponseEncoder()); ;
+                    pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
+                    {
+                        var i = 1;
+                    }, _logger, _serializer));
+                })).Option(ChannelOption.SoBroadcast, true);
             try
-            {
-                var ipAddress = endPoint as IPEndPoint;
-                _channel = await bootstrap.BindAsync(ipAddress.Port);
+            { 
+                _channel = await bootstrap.BindAsync(endPoint);
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"DNS服务主机启动成功，监听地址：{endPoint}。");
             }
@@ -120,14 +121,9 @@ namespace Surging.Core.DNS
                 _serializer = serializer;
             }
 
-        
-
-            protected override void ChannelRead0(IChannelHandlerContext ctx,DatagramDnsQuery query)
+            protected override void ChannelRead0(IChannelHandlerContext ctx, DatagramDnsQuery query)
             {
-               
             }
-
-           
 
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
             {

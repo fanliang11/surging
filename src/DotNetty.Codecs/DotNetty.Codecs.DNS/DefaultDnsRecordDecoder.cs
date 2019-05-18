@@ -69,7 +69,7 @@ namespace DotNetty.Codecs.DNS
             var name = new StringBuilder(readable << 1);
             while (inputBuffer.IsReadable())
             {
-                int len = inputBuffer.ReadUnsignedShort();
+                int len = inputBuffer.ReadByte() & 0xff; 
                 bool pointer = (len & 0xc0) == 0xc0;
 
                 if (pointer)
@@ -80,7 +80,7 @@ namespace DotNetty.Codecs.DNS
                     if (!inputBuffer.IsReadable())
                         throw new CorruptedFrameException("truncated pointer in a name");
 
-                    int next = (len & 0x3f) << 8 | inputBuffer.ReadUnsignedShort();
+                    int next = (len & 0x3f) << 8 | (inputBuffer.ReadByte() & 0xff);
                     if (next >= end)
                         throw new CorruptedFrameException("name has an out-of-range pointer");
 

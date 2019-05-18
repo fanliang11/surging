@@ -24,25 +24,28 @@ namespace DotNetty.Codecs.DNS
         {
             EndPoint recipient = message.Recipient;
             IDnsResponse response = message.Content;
-            IByteBuffer buffer = AllocateBuffer(context, message);
-
-            bool success = false;
-            try
+            if (response != null)
             {
-                EncodeHeader(response, buffer);
-                EncodeQuestions(response, buffer);
-                EncodeRecords(response, DnsSection.ANSWER, buffer);
-                EncodeRecords(response, DnsSection.AUTHORITY, buffer);
-                EncodeRecords(response, DnsSection.ADDITIONAL, buffer);
-                success = true;
-            }
-            finally
-            {
-                if (!success)
-                    buffer.Release();
-            }
+                IByteBuffer buffer = AllocateBuffer(context, message);
 
-            output.Add(new DatagramPacket(buffer, recipient, null));
+                bool success = false;
+                try
+                {
+                    EncodeHeader(response, buffer);
+                    EncodeQuestions(response, buffer);
+                    EncodeRecords(response, DnsSection.ANSWER, buffer);
+                    EncodeRecords(response, DnsSection.AUTHORITY, buffer);
+                    EncodeRecords(response, DnsSection.ADDITIONAL, buffer);
+                    success = true;
+                }
+                finally
+                {
+                    if (!success)
+                        buffer.Release();
+                }
+
+                output.Add(new DatagramPacket(buffer, recipient, null));
+            }
         }
 
         protected IByteBuffer AllocateBuffer(IChannelHandlerContext ctx,
