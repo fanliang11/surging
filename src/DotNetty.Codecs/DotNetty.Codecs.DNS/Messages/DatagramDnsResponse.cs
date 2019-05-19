@@ -10,7 +10,7 @@ namespace DotNetty.Codecs.DNS.Messages
 
         public EndPoint Recipient { get; }
 
-        public DatagramDnsResponse Content { get; }
+        public DatagramDnsResponse Content=>this ;
 
         public DatagramDnsResponse(EndPoint sender, EndPoint recipient, int id)
             : this(sender, recipient, id, DnsOpCode.QUERY, DnsResponseCode.NOERROR) { }

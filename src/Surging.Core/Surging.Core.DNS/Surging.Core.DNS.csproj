@@ -5,8 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ARSoft.Tools.Net" Version="2.2.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\DotNetty.Codecs\DotNetty.Codecs.DNS\DotNetty.Codecs.DNS.csproj" />
     <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Clients\" />
   </ItemGroup>
 
 </Project>
