@@ -13,5 +13,7 @@ namespace Surging.Core.EventBusRabbitMQ
         bool TryConnect();
 
         IModel CreateModel();
+
+        event EventHandler<ShutdownEventArgs> OnRabbitConnectionShutdown;
     }
 }

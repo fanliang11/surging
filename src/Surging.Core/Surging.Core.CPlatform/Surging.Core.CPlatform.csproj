@@ -1,16 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
      <PackageId>surging</PackageId>
      <Authors>fanly</Authors>
      <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
      <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
      <PackageTags>MicroService surging</PackageTags>
-     <PackageReleaseNotes>1.Fix incorrect question of Error Threshold Percentage 
-2.Service metadata add DisableNetwork option
-3.Upgrade to core 2.1</PackageReleaseNotes>
+     <PackageReleaseNotes>1.multiple register center cluster
+2. fix bug</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

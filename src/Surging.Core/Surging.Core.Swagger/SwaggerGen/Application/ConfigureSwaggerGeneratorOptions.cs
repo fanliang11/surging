@@ -40,6 +40,7 @@ namespace Surging.Core.SwaggerGen
             target.SwaggerDocs = new Dictionary<string, Info>(source.SwaggerDocs);
             target.DocInclusionPredicate = source.DocInclusionPredicate;
             target.IgnoreObsoleteActions = source.IgnoreObsoleteActions;
+            target.DocInclusionPredicateV2 = source.DocInclusionPredicateV2;
             target.ConflictingActionsResolver = source.ConflictingActionsResolver;
             target.OperationIdSelector = source.OperationIdSelector;
             target.TagsSelector = source.TagsSelector;

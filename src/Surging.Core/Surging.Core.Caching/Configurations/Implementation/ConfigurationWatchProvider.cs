@@ -65,10 +65,18 @@ namespace Surging.Core.Caching.Configurations.Implementation
                             m.Properties = cache.CacheEndpoint.Select(n =>
                             {
                                 var hashNode = n as ConsistentHashNode;
+                                if (!string.IsNullOrEmpty(hashNode.UserName) || !string.IsNullOrEmpty(hashNode.Password))
+                                {
+                                    return new Property
+                                    {
+                                        Value = $"{hashNode.UserName}:{hashNode.Password}@{hashNode.Host}:{hashNode.Port}::{hashNode.Db}"
+                                    };
+                                }
                                 return new Property
                                 {
                                     Value = $"{hashNode.Host}:{hashNode.Port}::{hashNode.Db}"
                                 };
+
                             }).ToList();
                     });
                 });

@@ -1,26 +1,23 @@
 ﻿using Surging.Core.CPlatform.EventBus.Events;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Surging.IModuleServices.Common.Models.Events;
-using System.Threading.Tasks;
+using Surging.Core.CPlatform.Utilities;
+using Surging.Core.EventBusRabbitMQ;
+using Surging.Core.EventBusRabbitMQ.Attributes;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
-using Surging.Core.CPlatform.Utilities;
-using Surging.Core.EventBusRabbitMQ.Attributes;
-using Surging.Core.EventBusRabbitMQ;
+using Surging.IModuleServices.Common.Models.Events;
+using System;
+using System.Threading.Tasks;
 
 namespace Surging.Modules.Common.IntegrationEvents.EventHandling
 {
-
-    [QueueConsumer("UserLoginDateChangeHandler")]
+    [QueueConsumer("UserLoginDateChangeHandler",QueueConsumerMode.Normal,QueueConsumerMode.Fail)]
     public  class UserLoginDateChangeHandler : BaseIntegrationEventHandler<UserEvent>
     {
         private readonly IUserService _userService;
         public UserLoginDateChangeHandler()
         {
             _userService = ServiceLocator.GetService<IUserService>("User");
-        }
+         }
         public override async Task Handle(UserEvent @event)
         {
             Console.WriteLine($"消费1。");

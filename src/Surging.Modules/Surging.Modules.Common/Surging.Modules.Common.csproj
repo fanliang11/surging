@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusRabbitMQ\Surging.Core.EventBusRabbitMQ.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Mqtt\Surging.Core.Protocol.Mqtt.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WS\Surging.Core.Protocol.WS.csproj" />
     <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.Common\Surging.IModuleServices.Common.csproj" />
     <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.Manger\Surging.IModuleServices.Manager.csproj" />

@@ -9,7 +9,7 @@ namespace Surging.Core.SwaggerGen
         public SchemaRegistryOptions()
         {
             CustomTypeMappings = new Dictionary<Type, Func<Schema>>();
-            SchemaIdSelector = (type) => type.FriendlyId(false);
+            SchemaIdSelector = (type) => type.FriendlyId(IgnoreFullyQualified);
             SchemaFilters = new List<ISchemaFilter>();
         }
 
@@ -22,6 +22,8 @@ namespace Surging.Core.SwaggerGen
         public bool UseReferencedDefinitionsForEnums { get; set; }
 
         public Func<Type, string> SchemaIdSelector { get; set; }
+
+        public bool IgnoreFullyQualified { get; set; }
 
         public bool IgnoreObsoleteProperties { get; set; }
 

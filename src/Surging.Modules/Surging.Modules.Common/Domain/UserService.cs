@@ -1,4 +1,5 @@
 ﻿
+using Surging.Core.Common;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
@@ -27,15 +28,22 @@ namespace Surging.Modules.Common.Domain
             this._repository = repository;
         }
 
-        public Task<string> GetUserName(int id)
+        public async Task<string> GetUserName(int id)
         {
-            this.GetService<IManagerService>().SayHello("fanly");
-            return Task.FromResult($"id:{id} is name fanly.");
+           var text= await this.GetService<IManagerService>().SayHello("fanly");
+            return await Task.FromResult<string>(text);
         }
 
         public Task<bool> Exists(int id)
         {
             return Task.FromResult(true);
+        }
+
+       public Task<UserModel> GetUserById(Guid id)
+        {
+            return Task.FromResult(new UserModel {
+
+            });
         }
 
         public Task<int> GetUserId(string userName)
@@ -128,6 +136,11 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult("type is List<int>");
         }
 
+        public async Task<Dictionary<string, object>> GetAllThings()
+        {
+            return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });
+        }
+
         public async Task<IActionResult> DownFile(string fileName,string contentType)
         {
             string uploadPath = Path.Combine(AppContext.BaseDirectory, fileName); 
@@ -145,6 +158,11 @@ namespace Surging.Modules.Common.Domain
             {
                 throw new FileNotFoundException(fileName);
             }
+        }
+
+        public async Task<Sex> SetSex(Sex sex)
+        {
+            return await Task.FromResult(sex);
         }
         #endregion Implementation of IUserService
     }

@@ -6,40 +6,55 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
+    "WanIp": "${WanIp}|192.168.249.103",
+    "Libuv": true,
+    "SoBacklog": 100,
     "MaxConcurrentRequests": 20,
-    "ExecutionTimeoutInMilliseconds": 30000,
-    "Protocol": "${Protocol}|None", //Http、Tcp、None
-    "RootPath": "${RootPath}|D:\\userapp",
+    "DisconnTimeInterval": 30,
+    "ExecutionTimeoutInMilliseconds": 1000,
+    "Protocol": "${Protocol}|None", //Http銆乀cp銆丯one
+    "RootPath": "${RootPath}|D:\\userapp1",
+    "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
+    "IsModulePerLifetimeScope": false,
+    "ReloadOnChange": false,
     "Ports": {
       "HttpPort": "${HttpPort}|280",
-      "WSPort": "${WSPort}|96"
+      "WSPort": "${WSPort}|96",
+      "MQTTPort": "${MQTTPort}|97"
     },
     "RequestCacheEnabled": false,
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;KestrelHttpModule;WSProtocolModule;EventBusRabbitMQModule;CachingModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;"
       }
     ]
-  }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
+  }, //濡傛灉寮曠敤澶氫釜鍚岀被鍨嬬殑缁勪欢锛岄渶瑕侀厤缃甈ackages锛屽鏋滄槸鑷畾涔夋寜闇�寮曠敤锛屾棤闇�閰嶇疆Packages
   "Consul": {
-    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
+    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500,127.0.0.1:9500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
-    "ReloadOnChange": true
+    "ReloadOnChange": true,
+    "EnableChildrenMonitor": false
   },
   "Swagger": {
-    "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",
-    "Title": "${SwaggerTitle}|Surging Demo",
-    "Description": "${SwaggerDes}|surging demo",
-    "Contact": {
-      "Name": "API Support",
-      "Url": "https://github.com/dotnetcore/surging",
-      "Email": "fanliang1@hotmail.com"
+    "Info": {
+      "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",
+      "Title": "${SwaggerTitle}|Surging Demo",
+      "Description": "${SwaggerDes}|surging demo",
+      "Contact": {
+        "Name": "API Support",
+        "Url": "https://github.com/dotnetcore/surging",
+        "Email": "fanliang1@hotmail.com"
+      },
+      "License": {
+        "Name": "MIT",
+        "Url": "https://github.com/dotnetcore/surging/blob/master/LICENSE"
+      }
     },
-    "License": {
-      "Name": "MIT",
-      "Url": "https://github.com/dotnetcore/surging/blob/master/LICENSE"
+    "Options": {
+      "IgnoreFullyQualified": false
+      // "IngressName": "Notice"
     }
   },
   "EventBus_Kafka": {
@@ -50,6 +65,14 @@
     "LogConnectionClose": "${LogConnectionClose}|false",
     "OffsetReset": "${OffsetReset}|earliest",
     "GroupID": "${EventBusGroupID}|surgingdemo"
+  },
+  "WebSocket":{
+    "WaitTime": 2,
+    "KeepClean": false,
+    "Behavior": {
+      "IgnoreExtensions": true,
+      "EmitOnPing": false
+    }
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",
@@ -64,7 +87,7 @@
     "Port": "${EventBusPort}|5672"
   },
   "Zookeeper": {
-    "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181",
+    "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181", // "127.0.0.1:2181,127.0.0.1:2281",
     "SessionTimeout": 50,
     "ReloadOnChange": true
   },

@@ -30,7 +30,6 @@ namespace Surging.Services.Server
     {
         static void Main(string[] args)
         {
-
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var host = new ServiceHostBuilder()
                 .RegisterServices(builder =>
@@ -53,7 +52,7 @@ namespace Surging.Services.Server
                 .UseServer(options =>{ })
                 .UseConsoleLifetime()
                 .Configure(build =>
-                build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false, reloadOnChange: true))
+                build.AddCacheFile("${cachepath}|cacheSettings.json",basePath:AppContext.BaseDirectory, optional: false, reloadOnChange: true))
                   .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
                 .UseStartup<Startup>()

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28527.54
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Common", "Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj", "{F9B2DBAE-34D5-4CF0-9CBB-67A87580BB6A}"
 EndProject
@@ -68,6 +68,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Services.Server", "Surging.Services\Surging.Services.Server\Surging.Services.Server.csproj", "{A8C605D7-3552-44D8-AD8D-4EA08B68CF33}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Swagger", "Surging.Core\Surging.Core.Swagger\Surging.Core.Swagger.csproj", "{DC065D75-25DD-4C0C-80A5-7B59E7B3A38D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Protocol.Mqtt", "Surging.Core\Surging.Core.Protocol.Mqtt\Surging.Core.Protocol.Mqtt.csproj", "{A0502179-D200-49AE-9897-A6B189A75B45}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Web", "Surging.Web\Surging.Web.csproj", "{B94ADCF5-E80F-4350-918D-4205B8C2F41B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetty.Codecs", "DotNetty.Codecs", "{C76A8400-CEFF-4E68-B632-CC4E888C6A31}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -187,6 +193,14 @@ Global
 		{DC065D75-25DD-4C0C-80A5-7B59E7B3A38D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC065D75-25DD-4C0C-80A5-7B59E7B3A38D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC065D75-25DD-4C0C-80A5-7B59E7B3A38D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0502179-D200-49AE-9897-A6B189A75B45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0502179-D200-49AE-9897-A6B189A75B45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0502179-D200-49AE-9897-A6B189A75B45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0502179-D200-49AE-9897-A6B189A75B45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B94ADCF5-E80F-4350-918D-4205B8C2F41B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B94ADCF5-E80F-4350-918D-4205B8C2F41B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B94ADCF5-E80F-4350-918D-4205B8C2F41B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B94ADCF5-E80F-4350-918D-4205B8C2F41B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -219,6 +233,7 @@ Global
 		{5846D387-8371-4E49-97B7-2B5E688FC0FD} = {30ADB177-C82F-49A7-8FA7-C32996543C4A}
 		{A8C605D7-3552-44D8-AD8D-4EA08B68CF33} = {30ADB177-C82F-49A7-8FA7-C32996543C4A}
 		{DC065D75-25DD-4C0C-80A5-7B59E7B3A38D} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{A0502179-D200-49AE-9897-A6B189A75B45} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}

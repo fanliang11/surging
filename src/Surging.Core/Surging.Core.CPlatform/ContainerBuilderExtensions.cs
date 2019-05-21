@@ -17,6 +17,7 @@ using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -86,6 +87,7 @@ namespace Surging.Core.CPlatform
     {
         private static List<Assembly> _referenceAssembly = new List<Assembly>();
         private static List<AbstractModule> _modules = new List<AbstractModule>();
+
         /// <summary>
         /// 添加Json序列化支持。
         /// </summary>
@@ -170,6 +172,18 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder UseRouteManager(this IServiceBuilder builder, IServiceRouteManager instance)
         {
             builder.Services.RegisterInstance(instance);
+            return builder;
+        }
+
+        /// <summary>
+        /// 设置mqtt服务路由管理者。
+        /// </summary>
+        /// <param name="builder">mqtt服务构建者。</param>
+        /// <param name="factory">mqtt服务路由管理者实例工厂。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseMqttRouteManager(this IServiceBuilder builder, Func<IServiceProvider, IMqttServiceRouteManager> factory)
+        {
+            builder.Services.RegisterAdapter(factory).InstancePerLifetimeScope();
             return builder;
         }
 
@@ -427,6 +441,7 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(ServiceTokenGenerator)).As(typeof(IServiceTokenGenerator)).SingleInstance();
             services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
             services.RegisterType(typeof(ServiceEngineLifetime)).As(typeof(IServiceEngineLifetime)).SingleInstance();
+            services.RegisterType(typeof(DefaultServiceHeartbeatManager)).As(typeof(IServiceHeartbeatManager)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
@@ -472,7 +487,7 @@ namespace Surging.Core.CPlatform
             try
             {
                 var services = builder.Services;
-                var referenceAssemblies = GetReferenceAssembly(virtualPaths);
+                var referenceAssemblies = GetAssemblies(virtualPaths);
                 foreach (var assembly in referenceAssemblies)
                 {
                     services.RegisterAssemblyTypes(assembly)
@@ -513,7 +528,7 @@ namespace Surging.Core.CPlatform
             (this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
+            var referenceAssemblies = GetAssemblies(virtualPaths);
 
             foreach (var assembly in referenceAssemblies)
             {
@@ -534,7 +549,7 @@ namespace Surging.Core.CPlatform
          (this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
+            var referenceAssemblies = GetAssemblies(virtualPaths);
 
             foreach (var assembly in referenceAssemblies)
             {
@@ -548,19 +563,7 @@ namespace Surging.Core.CPlatform
       this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
-            List<Assembly> referenceAssemblies = new List<Assembly>();
-            if (virtualPaths.Any())
-            {
-                referenceAssemblies = GetReferenceAssembly(virtualPaths);
-            }
-            else
-            {
-                string[] assemblyNames = DependencyContext
-                    .Default.GetDefaultAssemblyNames().Select(p => p.Name).ToArray();
-                assemblyNames = GetFilterAssemblies(assemblyNames);
-                foreach (var name in assemblyNames)
-                    referenceAssemblies.Add(Assembly.Load(name));
-            }
+            var referenceAssemblies = GetAssemblies(virtualPaths);
             if (builder == null) throw new ArgumentNullException("builder");
             var packages = ConvertDictionary(AppConfig.ServerOptions.Packages);
             foreach (var moduleAssembly in referenceAssemblies)
@@ -585,10 +588,10 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
-        public static List<Type> GetInterfaceService(this IServiceBuilder builder)
+        public static List<Type> GetInterfaceService(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var types = new List<Type>();
-            var referenceAssemblies = GetReferenceAssembly();
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
             referenceAssemblies.ForEach(p =>
             {
                 types.AddRange(p.GetTypes().Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface));
@@ -596,20 +599,25 @@ namespace Surging.Core.CPlatform
             return types;
         }
 
-        public static IEnumerable<string> GetDataContractName(this IServiceBuilder builder)
+        public static IEnumerable<string> GetDataContractName(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var namespaces = new List<string>();
-            var referenceAssemblies = builder.GetInterfaceService();
-            referenceAssemblies.ForEach(p =>
+            var assemblies = builder.GetInterfaceService(virtualPaths)
+                .Select(p => p.Assembly)
+                .Union(GetSystemModules())
+                .Distinct()
+                .ToList();
+
+            assemblies.ForEach(assembly =>
             {
-                namespaces.AddRange(p.Assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() != null).Select(n => n.Namespace));
+                namespaces.AddRange(assembly.GetTypes().Where(t => t.GetCustomAttribute<DataContractAttribute>() != null).Select(n => n.Namespace));
             });
-            return namespaces.Distinct();
+            return namespaces;
         }
 
         private static IDictionary<string, string> ConvertDictionary(List<ModulePackage> list)
         {
-           var result = new Dictionary<string, string>();
+            var result = new Dictionary<string, string>();
             list.ForEach(p =>
             {
                 result.Add(p.TypeName, p.Using);
@@ -632,7 +640,7 @@ namespace Surging.Core.CPlatform
                 paths.ForEach(path =>
                 {
                     var assemblyFiles = GetAllAssemblyFiles(path);
-                    
+
                     foreach (var referencedAssemblyFile in assemblyFiles)
                     {
                         var referencedAssembly = Assembly.LoadFrom(referencedAssemblyFile);
@@ -640,12 +648,46 @@ namespace Surging.Core.CPlatform
                             _referenceAssembly.Add(referencedAssembly);
                         refAssemblies.Add(referencedAssembly);
                     }
-                    result = existsPath ? refAssemblies: _referenceAssembly;
+                    result = existsPath ? refAssemblies : _referenceAssembly;
                 });
             }
             return result;
         }
-        
+
+        private static List<Assembly> GetSystemModules()
+        {
+            var assemblies = new List<Assembly>();
+            var referenceAssemblies = GetReferenceAssembly();
+            foreach (var referenceAssembly in referenceAssemblies)
+            {
+                var abstractModules = GetAbstractModules(referenceAssembly);
+                if (abstractModules.Any(p => p.GetType().IsSubclassOf(typeof(SystemModule))))
+                {
+                    assemblies.Add(referenceAssembly);
+                }
+            }
+            return assemblies;
+        }
+
+        private static List<Assembly> GetAssemblies(params string[] virtualPaths)
+        {
+            var referenceAssemblies = new List<Assembly>();
+            if (virtualPaths.Any())
+            {
+                referenceAssemblies = GetReferenceAssembly(virtualPaths);
+            }
+            else
+            {
+                string[] assemblyNames = DependencyContext
+                    .Default.GetDefaultAssemblyNames().Select(p => p.Name).ToArray();
+                assemblyNames = GetFilterAssemblies(assemblyNames);
+                foreach (var name in assemblyNames)
+                    referenceAssemblies.Add(Assembly.Load(name));
+                _referenceAssembly.AddRange(referenceAssemblies.Except(_referenceAssembly));
+            }
+            return referenceAssemblies;
+        }
+
         private static List<AbstractModule> GetAbstractModules(Assembly assembly)
         {
             var abstractModules = new List<AbstractModule>();
@@ -660,9 +702,9 @@ namespace Surging.Core.CPlatform
             return abstractModules;
         }
 
-        private static  string[] GetFilterAssemblies(string[] assemblyNames)
+        private static string[] GetFilterAssemblies(string[] assemblyNames)
         {
-            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+                var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
             var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
@@ -679,7 +721,7 @@ namespace Surging.Core.CPlatform
                 return
                     assemblyNames.Where(
                         name => !notRelatedRegex.IsMatch(name)).ToArray();
-            }
+}
         }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)
@@ -700,7 +742,7 @@ namespace Surging.Core.CPlatform
             {
                 return
                     Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
-                        a => !notRelatedRegex.IsMatch(a)).ToList();
+                        a => !notRelatedRegex.IsMatch(Path.GetFileName(a))).ToList();
             }
         }
     }

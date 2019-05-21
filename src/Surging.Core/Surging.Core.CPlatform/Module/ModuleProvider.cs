@@ -25,8 +25,15 @@ namespace Surging.Core.CPlatform.Module
         {
             _modules.ForEach(p =>
             {
-                if (p.Enable)
-                    p.Initialize(_serviceProvoider);
+                try
+                {
+                    if (p.Enable)
+                        p.Initialize(_serviceProvoider);
+                }
+                catch(Exception ex)
+                {
+                    throw ex;
+                }
             });
             WriteLog();
         }

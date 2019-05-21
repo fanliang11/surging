@@ -55,7 +55,12 @@ namespace Surging.Core.SwaggerGen
             if (!_options.SwaggerDocs.TryGetValue(documentName, out Info info))
                 throw new UnknownSwaggerDocument(documentName);
 
+
+
             var entry = _serviceEntryProvider.GetALLEntries();
+
+             entry = entry
+       .Where(apiDesc => _options.DocInclusionPredicateV2(documentName, apiDesc));
 
             var schemaRegistry = _schemaRegistryFactory.Create();
 
@@ -75,13 +80,16 @@ namespace Surging.Core.SwaggerGen
         }
 
         private Dictionary<string, PathItem> CreatePathItems(
-            IEnumerable<ServiceEntry>  apiDescriptions,
+            IEnumerable<ServiceEntry> apiDescriptions,
             ISchemaRegistry schemaRegistry)
         {
+
             return apiDescriptions
-                .OrderBy(p=>p.RoutePath)
+                .OrderBy(p => p.RoutePath)
                 .GroupBy(apiDesc => apiDesc.Descriptor.RoutePath)
-                .ToDictionary(entry => "/" + entry.Key, entry => CreatePathItem(entry, schemaRegistry));
+                .ToDictionary(entry =>
+                     entry.Key.IndexOf("/") == 0 ? entry.Key : $"/{entry.Key}"
+                     , entry => CreatePathItem(entry, schemaRegistry));
         }
 
         private Dictionary<string, PathItem> CreatePathItems(
@@ -183,6 +191,7 @@ namespace Surging.Core.SwaggerGen
 
             var operation = new Operation
             {
+                Tags = new[] { serviceEntry.Type.Name },
                 OperationId = serviceEntry.Descriptor.Id, 
                 Parameters= CreateParameters(serviceEntry, methodInfo,schemaRegistry),
                 Deprecated = isDeprecated ? true : (bool?)null,

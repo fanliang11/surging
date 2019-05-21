@@ -64,7 +64,8 @@ namespace Surging.Core.ProxyGenerator.Implementation
         protected async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId)
         {
             object result = default(T);
-            var command = await _commandProvider.GetCommand(serviceId);
+            var vt = _commandProvider.GetCommand(serviceId); 
+            var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             RemoteInvokeResultMessage message = null;
             var decodeJOject = typeof(T) == UtilityType.ObjectType;
             IInvocation invocation = null;
@@ -104,7 +105,10 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 }
             }
             if (message != null)
-                result = _typeConvertibleService.Convert(message.Result, typeof(T));
+            {
+                if (message.Result == null) result = message.Result;
+                else  result = _typeConvertibleService.Convert(message.Result, typeof(T));
+            }
             return (T)result;
         }
 
@@ -118,7 +122,8 @@ namespace Surging.Core.ProxyGenerator.Implementation
                    type == typeof(Task) ? false : true);
             if (message == null)
             {
-                var command = await _commandProvider.GetCommand(serviceId);
+                var vt =  _commandProvider.GetCommand(serviceId); 
+                var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
                 if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
                 {
                     var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
@@ -157,7 +162,8 @@ namespace Surging.Core.ProxyGenerator.Implementation
             }
             if (message == null)
             {
-                var command = await _commandProvider.GetCommand(serviceId);
+                var vt =   _commandProvider.GetCommand(serviceId);
+                var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
                 if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
                 {
                     var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);

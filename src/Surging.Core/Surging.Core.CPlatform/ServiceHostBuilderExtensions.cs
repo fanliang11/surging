@@ -33,35 +33,13 @@ namespace Surging.Core.CPlatform
                 BuildServiceEngine(mapper);
                 mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
-                int _port = AppConfig.ServerOptions.Port == 0 ? port : AppConfig.ServerOptions.Port;
-                string _ip = AppConfig.ServerOptions.Ip ?? ip;
-                _port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
-                _ip = AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
-                if (_ip.IndexOf(".") < 0 || _ip == "" || _ip == "0.0.0.0")
-                {
-                    NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-                    foreach (NetworkInterface adapter in nics)
-                    {
-                        if (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet && (_ip == "" || _ip == "0.0.0.0" || _ip == adapter.Name))
-                        {
-                            IPInterfaceProperties ipxx = adapter.GetIPProperties();
-                            UnicastIPAddressInformationCollection ipCollection = ipxx.UnicastAddresses;
-                            foreach (UnicastIPAddressInformation ipadd in ipCollection)
-                            {
-                                if (ipadd.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                                {
-                                    _ip = ipadd.Address.ToString();
-                                }
-                            }
-                        }
-                    }
-                }
-                var mappingIp = AppConfig.ServerOptions.MappingIP ?? _ip;
-                var mappingPort = AppConfig.ServerOptions.MappingPort;
-                if (mappingPort == 0)
-                    mappingPort = _port;
+                int _port = AppConfig.ServerOptions.Port= AppConfig.ServerOptions.Port == 0 ? port : AppConfig.ServerOptions.Port;
+                string _ip = AppConfig.ServerOptions.Ip = AppConfig.ServerOptions.Ip ?? ip;
+                _port = AppConfig.ServerOptions.Port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
+                _ip = AppConfig.ServerOptions.Ip =AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
+                _ip = NetUtils.GetHostAddress(_ip);
 
-                ConfigureRoute(mapper, mappingIp, mappingPort, serviceToken);
+                ConfigureRoute(mapper, serviceToken);
                 mapper.Resolve<IModuleProvider>().Initialize();
                 var serviceHosts = mapper.Resolve<IList<Runtime.Server.IServiceHost>>();
                 Task.Factory.StartNew(async () =>
@@ -117,31 +95,20 @@ namespace Surging.Core.CPlatform
             }
         }
 
-        public static void ConfigureRoute(IContainer mapper,string mappingIp,int mappingPort,string serviceToken)
+        public static void ConfigureRoute(IContainer mapper,string serviceToken)
         {
-            var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
              AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
-                new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(), () =>
-                {
-                    var addess = new IpAddressModel
-                    {
-                        Ip = mappingIp,
-                        Port = mappingPort,
-                        ProcessorTime = Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero),
-                    };
-                    RpcContext.GetContext().SetAttachment("Host", addess);
-                    var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-                    {
-                        i.Descriptor.Token = serviceToken;
-                        return new ServiceRoute
-                        {
-                            Address = new[] { addess },
-                            ServiceDescriptor = i.Descriptor
-                        };
-                    }).ToList();
-                    mapper.Resolve<IServiceRouteManager>().SetRoutesAsync(addressDescriptors).Wait();
-                });
+            {
+                var routeProvider = mapper.Resolve<IServiceRouteProvider>();
+                if (AppConfig.ServerOptions.EnableRouteWatch)
+                    new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
+                        () => routeProvider.RegisterRoutes(
+                        Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
+                else
+                    routeProvider.RegisterRoutes(0);
+            }
         }
+         
     }
 }

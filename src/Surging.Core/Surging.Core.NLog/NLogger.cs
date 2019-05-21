@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using System; 
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Nlog
 {
@@ -17,6 +18,7 @@ namespace Surging.Core.Nlog
             return NoopDisposable.Instance;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             switch (logLevel)

@@ -18,5 +18,8 @@ namespace Surging.IModuleServices.Common.Models
         [ProtoMember(3)]
         public int Age { get; set; }
 
+        [ProtoMember(4)]
+        public Sex Sex { get; set; }
+
     }
 }

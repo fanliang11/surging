@@ -3,7 +3,9 @@ using DotNetty.Codecs;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
@@ -60,15 +62,28 @@ namespace Surging.Core.DotNetty
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
 
-            var bossGroup = new MultithreadEventLoopGroup(1);
-            var workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
+            IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
+            IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
+           
+            if (AppConfig.ServerOptions.Libuv)
+            {
+                var dispatcher = new DispatcherEventLoopGroup();
+                bossGroup = dispatcher;
+                workerGroup = new WorkerEventLoopGroup(dispatcher);
+                bootstrap.Channel<TcpServerChannel>();
+            }
+            else
+            {
+                bossGroup = new MultithreadEventLoopGroup(1);
+                workerGroup = new MultithreadEventLoopGroup();
+                bootstrap.Channel<TcpServerSocketChannel>();
+            } 
             bootstrap
-            .Group(bossGroup, workerGroup)
-            .Channel<TcpServerSocketChannel>()
-            .Option(ChannelOption.SoBacklog, 100)
+            .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-            .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
+            .Group(bossGroup, workerGroup)
+            .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
             {
                 var pipeline = channel.Pipeline;
                 pipeline.AddLast(new LengthFieldPrepender(4));

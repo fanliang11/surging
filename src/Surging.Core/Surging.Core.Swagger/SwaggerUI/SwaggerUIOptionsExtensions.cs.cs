@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Runtime.Server;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Surging.Core.Swagger.SwaggerUI
@@ -39,11 +41,44 @@ namespace Surging.Core.Swagger.SwaggerUI
         /// <param name="options"></param>
         /// <param name="url">Can be fully qualified or relative to the current host</param>
         /// <param name="name">The description that appears in the document selector drop-down</param>
-        public static void SwaggerEndpoint(this SwaggerUIOptions options, string url, string name)
+        public static void SwaggerEndpoint(this SwaggerUIOptions options, string url, string name,string areaName)
         {
             var urls = new List<UrlDescriptor>(options.ConfigObject.Urls ?? Enumerable.Empty<UrlDescriptor>());
-            urls.Add(new UrlDescriptor { Url = url, Name = name });
+            urls.Add(new UrlDescriptor { Url = string.IsNullOrEmpty(areaName) ? url : $"{areaName}{url}", Name = name });
             options.ConfigObject.Urls = urls;
+        }
+
+        public static void SwaggerEndpoint(this SwaggerUIOptions options, IEnumerable<ServiceEntry> entries,string areaName)
+        {
+
+            var list = new List<Info>();
+            var assemblies = entries.Select(p => p.Type.Assembly).Distinct();
+            foreach (var assembly in assemblies)
+            {
+                var version = assembly
+                    .GetCustomAttributes(true)
+                    .OfType<AssemblyFileVersionAttribute>().FirstOrDefault();
+
+                var title = assembly
+                  .GetCustomAttributes(true)
+                  .OfType<AssemblyTitleAttribute>().FirstOrDefault();
+
+                var des = assembly
+                  .GetCustomAttributes(true)
+                  .OfType<AssemblyDescriptionAttribute>().FirstOrDefault();
+
+                if (version == null || title == null)
+                    continue;
+
+                var info = new Info()
+                {
+                    Title = title.Title,
+                    Version = version.Version,
+                    Description = des?.Description,
+
+                };
+                options.SwaggerEndpoint($"/swagger/{info.Title}/swagger.json", info.Title,areaName);
+            }
         }
 
         /// <summary>

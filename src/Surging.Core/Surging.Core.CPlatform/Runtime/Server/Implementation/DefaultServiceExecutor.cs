@@ -3,11 +3,13 @@ using Newtonsoft.Json;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -53,7 +55,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
             if (!message.IsInvokeMessage())
                 return;
-
+          
             RemoteInvokeMessage remoteInvokeMessage;
             try
             {
@@ -79,7 +81,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 foreach(var attachment in remoteInvokeMessage.Attachments)
                 RpcContext.GetContext().SetAttachment(attachment.Key,attachment.Value);
             }
-            
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("准备执行本地逻辑。");
@@ -115,7 +116,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         {
             try
             {
-                var cancelTokenSource = new CancellationTokenSource();
                 var result = await entry.Func(remoteInvokeMessage.ServiceKey, remoteInvokeMessage.Parameters);
                 var task = result as Task;
 
@@ -125,7 +125,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 }
                 else
                 {
-                    await task;
+                    if (!task.IsCompletedSuccessfully)
+                        await task;
                     var taskType = task.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)
                         resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
@@ -144,7 +145,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 resultMessage.StatusCode = exception.HResult;
             }
         }
-        
+         
         private async Task SendRemoteInvokeResult(IMessageSender sender, string messageId, RemoteInvokeResultMessage resultMessage)
         {
             try
@@ -161,7 +162,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception,"发送响应消息时候发生了异常。" );
             }
-        }
+        } 
 
         private static string GetExceptionMessage(Exception exception)
         {

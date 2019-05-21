@@ -77,9 +77,12 @@ namespace Surging.Services.Client
             Task.Run(async () =>
             {
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+                var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
                 var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
                 var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
+                userProxy.Try().GetAwaiter().GetResult();
                 var v1 = userProxy.GetUserLastSignInTime(1).Result;
+                var things = userProxy.GetAllThings().Result;
                 var apiResult = userProxy.GetApiResult().GetAwaiter().GetResult();
                 userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
@@ -105,7 +108,7 @@ namespace Surging.Services.Client
                     for (var i = 0; i < 10000; i++)
                     {
                         //var a = userProxy.GetDictionary().Result;
-                        var a = userProxy.GetDictionary().Result;
+                        var a = await userProxy.GetDictionary();
                         //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();

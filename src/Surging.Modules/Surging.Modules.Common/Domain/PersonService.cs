@@ -13,6 +13,7 @@ using Surging.Core.ProxyGenerator;
 using Surging.Core.KestrelHttpServer.Internal;
 using System.IO;
 using Surging.Core.KestrelHttpServer;
+using Surging.Core.Common;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -63,6 +64,15 @@ namespace Surging.Modules.Common.Domain
         public Task<bool> Update(int id, UserModel model)
         {
             return Task.FromResult(true);
+        }
+
+
+        public Task<UserModel> GetUserById(Guid id)
+        {
+            return Task.FromResult(new UserModel
+            {
+
+            });
         }
 
         public Task<bool> GetDictionary()
@@ -143,6 +153,16 @@ namespace Surging.Modules.Common.Domain
                 throw new FileNotFoundException(fileName);
             }
 
+        }
+
+        public async Task<Sex> SetSex(Sex sex)
+        {
+            return await Task.FromResult(sex);
+        }
+
+        public async Task<Dictionary<string, object>> GetAllThings()
+        {
+            return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });
         }
 
         #endregion Implementation of IUserService
