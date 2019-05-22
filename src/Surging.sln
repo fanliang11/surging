@@ -73,6 +73,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Protocol.Mqtt"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Web", "Surging.Web\Surging.Web.csproj", "{B94ADCF5-E80F-4350-918D-4205B8C2F41B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetty.Codecs", "DotNetty.Codecs", "{C76A8400-CEFF-4E68-B632-CC4E888C6A31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

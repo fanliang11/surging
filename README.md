@@ -281,10 +281,4 @@ QQ群：615562965
 
 ## 谁在使用
 
-这些只是使用surging的公司的一部分，仅供参考。 如果您使用的是surging，请在[此处](https://github.com/dotnetcore/surging/issues/283) 添加您的公司，告诉我们您的方案，以使surging更好。.
-
-![海克斯康](http://www.hexagonchina.com.cn/images/logo.png)
-![格林斯达](http://www.glsd99.com/UploadFiles/Others/20140521151139_27186.jpg)
-![星炬科技](http://www.cn-xingju.com.cn/imageRepository/b34fbb43-e98a-43f4-b665-65714684bafc.jpg)
-![恒赢智航](http://www.wintelia.com/resources/images/index/logo_head.png) 
 
