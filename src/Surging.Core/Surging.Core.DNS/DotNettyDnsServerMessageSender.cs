@@ -97,9 +97,7 @@ namespace Surging.Core.DNS
                                 buf = Unpooled.WrappedBuffer(aRecord.Address.GetAddressBytes());
                                 response.AddRecord(DnsSection.ANSWER, new DefaultDnsRawRecord(dnsQuestion.Name, DnsRecordType.From((int)dnsRecord.RecordType), (DnsRecordClass)(int)aRecord.RecordClass, dnsRecord.TimeToLive, buf));
                             }
-
                         }
-
                     }
                 }
             }
