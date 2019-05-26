@@ -10,6 +10,7 @@ namespace Surging.Core.CPlatform
         Tcp,
         Http,
         WS,
-        Mqtt
+        Mqtt,
+        Dns
     }
 }
