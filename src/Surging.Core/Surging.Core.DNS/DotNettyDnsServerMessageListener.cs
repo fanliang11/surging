@@ -64,7 +64,8 @@ namespace Surging.Core.DNS
                     pipeline.AddLast(new DatagramDnsResponseEncoder()); ;
                     pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
                     {
-                        
+                        var sender = new DotNettyDnsServerMessageSender(_transportMessageEncoder, contenxt, _serializer);
+                        await OnReceived(sender, message);
                     }, _logger, _serializer));
                 })).Option(ChannelOption.SoBroadcast, true);
             try
@@ -126,36 +127,15 @@ namespace Surging.Core.DNS
 
             protected override void ChannelRead0(IChannelHandlerContext ctx, DatagramDnsQuery query)
             {
-              //Test Code
-              //  DatagramDnsResponse response = new DatagramDnsResponse(query.Recipient, query.Sender, query.Id);
-              //  DefaultDnsQuestion dnsQuestion = query.GetRecord<DefaultDnsQuestion>(DnsSection.QUESTION);
-              ////  IDnsRecord additionalRecord = query.GetRecord<IDnsRecord>(DnsSection.ADDITIONAL);
-              //  response.AddRecord(DnsSection.QUESTION, dnsQuestion);
-      
-              //    //additionalRecord = query.GetRecord<IDnsRecord>(DnsSection.ADDITIONAL);
-              //  DnsClient dnsClient = new DnsClient(IPAddress.Parse("192.168.249.1"), 100);
 
-              //  var dnsMessage = dnsClient.Resolve(DomainName.Parse(dnsQuestion.Name),(RecordType)dnsQuestion.Type.IntValue);
-              //  if (dnsMessage != null)
-              //  {
-              //      foreach (DnsRecordBase dnsRecord in dnsMessage.AnswerRecords)
-              //      {
-              //          var aRecord = dnsRecord as ARecord;
-              //          var buf = Unpooled.Buffer();
-              //          if (dnsRecord.RecordType == RecordType.Ptr)
-              //          {
-              //              var ptrRecord = dnsRecord as PtrRecord;
-              //              response.AddRecord(DnsSection.ANSWER, new DefaultDnsPtrRecord(ptrRecord.Name.ToString(), (DnsRecordClass)(int)ptrRecord.RecordClass, ptrRecord.TimeToLive, ptrRecord.PointerDomainName.ToString()));
-              //          }
-              //          if (aRecord != null)
-              //          {
-              //              buf = Unpooled.WrappedBuffer(aRecord.Address.GetAddressBytes());
-              //              response.AddRecord(DnsSection.ANSWER, new DefaultDnsRawRecord(dnsQuestion.Name, DnsRecordType.From((int)dnsRecord.RecordType), (DnsRecordClass)(int)aRecord.RecordClass, dnsRecord.TimeToLive, buf));
-              //          }
-
-              //      }
-              //      ctx.WriteAndFlushAsync(response);
-              //  }
+                DatagramDnsResponse response = new DatagramDnsResponse(query.Recipient, query.Sender, query.Id);
+                DefaultDnsQuestion dnsQuestion = query.GetRecord<DefaultDnsQuestion>(DnsSection.QUESTION);
+                response.AddRecord(DnsSection.QUESTION, dnsQuestion);
+                _readAction(ctx, new TransportMessage(new DnsTransportMessage
+                {
+                    DnsResponse = response,
+                    DnsQuestion = dnsQuestion
+                }));
             }
 
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)

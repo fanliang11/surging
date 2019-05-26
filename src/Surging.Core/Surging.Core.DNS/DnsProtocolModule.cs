@@ -1,13 +1,14 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport.Codec;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Surging.Core.DNS.Configurations;
+using Surging.Core.DNS.Runtime;
+using Surging.Core.DNS.Runtime.Implementation;
 
 namespace Surging.Core.DNS
 {
@@ -25,11 +26,24 @@ namespace Surging.Core.DNS
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Dns)
+            var section = CPlatform.AppConfig.GetSection("Dns");
+            if (section.Exists())
+                AppConfig.DnsOption = section.Get<DnsOption>();
+            builder.Register(provider =>
+            {
+                return new DefaultDnsServiceEntryProvider(
+                       provider.Resolve<IServiceEntryProvider>(),
+                    provider.Resolve<ILogger<DefaultDnsServiceEntryProvider>>(),
+                      provider.Resolve<CPlatformContainer>()
+                      );
+            }).As(typeof(IDnsServiceEntryProvider)).SingleInstance();
+            builder.RegisterType(typeof(DnsServiceExecutor)).As(typeof(IServiceExecutor))
+            .Named<IServiceExecutor>(CommunicationProtocol.Dns.ToString()).SingleInstance();
+            if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.Dns)
             {
                 RegisterDefaultProtocol(builder);
             }
-            else if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
+            else if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
             {
                 RegisterHttpProtocol(builder);
             }
@@ -46,12 +60,13 @@ namespace Surging.Core.DNS
             }).SingleInstance();
             builder.Register(provider =>
             {
+                var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Dns.ToString());
                 var messageListener = provider.Resolve<DotNettyDnsServerMessageListener>();
                 return new DnsServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
-                }, null);
+                }, serviceExecutor);
 
             }).As<IServiceHost>();
         }
@@ -67,13 +82,14 @@ namespace Surging.Core.DNS
                       );
             }).SingleInstance();
             builder.Register(provider =>
-            { 
+            {
+                var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Dns.ToString());
                 var messageListener = provider.Resolve<DotNettyDnsServerMessageListener>();
                 return new DnsServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
-                }, null);
+                }, serviceExecutor);
 
             }).As<IServiceHost>();
         }

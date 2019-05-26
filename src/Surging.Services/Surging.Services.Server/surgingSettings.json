@@ -37,6 +37,10 @@
     "ReloadOnChange": true,
     "EnableChildrenMonitor": false
   },
+  "Dns": {
+    "RootDnsAddress": "192.168.1.1",
+    "QueryTimeout": 1000
+  },
   "Swagger": {
     "Info": {
       "Version": "${SwaggerVersion}|V1", // "127.0.0.1:8500",
