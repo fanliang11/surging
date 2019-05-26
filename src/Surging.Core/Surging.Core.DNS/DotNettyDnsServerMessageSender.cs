@@ -29,13 +29,13 @@ namespace Surging.Core.DNS
 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var response=  WriteResponse(message);
+            var response=await  WriteResponse(message);
             await _context.WriteAndFlushAsync(response);
         }
 
         public async Task SendAsync(TransportMessage message)
         {
-            var response =  WriteResponse(message);
+            var response = await WriteResponse(message);
             await _context.WriteAsync(response);
         }
 
@@ -66,7 +66,7 @@ namespace Surging.Core.DNS
             return transportMessage.Address;
         }
 
-        private IDnsResponse WriteResponse(TransportMessage message)
+        private async Task<IDnsResponse> WriteResponse(TransportMessage message)
         { 
             var response = GetDnsResponse(message);
             var dnsQuestion = GetDnsQuestion(message);
@@ -80,7 +80,7 @@ namespace Surging.Core.DNS
                 }
                 else
                 {
-                    var dnsMessage = GetDnsMessage(dnsQuestion.Name, dnsQuestion.Type);
+                    var dnsMessage =await GetDnsMessage(dnsQuestion.Name, dnsQuestion.Type);
                     if (dnsMessage != null)
                     {
                         foreach (DnsRecordBase dnsRecord in dnsMessage.AnswerRecords)
@@ -106,9 +106,9 @@ namespace Surging.Core.DNS
             return response;
         }
 
-        public DnsMessage GetDnsMessage(string name, DnsRecordType recordType)
+        public async Task<DnsMessage> GetDnsMessage(string name, DnsRecordType recordType)
         {
-           return DnsClientProvider.Instance().Resolve(name, recordType);
+           return await DnsClientProvider.Instance().Resolve(name, recordType);
         }
     }
 }

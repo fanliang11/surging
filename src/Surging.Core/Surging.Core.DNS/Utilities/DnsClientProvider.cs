@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.DNS.Utilities
 {
     public class DnsClientProvider
     {
-        public  DnsMessage Resolve(string name, DnsRecordType recordType , DnsRecordClass recordClass = DnsRecordClass.IN)
+        public  async Task<DnsMessage> Resolve(string name, DnsRecordType recordType , DnsRecordClass recordClass = DnsRecordClass.IN)
         {
-            var dnsMessage = GetDnsClient().Resolve(DomainName.Parse(name), (RecordType)recordType.IntValue,(RecordClass)(int)recordClass);
+            var dnsMessage =await GetDnsClient().ResolveAsync(DomainName.Parse(name), (RecordType)recordType.IntValue,(RecordClass)(int)recordClass);
             return dnsMessage;
         }
 
