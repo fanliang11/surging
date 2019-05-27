@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ZooKeeperNetEx" Version="3.4.12" />
+    <PackageReference Include="ZooKeeperNetEx" Version="3.4.12.1" />
   </ItemGroup>
 
   <ItemGroup>
