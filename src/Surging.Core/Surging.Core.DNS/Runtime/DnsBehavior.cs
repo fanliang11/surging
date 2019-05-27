@@ -81,16 +81,21 @@ namespace Surging.Core.DNS.Runtime
         internal async Task<IPAddress> DomainResolve(string domainName)
         {
             domainName = domainName.TrimEnd('.');
-            var len = domainName.IndexOf(".");
+            var prefixLen = domainName.IndexOf(".");
             IPAddress result = null;
-            if (len > 0)
+            if (prefixLen > 0)
             { 
-                var prefixName = domainName.Substring(0, len).ToString();
-                var routePath = domainName.Substring(len+1,domainName.LastIndexOf(".")-len-1).Replace(".","/").ToString();
-                if (routePath.IndexOf("/")<0 && routePath[0] != '/')
-                    routePath = $"/{routePath}";
-                var address = await GetService<IEchoService>().Locate(prefixName, routePath);
-                result = IPAddress.Parse(address.WanIp);
+                var prefixName = domainName.Substring(0, prefixLen).ToString();
+                var  pathLen= domainName.LastIndexOf(".") - prefixLen - 1;
+                if (pathLen > 0)
+                {
+                    var routePath = domainName.Substring(prefixLen + 1, pathLen).Replace(".", "/").ToString();
+                    if (routePath.IndexOf("/") < 0 && routePath[0] != '/')
+                        routePath = $"/{routePath}";
+                    var address = await GetService<IEchoService>().Locate(prefixName, routePath);
+                    if (!string.IsNullOrEmpty(address.WanIp))
+                        result = IPAddress.Parse(address.WanIp);
+                }
             }
             result = await Resolve(domainName) ?? result;
             return result;
