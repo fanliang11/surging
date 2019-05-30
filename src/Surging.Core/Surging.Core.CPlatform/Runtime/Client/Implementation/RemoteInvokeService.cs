@@ -46,7 +46,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
                 var endPoint = address.CreateEndPoint();
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
-                var client = _transportClientFactory.CreateClient(endPoint);
+                var client =await _transportClientFactory.CreateClientAsync(endPoint);
                 return await client.SendAsync(invokeMessage,cancellationToken).WithCancellation(cancellationToken);
             }
             catch (CommunicationException)
@@ -72,7 +72,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
                 var endPoint = address.CreateEndPoint();
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
-                var client = _transportClientFactory.CreateClient(endPoint);
+                var client =await _transportClientFactory.CreateClientAsync(endPoint);
                 using (var cts = new CancellationTokenSource())
                 {
                     return await client.SendAsync(invokeMessage, cts.Token).WithCancellation(cts, requestTimeout);

@@ -28,7 +28,9 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
         {
             yield return EnumTypeConvert;
             yield return SimpleTypeConvert;
+            yield return GuidTypeConvert;
             yield return ComplexTypeConvert;
+            
         }
 
         #endregion Implementation of ITypeConvertibleProvider
@@ -51,7 +53,22 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
 
         private object ComplexTypeConvert(object instance, Type conversionType)
         {
-            return _serializer.Deserialize(instance, conversionType);
+            try
+            {
+                return _serializer.Deserialize(instance, conversionType);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static object GuidTypeConvert(object instance, Type conversionType)
+        {
+            if (instance == null || conversionType != typeof(Guid))
+                return null;
+            Guid.TryParse(instance.ToString(), out Guid result);
+            return result;
         }
 
         #endregion Private Method

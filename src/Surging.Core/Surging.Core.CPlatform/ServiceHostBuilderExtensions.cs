@@ -28,10 +28,10 @@ namespace Surging.Core.CPlatform
     {
         public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, string ip, int port, string token = "True")
         {
-            return hostBuilder.MapServices(mapper =>
+            return hostBuilder.MapServices(async mapper =>
             {
                 BuildServiceEngine(mapper);
-                mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
+                await mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
                 int _port = AppConfig.ServerOptions.Port= AppConfig.ServerOptions.Port == 0 ? port : AppConfig.ServerOptions.Port;
                 string _ip = AppConfig.ServerOptions.Ip = AppConfig.ServerOptions.Ip ?? ip;
@@ -39,7 +39,7 @@ namespace Surging.Core.CPlatform
                 _ip = AppConfig.ServerOptions.Ip =AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
                 _ip = NetUtils.GetHostAddress(_ip);
 
-                ConfigureRoute(mapper, serviceToken);
+                await ConfigureRoute(mapper, serviceToken);
                 mapper.Resolve<IModuleProvider>().Initialize();
                 var serviceHosts = mapper.Resolve<IList<Runtime.Server.IServiceHost>>();
                 Task.Factory.StartNew(async () =>
@@ -95,7 +95,7 @@ namespace Surging.Core.CPlatform
             }
         }
 
-        public static void ConfigureRoute(IContainer mapper,string serviceToken)
+        public static async Task ConfigureRoute(IContainer mapper,string serviceToken)
         {
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
              AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
@@ -103,10 +103,10 @@ namespace Surging.Core.CPlatform
                 var routeProvider = mapper.Resolve<IServiceRouteProvider>();
                 if (AppConfig.ServerOptions.EnableRouteWatch)
                     new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
-                        () => routeProvider.RegisterRoutes(
+                        async () => await routeProvider.RegisterRoutes(
                         Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
                 else
-                    routeProvider.RegisterRoutes(0);
+                   await routeProvider.RegisterRoutes(0);
             }
         }
          
