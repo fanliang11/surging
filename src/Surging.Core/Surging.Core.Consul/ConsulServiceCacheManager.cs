@@ -160,7 +160,6 @@ namespace Surging.Core.Consul
                     var deletedCacheIds = caches.Select(i => i.CacheDescriptor.Id).ToArray();
                     foreach (var deletedCacheId in deletedCacheIds)
                     {
-                        var endpoints = _serviceCaches.Where(p => p.CacheDescriptor.Id == deletedCacheId).Select(p => p.CacheEndpoint).FirstOrDefault();
                         var nodePath = $"{path}{deletedCacheId}";
                         await client.KV.Delete(nodePath);
                     }
