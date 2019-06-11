@@ -81,23 +81,14 @@ namespace Surging.Core.Zookeeper
         public void Dispose()
         {
         }
-
+        
         public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)
         {
             var serviceCaches = await GetCaches(caches.Select(p => p.CacheDescriptor.Id));
-            foreach (var cache in caches)
-            {
-                var serviceCache = serviceCaches.Where(p => p.CacheDescriptor.Id == cache.CacheDescriptor.Id).FirstOrDefault();
-                if (serviceCache != null)
-                {
-                    cache.CacheEndpoint = serviceCache.CacheEndpoint.Concat(
-                      cache.CacheEndpoint.Except(serviceCache.CacheEndpoint));
-                }
-            }
-            await RemoveExceptCachesAsync(caches);
+            await RemoveCachesAsync(caches);
             await base.SetCachesAsync(caches);
         }
-
+        
         public override async Task<IEnumerable<ServiceCache>> GetCachesAsync()
         {
             await EnterCaches();
@@ -222,32 +213,23 @@ namespace Surging.Core.Zookeeper
         }
 
         #region 私有方法
-
-        private async Task RemoveExceptCachesAsync(IEnumerable<ServiceCache> caches)
+        private async Task RemoveCachesAsync(IEnumerable<ServiceCache> caches)
         {
-
-
             var path = _configInfo.CachePath;
             if (!path.EndsWith("/"))
                 path += "/";
             caches = caches.ToArray();
-            var zooKeepers = await _zookeeperClientProvider.GetZooKeepers();
-            foreach (var zooKeeper in zooKeepers)
+            if (_serviceCaches != null)
             {
-                if (_serviceCaches != null)
+                var zooKeepers = await _zookeeperClientProvider.GetZooKeepers();
+                foreach (var zooKeeper in zooKeepers)
                 {
-                    var oldCacheIds = _serviceCaches.Select(i => i.CacheDescriptor.Id).ToArray();
-                    var newCacheIds = caches.Select(i => i.CacheDescriptor.Id).ToArray();
-                    var deletedCacheIds = oldCacheIds.Except(newCacheIds).ToArray();
+
+                    var deletedCacheIds = caches.Select(i => i.CacheDescriptor.Id).ToArray();
                     foreach (var deletedCacheId in deletedCacheIds)
                     {
-                        var endpoints = _serviceCaches.Where(p => p.CacheDescriptor.Id == deletedCacheId).Select(p => p.CacheEndpoint).FirstOrDefault();
                         var nodePath = $"{path}{deletedCacheId}";
-                        foreach (var endpoint in endpoints)
-                        {
-                            if (caches.Any(p => p.CacheEndpoint.Select(a => a.ToString()).Contains(endpoint.ToString())))
-                                await zooKeeper.Item2.deleteAsync(nodePath);
-                        }
+                        await zooKeeper.Item2.deleteAsync(nodePath);
                     }
                 }
             }
