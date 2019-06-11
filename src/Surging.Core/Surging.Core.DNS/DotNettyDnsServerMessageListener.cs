@@ -61,7 +61,7 @@ namespace Surging.Core.DNS
                 {
                     IChannelPipeline pipeline = channel.Pipeline;
                     pipeline.AddLast(new DatagramDnsQueryDecoder());
-                    pipeline.AddLast(new DatagramDnsResponseEncoder()); ;
+                    pipeline.AddLast(new DatagramDnsResponseEncoder());
                     pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
                     {
                         var sender = new DotNettyDnsServerMessageSender(_transportMessageEncoder, contenxt, _serializer);
