@@ -59,8 +59,8 @@ namespace Surging.Core.KestrelHttpServer
                     hostBuilder = hostBuilder.UseWebRoot(CPlatform.AppConfig.ServerOptions.WebRootPath);
                 _host = hostBuilder.Build();
                 _lifetime.ServiceEngineStarted.Register(async () =>
-                { 
-                        await _host.RunAsync();
+                {
+                    await _host.RunAsync();
                 });
 
             }

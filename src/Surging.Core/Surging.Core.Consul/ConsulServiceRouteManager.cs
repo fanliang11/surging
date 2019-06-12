@@ -80,6 +80,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
+            var locks= await CreateLock(routes);
             await _consulClientProvider.Check();
             var hostAddr = NetUtils.GetHostAddress();
             var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
@@ -102,6 +103,7 @@ namespace Surging.Core.Consul
             }
             await RemoveExceptRoutesAsync(routes, hostAddr);
             await base.SetRoutesAsync(routes);
+            locks.ForEach(p => p.Release());
         }
 
         public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
@@ -156,6 +158,20 @@ namespace Surging.Core.Consul
                     }
                 }
             }
+        }
+
+        private async Task<List<IDistributedLock>> CreateLock(IEnumerable<ServiceRoute> routes)
+        {
+            var result = new List<IDistributedLock>();
+            var clients = await _consulClientProvider.GetClients();
+            foreach (var client in clients)
+            {
+                foreach (var serviceRoute in routes)
+                {
+                    result.Add(client.CreateLock($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}"));
+                }
+            }
+            return result;
         }
 
         private async Task<ServiceRoute> GetRoute(byte[] data)

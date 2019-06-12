@@ -100,7 +100,7 @@ namespace Surging.Core.Consul.Internal.Implementation
             {
                 if (!await _healthCheckService.IsHealth(address))
                 {
-                    throw new RegisterConnectionException(string.Format("注册中心{0}连接异常，请联系管理园", address.ToString()));
+                    throw new RegisterConnectionException(string.Format("注册中心{0}连接异常，请联系管理员", address.ToString()));
                 }
             }
         }
