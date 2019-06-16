@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Consul
@@ -80,30 +81,36 @@ namespace Surging.Core.Consul
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
-            var locks= await CreateLock(routes);
-            await _consulClientProvider.Check();
-            var hostAddr = NetUtils.GetHostAddress();
-            var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
-            foreach (var route in routes)
+            var locks= await CreateLock();
+            try
             {
-                var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
-
-                if (serviceRoute != null)
+                await _consulClientProvider.Check();
+                var hostAddr = NetUtils.GetHostAddress();
+                var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
+                foreach (var route in routes)
                 {
-                    var addresses = serviceRoute.Address.Concat(
-                      route.Address.Except(serviceRoute.Address)).ToList();
+                    var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
 
-                    foreach (var address in route.Address)
+                    if (serviceRoute != null)
                     {
-                        addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
-                        addresses.Add(address);
+                        var addresses = serviceRoute.Address.Concat(
+                          route.Address.Except(serviceRoute.Address)).ToList();
+
+                        foreach (var address in route.Address)
+                        {
+                            addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
+                            addresses.Add(address);
+                        }
+                        route.Address = addresses;
                     }
-                    route.Address = addresses;
                 }
+                await RemoveExceptRoutesAsync(routes, hostAddr);
+                await base.SetRoutesAsync(routes);
             }
-            await RemoveExceptRoutesAsync(routes, hostAddr);
-            await base.SetRoutesAsync(routes);
-            locks.ForEach(p => p.Release());
+            finally
+            {
+                locks.ForEach(p => p.Release());
+            }
         }
 
         public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
@@ -160,16 +167,16 @@ namespace Surging.Core.Consul
             }
         }
 
-        private async Task<List<IDistributedLock>> CreateLock(IEnumerable<ServiceRoute> routes)
+        private async Task<List<IDistributedLock>> CreateLock()
         {
             var result = new List<IDistributedLock>();
             var clients = await _consulClientProvider.GetClients();
             foreach (var client in clients)
             {
-                foreach (var serviceRoute in routes)
-                {
-                    result.Add(client.CreateLock($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}"));
-                }
+                var distributedLock = await client.AcquireLock($"lock_{_configInfo.RoutePath}", _configInfo.LockDelay==0?
+                    default:
+                     new CancellationTokenSource(TimeSpan.FromSeconds(_configInfo.LockDelay)).Token);
+                result.Add(distributedLock);
             }
             return result;
         }
