@@ -29,7 +29,6 @@ namespace Surging.Core.DNS
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private IChannel _channel;
-        private readonly ISerializer<string> _serializer;
 
         public event ReceivedDelegate Received;
 
@@ -37,12 +36,11 @@ namespace Surging.Core.DNS
 
         #region Constructor
 
-        public DotNettyDnsServerMessageListener(ILogger<DotNettyDnsServerMessageListener> logger, ITransportMessageCodecFactory codecFactory, ISerializer<string> serializer)
+        public DotNettyDnsServerMessageListener(ILogger<DotNettyDnsServerMessageListener> logger, ITransportMessageCodecFactory codecFactory)
         {
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
-            _serializer = serializer;
         }
 
         #endregion Constructor
@@ -64,9 +62,9 @@ namespace Surging.Core.DNS
                     pipeline.AddLast(new DatagramDnsResponseEncoder());
                     pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
                     {
-                        var sender = new DotNettyDnsServerMessageSender(_transportMessageEncoder, contenxt, _serializer);
+                        var sender = new DotNettyDnsServerMessageSender(_transportMessageEncoder, contenxt);
                         await OnReceived(sender, message);
-                    }, _logger, _serializer));
+                    }, _logger));
                 })).Option(ChannelOption.SoBroadcast, true);
             try
             {
@@ -118,11 +116,10 @@ namespace Surging.Core.DNS
             private readonly ILogger _logger;
             private readonly ISerializer<string> _serializer;
 
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger, ISerializer<string> serializer)
+            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
             {
                 _readAction = readAction;
-                _logger = logger;
-                _serializer = serializer;
+                _logger = logger; 
             }
 
             protected override void ChannelRead0(IChannelHandlerContext ctx, DatagramDnsQuery query)
