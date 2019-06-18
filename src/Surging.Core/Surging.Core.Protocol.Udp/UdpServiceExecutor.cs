@@ -1,33 +1,31 @@
-﻿using DotNetty.Codecs.DNS;
-using DotNetty.Codecs.DNS.Records;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Transport;
-using Surging.Core.DNS.Extensions;
-using Surging.Core.DNS.Runtime;
+using Surging.Core.Protocol.Udp.Extensions;
+using Surging.Core.Protocol.Udp.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Surging.Core.DNS
+namespace Surging.Core.Protocol.Udp
 {
-   public class DnsServiceExecutor : IServiceExecutor
+   public class UdpServiceExecutor : IServiceExecutor
     {
         #region Field
 
-        private readonly IDnsServiceEntryProvider _dnsServiceEntryProvider;
-        private readonly ILogger<DnsServiceExecutor> _logger;
+        private readonly IUdpServiceEntryProvider _udpServiceEntryProvider;
+        private readonly ILogger<UdpServiceExecutor> _logger;
 
         #endregion Field
 
         #region Constructor
 
-        public DnsServiceExecutor(IDnsServiceEntryProvider dnsServiceEntryProvider, 
-            ILogger<DnsServiceExecutor> logger)
+        public UdpServiceExecutor(IUdpServiceEntryProvider dnsServiceEntryProvider,
+            ILogger<UdpServiceExecutor> logger)
         {
-            _dnsServiceEntryProvider = dnsServiceEntryProvider;
+            _udpServiceEntryProvider = dnsServiceEntryProvider;
             _logger = logger;
         }
 
@@ -45,19 +43,19 @@ namespace Surging.Core.DNS
             if (_logger.IsEnabled(LogLevel.Trace))
                 _logger.LogTrace("服务提供者接收到消息。");
 
-            if (!message.IsDnsResultMessage())
+            if (!message.IsUdpDispatchMessage())
                 return;
-            DnsTransportMessage dnsTransportMessage;
+            byte [] udpMessage;
             try
             {
-                dnsTransportMessage = message.GetContent<DnsTransportMessage>();
+                udpMessage = message.GetContent<byte[]>();
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "将接收到的消息反序列化成 TransportMessage<DnsTransportMessage> 时发送了错误。");
+                _logger.LogError(exception, "将接收到的消息反序列化成 TransportMessage<byte[]> 时发送了错误。");
                 return;
             }
-            var entry = _dnsServiceEntryProvider.GetEntry();
+            var entry = _udpServiceEntryProvider.GetEntry();
             if (entry == null)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
@@ -65,32 +63,30 @@ namespace Surging.Core.DNS
                 return;
             }
 
-            await LocalExecuteAsync(entry, dnsTransportMessage);
-            await SendRemoteInvokeResult(sender, dnsTransportMessage);
+            await LocalExecuteAsync(entry, udpMessage);
+            await SendRemoteInvokeResult(sender, message);
         }
 
         #endregion Implementation of IServiceExecutor
 
         #region Private Method
 
-    
-        private async Task<DnsTransportMessage> LocalExecuteAsync(DnsServiceEntry entry, DnsTransportMessage message)
+
+        private async Task LocalExecuteAsync(UdpServiceEntry entry, byte [] bytes)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
             try
-            {
-                var dnsQuestion = message.DnsQuestion;
-                message.Address= await entry.Behavior.DomainResolve(dnsQuestion.Name);
+            { 
+                 await entry.Behavior.Dispatch(bytes);
             }
             catch (Exception exception)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
-            }
-            return message;
+            } 
         }
 
-        private async Task SendRemoteInvokeResult(IMessageSender sender, DnsTransportMessage resultMessage)
+        private async Task SendRemoteInvokeResult(IMessageSender sender, TransportMessage resultMessage)
         {
             try
             {

@@ -1,18 +1,18 @@
 ﻿using Autofac;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
-using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport.Codec;
-using Surging.Core.DNS.Configurations;
-using Surging.Core.DNS.Runtime;
-using Surging.Core.DNS.Runtime.Implementation;
+using Surging.Core.Protocol.Udp.Runtime;
+using Surging.Core.Protocol.Udp.Runtime.Implementation;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Surging.Core.DNS
+namespace Surging.Core.Protocol.Udp
 {
-   public class DnsProtocolModule : EnginePartModule
+    public class DnsProtocolModule : EnginePartModule
     {
         public override void Initialize(CPlatformContainer serviceProvider)
         {
@@ -26,26 +26,23 @@ namespace Surging.Core.DNS
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-            var section = CPlatform.AppConfig.GetSection("Dns");
-            if (section.Exists())
-                AppConfig.DnsOption = section.Get<DnsOption>();
             builder.Register(provider =>
             {
-                return new DefaultDnsServiceEntryProvider(
+                return new DefaultUdpServiceEntryProvider(
                        provider.Resolve<IServiceEntryProvider>(),
-                    provider.Resolve<ILogger<DefaultDnsServiceEntryProvider>>(),
+                    provider.Resolve<ILogger<DefaultUdpServiceEntryProvider>>(),
                       provider.Resolve<CPlatformContainer>()
                       );
-            }).As(typeof(IDnsServiceEntryProvider)).SingleInstance();
-            builder.RegisterType(typeof(DnsServiceExecutor)).As(typeof(IServiceExecutor))
-            .Named<IServiceExecutor>(CommunicationProtocol.Dns.ToString()).SingleInstance();
+            }).As(typeof(IUdpServiceEntryProvider)).SingleInstance();
+            builder.RegisterType(typeof(UdpServiceExecutor)).As(typeof(IServiceExecutor))
+            .Named<IServiceExecutor>(CommunicationProtocol.Udp.ToString()).SingleInstance();
             if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.Dns)
             {
                 RegisterDefaultProtocol(builder);
             }
             else if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
             {
-                RegisterDnsProtocol(builder);
+                RegisterUdpProtocol(builder);
             }
         }
 
@@ -53,15 +50,15 @@ namespace Surging.Core.DNS
         {
             builder.Register(provider =>
             {
-                return new DotNettyDnsServerMessageListener(provider.Resolve<ILogger<DotNettyDnsServerMessageListener>>(),
+                return new DotNettyUdpServerMessageListener(provider.Resolve<ILogger<DotNettyUdpServerMessageListener>>(),
                       provider.Resolve<ITransportMessageCodecFactory>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
             {
-                var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Dns.ToString());
-                var messageListener = provider.Resolve<DotNettyDnsServerMessageListener>();
-                return new DnsServiceHost(async endPoint =>
+                var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Udp.ToString());
+                var messageListener = provider.Resolve<DotNettyUdpServerMessageListener>();
+                return new UdpServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
@@ -70,20 +67,20 @@ namespace Surging.Core.DNS
             }).As<IServiceHost>();
         }
 
-        private static void RegisterDnsProtocol(ContainerBuilderWrapper builder)
+        private static void RegisterUdpProtocol(ContainerBuilderWrapper builder)
         {
 
             builder.Register(provider =>
             {
-                return new DotNettyDnsServerMessageListener(provider.Resolve<ILogger<DotNettyDnsServerMessageListener>>(),
+                return new DotNettyUdpServerMessageListener(provider.Resolve<ILogger<DotNettyUdpServerMessageListener>>(),
                       provider.Resolve<ITransportMessageCodecFactory>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
             {
-                var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Dns.ToString());
-                var messageListener = provider.Resolve<DotNettyDnsServerMessageListener>();
-                return new DnsServiceHost(async endPoint =>
+                var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Udp.ToString());
+                var messageListener = provider.Resolve<DotNettyUdpServerMessageListener>();
+                return new UdpServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;

@@ -18,13 +18,11 @@ namespace Surging.Core.DNS
 {
     class DotNettyDnsServerMessageSender : DotNettyMessageSender, IMessageSender
     {
-        private readonly IChannelHandlerContext _context;
-        private readonly ISerializer<string> _serializer;
+        private readonly IChannelHandlerContext _context; 
 
-        public DotNettyDnsServerMessageSender(ITransportMessageEncoder transportMessageEncoder, IChannelHandlerContext context, ISerializer<string> serializer) : base(transportMessageEncoder)
+        public DotNettyDnsServerMessageSender(ITransportMessageEncoder transportMessageEncoder, IChannelHandlerContext context) : base(transportMessageEncoder)
         {
             _context = context;
-            _serializer = serializer;
         }
 
         public async Task SendAndFlushAsync(TransportMessage message)
