@@ -47,6 +47,7 @@ namespace Surging.Core.Protocol.Udp
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(group)
+                .Channel<SocketDatagramChannel>()
                 .Option(ChannelOption.SoSndbuf, 1024 * 256)
                 .Option(ChannelOption.SoRcvbuf, 1024 * 256)
                 .Handler(new ActionChannelInitializer<IDatagramChannel>(channel =>
@@ -65,7 +66,7 @@ namespace Surging.Core.Protocol.Udp
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"Udp服务主机启动成功，监听地址：{endPoint}。");
             }
-            catch
+            catch(Exception ex)
             {
                 _logger.LogError($"Udp服务主机启动失败，监听地址：{endPoint}。 ");
             }

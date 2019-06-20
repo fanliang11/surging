@@ -43,12 +43,12 @@ namespace Surging.Core.Protocol.Udp
             if (_logger.IsEnabled(LogLevel.Trace))
                 _logger.LogTrace("服务提供者接收到消息。");
 
-            if (!message.IsUdpDispatchMessage())
-                return;
-            byte [] udpMessage;
+
+            byte[] udpMessage = null;
             try
             {
-                udpMessage = message.GetContent<byte[]>();
+                if (!message.IsUdpDispatchMessage())
+                    udpMessage = message.GetContent<byte[]>();
             }
             catch (Exception exception)
             {
@@ -62,8 +62,10 @@ namespace Surging.Core.Protocol.Udp
                     _logger.LogError($"未实现DnsBehavior实例。");
                 return;
             }
-
-            await LocalExecuteAsync(entry, udpMessage);
+            if (udpMessage != null)
+                await LocalExecuteAsync(entry, udpMessage);
+            else
+                await LocalExecuteAsync(entry, message.GetContent<object>());
             await SendRemoteInvokeResult(sender, message);
         }
 
@@ -85,6 +87,22 @@ namespace Surging.Core.Protocol.Udp
                     _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
             } 
         }
+
+
+        private async Task LocalExecuteAsync(UdpServiceEntry entry, object message)
+        {
+            HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
+            try
+            {
+                await entry.Behavior.Dispatch(message);
+            }
+            catch (Exception exception)
+            {
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
+            }
+        }
+
 
         private async Task SendRemoteInvokeResult(IMessageSender sender, TransportMessage resultMessage)
         {

@@ -67,7 +67,9 @@ namespace Surging.Core.Protocol.Udp.Runtime
 
         }
 
-        public abstract Task Dispatch(IEnumerable<byte> bytes);
+        public abstract Task<bool> Dispatch(IEnumerable<byte> bytes);
+
+        public abstract Task<bool> Dispatch(object message);
 
         public void Publish(IntegrationEvent @event)
         {

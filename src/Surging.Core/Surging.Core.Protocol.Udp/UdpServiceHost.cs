@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Runtime.Server;
+﻿using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Transport;
 using System;
@@ -54,7 +55,7 @@ namespace Surging.Core.Protocol.Udp
         {
             if (_serverMessageListener != null)
                 return;
-            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), port));
+            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.UdpPort));
             _serverMessageListener.Received += async (sender, message) =>
             {
                 await Task.Run(() =>
