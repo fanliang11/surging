@@ -37,7 +37,7 @@ namespace Surging.Core.Swagger
                 builder.UseSwaggerUI(c =>
                 {
                     var areaName = AppConfig.SwaggerConfig.Options?.IngressName;
-                    c.SwaggerEndpoint($"/swagger/{info.Version}/swagger.json", info.Title, areaName);
+                    c.SwaggerEndpoint($"../swagger/{info.Version}/swagger.json", info.Title, areaName);
                     c.SwaggerEndpoint(_serviceEntryProvider.GetALLEntries(), areaName);
                 });
             }
