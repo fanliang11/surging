@@ -156,7 +156,7 @@ namespace WebSocketCore
     {
       _maxRetryCountForConnect = 10;
       EmptyBytes = new byte[0];
-      FragmentLength = 1016;
+      FragmentLength = 1016*1024;
       RandomNumber = new RNGCryptoServiceProvider ();
     }
 

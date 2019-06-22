@@ -3,9 +3,6 @@ using DotNetty.Transport.Channels;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Udp
@@ -21,7 +18,7 @@ namespace Surging.Core.Protocol.Udp
 
         protected IByteBuffer GetByteBuffer(TransportMessage message)
         {
-            var data = _transportMessageEncoder.Encode(message); 
+            var data =  message.GetContent<byte []>(); 
             return Unpooled.WrappedBuffer(data);
         }
     }
@@ -59,6 +56,7 @@ namespace Surging.Core.Protocol.Udp
         public async Task SendAndFlushAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
+            if( _context.Channel.RemoteAddress !=null)
             await _context.WriteAndFlushAsync(buffer);
         }
 

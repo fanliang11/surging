@@ -47,7 +47,7 @@ namespace Surging.Core.Protocol.Udp
             byte[] udpMessage = null;
             try
             {
-                if (!message.IsUdpDispatchMessage())
+                if (message.IsUdpDispatchMessage())
                     udpMessage = message.GetContent<byte[]>();
             }
             catch (Exception exception)
@@ -59,14 +59,14 @@ namespace Surging.Core.Protocol.Udp
             if (entry == null)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError($"未实现DnsBehavior实例。");
+                    _logger.LogError($"未实现UdpBehavior实例。");
                 return;
             }
             if (udpMessage != null)
                 await LocalExecuteAsync(entry, udpMessage);
             else
                 await LocalExecuteAsync(entry, message.GetContent<object>());
-            await SendRemoteInvokeResult(sender, message);
+            await SendRemoteInvokeResult(sender, udpMessage);
         }
 
         #endregion Implementation of IServiceExecutor
@@ -104,7 +104,7 @@ namespace Surging.Core.Protocol.Udp
         }
 
 
-        private async Task SendRemoteInvokeResult(IMessageSender sender, TransportMessage resultMessage)
+        private async Task SendRemoteInvokeResult(IMessageSender sender, byte[] resultMessage)
         {
             try
             {

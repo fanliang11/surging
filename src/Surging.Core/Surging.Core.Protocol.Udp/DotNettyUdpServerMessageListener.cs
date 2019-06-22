@@ -48,17 +48,15 @@ namespace Surging.Core.Protocol.Udp
             bootstrap
                 .Group(group)
                 .Channel<SocketDatagramChannel>()
-                .Option(ChannelOption.SoSndbuf, 1024 * 256)
-                .Option(ChannelOption.SoRcvbuf, 1024 * 256)
-                .Handler(new ActionChannelInitializer<IDatagramChannel>(channel =>
-                {
-                    IChannelPipeline pipeline = channel.Pipeline;
-                    pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
+                .Option(ChannelOption.SoBacklog, 1024) 
+                .Option(ChannelOption.SoSndbuf, 1024 * 4096*10)
+                .Option(ChannelOption.SoRcvbuf, 1024 * 4096*10) 
+                .Handler(new ServerHandler(async (contenxt, message) =>
                     {
                         var sender = new DotNettyUdpServerMessageSender(_transportMessageEncoder, contenxt);
                         await OnReceived(sender, message);
-                    }, _logger, _serializer));
-                })).Option(ChannelOption.SoBroadcast, true);
+                    }, _logger, _serializer)
+                ).Option(ChannelOption.SoBroadcast, true);
             try
             {
 
@@ -106,6 +104,8 @@ namespace Surging.Core.Protocol.Udp
             private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
             private readonly ILogger _logger;
             private readonly ISerializer<string> _serializer;
+
+
 
             public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger, ISerializer<string> serializer)
             {
