@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -38,7 +39,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             if (httpMessage.RoutePath.AsSpan().IndexOf("/") == -1)
                 routePath = $"/{routePath}";
             var serviceEntries = _serviceEntryManager.GetEntries();
-            return serviceEntries.SingleOrDefault(i => i.RoutePath == routePath);
+            return serviceEntries.SingleOrDefault(i => i.RoutePath == routePath && !i.Descriptor.GetMetadata<bool>("IsOverload"));
         }
 
         #endregion Implementation of IServiceEntryLocate

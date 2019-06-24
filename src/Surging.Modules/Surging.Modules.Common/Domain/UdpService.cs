@@ -11,7 +11,7 @@ namespace Surging.Modules.Common.Domain
 {
     public class UdpService : UdpBehavior, IDnsService
     {
-        public override  async Task<bool> Dispatch(IEnumerable<byte> bytes)
+        public override async Task<bool> Dispatch(IEnumerable<byte> bytes)
         {
             await this.GetService<IMediaService>().Push(bytes);
             return await Task.FromResult(true);
