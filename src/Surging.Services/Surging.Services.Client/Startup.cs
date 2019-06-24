@@ -141,7 +141,8 @@ namespace Surging.Services.Client
             {
                 Name = "fanly",
                 Age = 18,
-                UserId = 1
+                UserId = 1,
+                Sex = "Man"
             }));
             string path = "api/user/getuser";
             string serviceKey = "User";
