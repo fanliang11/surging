@@ -404,7 +404,7 @@ namespace Surging.Core.CPlatform
             builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor))
                 .Named<IServiceExecutor>(CommunicationProtocol.Tcp.ToString()).SingleInstance();
 
-            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().AddRuntime();
+            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().RegisterInstanceByConstraint().AddRuntime();
         }
 
         /// <summary>
@@ -445,6 +445,23 @@ namespace Surging.Core.CPlatform
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
+
+        }
+
+        public static IServiceBuilder RegisterInstanceByConstraint(this IServiceBuilder builder, params string[] virtualPaths)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
+
+            foreach (var assembly in referenceAssemblies)
+            {
+                services.RegisterAssemblyTypes(assembly)
+                 .Where(t => typeof(ISingletonDependency).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().AsSelf().SingleInstance();
+
+                services.RegisterAssemblyTypes(assembly)
+                .Where(t => typeof(ITransientDependency).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().AsSelf().InstancePerDependency();
+            }
+            return builder;
 
         }
 
