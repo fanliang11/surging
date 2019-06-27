@@ -76,6 +76,7 @@ namespace Surging.Services.Client
         {
             Task.Run(async () =>
             {
+                RpcContext.GetContext().SetAttachment("xid",124);
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
                 var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
                 var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
@@ -140,7 +141,8 @@ namespace Surging.Services.Client
             {
                 Name = "fanly",
                 Age = 18,
-                UserId = 1
+                UserId = 1,
+                Sex = "Man"
             }));
             string path = "api/user/getuser";
             string serviceKey = "User";

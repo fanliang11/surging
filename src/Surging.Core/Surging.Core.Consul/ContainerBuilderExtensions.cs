@@ -196,9 +196,10 @@ namespace Surging.Core.Consul
                 config = new ConfigInfo(
                    option.ConnectionString,
                     TimeSpan.FromSeconds(sessionTimeout),
-                    option.RoutePath ?? config.RoutePath, 
+                    option.LockDelay ?? config.LockDelay,
+                    option.RoutePath ?? config.RoutePath,
                     option.SubscriberPath ?? config.SubscriberPath,
-                    option.CommandPath  ?? config.CommandPath,
+                    option.CommandPath ?? config.CommandPath,
                     option.CachePath ?? config.CachePath,
                     option.MqttRoutePath ?? config.MqttRoutePath,
                    option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
