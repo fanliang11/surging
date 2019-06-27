@@ -17,11 +17,11 @@ namespace Surging.Core.KestrelHttpServer
             base.Initialize(serviceProvider);
         }
 
-        public virtual void Initialize(IApplicationBuilder builder)
+        public virtual void Initialize(ApplicationInitializationContext builder)
         {
         }
 
-        public virtual void RegisterBuilder(IServiceCollection serviceCollection)
+        public virtual void RegisterBuilder(ConfigurationContext context)
         {
         }
 
@@ -52,7 +52,8 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
                      provider.Resolve<IServiceEngineLifetime>(),
-                     provider.Resolve<IModuleProvider>()
+                     provider.Resolve<IModuleProvider>(),
+                     provider.Resolve<CPlatformContainer>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -76,7 +77,8 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
                      provider.Resolve<IServiceEngineLifetime>(),
-                       provider.Resolve<IModuleProvider>()
+                       provider.Resolve<IModuleProvider>(),
+                     provider.Resolve<CPlatformContainer>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
