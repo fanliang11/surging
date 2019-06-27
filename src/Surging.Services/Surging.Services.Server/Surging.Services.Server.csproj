@@ -13,14 +13,12 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
+    <PackageReference Include="Volo.Abp.EventBus" Version="0.18.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Abp\Surging.Core.Abp.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Caching\Surging.Core.Caching.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Codec.MessagePack\Surging.Core.Codec.MessagePack.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Codec.ProtoBuffer\Surging.Core.Codec.ProtoBuffer.csproj" />
@@ -30,7 +28,6 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DNS\Surging.Core.DNS.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DotNetty\Surging.Core.DotNetty.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusKafka\Surging.Core.EventBusKafka.csproj" />
-    <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusRabbitMQ\Surging.Core.EventBusRabbitMQ.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.KestrelHttpServer\Surging.Core.KestrelHttpServer.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Log4net\Surging.Core.Log4net.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.NLog\Surging.Core.Nlog.csproj" />

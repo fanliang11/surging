@@ -583,7 +583,7 @@ namespace Surging.Core.CPlatform
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               _modules, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
+               _modules,virtualPaths, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }

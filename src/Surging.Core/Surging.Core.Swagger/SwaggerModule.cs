@@ -27,14 +27,14 @@ namespace Surging.Core.Swagger
             _serviceEntryProvider = serviceProvider.GetInstances<IServiceEntryProvider>();
         }
 
-        public override void Initialize(IApplicationBuilder builder)
+        public override void Initialize(ApplicationInitializationContext context)
         {
             var info = AppConfig.SwaggerConfig.Info == null
           ? AppConfig.SwaggerOptions : AppConfig.SwaggerConfig.Info;
             if (info != null)
             {
-                builder.UseSwagger();
-                builder.UseSwaggerUI(c =>
+                context.Builder.UseSwagger();
+                context.Builder.UseSwaggerUI(c =>
                 {
                     var areaName = AppConfig.SwaggerConfig.Options?.IngressName;
                     c.SwaggerEndpoint($"../swagger/{info.Version}/swagger.json", info.Title, areaName);
@@ -43,8 +43,9 @@ namespace Surging.Core.Swagger
             }
         }
 
-        public override void RegisterBuilder(IServiceCollection serviceCollection)
+        public override void RegisterBuilder(ConfigurationContext context)
         {
+            var serviceCollection = context.Services;
             var info = AppConfig.SwaggerConfig.Info == null
                      ? AppConfig.SwaggerOptions : AppConfig.SwaggerConfig.Info;
             var swaggerOptions = AppConfig.SwaggerConfig.Options;

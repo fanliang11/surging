@@ -9,19 +9,24 @@ namespace Surging.Core.CPlatform.Module
     public class ModuleProvider: IModuleProvider
     {
         private readonly List<AbstractModule> _modules;
+        private readonly string[] _virtualPaths;
         private readonly CPlatformContainer _serviceProvoider;
         private readonly ILogger<ModuleProvider> _logger;
 
         public ModuleProvider(List<AbstractModule> modules,
+            string[] virtualPaths,
             ILogger<ModuleProvider> logger,
             CPlatformContainer serviceProvoider)
         {
             _modules = modules;
+            _virtualPaths = virtualPaths;
             _serviceProvoider = serviceProvoider;
             _logger = logger;
         }
 
         public List<AbstractModule> Modules { get => _modules; }
+
+        public string[] VirtualPaths { get => _virtualPaths; }
 
         public void Initialize()
         {
