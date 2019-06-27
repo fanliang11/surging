@@ -1,15 +1,14 @@
-﻿using Surging.Core.Swagger;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Surging.Core.KestrelHttpServer
+namespace Surging.Core.Swagger
 {
-    public  class AppConfig
+   public  class AppConfig
     {
-        public  static Info SwaggerOptions
+        public static Info SwaggerOptions
         {
-            get;internal set;
+            get; internal set;
         }
 
         public static DocumentConfiguration SwaggerConfig

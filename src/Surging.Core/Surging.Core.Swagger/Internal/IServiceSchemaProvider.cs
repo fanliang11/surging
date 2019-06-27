@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Surging.Core.KestrelHttpServer.Internal
+namespace Surging.Core.Swagger.Internal
 {
-    public interface IServiceSchemaProvider
+   public interface IServiceSchemaProvider
     {
         IEnumerable<string> GetSchemaFilesPath();
     }

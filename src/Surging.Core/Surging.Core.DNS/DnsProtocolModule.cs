@@ -45,7 +45,7 @@ namespace Surging.Core.DNS
             }
             else if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
             {
-                RegisterHttpProtocol(builder);
+                RegisterDnsProtocol(builder);
             }
         }
 
@@ -54,8 +54,7 @@ namespace Surging.Core.DNS
             builder.Register(provider =>
             {
                 return new DotNettyDnsServerMessageListener(provider.Resolve<ILogger<DotNettyDnsServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>(),
-                      provider.Resolve<ISerializer<string>>()
+                      provider.Resolve<ITransportMessageCodecFactory>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -71,14 +70,13 @@ namespace Surging.Core.DNS
             }).As<IServiceHost>();
         }
 
-        private static void RegisterHttpProtocol(ContainerBuilderWrapper builder)
+        private static void RegisterDnsProtocol(ContainerBuilderWrapper builder)
         {
 
             builder.Register(provider =>
             {
                 return new DotNettyDnsServerMessageListener(provider.Resolve<ILogger<DotNettyDnsServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>(),
-                      provider.Resolve<ISerializer<string>>()
+                      provider.Resolve<ITransportMessageCodecFactory>()
                       );
             }).SingleInstance();
             builder.Register(provider =>

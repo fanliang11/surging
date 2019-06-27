@@ -77,7 +77,7 @@ namespace Surging.Core.Swagger.SwaggerUI
                     Description = des?.Description,
 
                 };
-                options.SwaggerEndpoint($"/swagger/{info.Title}/swagger.json", info.Title,areaName);
+                options.SwaggerEndpoint($"../swagger/{info.Title}/swagger.json", info.Title,areaName);
             }
         }
 

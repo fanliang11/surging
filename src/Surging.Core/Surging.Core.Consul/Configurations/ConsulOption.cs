@@ -23,5 +23,7 @@ namespace Surging.Core.Consul.Configurations
         public string ReloadOnChange { get; set; }
 
         public string EnableChildrenMonitor { get; set; }
+
+        public int? LockDelay { get; set; }
     }
 }

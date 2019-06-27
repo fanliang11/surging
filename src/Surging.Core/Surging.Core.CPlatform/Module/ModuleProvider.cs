@@ -21,6 +21,8 @@ namespace Surging.Core.CPlatform.Module
             _logger = logger;
         }
 
+        public List<AbstractModule> Modules { get => _modules; }
+
         public void Initialize()
         {
             _modules.ForEach(p =>

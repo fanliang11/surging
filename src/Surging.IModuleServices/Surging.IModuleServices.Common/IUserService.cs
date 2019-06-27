@@ -135,6 +135,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// </summary>
         /// <param name="idList">list 类型参数</param>
         /// <returns></returns>
+        [ServiceMetadata("IsOverload", true)]
         Task<string> GetUser(List<int> idList);
 
         /// <summary>

@@ -21,7 +21,7 @@ namespace Surging.Core.Consul.Configurations
             string cachePath="services/serviceCaches/",
             string mqttRoutePath = "services/mqttServiceRoutes/",
             bool reloadOnChange=false, bool enableChildrenMonitor = false) :
-            this(connectionString, TimeSpan.FromSeconds(20), routePath, subscriberPath,commandPath, cachePath, mqttRoutePath, reloadOnChange, enableChildrenMonitor)
+            this(connectionString, TimeSpan.FromSeconds(20), 0, routePath, subscriberPath,commandPath, cachePath, mqttRoutePath, reloadOnChange, enableChildrenMonitor)
         {
         }
 
@@ -35,7 +35,7 @@ namespace Surging.Core.Consul.Configurations
         /// <param name="routePath">路由路径配置路径</param>
         /// <param name="cachePath">缓存中心配置路径</param>
         /// <param name="mqttRoutePath">Mqtt路由路径配置路径</param>
-        public ConfigInfo(string connectionString, TimeSpan sessionTimeout,
+        public ConfigInfo(string connectionString, TimeSpan sessionTimeout, int lockDelay,
             string routePath = "services/serviceRoutes/",
              string subscriberPath = "services/serviceSubscribers/",
             string commandPath = "services/serviceCommands/",
@@ -47,6 +47,7 @@ namespace Surging.Core.Consul.Configurations
             ReloadOnChange = reloadOnChange;
             SessionTimeout = sessionTimeout;
             RoutePath = routePath;
+            LockDelay = lockDelay;
             SubscriberPath = subscriberPath;
             CommandPath = commandPath;
             MqttRoutePath = mqttRoutePath;
@@ -92,6 +93,7 @@ namespace Surging.Core.Consul.Configurations
         /// </summary>
         public int WatchInterval { get; set; } = 60;
 
+        public int LockDelay { get; set; }
 
         public bool EnableChildrenMonitor { get; set; }
         /// <summary>

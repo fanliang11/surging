@@ -131,7 +131,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         private async Task<ServiceRoute> GetRouteByPathAsync(string path)
         {
             var routes = await _serviceRouteManager.GetRoutesAsync();
-            var  route = routes.FirstOrDefault(i => String.Compare(i.ServiceDescriptor.RoutePath, path,true) ==0);
+            var route = routes.FirstOrDefault(i => String.Compare(i.ServiceDescriptor.RoutePath, path, true) == 0 && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload"));
             if (route == null)
             {
                 if (_logger.IsEnabled(LogLevel.Warning))

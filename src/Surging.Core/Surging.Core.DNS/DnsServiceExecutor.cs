@@ -65,7 +65,7 @@ namespace Surging.Core.DNS
                 return;
             }
 
-            dnsTransportMessage = await LocalExecuteAsync(entry, dnsTransportMessage);
+            await LocalExecuteAsync(entry, dnsTransportMessage);
             await SendRemoteInvokeResult(sender, dnsTransportMessage);
         }
 
