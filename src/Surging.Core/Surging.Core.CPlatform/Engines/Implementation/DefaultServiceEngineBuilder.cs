@@ -36,6 +36,7 @@ namespace Surging.Core.CPlatform.Engines.Implementation
                     serviceBuilder.RegisterServices(paths);
                     serviceBuilder.RegisterRepositories(paths);
                     serviceBuilder.RegisterServiceBus(paths);
+                    serviceBuilder.RegisterInstanceByConstraint(paths);
                 }
                 if (_serviceEngine.ComponentServiceLocationFormats != null)
                 {
