@@ -21,8 +21,9 @@ namespace Surging.Core.Swagger
         private  IServiceSchemaProvider _serviceSchemaProvider; 
         private  IServiceEntryProvider _serviceEntryProvider;
 
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
+            var serviceProvider = context.ServiceProvoider;
             _serviceSchemaProvider = serviceProvider.GetInstances<IServiceSchemaProvider>();
             _serviceEntryProvider = serviceProvider.GetInstances<IServiceEntryProvider>();
         }

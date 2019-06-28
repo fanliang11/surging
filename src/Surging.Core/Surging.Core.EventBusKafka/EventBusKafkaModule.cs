@@ -16,9 +16,10 @@ namespace Surging.Core.EventBusKafka
 {
     public class EventBusKafkaModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            var serviceProvider = context.ServiceProvoider;
+            base.Initialize(context);
             serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
             serviceProvider.GetInstances<IServiceEngineLifetime>().ServiceEngineStarted.Register(() =>
              {

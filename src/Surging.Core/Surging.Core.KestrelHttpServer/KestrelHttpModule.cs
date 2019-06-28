@@ -12,9 +12,9 @@ namespace Surging.Core.KestrelHttpServer
 {
     public class KestrelHttpModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         public virtual void Initialize(ApplicationInitializationContext builder)

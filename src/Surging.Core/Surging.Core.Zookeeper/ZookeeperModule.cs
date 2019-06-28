@@ -23,9 +23,9 @@ namespace Surging.Core.Zookeeper
 {
     public class ZookeeperModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>

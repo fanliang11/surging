@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace Surging.Core.CPlatform.Module
 {
-    public abstract class AbstractModule : Autofac.Module
+    public abstract class AbstractModule : Autofac.Module,IDisposable
     {
         #region 实例属性
 
@@ -47,8 +47,9 @@ namespace Surging.Core.CPlatform.Module
 
         #region 实例方法
 
-        public virtual void Initialize(CPlatformContainer serviceProvider)
+        public virtual void Initialize(AppModuleContext serviceProvider)
         {
+            Dispose();
         }
         
         protected override  void Load(ContainerBuilder builder)
@@ -157,6 +158,10 @@ namespace Surging.Core.CPlatform.Module
                 sb.AppendLine(c.ToString());
             });
             return sb.ToString();
+        }
+
+        public virtual void Dispose()
+        {
         }
 
         #endregion

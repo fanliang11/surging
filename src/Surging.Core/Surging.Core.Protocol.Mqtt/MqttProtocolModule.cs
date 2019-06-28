@@ -21,9 +21,9 @@ namespace Surging.Core.Protocol.Mqtt
 {
     public class MqttProtocolModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>

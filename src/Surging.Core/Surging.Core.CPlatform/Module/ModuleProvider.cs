@@ -2,7 +2,7 @@
 using Surging.Core.CPlatform.Engines;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Surging.Core.CPlatform.Module
 {
@@ -28,14 +28,18 @@ namespace Surging.Core.CPlatform.Module
 
         public string[] VirtualPaths { get => _virtualPaths; }
 
-        public void Initialize()
+        public virtual void Initialize()
         {
             _modules.ForEach(p =>
             {
                 try
                 {
+                    Type[] types = { typeof(SystemModule), typeof(BusinessModule), typeof(EnginePartModule), typeof(AbstractModule) }; 
                     if (p.Enable)
-                        p.Initialize(_serviceProvoider);
+                            p.Initialize(new AppModuleContext(_modules, _virtualPaths, _serviceProvoider));
+                    var type = p.GetType().BaseType;
+                    if (types.Any(ty => ty == type))
+                        p.Dispose();
                 }
                 catch(Exception ex)
                 {

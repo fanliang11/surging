@@ -8,10 +8,10 @@ namespace Surging.Core.AutoMapper
     public class AutoMapperModule : EnginePartModule
     {
 
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
-            serviceProvider.GetInstances<IAutoMapperBootstrap>().Initialize();
+            base.Initialize(context);
+            context.ServiceProvoider.GetInstances<IAutoMapperBootstrap>().Initialize();
         }
 
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)

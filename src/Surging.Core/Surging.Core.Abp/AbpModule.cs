@@ -25,14 +25,20 @@ namespace Surging.Core.Abp
     {
         private ILogger<AbpModule> _logger;
         private List<VoloAbp.IAbpApplicationWithExternalServiceProvider> _providers=new List<VoloAbp.IAbpApplicationWithExternalServiceProvider>();
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            _logger = serviceProvider.GetInstances<ILogger<AbpModule>>();
+            _logger = context.ServiceProvoider.GetInstances<ILogger<AbpModule>>();
         }
 
         public override void Initialize(ApplicationInitializationContext context)
         {
             _providers.ForEach(p => p.Initialize(context.Builder.ApplicationServices));
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _providers = null;
         }
 
         public override void RegisterBuilder(ConfigurationContext context)

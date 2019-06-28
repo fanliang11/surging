@@ -12,9 +12,9 @@ namespace Surging.Core.DotNetty
 {
     public class DotNettyModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>

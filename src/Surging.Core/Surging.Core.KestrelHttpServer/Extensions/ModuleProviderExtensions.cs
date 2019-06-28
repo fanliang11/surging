@@ -9,17 +9,18 @@ namespace Surging.Core.KestrelHttpServer.Extensions
 {
    public static  class ModuleProviderExtensions
     {
-        public static void Initialize(this IModuleProvider  moduleProvider, ApplicationInitializationContext builder)
+        public static void Initialize(this IModuleProvider moduleProvider, ApplicationInitializationContext builder)
         {
             moduleProvider.Modules.ForEach(p =>
             {
                 try
                 {
-                    if (p.Enable)
-                    {
-                        var module = p as KestrelHttpModule;
-                        module?.Initialize(builder);
-                    }
+                    using (var abstractModule = p)
+                        if (abstractModule.Enable)
+                        {
+                            var module = abstractModule as KestrelHttpModule;
+                            module?.Initialize(builder);
+                        }
                 }
                 catch (Exception ex)
                 {
