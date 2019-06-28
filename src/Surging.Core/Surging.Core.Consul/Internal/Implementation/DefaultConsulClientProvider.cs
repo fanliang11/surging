@@ -23,11 +23,11 @@ namespace Surging.Core.Consul.Internal.Implementation
         private ConfigInfo _config;
         private readonly IHealthCheckService _healthCheckService;
         private readonly IConsulAddressSelector _consulAddressSelector;
-        private readonly ILogger<DefaultConsulClientProvider> _logger; 
+        private readonly ILogger<DefaultConsulClientProvider> _logger;
         private readonly ConcurrentDictionary<string, IAddressSelector> _addressSelectors = new
             ConcurrentDictionary<string, IAddressSelector>();
         private readonly ConcurrentDictionary<AddressModel, ConsulClient> _consulClients = new
-           ConcurrentDictionary<AddressModel, ConsulClient>();
+            ConcurrentDictionary<AddressModel, ConsulClient>();
 
         public DefaultConsulClientProvider(ConfigInfo config, IHealthCheckService healthCheckService, IConsulAddressSelector consulAddressSelector,
             ILogger<DefaultConsulClientProvider> logger)
@@ -76,14 +76,14 @@ namespace Surging.Core.Consul.Internal.Implementation
             return result;
         }
 
-       public async  ValueTask<IEnumerable<ConsulClient>> GetClients()
+        public async ValueTask<IEnumerable<ConsulClient>> GetClients()
         {
             var result = new List<ConsulClient>();
             foreach (var address in _config.Addresses)
             {
-                var ipAddress=address as IpAddressModel;
+                var ipAddress = address as IpAddressModel;
                 if (await _healthCheckService.IsHealth(address))
-                { 
+                {
                     result.Add(_consulClients.GetOrAdd(ipAddress, new ConsulClient(config =>
                     {
                         config.Address = new Uri($"http://{ipAddress.Ip}:{ipAddress.Port}");

@@ -31,7 +31,6 @@ namespace Surging.Core.CPlatform
         public static ServiceDescriptor GroupName(this ServiceDescriptor descriptor, string groupName)
         {
             descriptor.Metadatas["GroupName"] = groupName;
-
             return descriptor;
         }
 
@@ -197,7 +196,6 @@ namespace Surging.Core.CPlatform
         /// 路由
         /// </summary>
         public string RoutePath { get; set; }
-
 
         /// <summary>
         /// 元数据。

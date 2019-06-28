@@ -1,5 +1,4 @@
-﻿
-using Autofac;
+﻿using Autofac;
 using Surging.Core.CPlatform.Support;
 using System.Linq;
 using Surging.Core.CPlatform.Routing;
@@ -33,10 +32,10 @@ namespace Surging.Core.CPlatform
                 BuildServiceEngine(mapper);
                 await mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
-                int _port = AppConfig.ServerOptions.Port= AppConfig.ServerOptions.Port == 0 ? port : AppConfig.ServerOptions.Port;
+                int _port = AppConfig.ServerOptions.Port = AppConfig.ServerOptions.Port == 0 ? port : AppConfig.ServerOptions.Port;
                 string _ip = AppConfig.ServerOptions.Ip = AppConfig.ServerOptions.Ip ?? ip;
                 _port = AppConfig.ServerOptions.Port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
-                _ip = AppConfig.ServerOptions.Ip =AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
+                _ip = AppConfig.ServerOptions.Ip = AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
                 _ip = NetUtils.GetHostAddress(_ip);
 
                 await ConfigureRoute(mapper, serviceToken);
@@ -56,7 +55,7 @@ namespace Surging.Core.CPlatform
             var serverOptions = new SurgingServerOptions();
             options.Invoke(serverOptions);
             AppConfig.ServerOptions = serverOptions;
-            return hostBuilder.UseServer(serverOptions.Ip,serverOptions.Port,serverOptions.Token);
+            return hostBuilder.UseServer(serverOptions.Ip, serverOptions.Port, serverOptions.Token);
         }
 
         public static IServiceHostBuilder UseClient(this IServiceHostBuilder hostBuilder)
@@ -70,9 +69,9 @@ namespace Surging.Core.CPlatform
                     return new ServiceSubscriber
                     {
                         Address = new[] { new IpAddressModel {
-                     Ip = Dns.GetHostEntry(Dns.GetHostName())
-                 .AddressList.FirstOrDefault<IPAddress>
-                 (a => a.AddressFamily.ToString().Equals("InterNetwork")).ToString() } },
+                             Ip = Dns.GetHostEntry(Dns.GetHostName())
+                             .AddressList.FirstOrDefault<IPAddress>
+                             (a => a.AddressFamily.ToString().Equals("InterNetwork")).ToString() } },
                         ServiceDescriptor = i.Descriptor
                     };
                 }).ToList();
@@ -88,14 +87,14 @@ namespace Surging.Core.CPlatform
                 var builder = new ContainerBuilder();
 
                 container.Resolve<IServiceEngineBuilder>().Build(builder);
-                 var configBuilder=  container.Resolve<IConfigurationBuilder>();
+                var configBuilder = container.Resolve<IConfigurationBuilder>();
                 var appSettingPath = Path.Combine(AppConfig.ServerOptions.RootPath, "appsettings.json");
-                configBuilder.AddCPlatformFile("${appsettingspath}|"+ appSettingPath, optional: false, reloadOnChange: true);
+                configBuilder.AddCPlatformFile("${appsettingspath}|" + appSettingPath, optional: false, reloadOnChange: true);
                 builder.Update(container);
             }
         }
 
-        public static async Task ConfigureRoute(IContainer mapper,string serviceToken)
+        public static async Task ConfigureRoute(IContainer mapper, string serviceToken)
         {
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
              AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
@@ -106,9 +105,9 @@ namespace Surging.Core.CPlatform
                         async () => await routeProvider.RegisterRoutes(
                         Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
                 else
-                   await routeProvider.RegisterRoutes(0);
+                    await routeProvider.RegisterRoutes(0);
             }
         }
-         
+
     }
 }

@@ -21,6 +21,9 @@ namespace Surging.Core.CPlatform
 
         public static IConfigurationRoot Configuration { get; internal set; }
 
+        /// <summary>
+        /// 负载均衡模式
+        /// </summary>
         public static AddressSelectorMode LoadBalanceMode
         {
             get
