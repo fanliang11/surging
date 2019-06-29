@@ -19,6 +19,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -31,15 +32,21 @@ namespace Surging.Core.KestrelHttpServer
         private readonly IServiceEngineLifetime _lifetime;
         private readonly IModuleProvider _moduleProvider;
         private readonly CPlatformContainer _container;
+        private readonly IServiceRouteProvider _serviceRouteProvider;
 
         public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger,
-            ISerializer<string> serializer, IServiceEngineLifetime lifetime,IModuleProvider moduleProvider, CPlatformContainer container) : base(logger, serializer)
+            ISerializer<string> serializer, 
+            IServiceEngineLifetime lifetime,
+            IModuleProvider moduleProvider,
+            IServiceRouteProvider serviceRouteProvider,
+            CPlatformContainer container) : base(logger, serializer, serviceRouteProvider)
         {
             _logger = logger;
             _serializer = serializer;
             _lifetime = lifetime;
             _moduleProvider = moduleProvider;
             _container = container;
+            _serviceRouteProvider = serviceRouteProvider;
         }
 
         public async Task StartAsync(EndPoint endPoint)

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 
@@ -53,6 +54,7 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ISerializer<string>>(),
                      provider.Resolve<IServiceEngineLifetime>(),
                      provider.Resolve<IModuleProvider>(),
+                    provider.Resolve<IServiceRouteProvider>(),
                      provider.Resolve<CPlatformContainer>()
                       );
             }).SingleInstance();
@@ -78,7 +80,9 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ISerializer<string>>(),
                      provider.Resolve<IServiceEngineLifetime>(),
                        provider.Resolve<IModuleProvider>(),
+                       provider.Resolve<IServiceRouteProvider>(),
                      provider.Resolve<CPlatformContainer>()
+
                       );
             }).SingleInstance();
             builder.Register(provider =>
