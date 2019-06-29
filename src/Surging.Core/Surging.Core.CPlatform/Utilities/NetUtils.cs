@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Utilities
 {
-  public  class NetUtils
+    public class NetUtils
     {
         public const string LOCALHOST = "127.0.0.1";
         public const string ANYHOST = "0.0.0.0";
@@ -14,7 +14,7 @@ namespace Surging.Core.CPlatform.Utilities
         private const int MAX_PORT = 65535;
         private const string LOCAL_IP_PATTERN = "127(\\.\\d{1,3}){3}$";
         private const string IP_PATTERN = "\\d{1,3}(\\.\\d{1,3}){3,5}$";
-        private static AddressModel _host=null;
+        private static AddressModel _host = null;
 
         public static bool IsInvalidPort(int port)
         {
@@ -36,7 +36,7 @@ namespace Surging.Core.CPlatform.Utilities
         private static bool IsValidAddress(string address)
         {
             return (address != null
-                    && !ANYHOST.Equals(address) 
+                    && !ANYHOST.Equals(address)
                     && address.IsMatch(IP_PATTERN));
         }
 
@@ -74,7 +74,7 @@ namespace Surging.Core.CPlatform.Utilities
         public static string GetHostAddress(string hostAddress)
         {
             var result = hostAddress;
-            if((!IsValidAddress(hostAddress) && !IsLocalHost(hostAddress)) || IsAnyHost(hostAddress))
+            if ((!IsValidAddress(hostAddress) && !IsLocalHost(hostAddress)) || IsAnyHost(hostAddress))
             {
                 result = GetAnyHostAddress();
             }
@@ -88,11 +88,11 @@ namespace Surging.Core.CPlatform.Utilities
             var ports = AppConfig.ServerOptions.Ports;
             string address = GetHostAddress(AppConfig.ServerOptions.Ip);
             int port = AppConfig.ServerOptions.Port;
-             var mappingIp = AppConfig.ServerOptions.MappingIP ?? address;
+            var mappingIp = AppConfig.ServerOptions.MappingIP ?? address;
             var mappingPort = AppConfig.ServerOptions.MappingPort;
             if (mappingPort == 0)
                 mappingPort = port;
-            _host= new IpAddressModel
+            _host = new IpAddressModel
             {
                 HttpPort = ports.HttpPort,
                 Ip = mappingIp,

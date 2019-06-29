@@ -552,7 +552,7 @@ namespace Surging.Core.CPlatform
                 services.RegisterAssemblyTypes(assembly)
                  .Where(t => typeof(IIntegrationEventHandler).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().SingleInstance();
                 services.RegisterAssemblyTypes(assembly)
-             .Where(t => typeof(IIntegrationEventHandler).IsAssignableFrom(t)).SingleInstance();
+                 .Where(t => typeof(IIntegrationEventHandler).IsAssignableFrom(t)).SingleInstance();
             }
             return builder;
         }
@@ -562,8 +562,7 @@ namespace Surging.Core.CPlatform
         /// </summary>
         /// <param name="builder">IOC容器</param>
         /// <returns>返回注册模块信息</returns>
-        public static IServiceBuilder RegisterRepositories
-         (this IServiceBuilder builder, params string[] virtualPaths)
+        public static IServiceBuilder RegisterRepositories(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
             var referenceAssemblies = GetAssemblies(virtualPaths);
@@ -576,8 +575,7 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
-        public static IServiceBuilder RegisterModules(
-      this IServiceBuilder builder, params string[] virtualPaths)
+        public static IServiceBuilder RegisterModules(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
             var referenceAssemblies = GetAssemblies(virtualPaths);
@@ -600,7 +598,7 @@ namespace Surging.Core.CPlatform
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               _modules,virtualPaths, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
+               _modules, virtualPaths, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }
@@ -721,7 +719,7 @@ namespace Surging.Core.CPlatform
 
         private static string[] GetFilterAssemblies(string[] assemblyNames)
         {
-                var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
             var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
@@ -738,7 +736,7 @@ namespace Surging.Core.CPlatform
                 return
                     assemblyNames.Where(
                         name => !notRelatedRegex.IsMatch(name)).ToArray();
-}
+            }
         }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)
