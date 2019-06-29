@@ -30,55 +30,55 @@ namespace Surging.Core.Consul
         /// 设置服务路由管理者。
         /// </summary>
         /// <param name="builder">Rpc服务构建者。</param>
-        /// <param name="configInfo">ZooKeeper设置信息。</param>
+        /// <param name="configInfo">Consul设置信息。</param>
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseConsulRouteManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseRouteManager(provider =>
              new ConsulServiceRouteManager(
-                 GetConfigInfo(configInfo),
-              provider.GetRequiredService<ISerializer<byte[]>>(),
+                GetConfigInfo(configInfo),
+                provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IClientWatchManager>(),
                 provider.GetRequiredService<IServiceRouteFactory>(),
                 provider.GetRequiredService<ILogger<ConsulServiceRouteManager>>(),
-                 provider.GetRequiredService<IServiceHeartbeatManager>(),
-               provider.GetRequiredService<IConsulClientProvider>()));
+                provider.GetRequiredService<IServiceHeartbeatManager>(),
+                provider.GetRequiredService<IConsulClientProvider>()));
         }
 
         public static IServiceBuilder UseConsulCacheManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseCacheManager(provider =>
              new ConsulServiceCacheManager(
-                 GetConfigInfo(configInfo),
-              provider.GetRequiredService<ISerializer<byte[]>>(),
+                GetConfigInfo(configInfo),
+                provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IClientWatchManager>(),
                 provider.GetRequiredService<IServiceCacheFactory>(),
                 provider.GetRequiredService<ILogger<ConsulServiceCacheManager>>(),
-               provider.GetRequiredService<IConsulClientProvider>()));
+                provider.GetRequiredService<IConsulClientProvider>()));
         }
 
         /// <summary>
         /// 设置服务命令管理者。
         /// </summary>
         /// <param name="builder">Rpc服务构建者。</param>
-        /// <param name="configInfo">ZooKeeper设置信息。</param>
+        /// <param name="configInfo">Consul设置信息。</param>
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseConsulCommandManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseCommandManager(provider =>
             {
                 var result = new ConsulServiceCommandManager(
-                     GetConfigInfo(configInfo),
-                  provider.GetRequiredService<ISerializer<byte[]>>(),
+                    GetConfigInfo(configInfo),
+                    provider.GetRequiredService<ISerializer<byte[]>>(),
                     provider.GetRequiredService<ISerializer<string>>(),
-                    provider.GetRequiredService <IServiceRouteManager>(),
+                    provider.GetRequiredService<IServiceRouteManager>(),
                     provider.GetRequiredService<IClientWatchManager>(),
                     provider.GetRequiredService<IServiceEntryManager>(),
                     provider.GetRequiredService<ILogger<ConsulServiceCommandManager>>(),
-                      provider.GetRequiredService<IServiceHeartbeatManager>(),
-               provider.GetRequiredService<IConsulClientProvider>());
+                    provider.GetRequiredService<IServiceHeartbeatManager>(),
+                    provider.GetRequiredService<IConsulClientProvider>());
                 return result;
             });
         }
@@ -88,13 +88,13 @@ namespace Surging.Core.Consul
             return builder.UseMqttRouteManager(provider =>
              new ConsulMqttServiceRouteManager(
                  GetConfigInfo(configInfo),
-              provider.GetRequiredService<ISerializer<byte[]>>(),
+                provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
                 provider.GetRequiredService<IClientWatchManager>(),
                 provider.GetRequiredService<IMqttServiceFactory>(),
                 provider.GetRequiredService<ILogger<ConsulMqttServiceRouteManager>>(),
-                 provider.GetRequiredService<IServiceHeartbeatManager>(),
-               provider.GetRequiredService<IConsulClientProvider>()));
+                provider.GetRequiredService<IServiceHeartbeatManager>(),
+                provider.GetRequiredService<IConsulClientProvider>()));
         }
 
         public static IServiceBuilder UseConsulServiceSubscribeManager(this IServiceBuilder builder, ConfigInfo configInfo)
@@ -107,7 +107,7 @@ namespace Surging.Core.Consul
                     provider.GetRequiredService<ISerializer<string>>(),
                     provider.GetRequiredService<IClientWatchManager>(),
                     provider.GetRequiredService<IServiceSubscriberFactory>(),
-                    provider.GetRequiredService<ILogger<ConsulServiceSubscribeManager>>(), 
+                    provider.GetRequiredService<ILogger<ConsulServiceSubscribeManager>>(),
                provider.GetRequiredService<IConsulClientProvider>());
                 return result;
             });
@@ -142,12 +142,12 @@ namespace Surging.Core.Consul
 
         public static IServiceBuilder UseCounlClientProvider(this IServiceBuilder builder, ConfigInfo configInfo)
         {
-            builder.Services.Register( provider =>
-        new DefaultConsulClientProvider(
-            GetConfigInfo(configInfo),
-         provider.Resolve<IHealthCheckService>(),
-           provider.Resolve<IConsulAddressSelector>(),
-           provider.Resolve<ILogger<DefaultConsulClientProvider>>())).As<IConsulClientProvider>().SingleInstance();
+            builder.Services.Register(provider =>
+              new DefaultConsulClientProvider(
+                GetConfigInfo(configInfo),
+                provider.Resolve<IHealthCheckService>(),
+                provider.Resolve<IConsulAddressSelector>(),
+                provider.Resolve<ILogger<DefaultConsulClientProvider>>())).As<IConsulClientProvider>().SingleInstance();
             return builder;
         }
 
@@ -157,12 +157,12 @@ namespace Surging.Core.Consul
             return builder.UseConsulRouteManager(configInfo)
                 .UseHealthCheck()
                 .UseConsulServiceSubscribeManager(configInfo)
-               .UseConsulCommandManager(configInfo)
-               .UseConsulCacheManager(configInfo)
-               .UseCounlClientProvider(configInfo)
-               .UseConsulAddressSelector()
-               .UseConsulWatch(configInfo)
-               .UseConsulMqttRouteManager(configInfo);
+                .UseConsulCommandManager(configInfo)
+                .UseConsulCacheManager(configInfo)
+                .UseCounlClientProvider(configInfo)
+                .UseConsulAddressSelector()
+                .UseConsulWatch(configInfo)
+                .UseConsulMqttRouteManager(configInfo);
         }
 
         [Obsolete]
@@ -172,11 +172,11 @@ namespace Surging.Core.Consul
             return builder.UseConsulRouteManager(configInfo)
                 .UseHealthCheck()
                 .UseConsulServiceSubscribeManager(configInfo)
-               .UseConsulCommandManager(configInfo)
+                .UseConsulCommandManager(configInfo)
                 .UseCounlClientProvider(configInfo)
-               .UseConsulAddressSelector()
-               .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo)
-               .UseConsulMqttRouteManager(configInfo);
+                .UseConsulAddressSelector()
+                .UseConsulCacheManager(configInfo).UseConsulWatch(configInfo)
+                .UseConsulMqttRouteManager(configInfo);
         }
 
 
@@ -186,7 +186,7 @@ namespace Surging.Core.Consul
             var section = CPlatform.AppConfig.GetSection("Consul");
             if (section.Exists())
                 option = section.Get<ConsulOption>();
-            else if(AppConfig.Configuration!=null)
+            else if (AppConfig.Configuration != null)
                 option = AppConfig.Configuration.Get<ConsulOption>();
 
             if (option != null)
@@ -194,7 +194,7 @@ namespace Surging.Core.Consul
                 var sessionTimeout = config.SessionTimeout.TotalSeconds;
                 Double.TryParse(option.SessionTimeout, out sessionTimeout);
                 config = new ConfigInfo(
-                   option.ConnectionString,
+                    option.ConnectionString,
                     TimeSpan.FromSeconds(sessionTimeout),
                     option.LockDelay ?? config.LockDelay,
                     option.RoutePath ?? config.RoutePath,
@@ -202,7 +202,7 @@ namespace Surging.Core.Consul
                     option.CommandPath ?? config.CommandPath,
                     option.CachePath ?? config.CachePath,
                     option.MqttRoutePath ?? config.MqttRoutePath,
-                   option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
+                    option.ReloadOnChange != null ? bool.Parse(option.ReloadOnChange) :
                     config.ReloadOnChange,
                     option.EnableChildrenMonitor != null ? bool.Parse(option.EnableChildrenMonitor) :
                     config.EnableChildrenMonitor
