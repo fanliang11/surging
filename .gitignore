@@ -264,3 +264,6 @@ __pycache__/
 *.pyc
 
 /src/Surging.Core/Surging.Core.CPlatform/CPlatformResource.en-US.resources
+api/
+_site/
+

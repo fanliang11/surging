@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Routing.Implementation
@@ -63,6 +64,20 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             if (route == null)
             {
                 return new ValueTask<ServiceRoute>(GetRouteByPathAsync(path));
+            }
+            else
+            {
+                return new ValueTask<ServiceRoute>(route);
+            }
+        }
+
+        public ValueTask<ServiceRoute> GetRouteByPathRegex(string path)
+        {
+            path = path.ToLower();
+            _serviceRoute.TryGetValue(path, out ServiceRoute route);
+            if (route == null)
+            {
+                return new ValueTask<ServiceRoute>(GetRouteByPathRegexAsync(path));
             }
             else
             {
@@ -142,7 +157,22 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
-    
+        private async Task<ServiceRoute> GetRouteByPathRegexAsync(string path)
+        {
+            var routes = await _serviceRouteManager.GetRoutesAsync();
+            var pattern = "/{.*?}";
+            var route =  routes.FirstOrDefault(i =>path.Contains(Regex.Replace(i.ServiceDescriptor.RoutePath, pattern, "")) && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload"));
+
+            if (route == null)
+            {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                    _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
+            }
+            else
+              if(Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))  _serviceRoute.GetOrAdd(path, route);
+            return route;
+        }
+
         #endregion
     }
 }

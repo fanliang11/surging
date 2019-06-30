@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.KestrelHttpServer.Internal;
@@ -13,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -22,11 +25,13 @@ namespace Surging.Core.KestrelHttpServer
         private readonly ILogger<HttpMessageListener> _logger;
         private readonly ISerializer<string> _serializer;
         private  event RequestDelegate Requested;
+        private readonly IServiceRouteProvider _serviceRouteProvider;
 
-        public HttpMessageListener(ILogger<HttpMessageListener> logger, ISerializer<string> serializer)
+        public HttpMessageListener(ILogger<HttpMessageListener> logger, ISerializer<string> serializer, IServiceRouteProvider serviceRouteProvider)
         {
             _logger = logger;
             _serializer = serializer;
+            _serviceRouteProvider = serviceRouteProvider;
         }
 
         public  async Task OnReceived(IMessageSender sender, TransportMessage message)
@@ -38,9 +43,22 @@ namespace Surging.Core.KestrelHttpServer
 
         public async Task OnReceived(IMessageSender sender, HttpContext context)
         {
-            var routePath = GetRoutePath(context.Request.Path.ToString());
+            var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
+            var serviceRoute =await _serviceRouteProvider.GetRouteByPathRegex(path);
             IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key,p => (object)p.Value.ToString());
             parameters.Remove("servicekey", out object serviceKey);
+            StreamReader streamReader = new StreamReader(context.Request.Body);
+            var data = await streamReader.ReadToEndAsync();
+            if (data.Length > 0)
+                parameters = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
+            if (String.Compare(serviceRoute.ServiceDescriptor.RoutePath, path, true) != 0)
+            {
+                var @params = RouteTemplateSegmenter.Segment(serviceRoute.ServiceDescriptor.RoutePath, path);
+                foreach (var param in @params)
+                {
+                    parameters.Add(param.Key,param.Value);
+                }
+            }
             if (context.Request.HasFormContentType)
             {
                 var collection =await GetFormCollection(context.Request);
@@ -48,20 +66,19 @@ namespace Surging.Core.KestrelHttpServer
                 await Received(sender, new TransportMessage(new HttpMessage
                 {
                     Parameters = parameters,
-                    RoutePath = routePath,
+                    RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
                     ServiceKey = serviceKey?.ToString()
                 }));
             }
             else
             {
-                StreamReader streamReader = new StreamReader(context.Request.Body);
-                var data = await streamReader.ReadToEndAsync();
+              
                 if (context.Request.Method == "POST")
                 {
                     await Received(sender, new TransportMessage(new HttpMessage
                     {
-                        Parameters = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>(),
-                        RoutePath = routePath,
+                        Parameters = parameters,
+                        RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
                         ServiceKey = serviceKey?.ToString()
                     }));
                 }
@@ -70,7 +87,7 @@ namespace Surging.Core.KestrelHttpServer
                     await Received(sender, new TransportMessage(new HttpMessage
                     {
                         Parameters = parameters,
-                        RoutePath = routePath,
+                        RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
                         ServiceKey = serviceKey?.ToString()
                     }));
                 }

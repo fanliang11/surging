@@ -48,7 +48,13 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>();
             foreach (var methodInfo in service.GetTypeInfo().GetMethods())
             {
-                yield return Create(methodInfo, service.Name, routeTemplate.RouteTemplate);
+                var serviceRoute = methodInfo.GetCustomAttribute<ServiceRouteAttribute>();
+                var routeTemplateVal = routeTemplate.RouteTemplate;
+                if (!routeTemplate.IsPrefix && serviceRoute != null)
+                     routeTemplateVal = serviceRoute.Template;
+                else if (routeTemplate.IsPrefix && serviceRoute != null)
+                   routeTemplateVal = $"{ routeTemplate.RouteTemplate}/{ serviceRoute.Template}";
+                yield return Create(methodInfo, service.Name, routeTemplateVal);
             }
         }
         #endregion Implementation of IClrServiceEntryFactory
