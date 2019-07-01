@@ -65,7 +65,7 @@ namespace Surging.Core.DotNetty
             IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
             IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
-           
+
             if (AppConfig.ServerOptions.Libuv)
             {
                 var dispatcher = new DispatcherEventLoopGroup();
@@ -78,13 +78,14 @@ namespace Surging.Core.DotNetty
                 bossGroup = new MultithreadEventLoopGroup(1);
                 workerGroup = new MultithreadEventLoopGroup();
                 bootstrap.Channel<TcpServerSocketChannel>();
-            } 
+            }
             bootstrap
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
             .Group(bossGroup, workerGroup)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
             {
+                //设置数据传输协议和解码器，客户端需一致
                 var pipeline = channel.Pipeline;
                 pipeline.AddLast(new LengthFieldPrepender(4));
                 pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
@@ -162,7 +163,7 @@ namespace Surging.Core.DotNetty
             {
                 context.CloseAsync();//客户端主动断开需要应答，否则socket变成CLOSE_WAIT状态导致socket资源耗尽
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError(exception,$"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
+                    _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
             }
 
             #endregion Overrides of ChannelHandlerAdapter
