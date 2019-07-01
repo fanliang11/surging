@@ -77,7 +77,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetty.Codecs.DNS", "DotN
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.DNS", "Surging.Core\Surging.Core.DNS\Surging.Core.DNS.csproj", "{3FA2B587-8490-4874-8318-84C1CBA2B111}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Swagger", "Surging.Core\Surging.Core.Swagger\Surging.Core.Swagger.csproj", "{F824A598-F19F-4A32-A28E-FF2FE96EFC10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Swagger", "Surging.Core\Surging.Core.Swagger\Surging.Core.Swagger.csproj", "{F824A598-F19F-4A32-A28E-FF2FE96EFC10}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Abp", "Surging.Core\Surging.Core.Abp\Surging.Core.Abp.csproj", "{00BFD602-245D-4052-8B8C-7AA319BBD567}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.AutoMapper", "Surging.Core\Surging.Core.AutoMapper\Surging.Core.AutoMapper.csproj", "{8D796D5A-9FC6-491B-906D-50B2AABAECF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -213,6 +217,14 @@ Global
 		{F824A598-F19F-4A32-A28E-FF2FE96EFC10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F824A598-F19F-4A32-A28E-FF2FE96EFC10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F824A598-F19F-4A32-A28E-FF2FE96EFC10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00BFD602-245D-4052-8B8C-7AA319BBD567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00BFD602-245D-4052-8B8C-7AA319BBD567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00BFD602-245D-4052-8B8C-7AA319BBD567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00BFD602-245D-4052-8B8C-7AA319BBD567}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D796D5A-9FC6-491B-906D-50B2AABAECF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D796D5A-9FC6-491B-906D-50B2AABAECF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D796D5A-9FC6-491B-906D-50B2AABAECF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D796D5A-9FC6-491B-906D-50B2AABAECF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -248,6 +260,8 @@ Global
 		{A3B75BE5-A26A-46AC-9C1F-64CDCB2D413B} = {C76A8400-CEFF-4E68-B632-CC4E888C6A31}
 		{3FA2B587-8490-4874-8318-84C1CBA2B111} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{F824A598-F19F-4A32-A28E-FF2FE96EFC10} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{00BFD602-245D-4052-8B8C-7AA319BBD567} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{8D796D5A-9FC6-491B-906D-50B2AABAECF3} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}

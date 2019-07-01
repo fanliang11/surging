@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
 
@@ -12,16 +13,16 @@ namespace Surging.Core.KestrelHttpServer
 {
     public class KestrelHttpModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
-        public virtual void Initialize(IApplicationBuilder builder)
+        public virtual void Initialize(ApplicationInitializationContext builder)
         {
         }
 
-        public virtual void RegisterBuilder(IServiceCollection serviceCollection)
+        public virtual void RegisterBuilder(ConfigurationContext context)
         {
         }
 
@@ -52,7 +53,9 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
                      provider.Resolve<IServiceEngineLifetime>(),
-                     provider.Resolve<IModuleProvider>()
+                     provider.Resolve<IModuleProvider>(),
+                    provider.Resolve<IServiceRouteProvider>(),
+                     provider.Resolve<CPlatformContainer>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -76,7 +79,10 @@ namespace Surging.Core.KestrelHttpServer
                     provider.Resolve<ILogger<KestrelHttpMessageListener>>(),
                     provider.Resolve<ISerializer<string>>(),
                      provider.Resolve<IServiceEngineLifetime>(),
-                       provider.Resolve<IModuleProvider>()
+                       provider.Resolve<IModuleProvider>(),
+                       provider.Resolve<IServiceRouteProvider>(),
+                     provider.Resolve<CPlatformContainer>()
+
                       );
             }).SingleInstance();
             builder.Register(provider =>

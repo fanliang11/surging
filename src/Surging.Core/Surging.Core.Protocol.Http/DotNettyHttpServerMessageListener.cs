@@ -6,6 +6,8 @@ using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
@@ -15,6 +17,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Surging.Core.Protocol.Http
 {
@@ -27,17 +30,22 @@ namespace Surging.Core.Protocol.Http
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private IChannel _channel;
         private readonly ISerializer<string> _serializer;
+        private readonly IServiceRouteProvider _serviceRouteProvider;
 
         #endregion Field
 
         #region Constructor
 
-        public DotNettyHttpServerMessageListener(ILogger<DotNettyHttpServerMessageListener> logger, ITransportMessageCodecFactory codecFactory, ISerializer<string> serializer)
+        public DotNettyHttpServerMessageListener(ILogger<DotNettyHttpServerMessageListener> logger,
+            ITransportMessageCodecFactory codecFactory, 
+            ISerializer<string> serializer, 
+            IServiceRouteProvider serviceRouteProvider)
         {
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
             _serializer = serializer;
+            _serviceRouteProvider = serviceRouteProvider;
         }
 
         #endregion Constructor
@@ -85,7 +93,7 @@ namespace Surging.Core.Protocol.Http
                 {
                     var sender = new DotNettyHttpServerMessageSender(_transportMessageEncoder, contenxt, _serializer);
                     await OnReceived(sender, message);
-                }, _logger, _serializer));
+                }, _logger, _serializer, _serviceRouteProvider));
                 serverCompletion.TryComplete();
             }));
             try
@@ -131,12 +139,17 @@ namespace Surging.Core.Protocol.Http
             private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
             private readonly ILogger _logger;
             private readonly ISerializer<string> _serializer;
+            private readonly IServiceRouteProvider _serviceRouteProvider;
 
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger, ISerializer<string> serializer)
+            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, 
+                ILogger logger, 
+                ISerializer<string> serializer,
+                IServiceRouteProvider serviceRouteProvider)
             {
                 _readAction = readAction;
                 _logger = logger;
                 _serializer = serializer;
+                _serviceRouteProvider = serviceRouteProvider;
             }
 
             public bool WaitForCompletion()
@@ -150,26 +163,40 @@ namespace Surging.Core.Protocol.Http
                 var data = new byte[msg.Content.ReadableBytes];
                 msg.Content.ReadBytes(data);
 
-                var parameters = GetParameters(msg.Uri, out string routePath);
-                parameters.Remove("servicekey", out object serviceKey);
-                if (msg.Method.Name == "POST")
+                Task.Run(async () =>
                 {
-                    _readAction(ctx, new TransportMessage(new HttpMessage
+                    var parameters = GetParameters(HttpUtility.UrlDecode(msg.Uri), out string path);
+                    var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+                    parameters.Remove("servicekey", out object serviceKey);
+                    if (data.Length > 0)
+                        parameters = _serializer.Deserialize<string, IDictionary<string, object>>(System.Text.Encoding.ASCII.GetString(data)) ?? new Dictionary<string, object>();
+                    if (String.Compare(serviceRoute.ServiceDescriptor.RoutePath, path, true) != 0)
                     {
-                        Parameters = _serializer.Deserialize<string, IDictionary<string, object>>(System.Text.Encoding.ASCII.GetString(data)) ?? new Dictionary<string, object>(),
-                        RoutePath = routePath,
-                        ServiceKey = serviceKey?.ToString()
-                    }));
-                }
-                else
-                {
-                    _readAction(ctx, new TransportMessage(new HttpMessage
+                        var @params = RouteTemplateSegmenter.Segment(serviceRoute.ServiceDescriptor.RoutePath, path);
+                        foreach (var param in @params)
+                        {
+                            parameters.Add(param.Key,param.Value);
+                        }
+                    }
+                    if (msg.Method.Name == "POST")
                     {
-                        Parameters = parameters,
-                        RoutePath = routePath,
-                        ServiceKey = serviceKey?.ToString()
-                    }));
-                }
+                        _readAction(ctx, new TransportMessage(new HttpMessage
+                        {
+                            Parameters = parameters,
+                            RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
+                            ServiceKey = serviceKey?.ToString()
+                        }));
+                    }
+                    else
+                    {
+                        _readAction(ctx, new TransportMessage(new HttpMessage
+                        {
+                            Parameters = parameters,
+                            RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
+                            ServiceKey = serviceKey?.ToString()
+                        }));
+                    }
+                });
             }
 
             public IDictionary<string, object> GetParameters(string msg, out string routePath)

@@ -17,7 +17,10 @@ using System.Threading.Tasks;
 
 namespace Surging.IModuleServices.Common
 {
-    [ServiceBundle("api/{Service}")]
+    [ServiceBundle("api/{Service}/{Method}")]
+    //[ServiceBundle("api/{Service}")]
+    //[ServiceBundle("api/{Service}/{Method}/test")]
+    //[ServiceBundle("api/{Service}/{Method}/test",false)]
     public interface IUserService: IServiceKey
     {
         /// <summary>
@@ -26,12 +29,13 @@ namespace Surging.IModuleServices.Common
         /// <param name="requestData">请求参数</param>
         /// <returns>用户模型</returns>
         Task<UserModel> Authentication(AuthenticationRequestData requestData);
-        
+
         /// <summary>
         /// 获取用户姓名
         /// </summary>
         /// <param name="id">用户编号</param>
         /// <returns></returns>
+        [ServiceRoute("{id}")]
         Task<string> GetUserName(int id);
 
         /// <summary>
@@ -39,6 +43,8 @@ namespace Surging.IModuleServices.Common
         /// </summary>
         /// <param name="id">用户编号</param>
         /// <returns></returns>
+        [ServiceRoute("{id}")]
+       // [ServiceBundle("api/{Service}/{id}", false)]
         Task<bool> Exists(int id);
 
         /// <summary>
@@ -47,6 +53,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="requestData">请求参数</param>
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
+       
         Task<IdentityUser> Save(IdentityUser requestData);
 
         /// <summary>
@@ -57,6 +64,7 @@ namespace Surging.IModuleServices.Common
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = true)]
         [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+        [ServiceRoute("{userName}")]
         Task<int> GetUserId(string userName);
 
         Task Try();
@@ -114,6 +122,7 @@ new Surging.IModuleServices.Common.Models.UserModel
        /// <returns></returns>
         Task TryThrowException();
 
+        [ServiceRoute("{sex}")]
         Task<Sex> SetSex(Sex sex);
 
         /// <summary>
@@ -143,6 +152,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [ServiceRoute("{id}")]
         Task<UserModel> GetUserById(Guid id);
 
         /// <summary>
@@ -158,6 +168,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// <param name="fileName">文件名</param>
         /// <param name="contentType">Content-Type</param>
         /// <returns></returns>
+        [ServiceRoute("{fileName}/{contentType}")]
         Task<IActionResult> DownFile(string fileName, string contentType);
 
         /// <summary>

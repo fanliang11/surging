@@ -13,7 +13,7 @@
     "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http、Tcp、None
-    "RootPath": "${RootPath}|D:\\userapp1",
+    "RootPath": "${RootPath}|D:\\userapp",
     "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
     "IsModulePerLifetimeScope": false,
     "ReloadOnChange": false,
@@ -70,7 +70,7 @@
     "OffsetReset": "${OffsetReset}|earliest",
     "GroupID": "${EventBusGroupID}|surgingdemo"
   },
-  "WebSocket":{
+  "WebSocket": {
     "WaitTime": 2,
     "KeepClean": false,
     "Behavior": {
@@ -94,6 +94,14 @@
     "ConnectionString": "${Zookeeper_ConnectionString}|127.0.0.1:2181", // "127.0.0.1:2181,127.0.0.1:2281",
     "SessionTimeout": 50,
     "ReloadOnChange": true
+  },
+  "RabbitMQ": {
+    "EventBus": {
+      "ConnectionName": "",
+      "ClientName": "",
+      "ExchangeName": ""
+    }
+
   },
   "Logging": {
     "Debug": {

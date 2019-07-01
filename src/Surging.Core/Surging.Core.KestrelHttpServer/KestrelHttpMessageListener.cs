@@ -1,7 +1,12 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -14,6 +19,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -25,14 +31,22 @@ namespace Surging.Core.KestrelHttpServer
         private readonly ISerializer<string> _serializer;
         private readonly IServiceEngineLifetime _lifetime;
         private readonly IModuleProvider _moduleProvider;
+        private readonly CPlatformContainer _container;
+        private readonly IServiceRouteProvider _serviceRouteProvider;
 
         public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger,
-            ISerializer<string> serializer, IServiceEngineLifetime lifetime,IModuleProvider moduleProvider) : base(logger, serializer)
+            ISerializer<string> serializer, 
+            IServiceEngineLifetime lifetime,
+            IModuleProvider moduleProvider,
+            IServiceRouteProvider serviceRouteProvider,
+            CPlatformContainer container) : base(logger, serializer, serviceRouteProvider)
         {
             _logger = logger;
             _serializer = serializer;
             _lifetime = lifetime;
             _moduleProvider = moduleProvider;
+            _container = container;
+            _serviceRouteProvider = serviceRouteProvider;
         }
 
         public async Task StartAsync(EndPoint endPoint)
@@ -73,15 +87,24 @@ namespace Surging.Core.KestrelHttpServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var builder = new ContainerBuilder();
             services.AddMvc();
-            _moduleProvider.ConfigureServices(services);
+            _moduleProvider.ConfigureServices(new ConfigurationContext(services,
+                _moduleProvider.Modules,
+                _moduleProvider.VirtualPaths,
+                AppConfig.Configuration));
+            builder.Populate(services);
+          
+            builder.Update(_container.Current.ComponentRegistry);
         }
 
         private void AppResolve(IApplicationBuilder app)
-        {
+        { 
             app.UseStaticFiles();
             app.UseMvc();
-            _moduleProvider.Initialize(app);
+            _moduleProvider.Initialize(new ApplicationInitializationContext(app, _moduleProvider.Modules,
+                _moduleProvider.VirtualPaths,
+                AppConfig.Configuration));
             app.Run(async (context) =>
             {
                 var sender = new HttpServerMessageSender(_serializer, context);
