@@ -46,7 +46,8 @@ namespace Surging.Core.Consul
             var clients = await _consulClientFactory.GetClients();
             foreach (var client in clients)
             {
-                var queryResult = await client.KV.List(_configInfo.CachePath); 
+                // 根据前缀获取consul结果
+                var queryResult = await client.KV.List(_configInfo.CachePath);
                 var response = queryResult.Response;
                 if (response != null)
                 {

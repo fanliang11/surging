@@ -10,6 +10,9 @@ using System.Linq;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
+    /// <summary>
+    /// 服务发现提供者
+    /// </summary>
     public class ServiceDiscoveryProvider : ServiceBase, IServiceDiscoveryProvider
     {
         public ServiceDiscoveryProvider()

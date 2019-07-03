@@ -9,6 +9,9 @@ using Surging.Core.System;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
+    /// <summary>
+    /// 服务缓存提供者
+    /// </summary>
     public class ServiceCacheProvider : ServiceBase, IServiceCacheProvider
     {
         private readonly ISerializer<string> _serializer;
