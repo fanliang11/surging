@@ -36,6 +36,7 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WS\Surging.Core.Protocol.WS.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Stage\Surging.Core.Stage.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Swagger\Surging.Core.Swagger.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.System\Surging.Core.System.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Zookeeper\Surging.Core.Zookeeper.csproj" />

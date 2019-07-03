@@ -8,6 +8,7 @@ using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
+using System.Net;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -19,6 +20,10 @@ namespace Surging.Core.KestrelHttpServer
         }
 
         public virtual void Initialize(ApplicationInitializationContext builder)
+        {
+        }
+
+        public virtual void RegisterBuilder(WebHostContext context)
         {
         }
 
@@ -64,7 +69,8 @@ namespace Surging.Core.KestrelHttpServer
                 var messageListener = provider.Resolve<KestrelHttpMessageListener>();
                 return new DefaultHttpServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var address = endPoint as IPEndPoint;
+                    await messageListener.StartAsync(address?.Address, address?.Port);
                     return messageListener;
                 }, executor, messageListener);
 
@@ -91,7 +97,8 @@ namespace Surging.Core.KestrelHttpServer
                 var messageListener = provider.Resolve<KestrelHttpMessageListener>();
                 return new HttpServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var address = endPoint as IPEndPoint;
+                    await messageListener.StartAsync(address?.Address,address?.Port);
                     return messageListener;
                 }, executor, messageListener);
 

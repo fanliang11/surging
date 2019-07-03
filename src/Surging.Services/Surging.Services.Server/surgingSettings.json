@@ -37,6 +37,15 @@
     "ReloadOnChange": true,
     "EnableChildrenMonitor": false
   },
+  "Stage": {
+    "EnableHttps": true, // 不设置ports，默认httpPorts:443
+    "CertificateFileName": "${CertificateFileName}|",
+    "CertificatePassword": "${CertificatePassword}|",
+    "Ports": {
+      "Https": "${StageHttpsPorts}|443,442,445",
+      "Http": "${StageHttpPorts}|280,281,282"
+    }
+  },
   "Dns": {
     "RootDnsAddress": "192.168.1.1",
     "QueryTimeout": 1000

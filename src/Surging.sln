@@ -83,6 +83,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Abp", "Surging
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.AutoMapper", "Surging.Core\Surging.Core.AutoMapper\Surging.Core.AutoMapper.csproj", "{8D796D5A-9FC6-491B-906D-50B2AABAECF3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Stage", "Surging.Core\Surging.Core.Stage\Surging.Core.Stage.csproj", "{7EB1BF38-7EE4-45FD-9D3C-A6BE2B62024E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,10 @@ Global
 		{8D796D5A-9FC6-491B-906D-50B2AABAECF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D796D5A-9FC6-491B-906D-50B2AABAECF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D796D5A-9FC6-491B-906D-50B2AABAECF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EB1BF38-7EE4-45FD-9D3C-A6BE2B62024E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EB1BF38-7EE4-45FD-9D3C-A6BE2B62024E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EB1BF38-7EE4-45FD-9D3C-A6BE2B62024E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EB1BF38-7EE4-45FD-9D3C-A6BE2B62024E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -262,6 +268,7 @@ Global
 		{F824A598-F19F-4A32-A28E-FF2FE96EFC10} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{00BFD602-245D-4052-8B8C-7AA319BBD567} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{8D796D5A-9FC6-491B-906D-50B2AABAECF3} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{7EB1BF38-7EE4-45FD-9D3C-A6BE2B62024E} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
