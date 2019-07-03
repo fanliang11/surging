@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
+    /// <summary>
+    /// 容错机制提供者
+    /// </summary>
     public class FaultTolerantProvider : ServiceBase, IFaultTolerantProvider
     {
         public async Task<IEnumerable<ServiceCommandDescriptor>> GetCommandDescriptor(params string[] serviceIds)

@@ -89,23 +89,31 @@ namespace Surging.Core.DotNetty
             {
                 return await _clients.GetOrAdd(key
                     , k => new Lazy<Task<ITransportClient>>(async () =>
-                    {
-                        var bootstrap = _bootstrap;
-                        var channel = await bootstrap.ConnectAsync(k);
-                        var messageListener = new MessageListener();
-                        channel.GetAttribute(messageListenerKey).Set(messageListener);
-                        var messageSender = new DotNettyMessageClientSender(_transportMessageEncoder, channel);
-                        channel.GetAttribute(messageSenderKey).Set(messageSender);
-                        channel.GetAttribute(origEndPointKey).Set(k);
-                        var client = new TransportClient(messageSender, messageListener, _logger, _serviceExecutor);
-                        return client;
-                    }
-                    )).Value;
+                        {
+                            //客户端对象
+                            var bootstrap = _bootstrap;
+                            //异步连接返回channel
+                            var channel = await bootstrap.ConnectAsync(k);
+                            var messageListener = new MessageListener();
+                            //设置监听
+                            channel.GetAttribute(messageListenerKey).Set(messageListener);
+                            //实例化发送者
+                            var messageSender = new DotNettyMessageClientSender(_transportMessageEncoder, channel);
+                            //设置channel属性
+                            channel.GetAttribute(messageSenderKey).Set(messageSender);
+                            channel.GetAttribute(origEndPointKey).Set(k);
+                            //创建客户端
+                            var client = new TransportClient(messageSender, messageListener, _logger, _serviceExecutor);
+                            return client;
+                        }
+                    )).Value;//返回实例
             }
             catch
             {
+                //移除
                 _clients.TryRemove(key, out var value);
                 var ipEndPoint = endPoint as IPEndPoint;
+                //标记这个地址是失败的请求
                 if (ipEndPoint != null)
                     await _healthCheckService.MarkFailure(new IpAddressModel(ipEndPoint.Address.ToString(), ipEndPoint.Port));
                 throw;

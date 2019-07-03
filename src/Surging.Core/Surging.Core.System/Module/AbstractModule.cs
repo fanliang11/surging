@@ -161,10 +161,14 @@ namespace Surging.Core.System.Module
             {
                 Components.ForEach(component =>
                 {
+                    //服务类型
                     Type serviceType = Type.GetType(component.ServiceType, true);
+                    //实现类型
                     Type implementType = Type.GetType(component.ImplementType, true);
+                    //组件生命周期
                     switch (component.LifetimeScope)
                     {
+                        //依赖创建
                         case LifetimeScope.InstancePerDependency:
                             if (serviceType.GetTypeInfo().IsGenericType || implementType.GetTypeInfo().IsGenericType)
                             {
@@ -175,7 +179,7 @@ namespace Surging.Core.System.Module
                                 builder.RegisterType(implementType).As(serviceType).InstancePerDependency();
                             }
                             break;
-                        case LifetimeScope.SingleInstance:
+                        case LifetimeScope.SingleInstance://单例
                             if (serviceType.GetTypeInfo().IsGenericType || implementType.GetTypeInfo().IsGenericType)
                             {
                                 builder.RegisterGeneric(implementType).As(serviceType).SingleInstance();
@@ -185,7 +189,7 @@ namespace Surging.Core.System.Module
                                 builder.RegisterType(implementType).As(serviceType).SingleInstance();
                             }
                             break;
-                        default:
+                        default://默认依赖创建
                             if (serviceType.GetTypeInfo().IsGenericType || implementType.GetTypeInfo().IsGenericType)
                             {
                                 builder.RegisterGeneric(implementType).As(serviceType).InstancePerDependency();

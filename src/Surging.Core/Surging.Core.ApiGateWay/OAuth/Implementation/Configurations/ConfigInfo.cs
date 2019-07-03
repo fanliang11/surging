@@ -18,7 +18,13 @@ namespace Surging.Core.ApiGateWay.OAuth
             AccessTokenExpireTimeSpan = accessTokenExpireTimeSpan;
         }
         public string AuthorizationServiceKey { get; set; }
+        /// <summary>
+        /// 授权服务路由地址
+        /// </summary>
         public string AuthorizationRoutePath { get; set; }
+        /// <summary>
+        /// token 有效期
+        /// </summary>
         public TimeSpan AccessTokenExpireTimeSpan { get; set; } = TimeSpan.FromMinutes(30);
     };
 }

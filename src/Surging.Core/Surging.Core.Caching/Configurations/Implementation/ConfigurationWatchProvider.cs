@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 
 namespace Surging.Core.Caching.Configurations.Implementation
 {
+    /// <summary>
+    /// 配置watch提供者
+    /// </summary>
     public class ConfigurationWatchProvider : ConfigurationWatch, IConfigurationWatchProvider
     {
         #region Field  

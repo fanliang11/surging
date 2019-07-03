@@ -8,6 +8,9 @@ using Surging.Core.CPlatform;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
+    /// <summary>
+    /// 服务订阅提供者
+    /// </summary>
     public class ServiceSubscribeProvider : ServiceBase, IServiceSubscribeProvider
     {
         public async Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null)
