@@ -88,13 +88,13 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             }
         }
 
-        public override bool Connect(string deviceId, MqttChannel channel)
+        public override async Task<bool> Connect(string deviceId, MqttChannel channel)
         {
             var mqttChannel = GetMqttChannel(deviceId);
             if (mqttChannel != null)
             {
-                if (mqttChannel.IsOnine()) return false;
-                else if (!mqttChannel.IsOnine())
+                if (await mqttChannel.IsOnine()) return false;
+                else
                 {
                     if (mqttChannel.SubscribeStatus == SubscribeStatus.Yes)
                     {
@@ -164,7 +164,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             if (!string.IsNullOrEmpty(deviceId))
             {
                 var mqttChannel = GetMqttChannel(deviceId);
-                if (mqttChannel != null && mqttChannel.IsOnine())
+                if (mqttChannel != null && await mqttChannel.IsOnine())
                 {
                     await _messagePushService.WriteWillMsg(mqttChannel, willMessage);
                 }
@@ -185,7 +185,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             {
                 foreach (var mqttChannel in mqttChannels)
                 {
-                    if (mqttChannel.IsOnine())
+                    if (await mqttChannel.IsOnine())
                     {
                         if (mqttChannel.IsActive())
                         {
@@ -256,7 +256,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             {
                 foreach (var mqttChannel in mqttChannels)
                 {
-                    if (!mqttChannel.IsOnine())
+                    if (!await mqttChannel.IsOnine())
                     {
                         _clientSessionService.SaveMessage(mqttChannel.ClientId, new SessionMessage
                         {
@@ -364,6 +364,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             MqttChannel mqttChannel = new MqttChannel()
             {
                 Channel = channel,
+                KeepAliveInSeconds = mqttConnectMessage.KeepAliveInSeconds,
                 CleanSession = mqttConnectMessage.CleanSession,
                 ClientId = mqttConnectMessage.ClientId,
                 SessionStatus = SessionStatus.OPEN,
@@ -372,7 +373,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 Messages = new ConcurrentDictionary<int, SendMqttMessage>(),
                 Topics = new List<string>()
             };
-            if (Connect(deviceId, mqttChannel))
+            if (await Connect(deviceId, mqttChannel))
             {
                 if (mqttConnectMessage.HasWill)
                 {

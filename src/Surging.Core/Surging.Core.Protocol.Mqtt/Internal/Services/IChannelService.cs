@@ -13,7 +13,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
     public interface IChannelService
     {
         MqttChannel GetMqttChannel(string deviceId);
-        bool Connect(string deviceId, MqttChannel build);
+        Task<bool> Connect(string deviceId, MqttChannel build);
         Task Suscribe(String deviceId, params string[] topics);
         Task Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
         Task Publish(IChannel channel, PublishPacket mqttPublishMessage);
