@@ -4,6 +4,9 @@ using System;
 
 namespace Surging.Core.CPlatform
 {
+    /// <summary>
+    /// 平台容器
+    /// </summary>
     public class CPlatformContainer
     {
         private  IComponentContext _container;

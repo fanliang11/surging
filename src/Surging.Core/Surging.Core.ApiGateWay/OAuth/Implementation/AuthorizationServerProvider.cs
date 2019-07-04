@@ -14,6 +14,9 @@ using Surging.Core.CPlatform.Cache;
 
 namespace Surging.Core.ApiGateWay.OAuth
 {
+    /// <summary>
+    /// 授权服务提供者
+    /// </summary>
     public class AuthorizationServerProvider: IAuthorizationServerProvider
     {
         private readonly IServiceProxyProvider _serviceProxyProvider;

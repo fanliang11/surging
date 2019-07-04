@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.System.Intercept
 {
+    /// <summary>
+    /// 缓存拦截器
+    /// </summary>
     public class CacheProviderInterceptor : CacheInterceptor
     {
         public override async Task Intercept(ICacheInvocation invocation)

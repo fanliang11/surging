@@ -12,12 +12,22 @@ namespace Surging.Core.Codec.MessagePack
 
         #region Implementation of ITransportMessageCodecFactory
 
+        /// <inheritdoc />
+        /// <summary>
+        /// 获取编码器 
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ITransportMessageEncoder GetEncoder()
         {
             return _transportMessageEncoder;
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        /// 获取解码器 
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ITransportMessageDecoder GetDecoder()
         {

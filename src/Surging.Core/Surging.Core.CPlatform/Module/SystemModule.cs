@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Module
 {
+    /// <summary>
+    /// 系统模块基类
+    /// </summary>
    public class SystemModule : AbstractModule
     {
         public override void Initialize(AppModuleContext context)

@@ -11,6 +11,9 @@ using Surging.Core.CPlatform.Cache;
 
 namespace Surging.Core.Caching.HealthChecks.Implementation
 {
+    /// <summary>
+    /// 默认的健康检查服务
+    /// </summary>
     public class DefaultHealthCheckService : IHealthCheckService, IDisposable
     {
         private readonly Timer _timer;

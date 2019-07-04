@@ -13,6 +13,12 @@ namespace Surging.Core.CPlatform.Module
         private readonly CPlatformContainer _serviceProvoider;
         private readonly ILogger<ModuleProvider> _logger;
 
+        /// <summary>
+        /// 模块提供器 
+        /// </summary>
+        /// <param name="modules"></param>
+        /// <param name="logger"></param>
+        /// <param name="serviceProvoider"></param>
         public ModuleProvider(List<AbstractModule> modules,
             string[] virtualPaths,
             ILogger<ModuleProvider> logger,

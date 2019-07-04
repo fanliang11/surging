@@ -20,6 +20,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Consul
 {
+    /// <summary>
+    /// consul服务路由管理器 
+    /// </summary>
     public class ConsulServiceRouteManager : ServiceRouteManagerBase, IDisposable
     {
         private readonly ConfigInfo _configInfo;
@@ -48,15 +51,21 @@ namespace Surging.Core.Consul
             EnterRoutes().Wait();
         }
 
+        /// <summary>
+        /// 清空服务路由
+        /// </summary>
+        /// <returns></returns>
         public override async Task ClearAsync()
         {
             var clients = await _consulClientProvider.GetClients();
             foreach (var client in clients)
             {
+                //根据前缀获取consul结果
                 var queryResult = await client.KV.List(_configInfo.RoutePath);
                 var response = queryResult.Response;
                 if (response != null)
                 {
+                    //删除操作
                     foreach (var result in response)
                     {
                         await client.KV.DeleteCAS(result);
@@ -268,11 +277,14 @@ namespace Surging.Core.Consul
                 return;
             Action<string[]> action = null;
             var client = await GetConsulClient();
+            //判断是否启用子监视器
             if (_configInfo.EnableChildrenMonitor)
             {
+                //创建子监控类
                 var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.RoutePath,
              async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                (result) => ConvertPaths(result).Result);
+                //对委托绑定方法
                 action = currentData => watcher.SetCurrentData(currentData);
             }
             if (client.KV.Keys(_configInfo.RoutePath).Result.Response?.Count() > 0)
@@ -280,7 +292,9 @@ namespace Surging.Core.Consul
                 var result = await client.GetChildrenAsync(_configInfo.RoutePath);
                 var keys = await client.KV.Keys(_configInfo.RoutePath);
                 var childrens = result;
+                //传参数到方法中
                 action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.RoutePath}{key}").ToArray());
+                //重新赋值到routes中
                 _routes = await GetRoutes(keys.Response);
             }
             else
@@ -345,6 +359,12 @@ namespace Surging.Core.Consul
             OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
         }
 
+        /// <summary>
+        /// 数据更新
+        /// </summary>
+        /// <param name="oldChildrens">旧的节点信息</param>
+        /// <param name="newChildrens">最新的节点信息</param>
+        /// <returns></returns>
         private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
@@ -369,12 +389,14 @@ namespace Surging.Core.Consul
             var routes = _routes.ToArray();
             lock (_routes)
             {
+                #region 节点变更操作
                 _routes = _routes
                     //删除无效的节点路由。
                     .Where(i => !deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}"))
                     //连接上新的路由。
                     .Concat(newRoutes)
                     .ToArray();
+                #endregion
             }
             //需要删除的路由集合。
             var deletedRoutes = routes.Where(i => deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}")).ToArray();

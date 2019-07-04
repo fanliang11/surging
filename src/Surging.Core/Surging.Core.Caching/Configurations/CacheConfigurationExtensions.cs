@@ -33,6 +33,7 @@ namespace Surging.Core.Caching.Configurations
         public static IConfigurationBuilder AddCacheFile(this IConfigurationBuilder builder, IFileProvider provider, string path, string basePath, bool optional, bool reloadOnChange)
         {
             Check.NotNull(builder, "builder");
+            //获取一个环境变量的路径
             Check.CheckCondition(() => string.IsNullOrEmpty(path), "path");
             path = CPlatform.Utilities.EnvironmentHelper.GetEnvironmentVariable(path);
             if (provider == null && Path.IsPathRooted(path))
@@ -40,6 +41,7 @@ namespace Surging.Core.Caching.Configurations
                 provider = new PhysicalFileProvider(Path.GetDirectoryName(path));
                 path = Path.GetFileName(path);
             }
+            //建立CacheConfigurationSource类，此类继承了FileConfigurationSource接口，并重写加入了json转换方法
             var source = new CacheConfigurationSource
             {
                 FileProvider = provider,
