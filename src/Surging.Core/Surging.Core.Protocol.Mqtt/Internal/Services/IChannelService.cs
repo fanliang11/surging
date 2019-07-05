@@ -22,14 +22,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         /// 获取设备是否连接
         /// </summary>
         /// <param name="deviceId"></param>
-        /// <param name="build"></param>
+        /// <param name="mqttChannel"></param>
         /// <returns></returns>
-        bool Connect(string deviceId, MqttChannel build);
+        Task<bool> Connect(string deviceId, MqttChannel mqttChannel);
         /// <summary>
         /// 订阅
         /// </summary>
         /// <param name="deviceId"></param>
-        /// <param name="topics">话题</param>
+        /// <param name="topics">主题列表</param>
         /// <returns></returns>
         Task Suscribe(String deviceId, params string[] topics);
         Task Login(IChannel channel, string deviceId, ConnectMessage mqttConnectMessage);
