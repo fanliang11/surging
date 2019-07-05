@@ -161,7 +161,14 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         {
             var routes = await _serviceRouteManager.GetRoutesAsync();
             var pattern = "/{.*?}";
-            var route =  routes.FirstOrDefault(i =>path.Contains(Regex.Replace(i.ServiceDescriptor.RoutePath, pattern, "")) && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload"));
+
+           var route = routes.FirstOrDefault(i =>
+            {
+                var routePath = Regex.Replace(i.ServiceDescriptor.RoutePath, pattern, "");
+                var newPath = path.Replace(routePath, "");
+                return (newPath.StartsWith("/")|| newPath.Length==0) && i.ServiceDescriptor.RoutePath.Split("/").Length == path.Split("/").Length && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload");
+            });
+
 
             if (route == null)
             {
@@ -169,7 +176,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                     _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
             }
             else
-              if(Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))  _serviceRoute.GetOrAdd(path, route);
+              if(!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))  _serviceRoute.GetOrAdd(path, route);
             return route;
         }
 
