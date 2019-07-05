@@ -66,13 +66,13 @@ namespace Surging.Core.CPlatform.Address
         /// <returns></returns>
         public override EndPoint CreateEndPoint()
         {
-            return new IPEndPoint(IPAddress.Parse(Ip), Port);
+            return new IPEndPoint(IPAddress.Parse(AddressHelper.GetIpFromAddress(Ip)), Port);
         }
 
 
         public override string ToString()
         {
-            return string.Concat(new string[] {Ip,":" , Port.ToString() });
+            return string.Concat(new string[] { AddressHelper.GetIpFromAddress(Ip), ":" , Port.ToString() });
         }
 
         #endregion Overrides of AddressModel
