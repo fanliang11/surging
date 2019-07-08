@@ -33,15 +33,16 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                 }) as IInvocation;
         }
 
-        public IInvocation GetCacheInvocation(object proxy, IDictionary<string, object> parameters,
-    string serviceId, Type returnType)
+        public IInvocation GetCacheInvocation(object proxy, IDictionary<string, object> parameters, string serviceId, Type returnType)
         {
             var entry = (from q in _serviceEntryManager.GetAllEntries()
                          let k = q.Attributes
                          where q.Descriptor.Id == serviceId
                          select q).FirstOrDefault();
-            var constructor = InvocationMethods.CompositionInvocationConstructor;
-            return constructor.Invoke(new object[]{
+            if (entry != null)
+            {
+                var constructor = InvocationMethods.CompositionInvocationConstructor;
+                return constructor.Invoke(new object[]{
                     parameters,
                     serviceId,
                     GetKey(parameters),
@@ -49,6 +50,10 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                     returnType,
                     proxy
                 }) as IInvocation;
+
+            }
+            return null;
+
         }
 
         private string[] GetKey(IDictionary<string, object> parameterValue)

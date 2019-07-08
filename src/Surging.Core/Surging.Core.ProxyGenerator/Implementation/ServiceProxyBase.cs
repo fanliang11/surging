@@ -90,9 +90,30 @@ namespace Surging.Core.ProxyGenerator.Implementation
             if (command.RequestCacheEnabled && !decodeJOject)
             {
                 invocation = GetCacheInvocation(parameters, serviceId, typeof(T));
-                var interceptReuslt = await Intercept(_cacheInterceptor, invocation);
-                message = interceptReuslt.Item1;
-                result = interceptReuslt.Item2 == null ? default(T) : interceptReuslt.Item2;
+                if (IsSetCacheInterceptMethod(invocation, command))
+                {
+                    var interceptCacheReuslt = await Intercept(_cacheInterceptor, invocation);
+                    message = interceptCacheReuslt.Item1;
+                    result = interceptCacheReuslt.Item2 == null ? default(T) : interceptCacheReuslt.Item2;
+                }
+                else
+                {
+                    message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
+                    if (message == null)
+                    {
+                        if (command.FallBackName != null && _serviceProvider.IsRegistered<IFallbackInvoker>(command.FallBackName) && command.Strategy == StrategyType.FallBack)
+                        {
+                            var invoker = _serviceProvider.GetInstances<IFallbackInvoker>(command.FallBackName);
+                            return await invoker.Invoke<T>(parameters, serviceId, _serviceKey);
+
+                        }
+                        else
+                        {
+                            var invoker = _serviceProvider.GetInstances<IClusterInvoker>(command.Strategy.ToString());
+                            return await invoker.Invoke<T>(parameters, serviceId, _serviceKey, typeof(T) == UtilityType.ObjectType);
+                        }
+                    }
+                }
             }
             if (existsInterceptor)
             {
@@ -195,6 +216,26 @@ namespace Surging.Core.ProxyGenerator.Implementation
         {
             var invocation = _serviceProvider.GetInstances<IInterceptorProvider>();
             return invocation.GetCacheInvocation(this, parameters, serviceId, returnType);
+        }
+
+        private bool IsSetCacheInterceptMethod(IInvocation invocation, ServiceCommand command)
+        {
+            if (invocation == null)
+            {
+                return false;
+            }
+            var cacheInvocation = invocation as ICacheInvocation;
+            if (cacheInvocation == null)
+            {
+                command.RequestCacheEnabled = false;
+                return false;
+            }
+            if (!cacheInvocation.Attributes.Any(p => p.GetType().Name == "InterceptMethodAttribute"))
+            {
+                command.RequestCacheEnabled = false;
+                return false;
+            }
+            return true;
         }
 
         #endregion Protected Method
