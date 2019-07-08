@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.Swagger.Builder;
 using Surging.Core.Swagger.Internal;
@@ -71,9 +72,16 @@ namespace Surging.Core.Swagger
 
                         return title.Any(v => v.Title == docName);
                     });
-                    var xmlPaths = _serviceSchemaProvider.GetSchemaFilesPath();
+                    var annotationXmlDir = string.Empty;
+                    if (!string.IsNullOrEmpty(AppConfig.SwaggerOptions.AnnotationXmlDir))
+                    {
+                        annotationXmlDir = EnvironmentHelper.GetEnvironmentVariable(AppConfig.SwaggerOptions.AnnotationXmlDir);
+                    }
+                    var xmlPaths = _serviceSchemaProvider.GetSchemaFilesPath(annotationXmlDir, AppConfig.SwaggerOptions.DtoXmls);
                     foreach (var xmlPath in xmlPaths)
+                    {
                         options.IncludeXmlComments(xmlPath);
+                    }
                 });
             }
         }

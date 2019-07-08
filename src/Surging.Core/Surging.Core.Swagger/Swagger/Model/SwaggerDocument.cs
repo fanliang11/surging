@@ -83,6 +83,10 @@ namespace Surging.Core.Swagger
 
         [JsonExtensionData]
         public Dictionary<string, object> Extensions { get; private set; }
+
+        public string AnnotationXmlDir { get; set; }
+
+        public IEnumerable<string> DtoXmls { get; set; }
     }
 
     public class Contact
