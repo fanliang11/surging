@@ -42,7 +42,7 @@
     "CertificateFileName": "${CertificateFileName}|",
     "CertificateLocation": "${CertificateLocation}|pfxs",
     "CertificatePassword": "${CertificatePassword}|",
-    "HttpsPort": "${StageHttpsPorts}|449",
+    "HttpsPort": "${StageHttpsPorts}|449,446",
     "HttpPorts": "${StageHttpPorts}|281,282,283"
   },
   "Dns": {

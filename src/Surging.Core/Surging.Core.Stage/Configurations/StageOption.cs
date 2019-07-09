@@ -14,7 +14,7 @@ namespace Surging.Core.Stage.Configurations
 
         public string CertificatePassword { get;  set; }
 
-        public int? HttpsPort { get;  set; }
+        public string HttpsPort { get;  set; }
 
         public string HttpPorts { get;  set; }
     }

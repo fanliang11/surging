@@ -20,29 +20,37 @@ namespace Surging.Core.Stage.Internal.Implementation
         void IWebServerListener.Listen(WebHostContext context)
         {
 
-            var httpsPorts = AppConfig.Options.HttpsPort??443;
+            var httpsPorts = AppConfig.Options.HttpsPort?.Split(",");
             var httpPorts = AppConfig.Options.HttpPorts?.Split(",");
             if (AppConfig.Options.EnableHttps)
             {
-                context.KestrelOptions.Listen(context.Address, httpsPorts, listOptions =>
+                foreach (var httpsPort in httpsPorts)
                 {
-                    X509Certificate2 certificate2 = null;
-                    var pfxFile = Path.Combine(AppContext.BaseDirectory, AppConfig.Options.CertificateFileName);
-                    if (File.Exists(pfxFile))
-                        certificate2 = new X509Certificate2(pfxFile, AppConfig.Options.CertificatePassword);
-                    else
+                    int.TryParse(httpsPort, out int port);
+                    if (string.IsNullOrEmpty(AppConfig.Options.HttpsPort)) port = 443;
+                    if (port > 0)
                     {
-                        var paths = GetPaths(AppConfig.Options.CertificateLocation);
-                        foreach (var path in paths)
+                        context.KestrelOptions.Listen(context.Address, port, listOptions =>
+                    {
+                        X509Certificate2 certificate2 = null;
+                        var pfxFile = Path.Combine(AppContext.BaseDirectory, AppConfig.Options.CertificateFileName);
+                        if (File.Exists(pfxFile))
+                            certificate2 = new X509Certificate2(pfxFile, AppConfig.Options.CertificatePassword);
+                        else
                         {
-                            pfxFile = Path.Combine(path, AppConfig.Options.CertificateFileName);
-                            if (File.Exists(pfxFile))
-                                certificate2 = new X509Certificate2(pfxFile, AppConfig.Options.CertificatePassword);
+                            var paths = GetPaths(AppConfig.Options.CertificateLocation);
+                            foreach (var path in paths)
+                            {
+                                pfxFile = Path.Combine(path, AppConfig.Options.CertificateFileName);
+                                if (File.Exists(pfxFile))
+                                    certificate2 = new X509Certificate2(pfxFile, AppConfig.Options.CertificatePassword);
 
+                            }
                         }
+                        listOptions = certificate2 == null ? listOptions.UseHttps() : listOptions.UseHttps(certificate2);
+                    });
                     }
-                    listOptions = certificate2 == null ? listOptions.UseHttps() : listOptions.UseHttps(certificate2);
-                }); 
+                }
             }
 
             foreach (var httpPort in httpPorts)
