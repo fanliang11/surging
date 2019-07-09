@@ -10,10 +10,11 @@ namespace Surging.Core.KestrelHttpServer
 {
     public class WebHostContext
     {
-        public WebHostContext(WebHostBuilderContext context, KestrelServerOptions options, IPAddress ipAddress)
+        public WebHostContext(WebHostBuilderContext context, KestrelServerOptions options, IPAddress ipAddress,string [] virtualPaths)
         {
             WebHostBuilderContext = Check.NotNull(context, nameof(context));
             KestrelOptions = Check.NotNull(options, nameof(options));
+            VirtualPaths = Check.NotNull(virtualPaths, nameof(virtualPaths));
             Address = ipAddress;
         }
 
@@ -22,6 +23,8 @@ namespace Surging.Core.KestrelHttpServer
         public KestrelServerOptions KestrelOptions { get; }
 
         public IPAddress Address { get; }
+
+        public string[] VirtualPaths { get; }
 
     }
 }

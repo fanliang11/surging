@@ -89,7 +89,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public void ConfigureHost(WebHostBuilderContext context, KestrelServerOptions options,IPAddress ipAddress)
         {
-            _moduleProvider.ConfigureHost(new WebHostContext(context, options, ipAddress));
+            _moduleProvider.ConfigureHost(new WebHostContext(context, options, ipAddress,_moduleProvider.VirtualPaths));
         }
 
         public void ConfigureServices(IServiceCollection services)
