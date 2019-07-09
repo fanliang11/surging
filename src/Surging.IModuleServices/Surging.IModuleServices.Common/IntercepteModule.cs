@@ -22,7 +22,8 @@ namespace Surging.IModuleServices.Common
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-            builder.AddClientIntercepted(typeof(CacheProviderInterceptor));
+            //builder.AddClientIntercepted(typeof(CacheProviderInterceptor));
+            builder.AddClientIntercepted(typeof(LogProviderInterceptor));
         }
     }
 }
