@@ -169,10 +169,17 @@ namespace Surging.Core.KestrelHttpServer
             string routePath = "";
             var urlSpan = path.AsSpan();
             var len = urlSpan.IndexOf("?");
-            if (len == -1)
-                routePath = urlSpan.TrimStart("/").ToString().ToLower();
+            if (urlSpan.LastIndexOf("/") == 0)
+            {
+                routePath = path;
+            }
             else
-                routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
+            {
+                if (len == -1)
+                    routePath = urlSpan.TrimStart("/").ToString().ToLower();
+                else
+                    routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
+            }
             return routePath;
         }
     }
