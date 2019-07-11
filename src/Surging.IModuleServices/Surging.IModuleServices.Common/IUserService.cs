@@ -63,7 +63,7 @@ namespace Surging.IModuleServices.Common
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
-        [InterceptMethod(CachingMethod.Get, Key = "GetUser", CacheSectionType = SectionType.ddlCache, EnableL2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = CacheTargetType.Redis, Time = 480)]
+        [InterceptMethod(CachingMethod.Get, Key = "GetUser", CacheSectionType = SectionType.ddlCache, L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = CacheTargetType.Redis, Time = 480)]
         [ServiceRoute("{userName}")]
         Task<int> GetUserId(string userName);
 

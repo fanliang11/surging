@@ -67,7 +67,7 @@ namespace Surging.Core.System.Intercept
             set;
         }
 
-        public string EnableL2Key
+        public string L2Key
         {
             get; set;
         }
