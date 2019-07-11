@@ -67,6 +67,16 @@ namespace Surging.Core.System.Intercept
             set;
         }
 
+        public string EnableL2Key
+        {
+            get; set;
+        }
+
+        public bool EnableL2Cache
+        {
+            get;set;
+        }
+
         public string Key { get; set; }
         /// <summary>
         /// 获取或设置缓存方式。
