@@ -69,7 +69,7 @@ namespace Surging.Core.System.Intercept
                 else
                 {
                    var l2Cache= l2cacheProvider.Get<ValueTuple<string, string>>(l2Key);
-                    if(l2Cache.Item1!=signJson)
+                    if(l2Cache==default || l2Cache.Item1!=signJson)
                     {
                         returnValue = await getFromPersistence();
                         if (returnValue != null)
