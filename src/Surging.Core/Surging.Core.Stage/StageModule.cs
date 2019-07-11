@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Serialization;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.KestrelHttpServer;
+using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.Stage.Configurations;
 using Surging.Core.Stage.Internal;
 using Surging.Core.Stage.Internal.Implementation;
@@ -31,6 +34,7 @@ namespace Surging.Core.Stage
 
         public override void RegisterBuilder(ConfigurationContext context)
         {
+       
         }
 
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
@@ -41,6 +45,7 @@ namespace Surging.Core.Stage
                 AppConfig.Options = section.Get<StageOption>();
             }
             builder.RegisterType<WebServerListener>().As<IWebServerListener>().SingleInstance();
+            builder.RegisterType<AuthorizationFilterAttribute>().As<IAuthorizationFilter>().SingleInstance();
         }
     }
 }

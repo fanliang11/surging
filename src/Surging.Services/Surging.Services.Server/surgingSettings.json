@@ -41,9 +41,9 @@
     "EnableHttps": true, // 不设置ports，默认httpsPort:443
     "CertificateFileName": "${CertificateFileName}|",
     "CertificateLocation": "${CertificateLocation}|pfxs",
-    "CertificatePassword": "${CertificatePassword}|",
-    "HttpsPort": "${StageHttpsPorts}|449,446",
-    "HttpPorts": "${StageHttpPorts}|281,282,283"
+    "CertificatePassword": "${CertificatePassword}|"
+    //"HttpsPort": "${StageHttpsPorts}|449,446",
+    //"HttpPorts": "${StageHttpPorts}|281,282,283"
   },
   "Dns": {
     "RootDnsAddress": "192.168.1.1",

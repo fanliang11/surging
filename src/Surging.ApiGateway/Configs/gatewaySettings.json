@@ -10,7 +10,7 @@
     "AllowAnyMethod": true
   },
   "Register": {
-    "Provider": "Consul",
+    "Provider": "Zookeeper",
     "Address": "${Register_Conn}|127.0.0.1:8500" //127.0.0.1:8500,127.0.0.1:9500
   },
   "ServicePart": {
