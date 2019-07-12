@@ -47,5 +47,7 @@ namespace Surging.Core.CPlatform.Configurations
         public string NotRelatedAssemblyFiles { get; set; }
 
         public string RelatedAssemblyFiles { get; set; } = "";
+
+        public RuntimeEnvironment Environment { get; set; } = RuntimeEnvironment.Production;
     }
 }

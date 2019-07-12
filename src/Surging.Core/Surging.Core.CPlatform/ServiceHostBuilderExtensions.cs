@@ -29,6 +29,7 @@ namespace Surging.Core.CPlatform
         {
             return hostBuilder.MapServices(async mapper =>
             {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", AppConfig.ServerOptions.Environment.ToString());
                 BuildServiceEngine(mapper);
                 await mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
                 string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
