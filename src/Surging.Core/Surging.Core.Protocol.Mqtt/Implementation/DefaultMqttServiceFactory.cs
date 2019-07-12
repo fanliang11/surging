@@ -10,18 +10,46 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="DefaultMqttServiceFactory" />
+    /// </summary>
     public class DefaultMqttServiceFactory : IMqttServiceFactory
     {
+        #region 字段
 
-        private readonly ISerializer<string> _serializer;
+        /// <summary>
+        /// Defines the _addressModel
+        /// </summary>
         private readonly ConcurrentDictionary<string, AddressModel> _addressModel =
                new ConcurrentDictionary<string, AddressModel>();
 
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<string> _serializer;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultMqttServiceFactory"/> class.
+        /// </summary>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
         public DefaultMqttServiceFactory(ISerializer<string> serializer)
         {
             _serializer = serializer;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The CreateMqttServiceRoutesAsync
+        /// </summary>
+        /// <param name="descriptors">The descriptors<see cref="IEnumerable{MqttServiceDescriptor}"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{MqttServiceRoute}}"/></returns>
         public Task<IEnumerable<MqttServiceRoute>> CreateMqttServiceRoutesAsync(IEnumerable<MqttServiceDescriptor> descriptors)
         {
             if (descriptors == null)
@@ -39,7 +67,11 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             return Task.FromResult(routes.AsEnumerable());
         }
 
-
+        /// <summary>
+        /// The CreateAddress
+        /// </summary>
+        /// <param name="descriptors">The descriptors<see cref="IEnumerable{MqttEndpointDescriptor}"/></param>
+        /// <returns>The <see cref="IEnumerable{AddressModel}"/></returns>
         private IEnumerable<AddressModel> CreateAddress(IEnumerable<MqttEndpointDescriptor> descriptors)
         {
             if (descriptors == null)
@@ -57,5 +89,6 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
             }
         }
 
+        #endregion 方法
     }
 }

@@ -1,4 +1,3 @@
-#region License
 /*
  * AuthenticationChallenge.cs
  *
@@ -24,7 +23,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 using System.Collections.Specialized;
@@ -32,115 +30,158 @@ using System.Text;
 
 namespace WebSocketCore.Net
 {
-  internal class AuthenticationChallenge : AuthenticationBase
-  {
-    #region Private Constructors
-
-    private AuthenticationChallenge (AuthenticationSchemes scheme, NameValueCollection parameters)
-      : base (scheme, parameters)
+    /// <summary>
+    /// Defines the <see cref="AuthenticationChallenge" />
+    /// </summary>
+    internal class AuthenticationChallenge : AuthenticationBase
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthenticationChallenge"/> class.
+        /// </summary>
+        /// <param name="scheme">The scheme<see cref="AuthenticationSchemes"/></param>
+        /// <param name="realm">The realm<see cref="string"/></param>
+        internal AuthenticationChallenge(AuthenticationSchemes scheme, string realm)
+      : base(scheme, new NameValueCollection())
+        {
+            Parameters["realm"] = realm;
+            if (scheme == AuthenticationSchemes.Digest)
+            {
+                Parameters["nonce"] = CreateNonceValue();
+                Parameters["algorithm"] = "MD5";
+                Parameters["qop"] = "auth";
+            }
+        }
+
+        /// <summary>
+        /// Prevents a default instance of the <see cref="AuthenticationChallenge"/> class from being created.
+        /// </summary>
+        /// <param name="scheme">The scheme<see cref="AuthenticationSchemes"/></param>
+        /// <param name="parameters">The parameters<see cref="NameValueCollection"/></param>
+        private AuthenticationChallenge(AuthenticationSchemes scheme, NameValueCollection parameters)
+      : base(scheme, parameters)
+        {
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Domain
+        /// </summary>
+        public string Domain
+        {
+            get
+            {
+                return Parameters["domain"];
+            }
+        }
+
+        /// <summary>
+        /// Gets the Stale
+        /// </summary>
+        public string Stale
+        {
+            get
+            {
+                return Parameters["stale"];
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The CreateBasicChallenge
+        /// </summary>
+        /// <param name="realm">The realm<see cref="string"/></param>
+        /// <returns>The <see cref="AuthenticationChallenge"/></returns>
+        internal static AuthenticationChallenge CreateBasicChallenge(string realm)
+        {
+            return new AuthenticationChallenge(AuthenticationSchemes.Basic, realm);
+        }
+
+        /// <summary>
+        /// The CreateDigestChallenge
+        /// </summary>
+        /// <param name="realm">The realm<see cref="string"/></param>
+        /// <returns>The <see cref="AuthenticationChallenge"/></returns>
+        internal static AuthenticationChallenge CreateDigestChallenge(string realm)
+        {
+            return new AuthenticationChallenge(AuthenticationSchemes.Digest, realm);
+        }
+
+        /// <summary>
+        /// The Parse
+        /// </summary>
+        /// <param name="value">The value<see cref="string"/></param>
+        /// <returns>The <see cref="AuthenticationChallenge"/></returns>
+        internal static AuthenticationChallenge Parse(string value)
+        {
+            var chal = value.Split(new[] { ' ' }, 2);
+            if (chal.Length != 2)
+                return null;
+
+            var schm = chal[0].ToLower();
+            return schm == "basic"
+                   ? new AuthenticationChallenge(
+                       AuthenticationSchemes.Basic, ParseParameters(chal[1]))
+                   : schm == "digest"
+                     ? new AuthenticationChallenge(
+                         AuthenticationSchemes.Digest, ParseParameters(chal[1]))
+                     : null;
+        }
+
+        /// <summary>
+        /// The ToBasicString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        internal override string ToBasicString()
+        {
+            return String.Format("Basic realm=\"{0}\"", Parameters["realm"]);
+        }
+
+        /// <summary>
+        /// The ToDigestString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        internal override string ToDigestString()
+        {
+            var output = new StringBuilder(128);
+
+            var domain = Parameters["domain"];
+            if (domain != null)
+                output.AppendFormat(
+                  "Digest realm=\"{0}\", domain=\"{1}\", nonce=\"{2}\"",
+                  Parameters["realm"],
+                  domain,
+                  Parameters["nonce"]);
+            else
+                output.AppendFormat(
+                  "Digest realm=\"{0}\", nonce=\"{1}\"", Parameters["realm"], Parameters["nonce"]);
+
+            var opaque = Parameters["opaque"];
+            if (opaque != null)
+                output.AppendFormat(", opaque=\"{0}\"", opaque);
+
+            var stale = Parameters["stale"];
+            if (stale != null)
+                output.AppendFormat(", stale={0}", stale);
+
+            var algo = Parameters["algorithm"];
+            if (algo != null)
+                output.AppendFormat(", algorithm={0}", algo);
+
+            var qop = Parameters["qop"];
+            if (qop != null)
+                output.AppendFormat(", qop=\"{0}\"", qop);
+
+            return output.ToString();
+        }
+
+        #endregion 方法
     }
-
-    #endregion
-
-    #region Internal Constructors
-
-    internal AuthenticationChallenge (AuthenticationSchemes scheme, string realm)
-      : base (scheme, new NameValueCollection ())
-    {
-      Parameters["realm"] = realm;
-      if (scheme == AuthenticationSchemes.Digest) {
-        Parameters["nonce"] = CreateNonceValue ();
-        Parameters["algorithm"] = "MD5";
-        Parameters["qop"] = "auth";
-      }
-    }
-
-    #endregion
-
-    #region Public Properties
-
-    public string Domain {
-      get {
-        return Parameters["domain"];
-      }
-    }
-
-    public string Stale {
-      get {
-        return Parameters["stale"];
-      }
-    }
-
-    #endregion
-
-    #region Internal Methods
-
-    internal static AuthenticationChallenge CreateBasicChallenge (string realm)
-    {
-      return new AuthenticationChallenge (AuthenticationSchemes.Basic, realm);
-    }
-
-    internal static AuthenticationChallenge CreateDigestChallenge (string realm)
-    {
-      return new AuthenticationChallenge (AuthenticationSchemes.Digest, realm);
-    }
-
-    internal static AuthenticationChallenge Parse (string value)
-    {
-      var chal = value.Split (new[] { ' ' }, 2);
-      if (chal.Length != 2)
-        return null;
-
-      var schm = chal[0].ToLower ();
-      return schm == "basic"
-             ? new AuthenticationChallenge (
-                 AuthenticationSchemes.Basic, ParseParameters (chal[1]))
-             : schm == "digest"
-               ? new AuthenticationChallenge (
-                   AuthenticationSchemes.Digest, ParseParameters (chal[1]))
-               : null;
-    }
-
-    internal override string ToBasicString ()
-    {
-      return String.Format ("Basic realm=\"{0}\"", Parameters["realm"]);
-    }
-
-    internal override string ToDigestString ()
-    {
-      var output = new StringBuilder (128);
-
-      var domain = Parameters["domain"];
-      if (domain != null)
-        output.AppendFormat (
-          "Digest realm=\"{0}\", domain=\"{1}\", nonce=\"{2}\"",
-          Parameters["realm"],
-          domain,
-          Parameters["nonce"]);
-      else
-        output.AppendFormat (
-          "Digest realm=\"{0}\", nonce=\"{1}\"", Parameters["realm"], Parameters["nonce"]);
-
-      var opaque = Parameters["opaque"];
-      if (opaque != null)
-        output.AppendFormat (", opaque=\"{0}\"", opaque);
-
-      var stale = Parameters["stale"];
-      if (stale != null)
-        output.AppendFormat (", stale={0}", stale);
-
-      var algo = Parameters["algorithm"];
-      if (algo != null)
-        output.AppendFormat (", algorithm={0}", algo);
-
-      var qop = Parameters["qop"];
-      if (qop != null)
-        output.AppendFormat (", qop=\"{0}\"", qop);
-
-      return output.ToString ();
-    }
-
-    #endregion
-  }
 }

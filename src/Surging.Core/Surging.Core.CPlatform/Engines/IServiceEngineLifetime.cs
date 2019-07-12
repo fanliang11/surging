@@ -5,19 +5,51 @@ using System.Threading;
 
 namespace Surging.Core.CPlatform.Engines
 {
-   public interface IServiceEngineLifetime
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IServiceEngineLifetime" />
+    /// </summary>
+    public interface IServiceEngineLifetime
     {
+        #region 属性
+
+        /// <summary>
+        /// Gets the ServiceEngineStarted
+        /// </summary>
         CancellationToken ServiceEngineStarted { get; }
 
-        CancellationToken ServiceEngineStopping { get; }
-
+        /// <summary>
+        /// Gets the ServiceEngineStopped
+        /// </summary>
         CancellationToken ServiceEngineStopped { get; }
 
+        /// <summary>
+        /// Gets the ServiceEngineStopping
+        /// </summary>
+        CancellationToken ServiceEngineStopping { get; }
 
-        void StopApplication();
+        #endregion 属性
 
+        #region 方法
+
+        /// <summary>
+        /// The NotifyStarted
+        /// </summary>
+        void NotifyStarted();
+
+        /// <summary>
+        /// The NotifyStopped
+        /// </summary>
         void NotifyStopped();
 
-        void NotifyStarted();
+        /// <summary>
+        /// The StopApplication
+        /// </summary>
+        void StopApplication();
+
+        #endregion 方法
     }
+
+    #endregion 接口
 }

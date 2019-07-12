@@ -4,7 +4,14 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer.Filters
 {
-    public  interface IFilter
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IFilter" />
+    /// </summary>
+    public interface IFilter
     {
     }
+
+    #endregion 接口
 }

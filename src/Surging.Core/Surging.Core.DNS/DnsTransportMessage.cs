@@ -7,12 +7,28 @@ using System.Text;
 
 namespace Surging.Core.DNS
 {
-   public class DnsTransportMessage
+    /// <summary>
+    /// Defines the <see cref="DnsTransportMessage" />
+    /// </summary>
+    public class DnsTransportMessage
     {
-        public IDnsResponse DnsResponse { get; set; }
+        #region 属性
 
+        /// <summary>
+        /// Gets or sets the Address
+        /// </summary>
+        public IPAddress Address { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DnsQuestion
+        /// </summary>
         public IDnsQuestion DnsQuestion { get; set; }
 
-        public IPAddress Address { get; set; }
+        /// <summary>
+        /// Gets or sets the DnsResponse
+        /// </summary>
+        public IDnsResponse DnsResponse { get; set; }
+
+        #endregion 属性
     }
 }

@@ -9,11 +9,24 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="MqttRomtePublishService" />
+    /// </summary>
     public class MqttRomtePublishService : ServiceBase, IMqttRomtePublishService
     {
-       public async Task Publish(string deviceId, MqttWillMessage message)
+        #region 方法
+
+        /// <summary>
+        /// The Publish
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <param name="message">The message<see cref="MqttWillMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public async Task Publish(string deviceId, MqttWillMessage message)
         {
             await ServiceLocator.GetService<IChannelService>().Publish(deviceId, message);
         }
+
+        #endregion 方法
     }
 }

@@ -8,11 +8,17 @@ using System.Text;
 
 namespace Surging.Core.System.MongoProvider
 {
+    /// <summary>
+    /// Defines the <see cref="MongoModule" />
+    /// </summary>
     public class MongoModule : SystemModule
     {
+        #region 方法
+
         /// <summary>
-        ///  Function module initialization,trigger when the module starts loading
+        /// Function module initialization,trigger when the module starts loading
         /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -27,5 +33,7 @@ namespace Surging.Core.System.MongoProvider
             base.RegisterBuilder(builder);
             builder.RegisterGeneric(typeof(MongoRepository<>)).As(typeof(IMongoRepository<>)).SingleInstance();
         }
+
+        #endregion 方法
     }
 }

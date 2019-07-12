@@ -1,4 +1,3 @@
-#region License
 /*
  * InputState.cs
  *
@@ -28,22 +27,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Gonzalo Paniagua Javier <gonzalo@novell.com>
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore.Net
 {
-  internal enum InputState
-  {
-    RequestLine,
-    Headers
-  }
+    #region Ã¶¾Ù
+
+    /// <summary>
+    /// Defines the InputState
+    /// </summary>
+    internal enum InputState
+    {
+        /// <summary>
+        /// Defines the RequestLine
+        /// </summary>
+        RequestLine,
+
+        /// <summary>
+        /// Defines the Headers
+        /// </summary>
+        Headers
+    }
+
+    #endregion Ã¶¾Ù
 }

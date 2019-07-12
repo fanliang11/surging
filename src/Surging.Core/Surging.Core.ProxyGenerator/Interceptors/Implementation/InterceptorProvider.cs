@@ -1,38 +1,58 @@
-﻿using Surging.Core.CPlatform.Runtime.Server;
+﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.ProxyGenerator.Utilitys;
+using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Surging.Core.CPlatform;
 using System.Reflection;
-using System.Collections;
-using Surging.Core.ProxyGenerator.Utilitys;
-using System.Collections.Concurrent;
-using System;
-using Microsoft.Extensions.Logging;
 
 namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="InterceptorProvider" />
+    /// </summary>
     public class InterceptorProvider : IInterceptorProvider
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _serviceEntryManager
+        /// </summary>
         private readonly IServiceEntryManager _serviceEntryManager;
-        ConcurrentDictionary<Tuple<Type, Type>,bool> _derivedTypes = new ConcurrentDictionary<Tuple<Type, Type>, bool>();
+
+        /// <summary>
+        /// Defines the _derivedTypes
+        /// </summary>
+        internal ConcurrentDictionary<Tuple<Type, Type>, bool> _derivedTypes = new ConcurrentDictionary<Tuple<Type, Type>, bool>();
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InterceptorProvider"/> class.
+        /// </summary>
+        /// <param name="serviceEntryManager">The serviceEntryManager<see cref="IServiceEntryManager"/></param>
         public InterceptorProvider(IServiceEntryManager serviceEntryManager)
         {
             _serviceEntryManager = serviceEntryManager;
         }
-        public IInvocation GetInvocation(object proxy, IDictionary<string, object> parameters,
-            string serviceId,Type returnType)
-        {
-            var constructor = InvocationMethods.CompositionInvocationConstructor;
-            return constructor.Invoke(new object[]{
-                    parameters,
-                    serviceId,
-                    null,
-                    null,
-                    returnType,
-                    proxy
-                }) as IInvocation;
-        }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The GetCacheInvocation
+        /// </summary>
+        /// <param name="proxy">The proxy<see cref="object"/></param>
+        /// <param name="parameters">The parameters<see cref="IDictionary{string, object}"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <param name="returnType">The returnType<see cref="Type"/></param>
+        /// <returns>The <see cref="IInvocation"/></returns>
         public IInvocation GetCacheInvocation(object proxy, IDictionary<string, object> parameters,
     string serviceId, Type returnType)
         {
@@ -51,6 +71,33 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                 }) as IInvocation;
         }
 
+        /// <summary>
+        /// The GetInvocation
+        /// </summary>
+        /// <param name="proxy">The proxy<see cref="object"/></param>
+        /// <param name="parameters">The parameters<see cref="IDictionary{string, object}"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <param name="returnType">The returnType<see cref="Type"/></param>
+        /// <returns>The <see cref="IInvocation"/></returns>
+        public IInvocation GetInvocation(object proxy, IDictionary<string, object> parameters,
+            string serviceId, Type returnType)
+        {
+            var constructor = InvocationMethods.CompositionInvocationConstructor;
+            return constructor.Invoke(new object[]{
+                    parameters,
+                    serviceId,
+                    null,
+                    null,
+                    returnType,
+                    proxy
+                }) as IInvocation;
+        }
+
+        /// <summary>
+        /// The GetKey
+        /// </summary>
+        /// <param name="parameterValue">The parameterValue<see cref="IDictionary{string, object}"/></param>
+        /// <returns>The <see cref="string[]"/></returns>
         private string[] GetKey(IDictionary<string, object> parameterValue)
         {
             var param = parameterValue.Values.FirstOrDefault();
@@ -74,13 +121,19 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             return reuslt;
         }
 
-        private bool IsKeyAttributeDerivedType(Type baseType,Type derivedType)
+        /// <summary>
+        /// The IsKeyAttributeDerivedType
+        /// </summary>
+        /// <param name="baseType">The baseType<see cref="Type"/></param>
+        /// <param name="derivedType">The derivedType<see cref="Type"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        private bool IsKeyAttributeDerivedType(Type baseType, Type derivedType)
         {
             bool result = false;
             var key = Tuple.Create(baseType, derivedType);
             if (!_derivedTypes.ContainsKey(key))
             {
-                result =_derivedTypes.GetOrAdd(key, derivedType.IsSubclassOf(baseType) || derivedType == baseType);
+                result = _derivedTypes.GetOrAdd(key, derivedType.IsSubclassOf(baseType) || derivedType == baseType);
             }
             else
             {
@@ -88,5 +141,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             }
             return result;
         }
+
+        #endregion 方法
     }
 }

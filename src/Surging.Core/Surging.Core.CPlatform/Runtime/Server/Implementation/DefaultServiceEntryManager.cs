@@ -10,42 +10,43 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
     /// </summary>
     public class DefaultServiceEntryManager : IServiceEntryManager
     {
-        #region Field
+        #region 字段
 
-        private  IEnumerable<ServiceEntry> _serviceEntries;
+        /// <summary>
+        /// Defines the _allEntries
+        /// </summary>
+        private IEnumerable<ServiceEntry> _allEntries;
 
-        private  IEnumerable<ServiceEntry> _allEntries;
+        /// <summary>
+        /// Defines the _serviceEntries
+        /// </summary>
+        private IEnumerable<ServiceEntry> _serviceEntries;
 
-        #endregion Field
+        #endregion 字段
 
-        #region Constructor
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceEntryManager"/> class.
+        /// </summary>
+        /// <param name="providers">The providers<see cref="IEnumerable{IServiceEntryProvider}"/></param>
         public DefaultServiceEntryManager(IEnumerable<IServiceEntryProvider> providers)
         {
             UpdateEntries(providers);
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IServiceEntryManager
+        #region 方法
 
-        public void UpdateEntries(IEnumerable<IServiceEntryProvider> providers)
+        /// <summary>
+        /// The GetAllEntries
+        /// </summary>
+        /// <returns>The <see cref="IEnumerable{ServiceEntry}"/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<ServiceEntry> GetAllEntries()
         {
-             var list = new List<ServiceEntry>();
-            var  allEntries = new List<ServiceEntry>();
-            foreach (var provider in providers)
-            {
-                var entries = provider.GetEntries().ToArray();
-                foreach (var entry in entries)
-                {
-                    if (list.Any(i => i.Descriptor.Id == entry.Descriptor.Id))
-                        throw new InvalidOperationException($"本地包含多个Id为：{entry.Descriptor.Id} 的服务条目。");
-                }
-                list.AddRange(entries);
-                allEntries.AddRange( provider.GetALLEntries());
-            } 
-            _serviceEntries = list.ToArray();
-            _allEntries = allEntries;
+            return _allEntries;
         }
 
         /// <summary>
@@ -58,12 +59,29 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             return _serviceEntries;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<ServiceEntry> GetAllEntries()
+        /// <summary>
+        /// The UpdateEntries
+        /// </summary>
+        /// <param name="providers">The providers<see cref="IEnumerable{IServiceEntryProvider}"/></param>
+        public void UpdateEntries(IEnumerable<IServiceEntryProvider> providers)
         {
-            return _allEntries;
+            var list = new List<ServiceEntry>();
+            var allEntries = new List<ServiceEntry>();
+            foreach (var provider in providers)
+            {
+                var entries = provider.GetEntries().ToArray();
+                foreach (var entry in entries)
+                {
+                    if (list.Any(i => i.Descriptor.Id == entry.Descriptor.Id))
+                        throw new InvalidOperationException($"本地包含多个Id为：{entry.Descriptor.Id} 的服务条目。");
+                }
+                list.AddRange(entries);
+                allEntries.AddRange(provider.GetALLEntries());
+            }
+            _serviceEntries = list.ToArray();
+            _allEntries = allEntries;
         }
 
-        #endregion Implementation of IServiceEntryManager
+        #endregion 方法
     }
 }

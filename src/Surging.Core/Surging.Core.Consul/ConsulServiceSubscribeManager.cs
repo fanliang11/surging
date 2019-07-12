@@ -15,17 +15,67 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Consul
 {
+    /// <summary>
+    /// Defines the <see cref="ConsulServiceSubscribeManager" />
+    /// </summary>
     public class ConsulServiceSubscribeManager : ServiceSubscribeManagerBase, IDisposable
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _configInfo
+        /// </summary>
         private readonly ConfigInfo _configInfo;
-        private readonly ISerializer<byte[]> _serializer;
-        private readonly IServiceSubscriberFactory _serviceSubscriberFactory;
-        private readonly ILogger<ConsulServiceSubscribeManager> _logger;
-        private readonly ISerializer<string> _stringSerializer;
-        private readonly IClientWatchManager _manager;
+
+        /// <summary>
+        /// Defines the _consulClientFactory
+        /// </summary>
         private readonly IConsulClientProvider _consulClientFactory;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<ConsulServiceSubscribeManager> _logger;
+
+        /// <summary>
+        /// Defines the _manager
+        /// </summary>
+        private readonly IClientWatchManager _manager;
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _serviceSubscriberFactory
+        /// </summary>
+        private readonly IServiceSubscriberFactory _serviceSubscriberFactory;
+
+        /// <summary>
+        /// Defines the _stringSerializer
+        /// </summary>
+        private readonly ISerializer<string> _stringSerializer;
+
+        /// <summary>
+        /// Defines the _subscribers
+        /// </summary>
         private ServiceSubscriber[] _subscribers;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsulServiceSubscribeManager"/> class.
+        /// </summary>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{byte[]}"/></param>
+        /// <param name="stringSerializer">The stringSerializer<see cref="ISerializer{string}"/></param>
+        /// <param name="manager">The manager<see cref="IClientWatchManager"/></param>
+        /// <param name="serviceSubscriberFactory">The serviceSubscriberFactory<see cref="IServiceSubscriberFactory"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{ConsulServiceSubscribeManager}"/></param>
+        /// <param name="consulClientFactory">The consulClientFactory<see cref="IConsulClientProvider"/></param>
         public ConsulServiceSubscribeManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceSubscriberFactory serviceSubscriberFactory,
             ILogger<ConsulServiceSubscribeManager> logger, IConsulClientProvider consulClientFactory) : base(stringSerializer)
@@ -40,16 +90,14 @@ namespace Surging.Core.Consul
             EnterSubscribers().Wait();
         }
 
-        /// <summary>
-        /// 获取所有可用的服务订阅者信息。
-        /// </summary>
-        /// <returns>服务路由集合。</returns>
-        public override async Task<IEnumerable<ServiceSubscriber>> GetSubscribersAsync()
-        {
-            await EnterSubscribers();
-            return _subscribers;
-        }
+        #endregion 构造函数
 
+        #region 方法
+
+        /// <summary>
+        /// The ClearAsync
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task ClearAsync()
         {
             var clients = await _consulClientFactory.GetClients();
@@ -69,10 +117,51 @@ namespace Surging.Core.Consul
             }
         }
 
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public void Dispose()
         {
         }
 
+        /// <summary>
+        /// 获取所有可用的服务订阅者信息。
+        /// </summary>
+        /// <returns>服务路由集合。</returns>
+        public override async Task<IEnumerable<ServiceSubscriber>> GetSubscribersAsync()
+        {
+            await EnterSubscribers();
+            return _subscribers;
+        }
+
+        /// <summary>
+        /// The SetSubscribersAsync
+        /// </summary>
+        /// <param name="subscribers">The subscribers<see cref="IEnumerable{ServiceSubscriber}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscribers)
+        {
+            var serviceSubscribers = await GetSubscribers(subscribers.Select(p => $"{ _configInfo.SubscriberPath }{ p.ServiceDescriptor.Id}"));
+            if (serviceSubscribers.Count() > 0)
+            {
+                foreach (var subscriber in subscribers)
+                {
+                    var serviceSubscriber = serviceSubscribers.Where(p => p.ServiceDescriptor.Id == subscriber.ServiceDescriptor.Id).FirstOrDefault();
+                    if (serviceSubscriber != null)
+                    {
+                        subscriber.Address = subscriber.Address.Concat(
+                            subscriber.Address.Except(serviceSubscriber.Address));
+                    }
+                }
+            }
+            await base.SetSubscribersAsync(subscribers);
+        }
+
+        /// <summary>
+        /// The SetSubscribersAsync
+        /// </summary>
+        /// <param name="subscribers">The subscribers<see cref="IEnumerable{ServiceSubscriberDescriptor}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         protected override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriberDescriptor> subscribers)
         {
             subscribers = subscribers.ToArray();
@@ -98,36 +187,10 @@ namespace Surging.Core.Consul
             }
         }
 
-        public override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscribers)
-        {
-            var serviceSubscribers = await GetSubscribers(subscribers.Select(p => $"{ _configInfo.SubscriberPath }{ p.ServiceDescriptor.Id}"));
-            if (serviceSubscribers.Count() > 0)
-            {
-                foreach (var subscriber in subscribers)
-                {
-                    var serviceSubscriber = serviceSubscribers.Where(p => p.ServiceDescriptor.Id == subscriber.ServiceDescriptor.Id).FirstOrDefault();
-                    if (serviceSubscriber != null)
-                    {
-                        subscriber.Address = subscriber.Address.Concat(
-                            subscriber.Address.Except(serviceSubscriber.Address));
-                    }
-                }
-            }
-            await base.SetSubscribersAsync(subscribers);
-        }
-
-        private async Task<ServiceSubscriber> GetSubscriber(byte[] data)
-        {
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"准备转换服务订阅者，配置内容：{Encoding.UTF8.GetString(data)}。");
-
-            if (data == null)
-                return null;
-
-            var descriptor = _serializer.Deserialize<byte[], ServiceSubscriberDescriptor>(data);
-            return (await _serviceSubscriberFactory.CreateServiceSubscribersAsync(new[] { descriptor })).First();
-        }
-
+        /// <summary>
+        /// The EnterSubscribers
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task EnterSubscribers()
         {
             if (_subscribers != null)
@@ -147,6 +210,28 @@ namespace Surging.Core.Consul
             }
         }
 
+        /// <summary>
+        /// The GetSubscriber
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <returns>The <see cref="Task{ServiceSubscriber}"/></returns>
+        private async Task<ServiceSubscriber> GetSubscriber(byte[] data)
+        {
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"准备转换服务订阅者，配置内容：{Encoding.UTF8.GetString(data)}。");
+
+            if (data == null)
+                return null;
+
+            var descriptor = _serializer.Deserialize<byte[], ServiceSubscriberDescriptor>(data);
+            return (await _serviceSubscriberFactory.CreateServiceSubscribersAsync(new[] { descriptor })).First();
+        }
+
+        /// <summary>
+        /// The GetSubscriber
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceSubscriber}"/></returns>
         private async Task<ServiceSubscriber> GetSubscriber(string path)
         {
             ServiceSubscriber result = null;
@@ -163,6 +248,11 @@ namespace Surging.Core.Consul
             return result;
         }
 
+        /// <summary>
+        /// The GetSubscribers
+        /// </summary>
+        /// <param name="childrens">The childrens<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="Task{ServiceSubscriber[]}"/></returns>
         private async Task<ServiceSubscriber[]> GetSubscribers(IEnumerable<string> childrens)
         {
             childrens = childrens.ToArray();
@@ -178,5 +268,7 @@ namespace Surging.Core.Consul
             }
             return subscribers.ToArray();
         }
+
+        #endregion 方法
     }
 }

@@ -15,16 +15,61 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper
 {
+    /// <summary>
+    /// Defines the <see cref="ZookeeperServiceCacheManager" />
+    /// </summary>
     public class ZookeeperServiceCacheManager : ServiceCacheManagerBase, IDisposable
-    { 
+    {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _configInfo
+        /// </summary>
         private readonly ConfigInfo _configInfo;
-        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<ZookeeperServiceCacheManager> _logger;
-        private ServiceCache[] _serviceCaches;
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _serviceCacheFactory
+        /// </summary>
         private readonly IServiceCacheFactory _serviceCacheFactory;
+
+        /// <summary>
+        /// Defines the _stringSerializer
+        /// </summary>
         private readonly ISerializer<string> _stringSerializer;
+
+        /// <summary>
+        /// Defines the _zookeeperClientProvider
+        /// </summary>
         private readonly IZookeeperClientProvider _zookeeperClientProvider;
 
+        /// <summary>
+        /// Defines the _serviceCaches
+        /// </summary>
+        private ServiceCache[] _serviceCaches;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZookeeperServiceCacheManager"/> class.
+        /// </summary>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{byte[]}"/></param>
+        /// <param name="stringSerializer">The stringSerializer<see cref="ISerializer{string}"/></param>
+        /// <param name="serviceCacheFactory">The serviceCacheFactory<see cref="IServiceCacheFactory"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{ZookeeperServiceCacheManager}"/></param>
+        /// <param name="zookeeperClientProvider">The zookeeperClientProvider<see cref="IZookeeperClientProvider"/></param>
         public ZookeeperServiceCacheManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
         ISerializer<string> stringSerializer, IServiceCacheFactory serviceCacheFactory,
         ILogger<ZookeeperServiceCacheManager> logger, IZookeeperClientProvider zookeeperClientProvider) : base(stringSerializer)
@@ -38,6 +83,14 @@ namespace Surging.Core.Zookeeper
             EnterCaches().Wait();
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The ClearAsync
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task ClearAsync()
         {
             if (_logger.IsEnabled(LogLevel.Information))
@@ -78,23 +131,28 @@ namespace Surging.Core.Zookeeper
             }
         }
 
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public void Dispose()
         {
         }
-        
-        public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)
-        {
-            var serviceCaches = await GetCaches(caches.Select(p => p.CacheDescriptor.Id));
-            await RemoveCachesAsync(caches);
-            await base.SetCachesAsync(caches);
-        }
-        
+
+        /// <summary>
+        /// The GetCachesAsync
+        /// </summary>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceCache}}"/></returns>
         public override async Task<IEnumerable<ServiceCache>> GetCachesAsync()
         {
             await EnterCaches();
             return _serviceCaches;
         }
 
+        /// <summary>
+        /// The RemveAddressAsync
+        /// </summary>
+        /// <param name="endpoints">The endpoints<see cref="IEnumerable{CacheEndpoint}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task RemveAddressAsync(IEnumerable<CacheEndpoint> endpoints)
         {
             var caches = await GetCachesAsync();
@@ -112,6 +170,23 @@ namespace Surging.Core.Zookeeper
             await base.SetCachesAsync(caches);
         }
 
+        /// <summary>
+        /// The SetCachesAsync
+        /// </summary>
+        /// <param name="caches">The caches<see cref="IEnumerable{ServiceCache}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)
+        {
+            var serviceCaches = await GetCaches(caches.Select(p => p.CacheDescriptor.Id));
+            await RemoveCachesAsync(caches);
+            await base.SetCachesAsync(caches);
+        }
+
+        /// <summary>
+        /// The SetCachesAsync
+        /// </summary>
+        /// <param name="cacheDescriptors">The cacheDescriptors<see cref="IEnumerable{ServiceCacheDescriptor}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors)
         {
             if (_logger.IsEnabled(LogLevel.Information))
@@ -152,113 +227,12 @@ namespace Surging.Core.Zookeeper
             }
         }
 
-        private async Task<ServiceCache[]> GetCaches(IEnumerable<string> childrens)
-        {
-            var rootPath = _configInfo.CachePath;
-            if (!rootPath.EndsWith("/"))
-                rootPath += "/";
-
-            childrens = childrens.ToArray();
-            var caches = new List<ServiceCache>(childrens.Count());
-
-            foreach (var children in childrens)
-            {
-                if (_logger.IsEnabled(LogLevel.Debug))
-                    _logger.LogDebug($"准备从节点：{children}中获取缓存信息。");
-
-                var nodePath = $"{rootPath}{children}";
-                var cache = await GetCache(nodePath);
-                if (cache != null)
-                    caches.Add(cache);
-            }
-            return caches.ToArray();
-        }
-
-        private async Task CreateSubdirectory((ManualResetEvent, ZooKeeper) zooKeeper, string path)
-        {
-            zooKeeper.Item1.WaitOne();
-            if (await zooKeeper.Item2.existsAsync(path) != null)
-                return;
-
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation($"节点{path}不存在，将进行创建。");
-
-            var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-            var nodePath = "/";
-
-            foreach (var children in childrens)
-            {
-                nodePath += children;
-                if (await zooKeeper.Item2.existsAsync(nodePath) == null)
-                {
-                    await zooKeeper.Item2.createAsync(nodePath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-                }
-                nodePath += "/";
-            }
-        }
-
-        private async Task<ServiceCache> GetCache(string path)
-        {
-            ServiceCache result = null; 
-            var zooKeeper = await GetZooKeeper();
-            var watcher = new NodeMonitorWatcher(GetZooKeeper, path,
-                 async (oldData, newData) => await NodeChange(oldData, newData));
-            if (await zooKeeper.Item2.existsAsync(path) != null)
-            {
-                var data = (await zooKeeper.Item2.getDataAsync(path, watcher)).Data;
-                watcher.SetCurrentData(data);
-                result = await GetCache(data);
-            }
-            return result;
-        }
-
-        #region 私有方法
-        private async Task RemoveCachesAsync(IEnumerable<ServiceCache> caches)
-        {
-            var path = _configInfo.CachePath;
-            if (!path.EndsWith("/"))
-                path += "/";
-            caches = caches.ToArray();
-            if (_serviceCaches != null)
-            {
-                var zooKeepers = await _zookeeperClientProvider.GetZooKeepers();
-                foreach (var zooKeeper in zooKeepers)
-                {
-
-                    var deletedCacheIds = caches.Select(i => i.CacheDescriptor.Id).ToArray();
-                    foreach (var deletedCacheId in deletedCacheIds)
-                    {
-                        var nodePath = $"{path}{deletedCacheId}";
-                        await zooKeeper.Item2.deleteAsync(nodePath);
-                    }
-                }
-            }
-        }
-
-        private async Task EnterCaches()
-        {
-            if (_serviceCaches != null)
-                return;
-            var zooKeeper = await GetZooKeeper();
-            zooKeeper.Item1.WaitOne();
-            var path = _configInfo.CachePath;
-            var watcher = new ChildrenMonitorWatcher(GetZooKeeper, path,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
-            if (await zooKeeper.Item2.existsAsync(path, watcher) != null)
-            {
-                var result = await zooKeeper.Item2.getChildrenAsync(path, watcher);
-                var childrens = result.Children.ToArray();
-                watcher.SetCurrentData(childrens);
-                _serviceCaches = await GetCaches(childrens);
-            }
-            else
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                    _logger.LogWarning($"无法获取服务缓存信息，因为节点：{path}，不存在。");
-                _serviceCaches = new ServiceCache[0];
-            }
-        }
-
+        /// <summary>
+        /// The DataEquals
+        /// </summary>
+        /// <param name="data1">The data1<see cref="IReadOnlyList{byte}"/></param>
+        /// <param name="data2">The data2<see cref="IReadOnlyList{byte}"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
         {
             if (data1.Count != data2.Count)
@@ -273,73 +247,12 @@ namespace Surging.Core.Zookeeper
             return true;
         }
 
-        private async Task<ServiceCache> GetCache(byte[] data)
-        {
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"准备转换服务缓存，配置内容：{Encoding.UTF8.GetString(data)}。");
-
-            if (data == null)
-                return null;
-
-            var descriptor = _serializer.Deserialize<byte[], ServiceCacheDescriptor>(data);
-            return (await _serviceCacheFactory.CreateServiceCachesAsync(new[] { descriptor })).First();
-        }
-
-        private async Task<ServiceCache> GetCacheData(string data)
-        {
-            if (data == null)
-                return null;
-
-            var descriptor = _stringSerializer.Deserialize(data, typeof(ServiceCacheDescriptor)) as ServiceCacheDescriptor;
-            return (await _serviceCacheFactory.CreateServiceCachesAsync(new[] { descriptor })).First();
-        }
-
-        private async Task<ServiceCache[]> GetCacheDatas(string[] caches)
-        {
-            List<ServiceCache> serviceCaches = new List<ServiceCache>();
-            foreach (var cache in caches)
-            {
-                var serviceCache = await GetCacheData(cache);
-                serviceCaches.Add(serviceCache);
-            }
-            return serviceCaches.ToArray();
-        }
-
-        private async Task<string[]> ConvertPaths(string[] datas)
-        {
-            List<string> paths = new List<string>();
-            foreach (var data in datas)
-            {
-                var result = await GetCacheData(data);
-                var serviceId = result?.CacheDescriptor.Id;
-                if (!string.IsNullOrEmpty(serviceId))
-                    paths.Add(serviceId);
-            }
-            return paths.ToArray();
-        }
-
-        private async Task NodeChange(byte[] oldData, byte[] newData)
-        {
-            if (DataEquals(oldData, newData))
-                return;
-
-            var newCache = await GetCache(newData);
-            //得到旧的缓存。
-            var oldCache = _serviceCaches.FirstOrDefault(i => i.CacheDescriptor.Id == newCache.CacheDescriptor.Id);
-
-            lock (_serviceCaches)
-            {
-                //删除旧缓存，并添加上新的缓存。
-                _serviceCaches =
-                    _serviceCaches
-                        .Where(i => i.CacheDescriptor.Id != newCache.CacheDescriptor.Id)
-                        .Concat(new[] { newCache }).ToArray();
-            }
-            
-            //触发缓存变更事件。
-             OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
-        }
-
+        /// <summary>
+        /// The ChildrenChange
+        /// </summary>
+        /// <param name="oldChildrens">The oldChildrens<see cref="string[]"/></param>
+        /// <param name="newChildrens">The newChildrens<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
@@ -383,13 +296,239 @@ namespace Surging.Core.Zookeeper
                 _logger.LogInformation("缓存数据更新成功。");
         }
 
+        /// <summary>
+        /// The ConvertPaths
+        /// </summary>
+        /// <param name="datas">The datas<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task{string[]}"/></returns>
+        private async Task<string[]> ConvertPaths(string[] datas)
+        {
+            List<string> paths = new List<string>();
+            foreach (var data in datas)
+            {
+                var result = await GetCacheData(data);
+                var serviceId = result?.CacheDescriptor.Id;
+                if (!string.IsNullOrEmpty(serviceId))
+                    paths.Add(serviceId);
+            }
+            return paths.ToArray();
+        }
+
+        /// <summary>
+        /// The CreateSubdirectory
+        /// </summary>
+        /// <param name="zooKeeper">The zooKeeper<see cref="(ManualResetEvent, ZooKeeper)"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task CreateSubdirectory((ManualResetEvent, ZooKeeper) zooKeeper, string path)
+        {
+            zooKeeper.Item1.WaitOne();
+            if (await zooKeeper.Item2.existsAsync(path) != null)
+                return;
+
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation($"节点{path}不存在，将进行创建。");
+
+            var childrens = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            var nodePath = "/";
+
+            foreach (var children in childrens)
+            {
+                nodePath += children;
+                if (await zooKeeper.Item2.existsAsync(nodePath) == null)
+                {
+                    await zooKeeper.Item2.createAsync(nodePath, null, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                }
+                nodePath += "/";
+            }
+        }
+
+        /// <summary>
+        /// The EnterCaches
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task EnterCaches()
+        {
+            if (_serviceCaches != null)
+                return;
+            var zooKeeper = await GetZooKeeper();
+            zooKeeper.Item1.WaitOne();
+            var path = _configInfo.CachePath;
+            var watcher = new ChildrenMonitorWatcher(GetZooKeeper, path,
+                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens));
+            if (await zooKeeper.Item2.existsAsync(path, watcher) != null)
+            {
+                var result = await zooKeeper.Item2.getChildrenAsync(path, watcher);
+                var childrens = result.Children.ToArray();
+                watcher.SetCurrentData(childrens);
+                _serviceCaches = await GetCaches(childrens);
+            }
+            else
+            {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                    _logger.LogWarning($"无法获取服务缓存信息，因为节点：{path}，不存在。");
+                _serviceCaches = new ServiceCache[0];
+            }
+        }
+
+        /// <summary>
+        /// The GetCache
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <returns>The <see cref="Task{ServiceCache}"/></returns>
+        private async Task<ServiceCache> GetCache(byte[] data)
+        {
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"准备转换服务缓存，配置内容：{Encoding.UTF8.GetString(data)}。");
+
+            if (data == null)
+                return null;
+
+            var descriptor = _serializer.Deserialize<byte[], ServiceCacheDescriptor>(data);
+            return (await _serviceCacheFactory.CreateServiceCachesAsync(new[] { descriptor })).First();
+        }
+
+        /// <summary>
+        /// The GetCache
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceCache}"/></returns>
+        private async Task<ServiceCache> GetCache(string path)
+        {
+            ServiceCache result = null;
+            var zooKeeper = await GetZooKeeper();
+            var watcher = new NodeMonitorWatcher(GetZooKeeper, path,
+                 async (oldData, newData) => await NodeChange(oldData, newData));
+            if (await zooKeeper.Item2.existsAsync(path) != null)
+            {
+                var data = (await zooKeeper.Item2.getDataAsync(path, watcher)).Data;
+                watcher.SetCurrentData(data);
+                result = await GetCache(data);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// The GetCacheData
+        /// </summary>
+        /// <param name="data">The data<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceCache}"/></returns>
+        private async Task<ServiceCache> GetCacheData(string data)
+        {
+            if (data == null)
+                return null;
+
+            var descriptor = _stringSerializer.Deserialize(data, typeof(ServiceCacheDescriptor)) as ServiceCacheDescriptor;
+            return (await _serviceCacheFactory.CreateServiceCachesAsync(new[] { descriptor })).First();
+        }
+
+        /// <summary>
+        /// The GetCacheDatas
+        /// </summary>
+        /// <param name="caches">The caches<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task{ServiceCache[]}"/></returns>
+        private async Task<ServiceCache[]> GetCacheDatas(string[] caches)
+        {
+            List<ServiceCache> serviceCaches = new List<ServiceCache>();
+            foreach (var cache in caches)
+            {
+                var serviceCache = await GetCacheData(cache);
+                serviceCaches.Add(serviceCache);
+            }
+            return serviceCaches.ToArray();
+        }
+
+        /// <summary>
+        /// The GetCaches
+        /// </summary>
+        /// <param name="childrens">The childrens<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="Task{ServiceCache[]}"/></returns>
+        private async Task<ServiceCache[]> GetCaches(IEnumerable<string> childrens)
+        {
+            var rootPath = _configInfo.CachePath;
+            if (!rootPath.EndsWith("/"))
+                rootPath += "/";
+
+            childrens = childrens.ToArray();
+            var caches = new List<ServiceCache>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取缓存信息。");
+
+                var nodePath = $"{rootPath}{children}";
+                var cache = await GetCache(nodePath);
+                if (cache != null)
+                    caches.Add(cache);
+            }
+            return caches.ToArray();
+        }
+
+        /// <summary>
+        /// The GetZooKeeper
+        /// </summary>
+        /// <returns>The <see cref="ValueTask{(ManualResetEvent, ZooKeeper)}"/></returns>
         private async ValueTask<(ManualResetEvent, ZooKeeper)> GetZooKeeper()
         {
             var zooKeeper = await _zookeeperClientProvider.GetZooKeeper();
             return zooKeeper;
         }
 
-        #endregion
+        /// <summary>
+        /// The NodeChange
+        /// </summary>
+        /// <param name="oldData">The oldData<see cref="byte[]"/></param>
+        /// <param name="newData">The newData<see cref="byte[]"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task NodeChange(byte[] oldData, byte[] newData)
+        {
+            if (DataEquals(oldData, newData))
+                return;
+
+            var newCache = await GetCache(newData);
+            //得到旧的缓存。
+            var oldCache = _serviceCaches.FirstOrDefault(i => i.CacheDescriptor.Id == newCache.CacheDescriptor.Id);
+
+            lock (_serviceCaches)
+            {
+                //删除旧缓存，并添加上新的缓存。
+                _serviceCaches =
+                    _serviceCaches
+                        .Where(i => i.CacheDescriptor.Id != newCache.CacheDescriptor.Id)
+                        .Concat(new[] { newCache }).ToArray();
+            }
+
+            //触发缓存变更事件。
+            OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+        }
+
+        /// <summary>
+        /// The RemoveCachesAsync
+        /// </summary>
+        /// <param name="caches">The caches<see cref="IEnumerable{ServiceCache}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task RemoveCachesAsync(IEnumerable<ServiceCache> caches)
+        {
+            var path = _configInfo.CachePath;
+            if (!path.EndsWith("/"))
+                path += "/";
+            caches = caches.ToArray();
+            if (_serviceCaches != null)
+            {
+                var zooKeepers = await _zookeeperClientProvider.GetZooKeepers();
+                foreach (var zooKeeper in zooKeepers)
+                {
+                    var deletedCacheIds = caches.Select(i => i.CacheDescriptor.Id).ToArray();
+                    foreach (var deletedCacheId in deletedCacheIds)
+                    {
+                        var nodePath = $"{path}{deletedCacheId}";
+                        await zooKeeper.Item2.deleteAsync(nodePath);
+                    }
+                }
+            }
+        }
+
+        #endregion 方法
     }
 }
-

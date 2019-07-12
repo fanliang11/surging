@@ -4,16 +4,24 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Transport.Codec.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="JsonTransportMessageEncoder" />
+    /// </summary>
     public sealed class JsonTransportMessageEncoder : ITransportMessageEncoder
     {
-        #region Implementation of ITransportMessageEncoder
+        #region 方法
 
+        /// <summary>
+        /// The Encode
+        /// </summary>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="byte[]"/></returns>
         public byte[] Encode(TransportMessage message)
         {
             var content = JsonConvert.SerializeObject(message);
             return Encoding.UTF8.GetBytes(content);
         }
 
-        #endregion Implementation of ITransportMessageEncoder
+        #endregion 方法
     }
 }

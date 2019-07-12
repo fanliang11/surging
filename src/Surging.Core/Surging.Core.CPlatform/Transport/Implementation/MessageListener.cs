@@ -8,12 +8,16 @@ namespace Surging.Core.CPlatform.Transport.Implementation
     /// </summary>
     public class MessageListener : IMessageListener
     {
-        #region Implementation of IMessageListener
+        #region 事件
 
         /// <summary>
         /// 接收到消息的事件。
         /// </summary>
         public event ReceivedDelegate Received;
+
+        #endregion 事件
+
+        #region 方法
 
         /// <summary>
         /// 触发接收到消息事件。
@@ -28,6 +32,6 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             await Received(sender, message);
         }
 
-        #endregion Implementation of IMessageListener
+        #endregion 方法
     }
 }

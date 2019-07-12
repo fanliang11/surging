@@ -7,30 +7,67 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Cache.Implementation
 {
-    public class ServiceCacheEventArgs
-    {
-        public ServiceCacheEventArgs(ServiceCache cache)
-        {
-            Cache = cache;
-        }
-         
-        public ServiceCache Cache { get; private set; }
-    }
-     
+    /// <summary>
+    /// Defines the <see cref="ServiceCacheChangedEventArgs" />
+    /// </summary>
     public class ServiceCacheChangedEventArgs : ServiceCacheEventArgs
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceCacheChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="cache">The cache<see cref="ServiceCache"/></param>
+        /// <param name="oldCache">The oldCache<see cref="ServiceCache"/></param>
         public ServiceCacheChangedEventArgs(ServiceCache cache, ServiceCache oldCache) : base(cache)
         {
             OldCache = oldCache;
         }
- 
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the OldCache
+        /// </summary>
         public ServiceCache OldCache { get; set; }
+
+        #endregion 属性
+    }
+
+    /// <summary>
+    /// Defines the <see cref="ServiceCacheEventArgs" />
+    /// </summary>
+    public class ServiceCacheEventArgs
+    {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceCacheEventArgs"/> class.
+        /// </summary>
+        /// <param name="cache">The cache<see cref="ServiceCache"/></param>
+        public ServiceCacheEventArgs(ServiceCache cache)
+        {
+            Cache = cache;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Cache
+        /// </summary>
+        public ServiceCache Cache { get; private set; }
+
+        #endregion 属性
     }
 
     public abstract class ServiceCacheManagerBase : IServiceCacheManager
     {
         private readonly ISerializer<string> _serializer;
-        private  EventHandler<ServiceCacheEventArgs> _created;
+        private EventHandler<ServiceCacheEventArgs> _created;
         private EventHandler<ServiceCacheEventArgs> _removed;
         private EventHandler<ServiceCacheChangedEventArgs> _changed;
 
@@ -38,19 +75,19 @@ namespace Surging.Core.CPlatform.Cache.Implementation
         {
             _serializer = serializer;
         }
-        
+
         public event EventHandler<ServiceCacheEventArgs> Created
         {
             add { _created += value; }
             remove { _created -= value; }
         }
-        
+
         public event EventHandler<ServiceCacheEventArgs> Removed
         {
             add { _removed += value; }
             remove { _removed -= value; }
         }
-        
+
         public event EventHandler<ServiceCacheChangedEventArgs> Changed
         {
             add { _changed += value; }
@@ -58,10 +95,10 @@ namespace Surging.Core.CPlatform.Cache.Implementation
         }
 
         public abstract Task ClearAsync();
-        public abstract Task<IEnumerable<ServiceCache>> GetCachesAsync();
-         
-        public abstract Task RemveAddressAsync(IEnumerable<CacheEndpoint> endpoints);
 
+        public abstract Task<IEnumerable<ServiceCache>> GetCachesAsync();
+
+        public abstract Task RemveAddressAsync(IEnumerable<CacheEndpoint> endpoints);
 
         public virtual Task SetCachesAsync(IEnumerable<ServiceCache> caches)
         {
@@ -75,7 +112,7 @@ namespace Surging.Core.CPlatform.Cache.Implementation
                     Type = address.GetType().FullName,
                     Value = _serializer.Serialize(address)
                 }) ?? Enumerable.Empty<CacheEndpointDescriptor>(),
-                 CacheDescriptor = cache.CacheDescriptor
+                CacheDescriptor = cache.CacheDescriptor
             });
             return SetCachesAsync(descriptors);
         }

@@ -8,17 +8,40 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Client.Implementation
 {
-    public abstract  class ServiceSubscribeManagerBase : IServiceSubscribeManager
-    { 
-        private readonly ISerializer<string> _serializer; 
+    /// <summary>
+    /// Defines the <see cref="ServiceSubscribeManagerBase" />
+    /// </summary>
+    public abstract class ServiceSubscribeManagerBase : IServiceSubscribeManager
+    {
+        #region 字段
 
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<string> _serializer;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceSubscribeManagerBase"/> class.
+        /// </summary>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
         protected ServiceSubscribeManagerBase(ISerializer<string> serializer)
         {
             _serializer = serializer;
         }
 
-        #region Implementation of IServiceRouteManager
+        #endregion 构造函数
 
+        #region 方法
+
+        /// <summary>
+        /// 清空所有的服务订阅者。
+        /// </summary>
+        /// <returns>一个任务。</returns>
+        public abstract Task ClearAsync();
 
         /// <summary>
         /// 获取所有服务订阅者信息。
@@ -29,7 +52,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
         /// <summary>
         /// 设置服务订阅者。
         /// </summary>
-        /// <param name="routes">服务路由集合。</param>
+        /// <param name="subscibers">The subscibers<see cref="IEnumerable{ServiceSubscriber}"/></param>
         /// <returns>一个任务。</returns>
         public virtual Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscibers)
         {
@@ -50,20 +73,12 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
         }
 
         /// <summary>
-        /// 清空所有的服务订阅者。
-        /// </summary>
-        /// <returns>一个任务。</returns>
-        public abstract Task ClearAsync();
-
-        #endregion Implementation of IServiceSubscriberManager
-
-        /// <summary>
         /// 设置服务订阅者。
         /// </summary>
-        /// <param name="routes">服务订阅者集合。</param>
+        /// <param name="subscribers">The subscribers<see cref="IEnumerable{ServiceSubscriberDescriptor}"/></param>
         /// <returns>一个任务。</returns>
         protected abstract Task SetSubscribersAsync(IEnumerable<ServiceSubscriberDescriptor> subscribers);
 
-     
+        #endregion 方法
     }
 }

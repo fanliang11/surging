@@ -11,30 +11,74 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.KestrelHttpServer.Internal
 {
-   internal class StreamCopyOperation
+    /// <summary>
+    /// Defines the <see cref="StreamCopyOperation" />
+    /// </summary>
+    internal class StreamCopyOperation
     {
+        #region 常量
+
+        /// <summary>
+        /// Defines the DefaultBufferSize
+        /// </summary>
         private const int DefaultBufferSize = 1024 * 16;
 
-        private readonly TaskCompletionSource<object> _tcs;
-        private readonly Stream _source;
-        private readonly Stream _destination;
+        #endregion 常量
+
+        #region 字段
+
+        /// <summary>
+        /// Defines the _buffer
+        /// </summary>
         private readonly byte[] _buffer;
+
+        /// <summary>
+        /// Defines the _destination
+        /// </summary>
+        private readonly Stream _destination;
+
+        /// <summary>
+        /// Defines the _readCallback
+        /// </summary>
         private readonly AsyncCallback _readCallback;
+
+        /// <summary>
+        /// Defines the _source
+        /// </summary>
+        private readonly Stream _source;
+
+        /// <summary>
+        /// Defines the _tcs
+        /// </summary>
+        private readonly TaskCompletionSource<object> _tcs;
+
+        /// <summary>
+        /// Defines the _writeCallback
+        /// </summary>
         private readonly AsyncCallback _writeCallback;
 
+        /// <summary>
+        /// Defines the _bytesRemaining
+        /// </summary>
         private long? _bytesRemaining;
+
+        /// <summary>
+        /// Defines the _cancel
+        /// </summary>
         private CancellationToken _cancel;
 
-        internal StreamCopyOperation(Stream source, Stream destination, long? bytesRemaining, CancellationToken cancel)
-            : this(source, destination, bytesRemaining, DefaultBufferSize, cancel)
-        {
-        }
+        #endregion 字段
 
-        internal StreamCopyOperation(Stream source, Stream destination, long? bytesRemaining, int bufferSize, CancellationToken cancel)
-            : this(source, destination, bytesRemaining, new byte[bufferSize], cancel)
-        {
-        }
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamCopyOperation"/> class.
+        /// </summary>
+        /// <param name="source">The source<see cref="Stream"/></param>
+        /// <param name="destination">The destination<see cref="Stream"/></param>
+        /// <param name="bytesRemaining">The bytesRemaining<see cref="long?"/></param>
+        /// <param name="buffer">The buffer<see cref="byte[]"/></param>
+        /// <param name="cancel">The cancel<see cref="CancellationToken"/></param>
         internal StreamCopyOperation(Stream source, Stream destination, long? bytesRemaining, byte[] buffer, CancellationToken cancel)
         {
             Contract.Assert(source != null);
@@ -53,6 +97,44 @@ namespace Surging.Core.KestrelHttpServer.Internal
             _writeCallback = new AsyncCallback(WriteCallback);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamCopyOperation"/> class.
+        /// </summary>
+        /// <param name="source">The source<see cref="Stream"/></param>
+        /// <param name="destination">The destination<see cref="Stream"/></param>
+        /// <param name="bytesRemaining">The bytesRemaining<see cref="long?"/></param>
+        /// <param name="cancel">The cancel<see cref="CancellationToken"/></param>
+        internal StreamCopyOperation(Stream source, Stream destination, long? bytesRemaining, CancellationToken cancel)
+            : this(source, destination, bytesRemaining, DefaultBufferSize, cancel)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamCopyOperation"/> class.
+        /// </summary>
+        /// <param name="source">The source<see cref="Stream"/></param>
+        /// <param name="destination">The destination<see cref="Stream"/></param>
+        /// <param name="bytesRemaining">The bytesRemaining<see cref="long?"/></param>
+        /// <param name="bufferSize">The bufferSize<see cref="int"/></param>
+        /// <param name="cancel">The cancel<see cref="CancellationToken"/></param>
+        internal StreamCopyOperation(Stream source, Stream destination, long? bytesRemaining, int bufferSize, CancellationToken cancel)
+            : this(source, destination, bytesRemaining, new byte[bufferSize], cancel)
+        {
+        }
+
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The CopyToAsync
+        /// </summary>
+        /// <param name="source">The source<see cref="Stream"/></param>
+        /// <param name="destination">The destination<see cref="Stream"/></param>
+        /// <param name="count">The count<see cref="long?"/></param>
+        /// <param name="bufferSize">The bufferSize<see cref="int"/></param>
+        /// <param name="cancel">The cancel<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public static async Task CopyToAsync(Stream source, Stream destination, long? count, int bufferSize, CancellationToken cancel)
         {
             long? bytesRemaining = count;
@@ -85,7 +167,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
                     {
                         bytesRemaining -= read;
                     }
-                    
+
                     if (read <= 0)
                     {
                         return;
@@ -102,17 +184,20 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
+        /// <summary>
+        /// The Start
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         internal Task Start()
         {
             ReadNextSegment();
             return _tcs.Task;
         }
 
-        private void Complete()
-        {
-            _tcs.TrySetResult(null);
-        }
-
+        /// <summary>
+        /// The CheckCancelled
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
         private bool CheckCancelled()
         {
             if (_cancel.IsCancellationRequested)
@@ -123,11 +208,49 @@ namespace Surging.Core.KestrelHttpServer.Internal
             return false;
         }
 
+        /// <summary>
+        /// The Complete
+        /// </summary>
+        private void Complete()
+        {
+            _tcs.TrySetResult(null);
+        }
+
+        /// <summary>
+        /// The Fail
+        /// </summary>
+        /// <param name="ex">The ex<see cref="Exception"/></param>
         private void Fail(Exception ex)
         {
             _tcs.TrySetException(ex);
         }
 
+        /// <summary>
+        /// The ReadCallback
+        /// </summary>
+        /// <param name="async">The async<see cref="IAsyncResult"/></param>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Redirecting")]
+        private void ReadCallback(IAsyncResult async)
+        {
+            if (async.CompletedSynchronously)
+            {
+                return;
+            }
+
+            try
+            {
+                int read = _source.EndRead(async);
+                WriteToOutputStream(read);
+            }
+            catch (Exception ex)
+            {
+                Fail(ex);
+            }
+        }
+
+        /// <summary>
+        /// The ReadNextSegment
+        /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Redirecting")]
         private void ReadNextSegment()
         {
@@ -164,8 +287,12 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
+        /// <summary>
+        /// The WriteCallback
+        /// </summary>
+        /// <param name="async">The async<see cref="IAsyncResult"/></param>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Redirecting")]
-        private void ReadCallback(IAsyncResult async)
+        private void WriteCallback(IAsyncResult async)
         {
             if (async.CompletedSynchronously)
             {
@@ -174,8 +301,8 @@ namespace Surging.Core.KestrelHttpServer.Internal
 
             try
             {
-                int read = _source.EndRead(async);
-                WriteToOutputStream(read);
+                _destination.EndWrite(async);
+                ReadNextSegment();
             }
             catch (Exception ex)
             {
@@ -183,6 +310,10 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
+        /// <summary>
+        /// The WriteToOutputStream
+        /// </summary>
+        /// <param name="count">The count<see cref="int"/></param>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Redirecting")]
         private void WriteToOutputStream(int count)
         {
@@ -190,7 +321,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             {
                 _bytesRemaining -= count;
             }
-             
+
             if (count == 0)
             {
                 Complete();
@@ -217,23 +348,6 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Redirecting")]
-        private void WriteCallback(IAsyncResult async)
-        {
-            if (async.CompletedSynchronously)
-            {
-                return;
-            }
-
-            try
-            {
-                _destination.EndWrite(async);
-                ReadNextSegment();
-            }
-            catch (Exception ex)
-            {
-                Fail(ex);
-            }
-        }
+        #endregion 方法
     }
 }

@@ -14,12 +14,34 @@ namespace Surging.Core.Caching.Internal.Implementation
     /// </summary>
     public class DefaultCacheNodeProvider : ICacheNodeProvider
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _serviceProvider
+        /// </summary>
         private readonly CPlatformContainer _serviceProvider;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultCacheNodeProvider"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The serviceProvider<see cref="CPlatformContainer"/></param>
         public DefaultCacheNodeProvider(CPlatformContainer serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The GetServiceCaches
+        /// </summary>
+        /// <returns>The <see cref="IEnumerable{ServiceCache}"/></returns>
         public IEnumerable<ServiceCache> GetServiceCaches()
         {
             var cacheWrapperSetting = AppConfig.Configuration.Get<CachingProvider>();
@@ -50,5 +72,7 @@ namespace Surging.Core.Caching.Internal.Implementation
             }
             return serviceCaches;
         }
+
+        #endregion 方法
     }
 }

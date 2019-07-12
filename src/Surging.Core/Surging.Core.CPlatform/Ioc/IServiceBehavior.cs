@@ -4,7 +4,14 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Ioc
 {
-   public interface IServiceBehavior
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IServiceBehavior" />
+    /// </summary>
+    public interface IServiceBehavior
     {
     }
+
+    #endregion 接口
 }

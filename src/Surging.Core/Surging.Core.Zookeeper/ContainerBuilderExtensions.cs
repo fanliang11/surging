@@ -20,39 +20,68 @@ using System;
 
 namespace Surging.Core.Zookeeper
 {
+    /// <summary>
+    /// Defines the <see cref="ContainerBuilderExtensions" />
+    /// </summary>
     public static class ContainerBuilderExtensions
     {
+        #region 方法
+
         /// <summary>
-        /// 设置共享文件路由管理者。
+        /// The UseHealthCheck
         /// </summary>
-        /// <param name="builder">Rpc服务构建者。</param>
-        /// <param name="configInfo">ZooKeeper设置信息。</param>
-        /// <returns>服务构建者。</returns>
-        public static IServiceBuilder UseZooKeeperRouteManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseHealthCheck(this IServiceBuilder builder)
         {
-            return builder.UseRouteManager(provider =>
-             new ZooKeeperServiceRouteManager(
-                GetConfigInfo(configInfo),
+            builder.Services.RegisterType<DefaultHealthCheckService>().As<IHealthCheckService>().SingleInstance();
+            return builder;
+        }
+
+        /// <summary>
+        /// The UseZookeeperAddressSelector
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseZookeeperAddressSelector(this IServiceBuilder builder)
+        {
+            builder.Services.RegisterType<ZookeeperRandomAddressSelector>().As<IZookeeperAddressSelector>().SingleInstance();
+            return builder;
+        }
+
+        /// <summary>
+        /// The UseZooKeeperCacheManager
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseZooKeeperCacheManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseCacheManager(provider =>
+             new ZookeeperServiceCacheManager(
+               GetConfigInfo(configInfo),
               provider.GetRequiredService<ISerializer<byte[]>>(),
                 provider.GetRequiredService<ISerializer<string>>(),
-                provider.GetRequiredService<IServiceRouteFactory>(),
-                provider.GetRequiredService<ILogger<ZooKeeperServiceRouteManager>>(),
+                provider.GetRequiredService<IServiceCacheFactory>(),
+                provider.GetRequiredService<ILogger<ZookeeperServiceCacheManager>>(),
                   provider.GetRequiredService<IZookeeperClientProvider>()));
         }
 
-        public static IServiceBuilder UseZooKeeperMqttRouteManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        /// <summary>
+        /// The UseZookeeperClientProvider
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseZookeeperClientProvider(this IServiceBuilder builder, ConfigInfo configInfo)
         {
-            return builder.UseMqttRouteManager(provider =>
-            {
-                var result = new ZooKeeperMqttServiceRouteManager(
-                     GetConfigInfo(configInfo),
-                   provider.GetRequiredService<ISerializer<byte[]>>(),
-                     provider.GetRequiredService<ISerializer<string>>(),
-                     provider.GetRequiredService<IMqttServiceFactory>(),
-                     provider.GetRequiredService<ILogger<ZooKeeperMqttServiceRouteManager>>(),
-                  provider.GetRequiredService<IZookeeperClientProvider>());
-                return result;
-            });
+            builder.Services.Register(provider =>
+       new DefaultZookeeperClientProvider(
+           GetConfigInfo(configInfo),
+        provider.Resolve<IHealthCheckService>(),
+          provider.Resolve<IZookeeperAddressSelector>(),
+          provider.Resolve<ILogger<DefaultZookeeperClientProvider>>())).As<IZookeeperClientProvider>().SingleInstance();
+            return builder;
         }
 
         /// <summary>
@@ -77,6 +106,87 @@ namespace Surging.Core.Zookeeper
             });
         }
 
+        /// <summary>
+        /// The UseZooKeeperManager
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder)
+        {
+            var configInfo = new ConfigInfo(null);
+            return builder.UseZooKeeperRouteManager(configInfo)
+                .UseHealthCheck()
+                .UseZookeeperAddressSelector()
+                .UseZookeeperClientProvider(configInfo)
+                .UseZooKeeperCacheManager(configInfo)
+                .UseZooKeeperServiceSubscribeManager(configInfo)
+                .UseZooKeeperCommandManager(configInfo)
+                .UseZooKeeperMqttRouteManager(configInfo);
+        }
+
+        /// <summary>
+        /// The UseZooKeeperManager
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseZooKeeperRouteManager(configInfo)
+                .UseHealthCheck()
+                .UseZookeeperAddressSelector()
+                .UseZookeeperClientProvider(configInfo)
+                .UseZooKeeperCacheManager(configInfo)
+                .UseZooKeeperServiceSubscribeManager(configInfo)
+                .UseZooKeeperCommandManager(configInfo)
+                .UseZooKeeperMqttRouteManager(configInfo);
+        }
+
+        /// <summary>
+        /// The UseZooKeeperMqttRouteManager
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseZooKeeperMqttRouteManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseMqttRouteManager(provider =>
+            {
+                var result = new ZooKeeperMqttServiceRouteManager(
+                     GetConfigInfo(configInfo),
+                   provider.GetRequiredService<ISerializer<byte[]>>(),
+                     provider.GetRequiredService<ISerializer<string>>(),
+                     provider.GetRequiredService<IMqttServiceFactory>(),
+                     provider.GetRequiredService<ILogger<ZooKeeperMqttServiceRouteManager>>(),
+                  provider.GetRequiredService<IZookeeperClientProvider>());
+                return result;
+            });
+        }
+
+        /// <summary>
+        /// 设置共享文件路由管理者。
+        /// </summary>
+        /// <param name="builder">Rpc服务构建者。</param>
+        /// <param name="configInfo">ZooKeeper设置信息。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseZooKeeperRouteManager(this IServiceBuilder builder, ConfigInfo configInfo)
+        {
+            return builder.UseRouteManager(provider =>
+             new ZooKeeperServiceRouteManager(
+                GetConfigInfo(configInfo),
+              provider.GetRequiredService<ISerializer<byte[]>>(),
+                provider.GetRequiredService<ISerializer<string>>(),
+                provider.GetRequiredService<IServiceRouteFactory>(),
+                provider.GetRequiredService<ILogger<ZooKeeperServiceRouteManager>>(),
+                  provider.GetRequiredService<IZookeeperClientProvider>()));
+        }
+
+        /// <summary>
+        /// The UseZooKeeperServiceSubscribeManager
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
         public static IServiceBuilder UseZooKeeperServiceSubscribeManager(this IServiceBuilder builder, ConfigInfo configInfo)
         {
             return builder.UseSubscribeManager(provider =>
@@ -92,69 +202,11 @@ namespace Surging.Core.Zookeeper
             });
         }
 
-        public static IServiceBuilder UseZooKeeperCacheManager(this IServiceBuilder builder, ConfigInfo configInfo)
-        {
-            return builder.UseCacheManager(provider =>
-             new ZookeeperServiceCacheManager(
-               GetConfigInfo(configInfo),
-              provider.GetRequiredService<ISerializer<byte[]>>(),
-                provider.GetRequiredService<ISerializer<string>>(),
-                provider.GetRequiredService<IServiceCacheFactory>(),
-                provider.GetRequiredService<ILogger<ZookeeperServiceCacheManager>>(),
-                  provider.GetRequiredService<IZookeeperClientProvider>()));
-        }
-
-
-        public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder, ConfigInfo configInfo)
-        {
-            return builder.UseZooKeeperRouteManager(configInfo)
-                .UseHealthCheck()
-                .UseZookeeperAddressSelector()
-                .UseZookeeperClientProvider(configInfo)
-                .UseZooKeeperCacheManager(configInfo)
-                .UseZooKeeperServiceSubscribeManager(configInfo)
-                .UseZooKeeperCommandManager(configInfo)
-                .UseZooKeeperMqttRouteManager(configInfo);
-        }
-
-        public static IServiceBuilder UseZooKeeperManager(this IServiceBuilder builder)
-        {
-            var configInfo = new ConfigInfo(null);
-            return builder.UseZooKeeperRouteManager(configInfo)
-                .UseHealthCheck()
-                .UseZookeeperAddressSelector()
-                .UseZookeeperClientProvider(configInfo)
-                .UseZooKeeperCacheManager(configInfo)
-                .UseZooKeeperServiceSubscribeManager(configInfo)
-                .UseZooKeeperCommandManager(configInfo)
-                .UseZooKeeperMqttRouteManager(configInfo);
-        }
-
-        public static IServiceBuilder UseZookeeperAddressSelector(this IServiceBuilder builder)
-        {
-            builder.Services.RegisterType<ZookeeperRandomAddressSelector>().As<IZookeeperAddressSelector>().SingleInstance();
-            return builder;
-        }
-
-        public static IServiceBuilder UseHealthCheck(this IServiceBuilder builder)
-        {
-            builder.Services.RegisterType<DefaultHealthCheckService>().As<IHealthCheckService>().SingleInstance();
-            return builder;
-        }
-
-
-        public static IServiceBuilder UseZookeeperClientProvider(this IServiceBuilder builder, ConfigInfo configInfo)
-        {
-            builder.Services.Register(provider =>
-       new DefaultZookeeperClientProvider(
-           GetConfigInfo(configInfo),
-        provider.Resolve<IHealthCheckService>(),
-          provider.Resolve<IZookeeperAddressSelector>(),
-          provider.Resolve<ILogger<DefaultZookeeperClientProvider>>())).As<IZookeeperClientProvider>().SingleInstance();
-            return builder;
-        }
-
-
+        /// <summary>
+        /// The GetConfigInfo
+        /// </summary>
+        /// <param name="config">The config<see cref="ConfigInfo"/></param>
+        /// <returns>The <see cref="ConfigInfo"/></returns>
         private static ConfigInfo GetConfigInfo(ConfigInfo config)
         {
             ZookeeperOption option = null;
@@ -184,5 +236,7 @@ namespace Surging.Core.Zookeeper
             }
             return config;
         }
+
+        #endregion 方法
     }
 }

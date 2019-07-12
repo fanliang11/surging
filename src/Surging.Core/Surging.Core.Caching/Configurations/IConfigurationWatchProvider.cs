@@ -4,7 +4,14 @@ using System.Text;
 
 namespace Surging.Core.Caching.Configurations
 {
-   public interface IConfigurationWatchProvider 
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IConfigurationWatchProvider" />
+    /// </summary>
+    public interface IConfigurationWatchProvider
     {
     }
+
+    #endregion 接口
 }

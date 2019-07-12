@@ -6,22 +6,34 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Mqtt
 {
-   public  class MqttServiceRoute
+    /// <summary>
+    /// Defines the <see cref="MqttServiceRoute" />
+    /// </summary>
+    public class MqttServiceRoute
     {
+        #region 属性
+
         /// <summary>
-        /// Mqtt服务可用地址。
-        /// </summary>
-        public IEnumerable<AddressModel> MqttEndpoint { get; set; }
-        /// <summary>
+        /// Gets or sets the MqttDescriptor
         /// Mqtt服务描述符。
         /// </summary>
         public MqttDescriptor MqttDescriptor { get; set; }
 
-        #region Equality members
+        /// <summary>
+        /// Gets or sets the MqttEndpoint
+        /// Mqtt服务可用地址。
+        /// </summary>
+        public IEnumerable<AddressModel> MqttEndpoint { get; set; }
 
-        /// <summary>Determines whether the specified object is equal to the current object.</summary>
-        /// <returns>true if the specified object  is equal to the current object; otherwise, false.</returns>
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Equals
+        /// </summary>
         /// <param name="obj">The object to compare with the current object. </param>
+        /// <returns>true if the specified object  is equal to the current object; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
             var model = obj as MqttServiceRoute;
@@ -37,23 +49,25 @@ namespace Surging.Core.CPlatform.Mqtt
             return model.MqttEndpoint.Count() == MqttEndpoint.Count() && model.MqttEndpoint.All(addressModel => MqttEndpoint.Contains(addressModel));
         }
 
-        /// <summary>Serves as the default hash function. </summary>
+        /// <summary>
+        /// The GetHashCode
+        /// </summary>
         /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
         }
 
+        #endregion 方法
+
         public static bool operator ==(MqttServiceRoute model1, MqttServiceRoute model2)
         {
             return Equals(model1, model2);
         }
 
-        public static bool operator != (MqttServiceRoute model1, MqttServiceRoute model2)
+        public static bool operator !=(MqttServiceRoute model1, MqttServiceRoute model2)
         {
             return !Equals(model1, model2);
         }
-
-        #endregion Equality members
     }
 }

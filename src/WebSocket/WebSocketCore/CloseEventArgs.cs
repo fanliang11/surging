@@ -1,4 +1,3 @@
-#region License
 /*
  * CloseEventArgs.cs
  *
@@ -24,119 +23,141 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore
 {
-  /// <summary>
-  /// Represents the event data for the <see cref="WebSocket.OnClose"/> event.
-  /// </summary>
-  /// <remarks>
-  ///   <para>
-  ///   That event occurs when the WebSocket connection has been closed.
-  ///   </para>
-  ///   <para>
-  ///   If you would like to get the reason for the close, you should access
-  ///   the <see cref="Code"/> or <see cref="Reason"/> property.
-  ///   </para>
-  /// </remarks>
-  public class CloseEventArgs : EventArgs
-  {
-    #region Private Fields
-
-    private bool        _clean;
-    private PayloadData _payloadData;
-
-    #endregion
-
-    #region Internal Constructors
-
-    internal CloseEventArgs ()
-    {
-      _payloadData = PayloadData.Empty;
-    }
-
-    internal CloseEventArgs (ushort code)
-      : this (code, null)
-    {
-    }
-
-    internal CloseEventArgs (CloseStatusCode code)
-      : this ((ushort) code, null)
-    {
-    }
-
-    internal CloseEventArgs (PayloadData payloadData)
-    {
-      _payloadData = payloadData;
-    }
-
-    internal CloseEventArgs (ushort code, string reason)
-    {
-      _payloadData = new PayloadData (code, reason);
-    }
-
-    internal CloseEventArgs (CloseStatusCode code, string reason)
-      : this ((ushort) code, reason)
-    {
-    }
-
-    #endregion
-
-    #region Internal Properties
-
-    internal PayloadData PayloadData {
-      get {
-        return _payloadData;
-      }
-    }
-
-    #endregion
-
-    #region Public Properties
-
     /// <summary>
-    /// Gets the status code for the close.
+    /// Represents the event data for the <see cref="WebSocket.OnClose"/> event.
     /// </summary>
-    /// <value>
-    /// A <see cref="ushort"/> that represents the status code for the close if any.
-    /// </value>
-    public ushort Code {
-      get {
-        return _payloadData.Code;
-      }
+    public class CloseEventArgs : EventArgs
+    {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _clean
+        /// </summary>
+        private bool _clean;
+
+        /// <summary>
+        /// Defines the _payloadData
+        /// </summary>
+        private PayloadData _payloadData;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CloseEventArgs"/> class.
+        /// </summary>
+        internal CloseEventArgs()
+        {
+            _payloadData = PayloadData.Empty;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CloseEventArgs"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="CloseStatusCode"/></param>
+        internal CloseEventArgs(CloseStatusCode code)
+      : this((ushort)code, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CloseEventArgs"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="CloseStatusCode"/></param>
+        /// <param name="reason">The reason<see cref="string"/></param>
+        internal CloseEventArgs(CloseStatusCode code, string reason)
+      : this((ushort)code, reason)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CloseEventArgs"/> class.
+        /// </summary>
+        /// <param name="payloadData">The payloadData<see cref="PayloadData"/></param>
+        internal CloseEventArgs(PayloadData payloadData)
+        {
+            _payloadData = payloadData;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CloseEventArgs"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="ushort"/></param>
+        internal CloseEventArgs(ushort code)
+      : this(code, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CloseEventArgs"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="ushort"/></param>
+        /// <param name="reason">The reason<see cref="string"/></param>
+        internal CloseEventArgs(ushort code, string reason)
+        {
+            _payloadData = new PayloadData(code, reason);
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the status code for the close.
+        /// </summary>
+        public ushort Code
+        {
+            get
+            {
+                return _payloadData.Code;
+            }
+        }
+
+        /// <summary>
+        /// Gets the reason for the close.
+        /// </summary>
+        public string Reason
+        {
+            get
+            {
+                return _payloadData.Reason ?? String.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether WasClean
+        /// Gets a value indicating whether the connection has been closed cleanly.
+        /// </summary>
+        public bool WasClean
+        {
+            get
+            {
+                return _clean;
+            }
+
+            internal set
+            {
+                _clean = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the PayloadData
+        /// </summary>
+        internal PayloadData PayloadData
+        {
+            get
+            {
+                return _payloadData;
+            }
+        }
+
+        #endregion 属性
     }
-
-    /// <summary>
-    /// Gets the reason for the close.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the reason for the close if any.
-    /// </value>
-    public string Reason {
-      get {
-        return _payloadData.Reason ?? String.Empty;
-      }
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether the connection has been closed cleanly.
-    /// </summary>
-    /// <value>
-    /// <c>true</c> if the connection has been closed cleanly; otherwise, <c>false</c>.
-    /// </value>
-    public bool WasClean {
-      get {
-        return _clean;
-      }
-
-      internal set {
-        _clean = value;
-      }
-    }
-
-    #endregion
-  }
 }

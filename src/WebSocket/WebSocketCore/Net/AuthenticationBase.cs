@@ -1,4 +1,3 @@
-#region License
 /*
  * AuthenticationBase.cs
  *
@@ -24,7 +23,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 using System.Collections.Specialized;
@@ -32,120 +30,178 @@ using System.Text;
 
 namespace WebSocketCore.Net
 {
-  internal abstract class AuthenticationBase
-  {
-    #region Private Fields
-
-    private AuthenticationSchemes _scheme;
-
-    #endregion
-
-    #region Internal Fields
-
-    internal NameValueCollection Parameters;
-
-    #endregion
-
-    #region Protected Constructors
-
-    protected AuthenticationBase (AuthenticationSchemes scheme, NameValueCollection parameters)
+    /// <summary>
+    /// Defines the <see cref="AuthenticationBase" />
+    /// </summary>
+    internal abstract class AuthenticationBase
     {
-      _scheme = scheme;
-      Parameters = parameters;
+        #region 字段
+
+        /// <summary>
+        /// Defines the Parameters
+        /// </summary>
+        internal NameValueCollection Parameters;
+
+        /// <summary>
+        /// Defines the _scheme
+        /// </summary>
+        private AuthenticationSchemes _scheme;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthenticationBase"/> class.
+        /// </summary>
+        /// <param name="scheme">The scheme<see cref="AuthenticationSchemes"/></param>
+        /// <param name="parameters">The parameters<see cref="NameValueCollection"/></param>
+        protected AuthenticationBase(AuthenticationSchemes scheme, NameValueCollection parameters)
+        {
+            _scheme = scheme;
+            Parameters = parameters;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Algorithm
+        /// </summary>
+        public string Algorithm
+        {
+            get
+            {
+                return Parameters["algorithm"];
+            }
+        }
+
+        /// <summary>
+        /// Gets the Nonce
+        /// </summary>
+        public string Nonce
+        {
+            get
+            {
+                return Parameters["nonce"];
+            }
+        }
+
+        /// <summary>
+        /// Gets the Opaque
+        /// </summary>
+        public string Opaque
+        {
+            get
+            {
+                return Parameters["opaque"];
+            }
+        }
+
+        /// <summary>
+        /// Gets the Qop
+        /// </summary>
+        public string Qop
+        {
+            get
+            {
+                return Parameters["qop"];
+            }
+        }
+
+        /// <summary>
+        /// Gets the Realm
+        /// </summary>
+        public string Realm
+        {
+            get
+            {
+                return Parameters["realm"];
+            }
+        }
+
+        /// <summary>
+        /// Gets the Scheme
+        /// </summary>
+        public AuthenticationSchemes Scheme
+        {
+            get
+            {
+                return _scheme;
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The ToString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        public override string ToString()
+        {
+            return _scheme == AuthenticationSchemes.Basic
+                   ? ToBasicString()
+                   : _scheme == AuthenticationSchemes.Digest
+                     ? ToDigestString()
+                     : String.Empty;
+        }
+
+        /// <summary>
+        /// The CreateNonceValue
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        internal static string CreateNonceValue()
+        {
+            var src = new byte[16];
+            var rand = new Random();
+            rand.NextBytes(src);
+
+            var res = new StringBuilder(32);
+            foreach (var b in src)
+                res.Append(b.ToString("x2"));
+
+            return res.ToString();
+        }
+
+        /// <summary>
+        /// The ParseParameters
+        /// </summary>
+        /// <param name="value">The value<see cref="string"/></param>
+        /// <returns>The <see cref="NameValueCollection"/></returns>
+        internal static NameValueCollection ParseParameters(string value)
+        {
+            var res = new NameValueCollection();
+            foreach (var param in value.SplitHeaderValue(','))
+            {
+                var i = param.IndexOf('=');
+                var name = i > 0 ? param.Substring(0, i).Trim() : null;
+                var val = i < 0
+                          ? param.Trim().Trim('"')
+                          : i < param.Length - 1
+                            ? param.Substring(i + 1).Trim().Trim('"')
+                            : String.Empty;
+
+                res.Add(name, val);
+            }
+
+            return res;
+        }
+
+        /// <summary>
+        /// The ToBasicString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        internal abstract string ToBasicString();
+
+        /// <summary>
+        /// The ToDigestString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        internal abstract string ToDigestString();
+
+        #endregion 方法
     }
-
-    #endregion
-
-    #region Public Properties
-
-    public string Algorithm {
-      get {
-        return Parameters["algorithm"];
-      }
-    }
-
-    public string Nonce {
-      get {
-        return Parameters["nonce"];
-      }
-    }
-
-    public string Opaque {
-      get {
-        return Parameters["opaque"];
-      }
-    }
-
-    public string Qop {
-      get {
-        return Parameters["qop"];
-      }
-    }
-
-    public string Realm {
-      get {
-        return Parameters["realm"];
-      }
-    }
-
-    public AuthenticationSchemes Scheme {
-      get {
-        return _scheme;
-      }
-    }
-
-    #endregion
-
-    #region Internal Methods
-
-    internal static string CreateNonceValue ()
-    {
-      var src = new byte[16];
-      var rand = new Random ();
-      rand.NextBytes (src);
-
-      var res = new StringBuilder (32);
-      foreach (var b in src)
-        res.Append (b.ToString ("x2"));
-
-      return res.ToString ();
-    }
-
-    internal static NameValueCollection ParseParameters (string value)
-    {
-      var res = new NameValueCollection ();
-      foreach (var param in value.SplitHeaderValue (',')) {
-        var i = param.IndexOf ('=');
-        var name = i > 0 ? param.Substring (0, i).Trim () : null;
-        var val = i < 0
-                  ? param.Trim ().Trim ('"')
-                  : i < param.Length - 1
-                    ? param.Substring (i + 1).Trim ().Trim ('"')
-                    : String.Empty;
-
-        res.Add (name, val);
-      }
-
-      return res;
-    }
-
-    internal abstract string ToBasicString ();
-
-    internal abstract string ToDigestString ();
-
-    #endregion
-
-    #region Public Methods
-
-    public override string ToString ()
-    {
-      return _scheme == AuthenticationSchemes.Basic
-             ? ToBasicString ()
-             : _scheme == AuthenticationSchemes.Digest
-               ? ToDigestString ()
-               : String.Empty;
-    }
-
-    #endregion
-  }
 }

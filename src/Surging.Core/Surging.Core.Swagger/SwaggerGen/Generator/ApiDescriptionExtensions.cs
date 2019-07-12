@@ -7,17 +7,18 @@ using System.Reflection;
 
 namespace Surging.Core.SwaggerGen
 {
-   public static class ApiDescriptionExtensions
+    /// <summary>
+    /// Defines the <see cref="ApiDescriptionExtensions" />
+    /// </summary>
+    public static class ApiDescriptionExtensions
     {
-        [Obsolete("Deprecated: Use TryGetMethodInfo")]
-        public static IEnumerable<object> ControllerAttributes(this ApiDescription apiDescription)
-        {
-            var controllerActionDescriptor = apiDescription.ActionDescriptor as ControllerActionDescriptor;
-            return (controllerActionDescriptor == null)
-                ? Enumerable.Empty<object>()
-                : controllerActionDescriptor.ControllerTypeInfo.GetCustomAttributes(true);
-        }
+        #region 方法
 
+        /// <summary>
+        /// The ActionAttributes
+        /// </summary>
+        /// <param name="apiDescription">The apiDescription<see cref="ApiDescription"/></param>
+        /// <returns>The <see cref="IEnumerable{object}"/></returns>
         [Obsolete("Deprecated: Use TryGetMethodInfo")]
         public static IEnumerable<object> ActionAttributes(this ApiDescription apiDescription)
         {
@@ -27,6 +28,26 @@ namespace Surging.Core.SwaggerGen
                 : controllerActionDescriptor.MethodInfo.GetCustomAttributes(true);
         }
 
+        /// <summary>
+        /// The ControllerAttributes
+        /// </summary>
+        /// <param name="apiDescription">The apiDescription<see cref="ApiDescription"/></param>
+        /// <returns>The <see cref="IEnumerable{object}"/></returns>
+        [Obsolete("Deprecated: Use TryGetMethodInfo")]
+        public static IEnumerable<object> ControllerAttributes(this ApiDescription apiDescription)
+        {
+            var controllerActionDescriptor = apiDescription.ActionDescriptor as ControllerActionDescriptor;
+            return (controllerActionDescriptor == null)
+                ? Enumerable.Empty<object>()
+                : controllerActionDescriptor.ControllerTypeInfo.GetCustomAttributes(true);
+        }
+
+        /// <summary>
+        /// The TryGetMethodInfo
+        /// </summary>
+        /// <param name="apiDescription">The apiDescription<see cref="ApiDescription"/></param>
+        /// <param name="methodInfo">The methodInfo<see cref="MethodInfo"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         public static bool TryGetMethodInfo(this ApiDescription apiDescription, out MethodInfo methodInfo)
         {
             var controllerActionDescriptor = apiDescription.ActionDescriptor as ControllerActionDescriptor;
@@ -36,11 +57,11 @@ namespace Surging.Core.SwaggerGen
             return (methodInfo != null);
         }
 
-        internal static string RelativePathSansQueryString(this ApiDescription apiDescription)
-        {
-            return apiDescription.RelativePath.Split('?').First();
-        }
-
+        /// <summary>
+        /// The IsObsolete
+        /// </summary>
+        /// <param name="apiDescription">The apiDescription<see cref="ApiDescription"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         internal static bool IsObsolete(this ApiDescription apiDescription)
         {
             if (!apiDescription.TryGetMethodInfo(out MethodInfo methodInfo))
@@ -50,5 +71,17 @@ namespace Surging.Core.SwaggerGen
                 .Union(methodInfo.DeclaringType.GetTypeInfo().GetCustomAttributes(true))
                 .Any(attr => attr.GetType() == typeof(ObsoleteAttribute));
         }
+
+        /// <summary>
+        /// The RelativePathSansQueryString
+        /// </summary>
+        /// <param name="apiDescription">The apiDescription<see cref="ApiDescription"/></param>
+        /// <returns>The <see cref="string"/></returns>
+        internal static string RelativePathSansQueryString(this ApiDescription apiDescription)
+        {
+            return apiDescription.RelativePath.Split('?').First();
+        }
+
+        #endregion 方法
     }
 }

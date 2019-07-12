@@ -7,24 +7,74 @@ using System.Collections.Generic;
 
 namespace DotNetty.Codecs.DNS.Messages
 {
+    /// <summary>
+    /// Defines the <see cref="AbstractDnsMessage" />
+    /// </summary>
     public class AbstractDnsMessage : AbstractReferenceCounted, IDnsMessage
     {
-        private static readonly ResourceLeakDetector leakDetector = ResourceLeakDetector.Create<IDnsMessage>();
-        private readonly IResourceLeakTracker leak;
-        private const DnsSection SECTION_QUESTION = DnsSection.QUESTION;
+        #region 常量
+
+        /// <summary>
+        /// Defines the SECTION_COUNT
+        /// </summary>
         private const int SECTION_COUNT = 4;
-        private object questions;
-        private object answers;
-        private object authorities;
+
+        /// <summary>
+        /// Defines the SECTION_QUESTION
+        /// </summary>
+        private const DnsSection SECTION_QUESTION = DnsSection.QUESTION;
+
+        #endregion 常量
+
+        #region 字段
+
+        /// <summary>
+        /// Defines the leakDetector
+        /// </summary>
+        private static readonly ResourceLeakDetector leakDetector = ResourceLeakDetector.Create<IDnsMessage>();
+
+        /// <summary>
+        /// Defines the leak
+        /// </summary>
+        private readonly IResourceLeakTracker leak;
+
+        /// <summary>
+        /// Defines the additionals
+        /// </summary>
         private object additionals;
 
-        public int Id { get; set; }
-        public DnsOpCode OpCode { get; set; }
-        public bool IsRecursionDesired { get; set; }
-        public int Z { get; set; }
+        /// <summary>
+        /// Defines the answers
+        /// </summary>
+        private object answers;
 
-        protected AbstractDnsMessage(int id) : this(id, DnsOpCode.QUERY) { }
+        /// <summary>
+        /// Defines the authorities
+        /// </summary>
+        private object authorities;
 
+        /// <summary>
+        /// Defines the questions
+        /// </summary>
+        private object questions;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractDnsMessage"/> class.
+        /// </summary>
+        /// <param name="id">The id<see cref="int"/></param>
+        protected AbstractDnsMessage(int id) : this(id, DnsOpCode.QUERY)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractDnsMessage"/> class.
+        /// </summary>
+        /// <param name="id">The id<see cref="int"/></param>
+        /// <param name="opcode">The opcode<see cref="DnsOpCode"/></param>
         protected AbstractDnsMessage(int id, DnsOpCode opcode)
         {
             Id = id;
@@ -32,46 +82,39 @@ namespace DotNetty.Codecs.DNS.Messages
             leak = leakDetector.Track(this);
         }
 
-        public int Count()
-        {
-            int count = 0;
-            for (int i = 0; i < SECTION_COUNT; i++)
-            {
-                count += Count((DnsSection)i);
-            }
-            return count;
-        }
+        #endregion 构造函数
 
-        public int Count(DnsSection section)
-        {
-            object records = SectionAt(section);
-            if (records == null)
-                return 0;
+        #region 属性
 
-            if (records is IDnsRecord)
-                return 1;
+        /// <summary>
+        /// Gets or sets the Id
+        /// </summary>
+        public int Id { get; set; }
 
-            List<IDnsRecord> recordList = (List<IDnsRecord>)records;
-            return recordList.Count;
-        }
+        /// <summary>
+        /// Gets or sets a value indicating whether IsRecursionDesired
+        /// </summary>
+        public bool IsRecursionDesired { get; set; }
 
-        private object SectionAt(DnsSection section)
-        {
-            switch (section)
-            {
-                case DnsSection.QUESTION:
-                    return questions;
-                case DnsSection.ANSWER:
-                    return answers;
-                case DnsSection.AUTHORITY:
-                    return authorities;
-                case DnsSection.ADDITIONAL:
-                    return additionals;
-                default:
-                    return null;
-            }
-        }
+        /// <summary>
+        /// Gets or sets the OpCode
+        /// </summary>
+        public DnsOpCode OpCode { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Z
+        /// </summary>
+        public int Z { get; set; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The AddRecord
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="record">The record<see cref="IDnsRecord"/></param>
         public void AddRecord(DnsSection section, IDnsRecord record)
         {
             CheckQuestion(section, record);
@@ -97,6 +140,12 @@ namespace DotNetty.Codecs.DNS.Messages
             recordList.Add(record);
         }
 
+        /// <summary>
+        /// The AddRecord
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="index">The index<see cref="int"/></param>
+        /// <param name="record">The record<see cref="IDnsRecord"/></param>
         public void AddRecord(DnsSection section, int index, IDnsRecord record)
         {
             CheckQuestion(section, record);
@@ -138,6 +187,21 @@ namespace DotNetty.Codecs.DNS.Messages
             recordList[index] = record;
         }
 
+        /// <summary>
+        /// The Clear
+        /// </summary>
+        public void Clear()
+        {
+            for (int i = 0; i < SECTION_COUNT; i++)
+            {
+                Clear((DnsSection)i);
+            }
+        }
+
+        /// <summary>
+        /// The Clear
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
         public void Clear(DnsSection section)
         {
             object recordOrList = SectionAt(section);
@@ -160,14 +224,81 @@ namespace DotNetty.Codecs.DNS.Messages
             }
         }
 
-        public void Clear()
+        /// <summary>
+        /// The Count
+        /// </summary>
+        /// <returns>The <see cref="int"/></returns>
+        public int Count()
         {
+            int count = 0;
             for (int i = 0; i < SECTION_COUNT; i++)
             {
-                Clear((DnsSection)i);
+                count += Count((DnsSection)i);
             }
+            return count;
         }
 
+        /// <summary>
+        /// The Count
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <returns>The <see cref="int"/></returns>
+        public int Count(DnsSection section)
+        {
+            object records = SectionAt(section);
+            if (records == null)
+                return 0;
+
+            if (records is IDnsRecord)
+                return 1;
+
+            List<IDnsRecord> recordList = (List<IDnsRecord>)records;
+            return recordList.Count;
+        }
+
+        /// <summary>
+        /// The Equals
+        /// </summary>
+        /// <param name="obj">The obj<see cref="object"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        public override bool Equals(object obj)
+        {
+            if (this == obj) return true;
+
+            if (!(obj is IDnsMessage)) return false;
+
+            IDnsMessage that = (IDnsMessage)obj;
+            if (Id != that.Id)
+                return false;
+
+            if (this is IDnsQuestion)
+            {
+                if (!(that is IDnsQuestion))
+                    return false;
+            }
+            else if (that is IDnsQuestion)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// The GetHashCode
+        /// </summary>
+        /// <returns>The <see cref="int"/></returns>
+        public override int GetHashCode()
+        {
+            return Id * 31 + (this is IDnsQuestion ? 0 : 1);
+        }
+
+        /// <summary>
+        /// The GetRecord
+        /// </summary>
+        /// <typeparam name="TRecord"></typeparam>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <returns>The <see cref="TRecord"/></returns>
         public TRecord GetRecord<TRecord>(DnsSection section) where TRecord : IDnsRecord
         {
             object records = SectionAt(section);
@@ -184,6 +315,13 @@ namespace DotNetty.Codecs.DNS.Messages
             return (TRecord)recordList[0];
         }
 
+        /// <summary>
+        /// The GetRecord
+        /// </summary>
+        /// <typeparam name="TRecord"></typeparam>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="index">The index<see cref="int"/></param>
+        /// <returns>The <see cref="TRecord"/></returns>
         public TRecord GetRecord<TRecord>(DnsSection section, int index) where TRecord : IDnsRecord
         {
             object records = SectionAt(section);
@@ -202,6 +340,11 @@ namespace DotNetty.Codecs.DNS.Messages
             return (TRecord)recordList[index];
         }
 
+        /// <summary>
+        /// The RemoveRecord
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="index">The index<see cref="int"/></param>
         public void RemoveRecord(DnsSection section, int index)
         {
             object records = SectionAt(section);
@@ -220,12 +363,23 @@ namespace DotNetty.Codecs.DNS.Messages
             recordList.RemoveAt(index);
         }
 
+        /// <summary>
+        /// The SetRecord
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="record">The record<see cref="IDnsRecord"/></param>
         public void SetRecord(DnsSection section, IDnsRecord record)
         {
             Clear(section);
             SetSection(section, record);
         }
 
+        /// <summary>
+        /// The SetRecord
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="index">The index<see cref="int"/></param>
+        /// <param name="record">The record<see cref="IDnsRecord"/></param>
         public void SetRecord(DnsSection section, int index, IDnsRecord record)
         {
             CheckQuestion(section, record);
@@ -250,33 +404,11 @@ namespace DotNetty.Codecs.DNS.Messages
             recordList[index] = record;
         }
 
-        private void SetSection(DnsSection section, object value)
-        {
-            switch (section)
-            {
-                case DnsSection.QUESTION:
-                    questions = value;
-                    break;
-                case DnsSection.ANSWER:
-                    answers = value;
-                    break;
-                case DnsSection.AUTHORITY:
-                    authorities = value;
-                    break;
-                case DnsSection.ADDITIONAL:
-                    additionals = value;
-                    break;
-            }
-        }
-
-        private static void CheckQuestion(DnsSection section, IDnsRecord record)
-        {
-            if (section == SECTION_QUESTION &&
-                record != null &&
-                !(record is IDnsQuestion))
-                throw new ArgumentException($"record: {record} (expected: DnsQuestion)");
-        }
-
+        /// <summary>
+        /// The Touch
+        /// </summary>
+        /// <param name="hint">The hint<see cref="object"/></param>
+        /// <returns>The <see cref="IReferenceCounted"/></returns>
         public override IReferenceCounted Touch(object hint)
         {
             if (leak != null)
@@ -285,39 +417,82 @@ namespace DotNetty.Codecs.DNS.Messages
             return this;
         }
 
+        /// <summary>
+        /// The Deallocate
+        /// </summary>
         protected override void Deallocate()
         {
             Clear();
             if (leak != null)
-                leak.Close(this); 
+                leak.Close(this);
         }
 
-        public override bool Equals(object obj)
+        /// <summary>
+        /// The CheckQuestion
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="record">The record<see cref="IDnsRecord"/></param>
+        private static void CheckQuestion(DnsSection section, IDnsRecord record)
         {
-            if (this == obj) return true;
-
-            if (!(obj is IDnsMessage)) return false;
-
-            IDnsMessage that = (IDnsMessage)obj;
-            if (Id != that.Id)
-                return false;
-
-            if (this is IDnsQuestion)
-            {
-                if (!(that is IDnsQuestion))
-                    return false;
-            }
-            else if (that is IDnsQuestion)
-            {
-                return false;
-            }
-
-            return true;
+            if (section == SECTION_QUESTION &&
+                record != null &&
+                !(record is IDnsQuestion))
+                throw new ArgumentException($"record: {record} (expected: DnsQuestion)");
         }
 
-        public override int GetHashCode()
+        /// <summary>
+        /// The SectionAt
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <returns>The <see cref="object"/></returns>
+        private object SectionAt(DnsSection section)
         {
-            return Id * 31 + (this is IDnsQuestion ? 0 : 1);
+            switch (section)
+            {
+                case DnsSection.QUESTION:
+                    return questions;
+
+                case DnsSection.ANSWER:
+                    return answers;
+
+                case DnsSection.AUTHORITY:
+                    return authorities;
+
+                case DnsSection.ADDITIONAL:
+                    return additionals;
+
+                default:
+                    return null;
+            }
         }
+
+        /// <summary>
+        /// The SetSection
+        /// </summary>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="value">The value<see cref="object"/></param>
+        private void SetSection(DnsSection section, object value)
+        {
+            switch (section)
+            {
+                case DnsSection.QUESTION:
+                    questions = value;
+                    break;
+
+                case DnsSection.ANSWER:
+                    answers = value;
+                    break;
+
+                case DnsSection.AUTHORITY:
+                    authorities = value;
+                    break;
+
+                case DnsSection.ADDITIONAL:
+                    additionals = value;
+                    break;
+            }
+        }
+
+        #endregion 方法
     }
 }

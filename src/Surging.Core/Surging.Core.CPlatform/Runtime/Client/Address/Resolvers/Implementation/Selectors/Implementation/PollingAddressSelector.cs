@@ -16,11 +16,28 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
     /// </summary>
     public class PollingAddressSelector : AddressSelectorBase
     {
-        private readonly IHealthCheckService _healthCheckService;
+        #region 字段
 
+        /// <summary>
+        /// Defines the _concurrent
+        /// </summary>
         private readonly ConcurrentDictionary<string, Lazy<AddressEntry>> _concurrent =
             new ConcurrentDictionary<string, Lazy<AddressEntry>>();
 
+        /// <summary>
+        /// Defines the _healthCheckService
+        /// </summary>
+        private readonly IHealthCheckService _healthCheckService;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PollingAddressSelector"/> class.
+        /// </summary>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="healthCheckService">The healthCheckService<see cref="IHealthCheckService"/></param>
         public PollingAddressSelector(IServiceRouteManager serviceRouteManager, IHealthCheckService healthCheckService)
         {
             _healthCheckService = healthCheckService;
@@ -29,7 +46,20 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
-        #region Overrides of AddressSelectorBase
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The CheckHealth
+        /// </summary>
+        /// <param name="addressModel">The addressModel<see cref="AddressModel"/></param>
+        /// <returns>The <see cref="ValueTask{bool}"/></returns>
+        public async ValueTask<bool> CheckHealth(AddressModel addressModel)
+        {
+            var vt = _healthCheckService.IsHealth(addressModel);
+            return vt.IsCompletedSuccessfully ? vt.Result : await vt;
+        }
 
         /// <summary>
         /// 选择一个地址。
@@ -47,7 +77,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             ValueTask<bool> vt;
             do
             {
-
                 addressModel = addressEntry.GetAddress();
                 if (len <= index)
                 {
@@ -60,21 +89,21 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             return addressModel;
         }
 
-        #endregion Overrides of AddressSelectorBase
-
-        #region Private Method
-
+        /// <summary>
+        /// The GetCacheKey
+        /// </summary>
+        /// <param name="descriptor">The descriptor<see cref="ServiceDescriptor"/></param>
+        /// <returns>The <see cref="string"/></returns>
         private static string GetCacheKey(ServiceDescriptor descriptor)
         {
             return descriptor.Id;
         }
 
-        public async ValueTask<bool> CheckHealth(AddressModel addressModel)
-        {
-            var vt = _healthCheckService.IsHealth(addressModel);
-            return vt.IsCompletedSuccessfully ? vt.Result : await vt;
-        }
-
+        /// <summary>
+        /// The ServiceRouteManager_Removed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceRouteEventArgs"/></param>
         private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
         {
             var key = GetCacheKey(e.Route.ServiceDescriptor);
@@ -82,33 +111,57 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             _concurrent.TryRemove(key, out value);
         }
 
-        #endregion Private Method
+        #endregion 方法
 
-        #region Help Class
-
+        /// <summary>
+        /// Defines the <see cref="AddressEntry" />
+        /// </summary>
         protected class AddressEntry
         {
-            #region Field
+            #region 字段
 
-            private int _index;
-            private int _lock;
-            private readonly int _maxIndex;
+            /// <summary>
+            /// Defines the _address
+            /// </summary>
             private readonly AddressModel[] _address;
 
-            #endregion Field
+            /// <summary>
+            /// Defines the _maxIndex
+            /// </summary>
+            private readonly int _maxIndex;
 
-            #region Constructor
+            /// <summary>
+            /// Defines the _index
+            /// </summary>
+            private int _index;
 
+            /// <summary>
+            /// Defines the _lock
+            /// </summary>
+            private int _lock;
+
+            #endregion 字段
+
+            #region 构造函数
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="AddressEntry"/> class.
+            /// </summary>
+            /// <param name="address">The address<see cref="IEnumerable{AddressModel}"/></param>
             public AddressEntry(IEnumerable<AddressModel> address)
             {
                 _address = address.ToArray();
                 _maxIndex = _address.Length - 1;
             }
 
-            #endregion Constructor
+            #endregion 构造函数
 
-            #region Public Method
+            #region 方法
 
+            /// <summary>
+            /// The GetAddress
+            /// </summary>
+            /// <returns>The <see cref="AddressModel"/></returns>
             public AddressModel GetAddress()
             {
                 while (true)
@@ -135,9 +188,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 }
             }
 
-            #endregion Public Method
+            #endregion 方法
         }
-
-        #endregion Help Class
     }
 }

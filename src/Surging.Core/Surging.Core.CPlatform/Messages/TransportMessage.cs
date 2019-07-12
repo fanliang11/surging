@@ -8,10 +8,19 @@ namespace Surging.Core.CPlatform.Messages
     /// </summary>
     public class TransportMessage
     {
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransportMessage"/> class.
+        /// </summary>
         public TransportMessage()
         {
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransportMessage"/> class.
+        /// </summary>
+        /// <param name="content">The content<see cref="object"/></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransportMessage(object content)
         {
@@ -21,6 +30,12 @@ namespace Surging.Core.CPlatform.Messages
             Content = content;
             ContentType = content.GetType().FullName;
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransportMessage"/> class.
+        /// </summary>
+        /// <param name="content">The content<see cref="object"/></param>
+        /// <param name="fullName">The fullName<see cref="string"/></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransportMessage(object content, string fullName)
         {
@@ -31,20 +46,89 @@ namespace Surging.Core.CPlatform.Messages
             ContentType = fullName;
         }
 
-        /// <summary>
-        /// 消息Id。
-        /// </summary>
-        public string Id { get; set; }
+        #endregion 构造函数
+
+        #region 属性
 
         /// <summary>
+        /// Gets or sets the Content
         /// 消息内容。
         /// </summary>
         public object Content { get; set; }
 
         /// <summary>
+        /// Gets or sets the ContentType
         /// 内容类型。
         /// </summary>
         public string ContentType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Id
+        /// 消息Id。
+        /// </summary>
+        public string Id { get; set; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// 创建一个调用传输消息。
+        /// </summary>
+        /// <param name="invokeMessage">调用实例。</param>
+        /// <returns>调用传输消息。</returns>
+        public static TransportMessage CreateInvokeMessage(RemoteInvokeMessage invokeMessage)
+        {
+            return new TransportMessage(invokeMessage, MessagePackTransportMessageType.remoteInvokeMessageTypeName)
+            {
+                Id = Guid.NewGuid().ToString("N")
+            };
+        }
+
+        /// <summary>
+        /// 创建一个调用结果传输消息。
+        /// </summary>
+        /// <param name="id">消息Id。</param>
+        /// <param name="invokeResultMessage">调用结果实例。</param>
+        /// <returns>调用结果传输消息。</returns>
+        public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
+        {
+            return new TransportMessage(invokeResultMessage, MessagePackTransportMessageType.remoteInvokeResultMessageTypeName)
+            {
+                Id = id
+            };
+        }
+
+        /// <summary>
+        /// 获取内容。
+        /// </summary>
+        /// <typeparam name="T">内容类型。</typeparam>
+        /// <returns>内容实例。</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T GetContent<T>()
+        {
+            return (T)Content;
+        }
+
+        /// <summary>
+        /// The IsHttpMessage
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsHttpMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.httpMessageTypeName;
+        }
+
+        /// <summary>
+        /// The IsHttpResultMessage
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsHttpResultMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.httpResultMessageTypeName;
+        }
 
         /// <summary>
         /// 是否调用消息。
@@ -66,54 +150,6 @@ namespace Surging.Core.CPlatform.Messages
             return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsHttpMessage()
-        {
-            return ContentType == MessagePackTransportMessageType.httpMessageTypeName;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsHttpResultMessage()
-        {
-            return ContentType == MessagePackTransportMessageType.httpResultMessageTypeName;
-        }
-
-        /// <summary>
-        /// 获取内容。
-        /// </summary>
-        /// <typeparam name="T">内容类型。</typeparam>
-        /// <returns>内容实例。</returns> 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetContent<T>()
-        {
-            return (T)Content;
-        }
-
-        /// <summary>
-        /// 创建一个调用传输消息。
-        /// </summary>
-        /// <param name="invokeMessage">调用实例。</param>
-        /// <returns>调用传输消息。</returns>  
-        public static TransportMessage CreateInvokeMessage(RemoteInvokeMessage invokeMessage)
-        {
-            return new TransportMessage(invokeMessage, MessagePackTransportMessageType.remoteInvokeMessageTypeName)
-            {
-                Id = Guid.NewGuid().ToString("N")
-            };
-        }
-
-        /// <summary>
-        /// 创建一个调用结果传输消息。
-        /// </summary>
-        /// <param name="id">消息Id。</param>
-        /// <param name="invokeResultMessage">调用结果实例。</param>
-        /// <returns>调用结果传输消息。</returns>  
-        public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
-        {
-            return new TransportMessage(invokeResultMessage, MessagePackTransportMessageType.remoteInvokeResultMessageTypeName)
-            {
-                Id = id
-            };
-        }
+        #endregion 方法
     }
 }

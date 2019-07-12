@@ -1,5 +1,4 @@
-﻿#region License
-/*
+﻿/*
  * ServerSslConfiguration.cs
  *
  * The MIT License
@@ -25,14 +24,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Liryna <liryna.stark@gmail.com>
  */
-#endregion
 
 using System;
 using System.Net.Security;
@@ -41,205 +37,188 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace WebSocketCore.Net
 {
-  /// <summary>
-  /// Stores the parameters for the <see cref="SslStream"/> used by servers.
-  /// </summary>
-  public class ServerSslConfiguration
-  {
-    #region Private Fields
-
-    private bool                                _checkCertRevocation;
-    private bool                                _clientCertRequired;
-    private RemoteCertificateValidationCallback _clientCertValidationCallback;
-    private SslProtocols                        _enabledSslProtocols;
-    private X509Certificate2                    _serverCert;
-
-    #endregion
-
-    #region Public Constructors
-
     /// <summary>
-    /// Initializes a new instance of the <see cref="ServerSslConfiguration"/> class.
+    /// Stores the parameters for the <see cref="SslStream"/> used by servers.
     /// </summary>
-    public ServerSslConfiguration ()
+    public class ServerSslConfiguration
     {
-      _enabledSslProtocols = SslProtocols.Default;
-    }
+        #region 字段
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ServerSslConfiguration"/> class
-    /// with the specified <paramref name="serverCertificate"/>.
-    /// </summary>
-    /// <param name="serverCertificate">
-    /// A <see cref="X509Certificate2"/> that represents the certificate used to
-    /// authenticate the server.
-    /// </param>
-    public ServerSslConfiguration (X509Certificate2 serverCertificate)
-    {
-      _serverCert = serverCertificate;
-      _enabledSslProtocols = SslProtocols.Default;
-    }
+        /// <summary>
+        /// Defines the _checkCertRevocation
+        /// </summary>
+        private bool _checkCertRevocation;
 
-    /// <summary>
-    /// Copies the parameters from the specified <paramref name="configuration"/> to
-    /// a new instance of the <see cref="ServerSslConfiguration"/> class.
-    /// </summary>
-    /// <param name="configuration">
-    /// A <see cref="ServerSslConfiguration"/> from which to copy.
-    /// </param>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="configuration"/> is <see langword="null"/>.
-    /// </exception>
-    public ServerSslConfiguration (ServerSslConfiguration configuration)
-    {
-      if (configuration == null)
-        throw new ArgumentNullException ("configuration");
+        /// <summary>
+        /// Defines the _clientCertRequired
+        /// </summary>
+        private bool _clientCertRequired;
 
-      _checkCertRevocation = configuration._checkCertRevocation;
-      _clientCertRequired = configuration._clientCertRequired;
-      _clientCertValidationCallback = configuration._clientCertValidationCallback;
-      _enabledSslProtocols = configuration._enabledSslProtocols;
-      _serverCert = configuration._serverCert;
-    }
+        /// <summary>
+        /// Defines the _clientCertValidationCallback
+        /// </summary>
+        private RemoteCertificateValidationCallback _clientCertValidationCallback;
 
-    #endregion
+        /// <summary>
+        /// Defines the _enabledSslProtocols
+        /// </summary>
+        private SslProtocols _enabledSslProtocols;
 
-    #region Public Properties
+        /// <summary>
+        /// Defines the _serverCert
+        /// </summary>
+        private X509Certificate2 _serverCert;
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the certificate revocation
-    /// list is checked during authentication.
-    /// </summary>
-    /// <value>
-    ///   <para>
-    ///   <c>true</c> if the certificate revocation list is checked during
-    ///   authentication; otherwise, <c>false</c>.
-    ///   </para>
-    ///   <para>
-    ///   The default value is <c>false</c>.
-    ///   </para>
-    /// </value>
-    public bool CheckCertificateRevocation {
-      get {
-        return _checkCertRevocation;
-      }
+        #endregion 字段
 
-      set {
-        _checkCertRevocation = value;
-      }
-    }
+        #region 构造函数
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the client is asked for
-    /// a certificate for authentication.
-    /// </summary>
-    /// <value>
-    ///   <para>
-    ///   <c>true</c> if the client is asked for a certificate for
-    ///   authentication; otherwise, <c>false</c>.
-    ///   </para>
-    ///   <para>
-    ///   The default value is <c>false</c>.
-    ///   </para>
-    /// </value>
-    public bool ClientCertificateRequired {
-      get {
-        return _clientCertRequired;
-      }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerSslConfiguration"/> class.
+        /// </summary>
+        public ServerSslConfiguration()
+        {
+            _enabledSslProtocols = SslProtocols.Default;
+        }
 
-      set {
-        _clientCertRequired = value;
-      }
-    }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerSslConfiguration"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration<see cref="ServerSslConfiguration"/></param>
+        public ServerSslConfiguration(ServerSslConfiguration configuration)
+        {
+            if (configuration == null)
+                throw new ArgumentNullException("configuration");
 
-    /// <summary>
-    /// Gets or sets the callback used to validate the certificate
-    /// supplied by the client.
-    /// </summary>
-    /// <remarks>
-    /// The certificate is valid if the callback returns <c>true</c>.
-    /// </remarks>
-    /// <value>
-    ///   <para>
-    ///   A <see cref="RemoteCertificateValidationCallback"/> delegate that
-    ///   invokes the method called for validating the certificate.
-    ///   </para>
-    ///   <para>
-    ///   The default value is a delegate that invokes a method that
-    ///   only returns <c>true</c>.
-    ///   </para>
-    /// </value>
-    public RemoteCertificateValidationCallback ClientCertificateValidationCallback {
-      get {
-        if (_clientCertValidationCallback == null)
-          _clientCertValidationCallback = defaultValidateClientCertificate;
+            _checkCertRevocation = configuration._checkCertRevocation;
+            _clientCertRequired = configuration._clientCertRequired;
+            _clientCertValidationCallback = configuration._clientCertValidationCallback;
+            _enabledSslProtocols = configuration._enabledSslProtocols;
+            _serverCert = configuration._serverCert;
+        }
 
-        return _clientCertValidationCallback;
-      }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerSslConfiguration"/> class.
+        /// </summary>
+        /// <param name="serverCertificate">The serverCertificate<see cref="X509Certificate2"/></param>
+        public ServerSslConfiguration(X509Certificate2 serverCertificate)
+        {
+            _serverCert = serverCertificate;
+            _enabledSslProtocols = SslProtocols.Default;
+        }
 
-      set {
-        _clientCertValidationCallback = value;
-      }
-    }
+        #endregion 构造函数
 
-    /// <summary>
-    /// Gets or sets the protocols used for authentication.
-    /// </summary>
-    /// <value>
-    ///   <para>
-    ///   The <see cref="SslProtocols"/> enum values that represent
-    ///   the protocols used for authentication.
-    ///   </para>
-    ///   <para>
-    ///   The default value is <see cref="SslProtocols.Default"/>.
-    ///   </para>
-    /// </value>
-    public SslProtocols EnabledSslProtocols {
-      get {
-        return _enabledSslProtocols;
-      }
+        #region 属性
 
-      set {
-        _enabledSslProtocols = value;
-      }
-    }
+        /// <summary>
+        /// Gets or sets a value indicating whether the certificate revocation
+        /// list is checked during authentication.
+        /// </summary>
+        public bool CheckCertificateRevocation
+        {
+            get
+            {
+                return _checkCertRevocation;
+            }
 
-    /// <summary>
-    /// Gets or sets the certificate used to authenticate the server.
-    /// </summary>
-    /// <value>
-    ///   <para>
-    ///   A <see cref="X509Certificate2"/> or <see langword="null"/>
-    ///   if not specified.
-    ///   </para>
-    ///   <para>
-    ///   That instance represents an X.509 certificate.
-    ///   </para>
-    /// </value>
-    public X509Certificate2 ServerCertificate {
-      get {
-        return _serverCert;
-      }
+            set
+            {
+                _checkCertRevocation = value;
+            }
+        }
 
-      set {
-        _serverCert = value;
-      }
-    }
+        /// <summary>
+        /// Gets or sets a value indicating whether the client is asked for
+        /// a certificate for authentication.
+        /// </summary>
+        public bool ClientCertificateRequired
+        {
+            get
+            {
+                return _clientCertRequired;
+            }
 
-    #endregion
+            set
+            {
+                _clientCertRequired = value;
+            }
+        }
 
-    #region Private Methods
+        /// <summary>
+        /// Gets or sets the callback used to validate the certificate
+        /// supplied by the client.
+        /// </summary>
+        public RemoteCertificateValidationCallback ClientCertificateValidationCallback
+        {
+            get
+            {
+                if (_clientCertValidationCallback == null)
+                    _clientCertValidationCallback = defaultValidateClientCertificate;
 
-    private static bool defaultValidateClientCertificate (
+                return _clientCertValidationCallback;
+            }
+
+            set
+            {
+                _clientCertValidationCallback = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the protocols used for authentication.
+        /// </summary>
+        public SslProtocols EnabledSslProtocols
+        {
+            get
+            {
+                return _enabledSslProtocols;
+            }
+
+            set
+            {
+                _enabledSslProtocols = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the certificate used to authenticate the server.
+        /// </summary>
+        public X509Certificate2 ServerCertificate
+        {
+            get
+            {
+                return _serverCert;
+            }
+
+            set
+            {
+                _serverCert = value;
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The defaultValidateClientCertificate
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="certificate">The certificate<see cref="X509Certificate"/></param>
+        /// <param name="chain">The chain<see cref="X509Chain"/></param>
+        /// <param name="sslPolicyErrors">The sslPolicyErrors<see cref="SslPolicyErrors"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        private static bool defaultValidateClientCertificate(
       object sender,
       X509Certificate certificate,
       X509Chain chain,
       SslPolicyErrors sslPolicyErrors
     )
-    {
-      return true;
-    }
+        {
+            return true;
+        }
 
-    #endregion
-  }
+        #endregion 方法
+    }
 }

@@ -1,13 +1,38 @@
-﻿using System;
+﻿using Surging.Core.Swagger;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
-using Surging.Core.Swagger;
 
 namespace Surging.Core.SwaggerGen
 {
+    /// <summary>
+    /// Defines the <see cref="SchemaExtensions" />
+    /// </summary>
     internal static class SchemaExtensions
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the DataTypeFormatMap
+        /// </summary>
+        private static readonly Dictionary<DataType, string> DataTypeFormatMap = new Dictionary<DataType, string>
+        {
+            { DataType.Date, "date" },
+            { DataType.DateTime, "date-time" },
+            { DataType.Password, "password" }
+        };
+
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The AssignAttributeMetadata
+        /// </summary>
+        /// <param name="schema">The schema<see cref="Schema"/></param>
+        /// <param name="attributes">The attributes<see cref="IEnumerable{object}"/></param>
+        /// <returns>The <see cref="Schema"/></returns>
         internal static Schema AssignAttributeMetadata(this Schema schema, IEnumerable<object> attributes)
         {
             foreach (var attribute in attributes)
@@ -49,6 +74,11 @@ namespace Surging.Core.SwaggerGen
             return schema;
         }
 
+        /// <summary>
+        /// The PopulateFrom
+        /// </summary>
+        /// <param name="partialSchema">The partialSchema<see cref="PartialSchema"/></param>
+        /// <param name="schema">The schema<see cref="Schema"/></param>
         internal static void PopulateFrom(this PartialSchema partialSchema, Schema schema)
         {
             if (schema == null) return;
@@ -79,11 +109,6 @@ namespace Surging.Core.SwaggerGen
             partialSchema.MultipleOf = schema.MultipleOf;
         }
 
-        private static readonly Dictionary<DataType, string> DataTypeFormatMap = new Dictionary<DataType, string>
-        {
-            { DataType.Date, "date" },
-            { DataType.DateTime, "date-time" },
-            { DataType.Password, "password" }
-        };
+        #endregion 方法
     }
 }

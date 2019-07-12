@@ -4,11 +4,15 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Server
 {
+    #region 接口
+
     /// <summary>
     /// 一个抽象的服务主机。
     /// </summary>
     public interface IServiceHost : IDisposable
     {
+        #region 方法
+
         /// <summary>
         /// 启动主机。
         /// </summary>
@@ -19,7 +23,13 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// <summary>
         /// 启动主机。
         /// </summary>
-        /// <param name="endPoint">ip地址。</param>
-        Task StartAsync(string ip,int port);
+        /// <param name="ip">The ip<see cref="string"/></param>
+        /// <param name="port">The port<see cref="int"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        Task StartAsync(string ip, int port);
+
+        #endregion 方法
     }
+
+    #endregion 接口
 }

@@ -1,4 +1,3 @@
-#region License
 /*
  * HttpBasicIdentity.cs
  *
@@ -28,55 +27,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Gonzalo Paniagua Javier <gonzalo@novell.com>
  */
-#endregion
 
 using System;
 using System.Security.Principal;
 
 namespace WebSocketCore.Net
 {
-  /// <summary>
-  /// Holds the username and password from an HTTP Basic authentication attempt.
-  /// </summary>
-  public class HttpBasicIdentity : GenericIdentity
-  {
-    #region Private Fields
-
-    private string _password;
-
-    #endregion
-
-    #region Internal Constructors
-
-    internal HttpBasicIdentity (string username, string password)
-      : base (username, "Basic")
-    {
-      _password = password;
-    }
-
-    #endregion
-
-    #region Public Properties
-
     /// <summary>
-    /// Gets the password from a basic authentication attempt.
+    /// Holds the username and password from an HTTP Basic authentication attempt.
     /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the password.
-    /// </value>
-    public virtual string Password {
-      get {
-        return _password;
-      }
-    }
+    public class HttpBasicIdentity : GenericIdentity
+    {
+        #region 字段
 
-    #endregion
-  }
+        /// <summary>
+        /// Defines the _password
+        /// </summary>
+        private string _password;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpBasicIdentity"/> class.
+        /// </summary>
+        /// <param name="username">The username<see cref="string"/></param>
+        /// <param name="password">The password<see cref="string"/></param>
+        internal HttpBasicIdentity(string username, string password)
+      : base(username, "Basic")
+        {
+            _password = password;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the password from a basic authentication attempt.
+        /// </summary>
+        public virtual string Password
+        {
+            get
+            {
+                return _password;
+            }
+        }
+
+        #endregion 属性
+    }
 }

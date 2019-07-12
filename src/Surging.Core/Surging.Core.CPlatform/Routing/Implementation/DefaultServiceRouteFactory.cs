@@ -13,16 +13,35 @@ namespace Surging.Core.CPlatform.Routing.Implementation
     /// </summary>
     public class DefaultServiceRouteFactory : IServiceRouteFactory
     {
-        private readonly ISerializer<string> _serializer;
-         private readonly ConcurrentDictionary<string, AddressModel> _addressModel =
+        #region 字段
+
+        /// <summary>
+        /// Defines the _addressModel
+        /// </summary>
+        private readonly ConcurrentDictionary<string, AddressModel> _addressModel =
                 new ConcurrentDictionary<string, AddressModel>();
 
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<string> _serializer;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceRouteFactory"/> class.
+        /// </summary>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
         public DefaultServiceRouteFactory(ISerializer<string> serializer)
         {
             _serializer = serializer;
         }
 
-        #region Implementation of IServiceRouteFactory
+        #endregion 构造函数
+
+        #region 方法
 
         /// <summary>
         /// 根据服务路由描述符创建服务路由。
@@ -39,7 +58,6 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
             routes.AddRange(descriptors.Select(descriptor => new ServiceRoute
             {
-               
                 Address = CreateAddress(descriptor.AddressDescriptors),
                 ServiceDescriptor = descriptor.ServiceDescriptor
             }));
@@ -47,8 +65,11 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return Task.FromResult(routes.AsEnumerable());
         }
 
-        #endregion Implementation of IServiceRouteFactory
-
+        /// <summary>
+        /// The CreateAddress
+        /// </summary>
+        /// <param name="descriptors">The descriptors<see cref="IEnumerable{ServiceAddressDescriptor}"/></param>
+        /// <returns>The <see cref="IEnumerable{AddressModel}"/></returns>
         private IEnumerable<AddressModel> CreateAddress(IEnumerable<ServiceAddressDescriptor> descriptors)
         {
             if (descriptors == null)
@@ -65,5 +86,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                 yield return address;
             }
         }
+
+        #endregion 方法
     }
 }

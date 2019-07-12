@@ -5,6 +5,8 @@
     /// </summary>
     public static class SerializerExtensions
     {
+        #region 方法
+
         /// <summary>
         /// 反序列化方法
         /// </summary>
@@ -17,5 +19,7 @@
         {
             return (TResult)serializer.Deserialize(content, typeof(TResult));
         }
+
+        #endregion 方法
     }
 }

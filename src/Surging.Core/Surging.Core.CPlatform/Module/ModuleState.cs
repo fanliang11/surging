@@ -4,6 +4,8 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Module
 {
+    #region 枚举
+
     /// <summary>
     /// 模块状态枚举。
     /// </summary>
@@ -29,4 +31,6 @@ namespace Surging.Core.CPlatform.Module
         /// </summary>
         Uninstalled
     }
+
+    #endregion 枚举
 }

@@ -7,8 +7,20 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Support
 {
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IServiceCommandManager" />
+    /// </summary>
     public interface IServiceCommandManager
     {
+        #region 事件
+
+        /// <summary>
+        /// 服务命令被修改。
+        /// </summary>
+        event EventHandler<ServiceCommandChangedEventArgs> Changed;
+
         /// <summary>
         /// 服务命令被创建。
         /// </summary>
@@ -19,10 +31,15 @@ namespace Surging.Core.CPlatform.Support
         /// </summary>
         event EventHandler<ServiceCommandEventArgs> Removed;
 
+        #endregion 事件
+
+        #region 方法
+
         /// <summary>
-        /// 服务命令被修改。
+        /// 清空所有的服务命令。
         /// </summary>
-        event EventHandler<ServiceCommandChangedEventArgs> Changed;
+        /// <returns>一个任务。</returns>
+        Task ClearAsync();
 
         /// <summary>
         /// 获取所有可用的服务命令信息。
@@ -31,20 +48,22 @@ namespace Surging.Core.CPlatform.Support
         Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync();
 
         /// <summary>
+        /// The SetServiceCommandsAsync
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
+        Task SetServiceCommandsAsync();
+
+        /// <summary>
         /// 设置服务命令。
         /// </summary>
         /// <param name="commands">服务命令集合。</param>
         /// <returns>一个任务。</returns>
         Task SetServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> commands);
 
-
-        Task SetServiceCommandsAsync();
-        /// <summary>
-        /// 清空所有的服务命令。
-        /// </summary>
-        /// <returns>一个任务。</returns>
-        Task ClearAsync();
+        #endregion 方法
     }
+
+    #endregion 接口
 }
 
 /// <summary>
@@ -52,9 +71,13 @@ namespace Surging.Core.CPlatform.Support
 /// </summary>
 public static class ServiceCommandManagerExtensions
 {
+    #region 方法
+
     /// <summary>
     /// 获取所有可用的服务命令信息。
     /// </summary>
+    /// <param name="serviceCommandManager">The serviceCommandManager<see cref="IServiceCommandManager"/></param>
+    /// <param name="serviceIds">The serviceIds<see cref="string[]"/></param>
     /// <returns>服务命令集合。</returns>
     public static async Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync
         (this IServiceCommandManager serviceCommandManager, params string[] serviceIds)
@@ -62,4 +85,6 @@ public static class ServiceCommandManagerExtensions
         var result = (await serviceCommandManager.GetServiceCommandsAsync());
         return result.Where(p => serviceIds.Contains(p.ServiceId));
     }
+
+    #endregion 方法
 }

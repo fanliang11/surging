@@ -6,10 +6,31 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services
 {
-   public interface IClientSessionService
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IClientSessionService" />
+    /// </summary>
+    public interface IClientSessionService
     {
+        #region 方法
+
+        /// <summary>
+        /// The GetMessages
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <returns>The <see cref="ConcurrentQueue{SessionMessage}"/></returns>
+        ConcurrentQueue<SessionMessage> GetMessages(string deviceId);
+
+        /// <summary>
+        /// The SaveMessage
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <param name="sessionMessage">The sessionMessage<see cref="SessionMessage"/></param>
         void SaveMessage(string deviceId, SessionMessage sessionMessage);
 
-        ConcurrentQueue<SessionMessage> GetMessages(string deviceId);
+        #endregion 方法
     }
+
+    #endregion 接口
 }

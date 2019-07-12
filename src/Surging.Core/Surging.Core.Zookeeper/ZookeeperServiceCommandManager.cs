@@ -18,15 +18,57 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper
 {
+    /// <summary>
+    /// Defines the <see cref="ZookeeperServiceCommandManager" />
+    /// </summary>
     public class ZookeeperServiceCommandManager : ServiceCommandManagerBase, IDisposable
-    { 
+    {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _configInfo
+        /// </summary>
         private readonly ConfigInfo _configInfo;
-        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<ZookeeperServiceCommandManager> _logger;
-        private ServiceCommandDescriptor[] _serviceCommands; 
-        private readonly IServiceRouteManager _serviceRouteManager; 
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _serviceRouteManager
+        /// </summary>
+        private readonly IServiceRouteManager _serviceRouteManager;
+
+        /// <summary>
+        /// Defines the _zookeeperClientProvider
+        /// </summary>
         private readonly IZookeeperClientProvider _zookeeperClientProvider;
 
+        /// <summary>
+        /// Defines the _serviceCommands
+        /// </summary>
+        private ServiceCommandDescriptor[] _serviceCommands;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZookeeperServiceCommandManager"/> class.
+        /// </summary>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{byte[]}"/></param>
+        /// <param name="stringSerializer">The stringSerializer<see cref="ISerializer{string}"/></param>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="serviceEntryManager">The serviceEntryManager<see cref="IServiceEntryManager"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{ZookeeperServiceCommandManager}"/></param>
+        /// <param name="zookeeperClientProvider">The zookeeperClientProvider<see cref="IZookeeperClientProvider"/></param>
         public ZookeeperServiceCommandManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IServiceRouteManager serviceRouteManager, IServiceEntryManager serviceEntryManager,
             ILogger<ZookeeperServiceCommandManager> logger, IZookeeperClientProvider zookeeperClientProvider) : base(stringSerializer, serviceEntryManager)
@@ -36,19 +78,61 @@ namespace Surging.Core.Zookeeper
             _serviceRouteManager = serviceRouteManager;
             _logger = logger;
             _zookeeperClientProvider = zookeeperClientProvider;
-             EnterServiceCommands().Wait();
+            EnterServiceCommands().Wait();
             _serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
+        #endregion 构造函数
+
+        #region 方法
 
         /// <summary>
-        /// 获取所有可用的服务命令信息。
+        /// The ChildrenChange
         /// </summary>
-        /// <returns>服务命令集合。</returns>
-        public override async Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync()
+        /// <param name="oldChildrens">The oldChildrens<see cref="string[]"/></param>
+        /// <param name="newChildrens">The newChildrens<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
         {
-            await EnterServiceCommands();
-            return _serviceCommands;
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"旧的节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的服务命令节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的服务命令节点：{string.Join(",", createdChildrens)}");
+
+            //获取新增的服务命令信息。
+            var newCommands = (await GetServiceCommands(createdChildrens)).ToArray();
+
+            var routes = _serviceCommands.ToArray();
+            lock (_serviceCommands)
+            {
+                _serviceCommands = _serviceCommands
+                    //删除无效的节点服务命令。
+                    .Where(i => !deletedChildrens.Contains(i.ServiceId))
+                    //连接上新的服务命令。
+                    .Concat(newCommands)
+                    .ToArray();
+            }
+            //需要删除的服务命令集合。
+            var deletedRoutes = routes.Where(i => deletedChildrens.Contains(i.ServiceId)).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedRoutes.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            //触发服务命令被创建事件。
+            OnCreated(newCommands.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation("服务命令数据更新成功。");
         }
 
         /// <summary>
@@ -96,9 +180,74 @@ namespace Surging.Core.Zookeeper
         }
 
         /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+        }
+
+        /// <summary>
+        /// 获取所有可用的服务命令信息。
+        /// </summary>
+        /// <returns>服务命令集合。</returns>
+        public override async Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync()
+        {
+            await EnterServiceCommands();
+            return _serviceCommands;
+        }
+
+        /// <summary>
+        /// The NodeChange
+        /// </summary>
+        /// <param name="oldData">The oldData<see cref="byte[]"/></param>
+        /// <param name="newData">The newData<see cref="byte[]"/></param>
+        public void NodeChange(byte[] oldData, byte[] newData)
+        {
+            if (DataEquals(oldData, newData))
+                return;
+
+            var newCommand = GetServiceCommand(newData);
+            //得到旧的服务命令。
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+            //触发服务命令变更事件。
+            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+
+        /// <summary>
+        /// The NodeChange
+        /// </summary>
+        /// <param name="newCommand">The newCommand<see cref="ServiceCommandDescriptor"/></param>
+        public void NodeChange(ServiceCommandDescriptor newCommand)
+        {
+            //得到旧的服务命令。
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+
+            //触发服务命令变更事件。
+            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+
+        /// <summary>
         /// 设置服务命令。
         /// </summary>
-        /// <param name="routes">服务命令集合。</param>
+        /// <param name="serviceCommand">The serviceCommand<see cref="IEnumerable{ServiceCommandDescriptor}"/></param>
         /// <returns>一个任务。</returns>
         public override async Task SetServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommand)
         {
@@ -142,32 +291,46 @@ namespace Surging.Core.Zookeeper
             }
         }
 
+        /// <summary>
+        /// The InitServiceCommandsAsync
+        /// </summary>
+        /// <param name="serviceCommands">The serviceCommands<see cref="IEnumerable{ServiceCommandDescriptor}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
             var commands = await GetServiceCommands(serviceCommands.Select(p => p.ServiceId));
             if (commands.Count() == 0 || _configInfo.ReloadOnChange)
-            { 
+            {
                 await SetServiceCommandsAsync(serviceCommands);
             }
         }
 
-        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
+        /// <summary>
+        /// The DataEquals
+        /// </summary>
+        /// <param name="data1">The data1<see cref="IReadOnlyList{byte}"/></param>
+        /// <param name="data2">The data2<see cref="IReadOnlyList{byte}"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
         {
-            var path = _configInfo.CommandPath;
-            if (!path.EndsWith("/"))
-                path += "/";
-            var zooKeepers = _zookeeperClientProvider.GetZooKeepers().Result;
-            foreach (var zooKeeper in zooKeepers)
+            if (data1.Count != data2.Count)
+                return false;
+            for (var i = 0; i < data1.Count; i++)
             {
-                var nodePath = $"{path}{e.Route.ServiceDescriptor.Id}";
-                if (zooKeeper.Item2.existsAsync(nodePath).Result != null)
-                {
-                    zooKeeper.Item2.deleteAsync(nodePath).Wait();
-                }
+                var b1 = data1[i];
+                var b2 = data2[i];
+                if (b1 != b2)
+                    return false;
             }
+            return true;
         }
 
-
+        /// <summary>
+        /// The CreateSubdirectory
+        /// </summary>
+        /// <param name="zooKeeper">The zooKeeper<see cref="(ManualResetEvent, ZooKeeper)"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task CreateSubdirectory((ManualResetEvent, ZooKeeper) zooKeeper, string path)
         {
             zooKeeper.Item1.WaitOne();
@@ -191,55 +354,10 @@ namespace Surging.Core.Zookeeper
             }
         }
 
-        private ServiceCommandDescriptor GetServiceCommand(byte[] data)
-        {
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"准备转换服务命令，配置内容：{Encoding.UTF8.GetString(data)}。");
-
-            if (data == null)
-                return null;
-
-            var descriptor = _serializer.Deserialize<byte[], ServiceCommandDescriptor>(data);
-            return descriptor;
-        }
-
-        private async Task<ServiceCommandDescriptor> GetServiceCommand(string path)
-        {
-            ServiceCommandDescriptor result = null; 
-            var zooKeeper = await GetZooKeeper();
-            var watcher = new NodeMonitorWatcher(GetZooKeeper, path,
-                  (oldData, newData) => NodeChange(oldData, newData));
-            if (await zooKeeper.Item2.existsAsync(path) != null)
-            {
-                var data = (await zooKeeper.Item2.getDataAsync(path, watcher)).Data;
-                watcher.SetCurrentData(data);
-                result = GetServiceCommand(data);
-            }
-            return result;
-        }
-
-        private async Task<ServiceCommandDescriptor[]> GetServiceCommands(IEnumerable<string> childrens)
-        {
-            var rootPath = _configInfo.CommandPath;
-            if (!rootPath.EndsWith("/"))
-                rootPath += "/";
-
-            childrens = childrens.ToArray();
-            var serviceCommands = new List<ServiceCommandDescriptor>(childrens.Count());
-
-            foreach (var children in childrens)
-            {
-                if (_logger.IsEnabled(LogLevel.Debug))
-                    _logger.LogDebug($"准备从节点：{children}中获取服务命令信息。");
-
-                var nodePath = $"{rootPath}{children}";
-                var serviceCommand = await GetServiceCommand(nodePath);
-                if (serviceCommand != null)
-                    serviceCommands.Add(serviceCommand);
-            }
-            return serviceCommands.ToArray();
-        }
-
+        /// <summary>
+        /// The EnterServiceCommands
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task EnterServiceCommands()
         {
             if (_serviceCommands != null)
@@ -264,113 +382,101 @@ namespace Surging.Core.Zookeeper
             }
         }
 
-        private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
-        {
-            if (data1.Count != data2.Count)
-                return false;
-            for (var i = 0; i < data1.Count; i++)
-            {
-                var b1 = data1[i];
-                var b2 = data2[i];
-                if (b1 != b2)
-                    return false;
-            }
-            return true;
-        }
-
-        public void NodeChange(ServiceCommandDescriptor newCommand)
-        {
-            //得到旧的服务命令。
-            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
-
-            lock (_serviceCommands)
-            {
-                //删除旧服务命令，并添加上新的服务命令。
-                _serviceCommands =
-                    _serviceCommands
-                        .Where(i => i.ServiceId != newCommand.ServiceId)
-                        .Concat(new[] { newCommand }).ToArray();
-            }
-            
-                //触发服务命令变更事件。
-            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
-        }
-
-        public void NodeChange(byte[] oldData, byte[] newData)
-        {
-            if (DataEquals(oldData, newData))
-                return;
-
-            var newCommand = GetServiceCommand(newData);
-            //得到旧的服务命令。
-            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
-
-            lock (_serviceCommands)
-            {
-                //删除旧服务命令，并添加上新的服务命令。
-                _serviceCommands =
-                    _serviceCommands
-                        .Where(i => i.ServiceId != newCommand.ServiceId)
-                        .Concat(new[] { newCommand }).ToArray();
-            }
-            //触发服务命令变更事件。
-            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
-        }
-
-        public async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
+        /// <summary>
+        /// The GetServiceCommand
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <returns>The <see cref="ServiceCommandDescriptor"/></returns>
+        private ServiceCommandDescriptor GetServiceCommand(byte[] data)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
+                _logger.LogDebug($"准备转换服务命令，配置内容：{Encoding.UTF8.GetString(data)}。");
 
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"旧的节点信息：{string.Join(",", oldChildrens)}");
+            if (data == null)
+                return null;
 
-            //计算出已被删除的节点。
-            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
-            //计算出新增的节点。
-            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+            var descriptor = _serializer.Deserialize<byte[], ServiceCommandDescriptor>(data);
+            return descriptor;
+        }
 
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"需要被删除的服务命令节点：{string.Join(",", deletedChildrens)}");
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"需要被添加的服务命令节点：{string.Join(",", createdChildrens)}");
-
-            //获取新增的服务命令信息。
-            var newCommands = (await GetServiceCommands(createdChildrens)).ToArray();
-
-            var routes = _serviceCommands.ToArray();
-            lock (_serviceCommands)
+        /// <summary>
+        /// The GetServiceCommand
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceCommandDescriptor}"/></returns>
+        private async Task<ServiceCommandDescriptor> GetServiceCommand(string path)
+        {
+            ServiceCommandDescriptor result = null;
+            var zooKeeper = await GetZooKeeper();
+            var watcher = new NodeMonitorWatcher(GetZooKeeper, path,
+                  (oldData, newData) => NodeChange(oldData, newData));
+            if (await zooKeeper.Item2.existsAsync(path) != null)
             {
-                _serviceCommands = _serviceCommands
-                    //删除无效的节点服务命令。
-                    .Where(i => !deletedChildrens.Contains(i.ServiceId))
-                    //连接上新的服务命令。
-                    .Concat(newCommands)
-                    .ToArray();
+                var data = (await zooKeeper.Item2.getDataAsync(path, watcher)).Data;
+                watcher.SetCurrentData(data);
+                result = GetServiceCommand(data);
             }
-            //需要删除的服务命令集合。
-            var deletedRoutes = routes.Where(i => deletedChildrens.Contains(i.ServiceId)).ToArray();
-            //触发删除事件。
-            OnRemoved(deletedRoutes.Select(command => new ServiceCommandEventArgs(command)).ToArray());
-
-            //触发服务命令被创建事件。
-            OnCreated(newCommands.Select(command => new ServiceCommandEventArgs(command)).ToArray());
-
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("服务命令数据更新成功。");
+            return result;
         }
 
+        /// <summary>
+        /// The GetServiceCommands
+        /// </summary>
+        /// <param name="childrens">The childrens<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="Task{ServiceCommandDescriptor[]}"/></returns>
+        private async Task<ServiceCommandDescriptor[]> GetServiceCommands(IEnumerable<string> childrens)
+        {
+            var rootPath = _configInfo.CommandPath;
+            if (!rootPath.EndsWith("/"))
+                rootPath += "/";
 
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-        public void Dispose()
-        { 
+            childrens = childrens.ToArray();
+            var serviceCommands = new List<ServiceCommandDescriptor>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取服务命令信息。");
+
+                var nodePath = $"{rootPath}{children}";
+                var serviceCommand = await GetServiceCommand(nodePath);
+                if (serviceCommand != null)
+                    serviceCommands.Add(serviceCommand);
+            }
+            return serviceCommands.ToArray();
         }
 
+        /// <summary>
+        /// The GetZooKeeper
+        /// </summary>
+        /// <returns>The <see cref="ValueTask{(ManualResetEvent, ZooKeeper)}"/></returns>
         private async ValueTask<(ManualResetEvent, ZooKeeper)> GetZooKeeper()
         {
             var zooKeeper = await _zookeeperClientProvider.GetZooKeeper();
             return zooKeeper;
         }
 
+        /// <summary>
+        /// The ServiceRouteManager_Removed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceRouteEventArgs"/></param>
+        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
+        {
+            var path = _configInfo.CommandPath;
+            if (!path.EndsWith("/"))
+                path += "/";
+            var zooKeepers = _zookeeperClientProvider.GetZooKeepers().Result;
+            foreach (var zooKeeper in zooKeepers)
+            {
+                var nodePath = $"{path}{e.Route.ServiceDescriptor.Id}";
+                if (zooKeeper.Item2.existsAsync(nodePath).Result != null)
+                {
+                    zooKeeper.Item2.deleteAsync(nodePath).Wait();
+                }
+            }
+        }
+
+        #endregion 方法
     }
 }

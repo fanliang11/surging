@@ -5,28 +5,45 @@ using System.Text;
 
 namespace Surging.Core.Codec.ProtoBuffer
 {
-   public sealed  class ProtoBufferTransportMessageCodecFactory : ITransportMessageCodecFactory
+    /// <summary>
+    /// Defines the <see cref="ProtoBufferTransportMessageCodecFactory" />
+    /// </summary>
+    public sealed class ProtoBufferTransportMessageCodecFactory : ITransportMessageCodecFactory
     {
-        #region Field
+        #region 字段
 
-        private readonly ITransportMessageEncoder _transportMessageEncoder = new ProtoBufferTransportMessageEncoder();
+        /// <summary>
+        /// Defines the _transportMessageDecoder
+        /// </summary>
         private readonly ITransportMessageDecoder _transportMessageDecoder = new ProtoBufferTransportMessageDecoder();
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _transportMessageEncoder
+        /// </summary>
+        private readonly ITransportMessageEncoder _transportMessageEncoder = new ProtoBufferTransportMessageEncoder();
 
-        #region Implementation of ITransportMessageCodecFactory
-        
-        public ITransportMessageEncoder GetEncoder()
-        {
-            return _transportMessageEncoder;
-        }
-        
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The GetDecoder
+        /// </summary>
+        /// <returns>The <see cref="ITransportMessageDecoder"/></returns>
         public ITransportMessageDecoder GetDecoder()
         {
             return _transportMessageDecoder;
         }
 
-        #endregion Implementation of ITransportMessageCodecFactory
+        /// <summary>
+        /// The GetEncoder
+        /// </summary>
+        /// <returns>The <see cref="ITransportMessageEncoder"/></returns>
+        public ITransportMessageEncoder GetEncoder()
+        {
+            return _transportMessageEncoder;
+        }
+
+        #endregion 方法
     }
 }
-

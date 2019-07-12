@@ -20,8 +20,17 @@ using System.Reflection;
 
 namespace Surging.Core.Caching
 {
+    /// <summary>
+    /// Defines the <see cref="CachingModule" />
+    /// </summary>
     public class CachingModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             var serviceProvider = context.ServiceProvoider;
@@ -49,17 +58,48 @@ namespace Surging.Core.Caching
             RegisterLocalInstance("ICacheClient`1", builder);
         }
 
-        private static void RegisterLocalInstance(string typeName, ContainerBuilderWrapper builder)
+        /// <summary>
+        /// The GetTypedPropertyValue
+        /// </summary>
+        /// <param name="obj">The obj<see cref="Property"/></param>
+        /// <returns>The <see cref="object"/></returns>
+        private static object GetTypedPropertyValue(Property obj)
         {
-            var types = typeof(AppConfig)
-                        .Assembly.GetTypes().Where(p => p.GetTypeInfo().GetInterface(typeName) != null);
-            foreach (var t in types)
+            var mapCollections = obj.Maps;
+            if (mapCollections != null && mapCollections.Any())
             {
-                var attribute = t.GetTypeInfo().GetCustomAttribute<IdentifyCacheAttribute>();
-                builder.RegisterGeneric(t).Named(attribute.Name.ToString(), typeof(ICacheClient<>)).SingleInstance();
+                var results = new List<object>();
+                foreach (var map in mapCollections)
+                {
+                    object items = null;
+                    if (map.Properties != null) items = map.Properties.Select(p => GetTypedPropertyValue(p)).ToArray();
+                    results.Add(new
+                    {
+                        Name = Convert.ChangeType(obj.Name, typeof(string)),
+                        Value = Convert.ChangeType(map.Name, typeof(string)),
+                        Items = items
+                    });
+                }
+                return results;
             }
+            else if (!string.IsNullOrEmpty(obj.Value))
+            {
+                return new
+                {
+                    Name = Convert.ChangeType(obj.Name ?? "", typeof(string)),
+                    Value = Convert.ChangeType(obj.Value, typeof(string)),
+                };
+            }
+            else if (!string.IsNullOrEmpty(obj.Ref))
+                return Convert.ChangeType(obj.Ref, typeof(string));
+
+            return null;
         }
 
+        /// <summary>
+        /// The RegisterConfigInstance
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterConfigInstance(ContainerBuilderWrapper builder)
         {
             var cacheWrapperSetting = AppConfig.Configuration.Get<CachingProvider>();
@@ -100,37 +140,22 @@ namespace Surging.Core.Caching
             catch { }
         }
 
-        private static object GetTypedPropertyValue(Property obj)
+        /// <summary>
+        /// The RegisterLocalInstance
+        /// </summary>
+        /// <param name="typeName">The typeName<see cref="string"/></param>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        private static void RegisterLocalInstance(string typeName, ContainerBuilderWrapper builder)
         {
-            var mapCollections = obj.Maps;
-            if (mapCollections != null && mapCollections.Any())
+            var types = typeof(AppConfig)
+                        .Assembly.GetTypes().Where(p => p.GetTypeInfo().GetInterface(typeName) != null);
+            foreach (var t in types)
             {
-                var results = new List<object>();
-                foreach (var map in mapCollections)
-                {
-                    object items = null;
-                    if (map.Properties != null) items = map.Properties.Select(p => GetTypedPropertyValue(p)).ToArray();
-                    results.Add(new
-                    {
-                        Name = Convert.ChangeType(obj.Name, typeof(string)),
-                        Value = Convert.ChangeType(map.Name, typeof(string)),
-                        Items = items
-                    });
-                }
-                return results;
+                var attribute = t.GetTypeInfo().GetCustomAttribute<IdentifyCacheAttribute>();
+                builder.RegisterGeneric(t).Named(attribute.Name.ToString(), typeof(ICacheClient<>)).SingleInstance();
             }
-            else if (!string.IsNullOrEmpty(obj.Value))
-            {
-                return new
-                {
-                    Name = Convert.ChangeType(obj.Name ?? "", typeof(string)),
-                    Value = Convert.ChangeType(obj.Value, typeof(string)),
-                };
-            }
-            else if (!string.IsNullOrEmpty(obj.Ref))
-                return Convert.ChangeType(obj.Ref, typeof(string));
-
-            return null;
         }
+
+        #endregion 方法
     }
 }

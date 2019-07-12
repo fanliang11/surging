@@ -1,21 +1,53 @@
-﻿using Surging.Core.CPlatform;
-using Surging.Core.CPlatform.EventBus;
-using System;
-using Autofac;
-using Surging.Core.EventBusRabbitMQ.Implementation;
+﻿using Autofac;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using Surging.Core.CPlatform.EventBus.Events;
-using Surging.Core.CPlatform.EventBus.Implementation;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventBus;
+using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.EventBusRabbitMQ.Configurations;
-using Microsoft.Extensions.Configuration;
+using Surging.Core.EventBusRabbitMQ.Implementation;
+using System;
+using System.Collections.Generic;
 
 namespace Surging.Core.EventBusRabbitMQ
 {
+    /// <summary>
+    /// Defines the <see cref="ContainerBuilderExtensions" />
+    /// </summary>
     public static class ContainerBuilderExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The AddRabbitMQAdapt
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder AddRabbitMQAdapt(this IServiceBuilder builder)
+        {
+            return builder.UseRabbitMQEventAdapt(provider =>
+             new RabbitMqSubscriptionAdapt(
+                 provider.GetService<IConsumeConfigurator>(),
+                 provider.GetService<IEnumerable<IIntegrationEventHandler>>()
+                 )
+            );
+        }
+
+        /// <summary>
+        /// The UseRabbitMQEventAdapt
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IServiceBuilder"/></param>
+        /// <param name="adapt">The adapt<see cref="Func{IServiceProvider, ISubscriptionAdapt}"/></param>
+        /// <returns>The <see cref="IServiceBuilder"/></returns>
+        public static IServiceBuilder UseRabbitMQEventAdapt(this IServiceBuilder builder, Func<IServiceProvider, ISubscriptionAdapt> adapt)
+        {
+            var services = builder.Services;
+            services.RegisterAdapter(adapt);
+            return builder;
+        }
 
         /// <summary>
         /// 使用RabbitMQ进行传输。
@@ -55,21 +87,6 @@ namespace Surging.Core.EventBusRabbitMQ
             return builder;
         }
 
-        public static IServiceBuilder UseRabbitMQEventAdapt(this IServiceBuilder builder, Func<IServiceProvider, ISubscriptionAdapt> adapt)
-        {
-            var services = builder.Services;
-            services.RegisterAdapter(adapt);
-            return builder;
-        }
-
-        public static IServiceBuilder AddRabbitMQAdapt(this IServiceBuilder builder)
-        {
-            return builder.UseRabbitMQEventAdapt(provider =>
-             new RabbitMqSubscriptionAdapt(
-                 provider.GetService<IConsumeConfigurator>(),
-                 provider.GetService<IEnumerable<IIntegrationEventHandler>>()
-                 )
-            );
-        }
+        #endregion 方法
     }
 }

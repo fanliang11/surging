@@ -5,7 +5,10 @@ using System.Text;
 
 namespace Surging.Core.Common
 {
-    public  class CommonModule:SystemModule
+    /// <summary>
+    /// Defines the <see cref="CommonModule" />
+    /// </summary>
+    public class CommonModule : SystemModule
     {
     }
 }

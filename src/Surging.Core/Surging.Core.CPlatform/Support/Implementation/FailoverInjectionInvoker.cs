@@ -7,12 +7,38 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="FailoverInjectionInvoker" />
+    /// </summary>
     public class FailoverInjectionInvoker : IClusterInvoker
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _serviceCommandProvider
+        /// </summary>
         public readonly IServiceCommandProvider _serviceCommandProvider;
+
+        /// <summary>
+        /// Defines the _serviceEntryManager
+        /// </summary>
         public readonly IServiceEntryManager _serviceEntryManager;
+
+        /// <summary>
+        /// Defines the _typeConvertibleService
+        /// </summary>
         private readonly ITypeConvertibleService _typeConvertibleService;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FailoverInjectionInvoker"/> class.
+        /// </summary>
+        /// <param name="serviceCommandProvider">The serviceCommandProvider<see cref="IServiceCommandProvider"/></param>
+        /// <param name="serviceEntryManager">The serviceEntryManager<see cref="IServiceEntryManager"/></param>
+        /// <param name="typeConvertibleService">The typeConvertibleService<see cref="ITypeConvertibleService"/></param>
         public FailoverInjectionInvoker(IServiceCommandProvider serviceCommandProvider, IServiceEntryManager serviceEntryManager, ITypeConvertibleService typeConvertibleService)
         {
             _serviceCommandProvider = serviceCommandProvider;
@@ -20,6 +46,18 @@ namespace Surging.Core.CPlatform.Support.Implementation
             _typeConvertibleService = typeConvertibleService;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The Invoke
+        /// </summary>
+        /// <param name="parameters">The parameters<see cref="IDictionary{string, object}"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <param name="serviceKey">The serviceKey<see cref="string"/></param>
+        /// <param name="decodeJOject">The decodeJOject<see cref="bool"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var vt = _serviceCommandProvider.GetCommand(serviceId);
@@ -36,6 +74,15 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
         }
 
+        /// <summary>
+        /// The Invoke
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="parameters">The parameters<see cref="IDictionary{string, object}"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <param name="serviceKey">The serviceKey<see cref="string"/></param>
+        /// <param name="decodeJOject">The decodeJOject<see cref="bool"/></param>
+        /// <returns>The <see cref="Task{T}"/></returns>
         public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var vt = _serviceCommandProvider.GetCommand(serviceId);
@@ -67,5 +114,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
             return default(T);
         }
+
+        #endregion 方法
     }
 }

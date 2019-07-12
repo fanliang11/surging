@@ -21,21 +21,42 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DNS
 {
-    class DotNettyDnsServerMessageListener : IMessageListener, IDisposable
+    /// <summary>
+    /// Defines the <see cref="DotNettyDnsServerMessageListener" />
+    /// </summary>
+    internal class DotNettyDnsServerMessageListener : IMessageListener, IDisposable
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<DotNettyDnsServerMessageListener> _logger;
+
+        /// <summary>
+        /// Defines the _transportMessageDecoder
+        /// </summary>
         private readonly ITransportMessageDecoder _transportMessageDecoder;
+
+        /// <summary>
+        /// Defines the _transportMessageEncoder
+        /// </summary>
         private readonly ITransportMessageEncoder _transportMessageEncoder;
+
+        /// <summary>
+        /// Defines the _channel
+        /// </summary>
         private IChannel _channel;
 
-        public event ReceivedDelegate Received;
+        #endregion 字段
 
-        #endregion Field
+        #region 构造函数
 
-        #region Constructor
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DotNettyDnsServerMessageListener"/> class.
+        /// </summary>
+        /// <param name="logger">The logger<see cref="ILogger{DotNettyDnsServerMessageListener}"/></param>
+        /// <param name="codecFactory">The codecFactory<see cref="ITransportMessageCodecFactory"/></param>
         public DotNettyDnsServerMessageListener(ILogger<DotNettyDnsServerMessageListener> logger, ITransportMessageCodecFactory codecFactory)
         {
             _logger = logger;
@@ -43,8 +64,60 @@ namespace Surging.Core.DNS
             _transportMessageDecoder = codecFactory.GetDecoder();
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
+        #region 事件
+
+        /// <summary>
+        /// Defines the Received
+        /// </summary>
+        public event ReceivedDelegate Received;
+
+        #endregion 事件
+
+        #region 方法
+
+        /// <summary>
+        /// The CloseAsync
+        /// </summary>
+        public void CloseAsync()
+        {
+            Task.Run(async () =>
+            {
+                await _channel.EventLoop.ShutdownGracefullyAsync();
+                await _channel.CloseAsync();
+            }).Wait();
+        }
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            Task.Run(async () =>
+            {
+                await _channel.DisconnectAsync();
+            }).Wait();
+        }
+
+        /// <summary>
+        /// The OnReceived
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public async Task OnReceived(IMessageSender sender, TransportMessage message)
+        {
+            if (Received == null)
+                return;
+            await Received(sender, message);
+        }
+
+        /// <summary>
+        /// The StartAsync
+        /// </summary>
+        /// <param name="endPoint">The endPoint<see cref="EndPoint"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task StartAsync(EndPoint endPoint)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -68,7 +141,6 @@ namespace Surging.Core.DNS
                 })).Option(ChannelOption.SoBroadcast, true);
             try
             {
-
                 _channel = await bootstrap.BindAsync(endPoint);
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"DNS服务主机启动成功，监听地址：{endPoint}。");
@@ -77,54 +149,70 @@ namespace Surging.Core.DNS
             {
                 _logger.LogError($"DNS服务主机启动失败，监听地址：{endPoint}。 ");
             }
-
         }
 
-        public void CloseAsync()
-        {
-            Task.Run(async () =>
-            {
-                await _channel.EventLoop.ShutdownGracefullyAsync();
-                await _channel.CloseAsync();
-            }).Wait();
-        }
+        #endregion 方法
 
-        #region Implementation of IDisposable
-
-
-        public void Dispose()
-        {
-            Task.Run(async () =>
-            {
-                await _channel.DisconnectAsync();
-            }).Wait();
-        }
-
-        public async Task OnReceived(IMessageSender sender, TransportMessage message)
-        {
-            if (Received == null)
-                return;
-            await Received(sender, message);
-        }
-
-        #endregion Implementation of IDisposable
-
+        /// <summary>
+        /// Defines the <see cref="ServerHandler" />
+        /// </summary>
         private class ServerHandler : SimpleChannelInboundHandler<DatagramDnsQuery>
         {
+            #region 字段
 
-            private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
+            /// <summary>
+            /// Defines the _logger
+            /// </summary>
             private readonly ILogger _logger;
+
+            /// <summary>
+            /// Defines the _readAction
+            /// </summary>
+            private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
+
+            /// <summary>
+            /// Defines the _serializer
+            /// </summary>
             private readonly ISerializer<string> _serializer;
 
+            #endregion 字段
+
+            #region 构造函数
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ServerHandler"/> class.
+            /// </summary>
+            /// <param name="readAction">The readAction<see cref="Action{IChannelHandlerContext, TransportMessage}"/></param>
+            /// <param name="logger">The logger<see cref="ILogger"/></param>
             public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
             {
                 _readAction = readAction;
-                _logger = logger; 
+                _logger = logger;
             }
 
+            #endregion 构造函数
+
+            #region 方法
+
+            /// <summary>
+            /// The ExceptionCaught
+            /// </summary>
+            /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+            /// <param name="exception">The exception<see cref="Exception"/></param>
+            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
+            {
+                context.CloseAsync();
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
+            }
+
+            /// <summary>
+            /// The ChannelRead0
+            /// </summary>
+            /// <param name="ctx">The ctx<see cref="IChannelHandlerContext"/></param>
+            /// <param name="query">The query<see cref="DatagramDnsQuery"/></param>
             protected override void ChannelRead0(IChannelHandlerContext ctx, DatagramDnsQuery query)
             {
-
                 DatagramDnsResponse response = new DatagramDnsResponse(query.Recipient, query.Sender, query.Id);
                 DefaultDnsQuestion dnsQuestion = query.GetRecord<DefaultDnsQuestion>(DnsSection.QUESTION);
                 response.AddRecord(DnsSection.QUESTION, dnsQuestion);
@@ -135,12 +223,7 @@ namespace Surging.Core.DNS
                 }));
             }
 
-            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
-            {
-                 context.CloseAsync();
-                if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
-            }
+            #endregion 方法
         }
     }
 }

@@ -14,15 +14,41 @@ namespace Surging.Core.Caching.Internal.Implementation
     /// </summary>
     public class DefaultServiceCacheFactory : IServiceCacheFactory
     {
-        private readonly ISerializer<string> _serializer;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _addressModel
+        /// </summary>
         private readonly ConcurrentDictionary<string, CacheEndpoint> _addressModel =
                new ConcurrentDictionary<string, CacheEndpoint>();
 
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<string> _serializer;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceCacheFactory"/> class.
+        /// </summary>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
         public DefaultServiceCacheFactory(ISerializer<string> serializer)
         {
             _serializer = serializer;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The CreateServiceCachesAsync
+        /// </summary>
+        /// <param name="descriptors">The descriptors<see cref="IEnumerable{ServiceCacheDescriptor}"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceCache}}"/></returns>
         public Task<IEnumerable<ServiceCache>> CreateServiceCachesAsync(IEnumerable<ServiceCacheDescriptor> descriptors)
         {
             if (descriptors == null)
@@ -33,14 +59,18 @@ namespace Surging.Core.Caching.Internal.Implementation
 
             routes.AddRange(descriptors.Select(descriptor => new ServiceCache
             {
-                 CacheEndpoint = CreateAddress(descriptor.AddressDescriptors),
-                 CacheDescriptor = descriptor.CacheDescriptor
+                CacheEndpoint = CreateAddress(descriptor.AddressDescriptors),
+                CacheDescriptor = descriptor.CacheDescriptor
             }));
 
             return Task.FromResult(routes.AsEnumerable());
         }
-   
 
+        /// <summary>
+        /// The CreateAddress
+        /// </summary>
+        /// <param name="descriptors">The descriptors<see cref="IEnumerable{CacheEndpointDescriptor}"/></param>
+        /// <returns>The <see cref="IEnumerable{CacheEndpoint}"/></returns>
         private IEnumerable<CacheEndpoint> CreateAddress(IEnumerable<CacheEndpointDescriptor> descriptors)
         {
             if (descriptors == null)
@@ -58,5 +88,7 @@ namespace Surging.Core.Caching.Internal.Implementation
                 yield return address;
             }
         }
+
+        #endregion 方法
     }
 }

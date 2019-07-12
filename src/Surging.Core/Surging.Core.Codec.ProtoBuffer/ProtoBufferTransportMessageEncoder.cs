@@ -8,10 +8,18 @@ using System.Text;
 
 namespace Surging.Core.Codec.ProtoBuffer
 {
+    /// <summary>
+    /// Defines the <see cref="ProtoBufferTransportMessageEncoder" />
+    /// </summary>
     public sealed class ProtoBufferTransportMessageEncoder : ITransportMessageEncoder
     {
-        #region Implementation of ITransportMessageEncoder
+        #region 方法
 
+        /// <summary>
+        /// The Encode
+        /// </summary>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="byte[]"/></returns>
         public byte[] Encode(TransportMessage message)
         {
             var transportMessage = new ProtoBufferTransportMessage(message)
@@ -23,6 +31,6 @@ namespace Surging.Core.Codec.ProtoBuffer
             return SerializerUtilitys.Serialize(transportMessage);
         }
 
-        #endregion Implementation of ITransportMessageEncoder
+        #endregion 方法
     }
 }

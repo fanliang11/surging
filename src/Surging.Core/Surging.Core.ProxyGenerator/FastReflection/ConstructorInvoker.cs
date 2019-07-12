@@ -6,23 +6,81 @@ using System.Text;
 
 namespace Surging.Core.ProxyGenerator.FastReflection
 {
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IConstructorInvoker" />
+    /// </summary>
     public interface IConstructorInvoker
     {
+        #region 方法
+
+        /// <summary>
+        /// The Invoke
+        /// </summary>
+        /// <param name="parameters">The parameters<see cref="object[]"/></param>
+        /// <returns>The <see cref="object"/></returns>
         object Invoke(params object[] parameters);
+
+        #endregion 方法
     }
 
+    #endregion 接口
+
+    /// <summary>
+    /// Defines the <see cref="ConstructorInvoker" />
+    /// </summary>
     public class ConstructorInvoker : IConstructorInvoker
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the m_invoker
+        /// </summary>
         private Func<object[], object> m_invoker;
 
-        public ConstructorInfo ConstructorInfo { get; private set; }
+        #endregion 字段
 
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConstructorInvoker"/> class.
+        /// </summary>
+        /// <param name="constructorInfo">The constructorInfo<see cref="ConstructorInfo"/></param>
         public ConstructorInvoker(ConstructorInfo constructorInfo)
         {
             this.ConstructorInfo = constructorInfo;
             this.m_invoker = InitializeInvoker(constructorInfo);
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the ConstructorInfo
+        /// </summary>
+        public ConstructorInfo ConstructorInfo { get; private set; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Invoke
+        /// </summary>
+        /// <param name="parameters">The parameters<see cref="object[]"/></param>
+        /// <returns>The <see cref="object"/></returns>
+        public object Invoke(params object[] parameters)
+        {
+            return this.m_invoker(parameters);
+        }
+
+        /// <summary>
+        /// The InitializeInvoker
+        /// </summary>
+        /// <param name="constructorInfo">The constructorInfo<see cref="ConstructorInfo"/></param>
+        /// <returns>The <see cref="Func{object[], object}"/></returns>
         private Func<object[], object> InitializeInvoker(ConstructorInfo constructorInfo)
         {
             // Target: (object)new T((T0)parameters[0], (T1)parameters[1], ...)
@@ -53,18 +111,16 @@ namespace Surging.Core.ProxyGenerator.FastReflection
             return lambda.Compile();
         }
 
-        public object Invoke(params object[] parameters)
-        {
-            return this.m_invoker(parameters);
-        }
-
-        #region IConstructorInvoker Members
-
+        /// <summary>
+        /// The Invoke
+        /// </summary>
+        /// <param name="parameters">The parameters<see cref="object[]"/></param>
+        /// <returns>The <see cref="object"/></returns>
         object IConstructorInvoker.Invoke(params object[] parameters)
         {
             return this.Invoke(parameters);
         }
 
-        #endregion
+        #endregion 方法
     }
 }

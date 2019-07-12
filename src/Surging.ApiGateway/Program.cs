@@ -16,11 +16,19 @@ using Surging.Core.System.Intercept;
 using System;
 using System.IO;
 
-
 namespace Surging.ApiGateway
 {
+    /// <summary>
+    /// Defines the <see cref="Program" />
+    /// </summary>
     public class Program
     {
+        #region 方法
+
+        /// <summary>
+        /// The Main
+        /// </summary>
+        /// <param name="args">The args<see cref="string[]"/></param>
         public static void Main(string[] args)
         {
             var host = new WebHostBuilder()
@@ -32,7 +40,8 @@ namespace Surging.ApiGateway
                 .UseApplicationInsights()
                 .Build();
             host.Run();
-          
         }
+
+        #endregion 方法
     }
 }

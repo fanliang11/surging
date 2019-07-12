@@ -11,24 +11,72 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.RedisCache
 {
+    /// <summary>
+    /// Defines the <see cref="RedisProvider" />
+    /// </summary>
     [IdentifyCache(name: CacheTargetType.Redis)]
     public class RedisProvider : ICacheProvider
     {
-        #region 字段
-        private readonly Lazy<RedisContext> _context;
-        private Lazy<long> _defaultExpireTime;
+        #region 常量
+
+        /// <summary>
+        /// Defines the ExpireTime
+        /// </summary>
         private const double ExpireTime = 60D;
-        private string _keySuffix;
-        private Lazy<int> _connectTimeout;
+
+        #endregion 常量
+
+        #region 字段
+
+        /// <summary>
+        /// Defines the _cacheClient
+        /// </summary>
         private readonly Lazy<ICacheClient<IDatabase>> _cacheClient;
+
+        /// <summary>
+        /// Defines the _context
+        /// </summary>
+        private readonly Lazy<RedisContext> _context;
+
+        /// <summary>
+        /// Defines the addressResolver
+        /// </summary>
         private readonly IAddressResolver addressResolver;
-        #endregion
+
+        /// <summary>
+        /// Defines the _connectTimeout
+        /// </summary>
+        private Lazy<int> _connectTimeout;
+
+        /// <summary>
+        /// Defines the _defaultExpireTime
+        /// </summary>
+        private Lazy<long> _defaultExpireTime;
+
+        /// <summary>
+        /// Defines the _keySuffix
+        /// </summary>
+        private string _keySuffix;
+
+        #endregion 字段
 
         #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisProvider"/> class.
+        /// </summary>
+        public RedisProvider()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisProvider"/> class.
+        /// </summary>
+        /// <param name="appName">The appName<see cref="string"/></param>
         public RedisProvider(string appName)
         {
-            _context = new Lazy<RedisContext>(() => {
+            _context = new Lazy<RedisContext>(() =>
+            {
                 if (CacheContainer.IsRegistered<RedisContext>(appName))
                     return CacheContainer.GetService<RedisContext>(appName);
                 else
@@ -46,102 +94,90 @@ namespace Surging.Core.Caching.RedisCache
                 _cacheClient = new Lazy<ICacheClient<IDatabase>>(() => CacheContainer.GetInstances<ICacheClient<IDatabase>>(CacheTargetType.Redis.ToString()));
         }
 
-        public RedisProvider()
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the ConnectTimeout
+        /// </summary>
+        public int ConnectTimeout
         {
-
+            get
+            {
+                return _connectTimeout.Value;
+            }
+            set
+            {
+                _connectTimeout = new Lazy<int>(() => value);
+            }
         }
-        #endregion
 
-        #region 公共方法
+        /// <summary>
+        /// Gets or sets the DefaultExpireTime
+        /// </summary>
+        public long DefaultExpireTime
+        {
+            get
+            {
+                return _defaultExpireTime.Value;
+            }
+            set
+            {
+                _defaultExpireTime = new Lazy<long>(() => value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the KeySuffix
+        /// </summary>
+        public string KeySuffix
+        {
+            get
+            {
+                return _keySuffix;
+            }
+            set
+            {
+                _keySuffix = value;
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
         /// <summary>
         /// 添加K/V值
         /// </summary>
         /// <param name="key">键</param>
         /// <param name="value">值</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public void Add(string key, object value)
         {
             this.Add(key, value, TimeSpan.FromSeconds(ExpireTime));
         }
 
         /// <summary>
-        /// 异步添加K/V值
-        /// </summary>
-        /// <param name="key">键</param>
-        /// <param name="value">值</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public void AddAsync(string key, object value)
-        {
-            this.AddTaskAsync(key, value, TimeSpan.FromSeconds(ExpireTime));
-        }
-
-        /// <summary>
         /// 添加k/v值
         /// </summary>
         /// <param name="key">键</param>
         /// <param name="value">值</param>
         /// <param name="defaultExpire">默认配置失效时间</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public void Add(string key, object value, bool defaultExpire)
         {
             this.Add(key, value, TimeSpan.FromSeconds(defaultExpire ? DefaultExpireTime : ExpireTime));
         }
 
         /// <summary>
-        /// 异步添加K/V值
-        /// </summary>
-        /// <param name="key">键</param>
-        /// <param name="value">值</param>
-        /// <param name="defaultExpire">默认配置失效时间</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public void AddAsync(string key, object value, bool defaultExpire)
-        {
-            this.AddTaskAsync(key, value, TimeSpan.FromSeconds(defaultExpire ? DefaultExpireTime : ExpireTime));
-        }
-
-        /// <summary>
         /// 添加k/v值
         /// </summary>
         /// <param name="key">键</param>
         /// <param name="value">值</param>
         /// <param name="numOfMinutes">默认配置失效时间</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public void Add(string key, object value, long numOfMinutes)
         {
             this.Add(key, value, TimeSpan.FromMinutes(numOfMinutes));
         }
-
-
-        /// <summary>
-        /// 异步添加K/V值
-        /// </summary>
-        /// <param name="key">键</param>
-        /// <param name="value">值</param>
-        /// <param name="numOfMinutes">默认配置失效时间</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public void AddAsync(string key, object value, long numOfMinutes)
-        {
-            this.AddTaskAsync(key, value, TimeSpan.FromMinutes(numOfMinutes));
-        }
-
 
         /// <summary>
         /// 添加k/v值
@@ -149,10 +185,6 @@ namespace Surging.Core.Caching.RedisCache
         /// <param name="key">键</param>
         /// <param name="value">值</param>
         /// <param name="timeSpan">配置时间间隔</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public void Add(string key, object value, TimeSpan timeSpan)
         {
             var node = GetRedisNode(key);
@@ -173,14 +205,54 @@ namespace Surging.Core.Caching.RedisCache
         /// </summary>
         /// <param name="key">键</param>
         /// <param name="value">值</param>
+        public void AddAsync(string key, object value)
+        {
+            this.AddTaskAsync(key, value, TimeSpan.FromSeconds(ExpireTime));
+        }
+
+        /// <summary>
+        /// 异步添加K/V值
+        /// </summary>
+        /// <param name="key">键</param>
+        /// <param name="value">值</param>
+        /// <param name="defaultExpire">默认配置失效时间</param>
+        public void AddAsync(string key, object value, bool defaultExpire)
+        {
+            this.AddTaskAsync(key, value, TimeSpan.FromSeconds(defaultExpire ? DefaultExpireTime : ExpireTime));
+        }
+
+        /// <summary>
+        /// 异步添加K/V值
+        /// </summary>
+        /// <param name="key">键</param>
+        /// <param name="value">值</param>
+        /// <param name="numOfMinutes">默认配置失效时间</param>
+        public void AddAsync(string key, object value, long numOfMinutes)
+        {
+            this.AddTaskAsync(key, value, TimeSpan.FromMinutes(numOfMinutes));
+        }
+
+        /// <summary>
+        /// 异步添加K/V值
+        /// </summary>
+        /// <param name="key">键</param>
+        /// <param name="value">值</param>
         /// <param name="timeSpan">配置时间间隔</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public void AddAsync(string key, object value, TimeSpan timeSpan)
         {
             this.AddTaskAsync(key, value, timeSpan);
+        }
+
+        /// <summary>
+        /// The ConnectionAsync
+        /// </summary>
+        /// <param name="endpoint">The endpoint<see cref="CacheEndpoint"/></param>
+        /// <returns>The <see cref="Task{bool}"/></returns>
+        public async Task<bool> ConnectionAsync(CacheEndpoint endpoint)
+        {
+            var connection = await _cacheClient
+                 .Value.ConnectionAsync(endpoint, ConnectTimeout);
+            return connection;
         }
 
         /// <summary>
@@ -189,16 +261,11 @@ namespace Surging.Core.Caching.RedisCache
         /// <typeparam name="T">返回类型</typeparam>
         /// <param name="keys">KEY值集合</param>
         /// <returns>需要返回的对象集合</returns>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public IDictionary<string, T> Get<T>(IEnumerable<string> keys)
         {
             IDictionary<string, T> result = null;
             foreach (var key in keys)
             {
-
                 var node = GetRedisNode(key);
                 var redis = GetRedisClient(new RedisEndpoint()
                 {
@@ -215,60 +282,14 @@ namespace Surging.Core.Caching.RedisCache
         }
 
         /// <summary>
-        /// 根据KEY键集合异步获取返回对象集合
-        /// </summary>
-        /// <typeparam name="T">返回类型</typeparam>
-        /// <param name="keys">KEY值集合</param>
-        /// <returns>需要返回的对象集合</returns>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public async Task<IDictionary<string, T>> GetAsync<T>(IEnumerable<string> keys)
-        {
-            IDictionary<string, T> result = null;
-            foreach (var key in keys)
-            {
-
-                var node = GetRedisNode(key);
-                var redis = GetRedisClient(new RedisEndpoint()
-                {
-                    DbIndex = int.Parse(node.Db),
-                    Host = node.Host,
-                    Password = node.Password,
-                    Port = int.Parse(node.Port),
-                    MinSize = int.Parse(node.MinSize),
-                    MaxSize = int.Parse(node.MaxSize),
-                });
-                result.Add(key, await redis.GetAsync<T>(key));
-            }
-            return result;
-        }
-
-        /// <summary>
         /// 根据KEY键获取返回对象
         /// </summary>
         /// <param name="key">KEY值</param>
         /// <returns>需要返回的对象</returns>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public object Get(string key)
         {
             var o = this.Get<object>(key);
             return o;
-        }
-
-        /// <summary>
-        /// 根据KEY异步获取返回对象
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public async Task<object> GetAsync(string key)
-        {
-            var result = await this.GetTaskAsync<object>(key);
-            return result;
         }
 
         /// <summary>
@@ -277,10 +298,6 @@ namespace Surging.Core.Caching.RedisCache
         /// <typeparam name="T">返回类型</typeparam>
         /// <param name="key">KEY值</param>
         /// <returns>需要返回的对象</returns>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public T Get<T>(string key)
         {
             var node = GetRedisNode(key);
@@ -298,7 +315,42 @@ namespace Surging.Core.Caching.RedisCache
             return result;
         }
 
+        /// <summary>
+        /// 根据KEY键集合异步获取返回对象集合
+        /// </summary>
+        /// <typeparam name="T">返回类型</typeparam>
+        /// <param name="keys">KEY值集合</param>
+        /// <returns>需要返回的对象集合</returns>
+        public async Task<IDictionary<string, T>> GetAsync<T>(IEnumerable<string> keys)
+        {
+            IDictionary<string, T> result = null;
+            foreach (var key in keys)
+            {
+                var node = GetRedisNode(key);
+                var redis = GetRedisClient(new RedisEndpoint()
+                {
+                    DbIndex = int.Parse(node.Db),
+                    Host = node.Host,
+                    Password = node.Password,
+                    Port = int.Parse(node.Port),
+                    MinSize = int.Parse(node.MinSize),
+                    MaxSize = int.Parse(node.MaxSize),
+                });
+                result.Add(key, await redis.GetAsync<T>(key));
+            }
+            return result;
+        }
 
+        /// <summary>
+        /// 根据KEY异步获取返回对象
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public async Task<object> GetAsync(string key)
+        {
+            var result = await this.GetTaskAsync<object>(key);
+            return result;
+        }
 
         /// <summary>
         /// 根据KEY异步获取指定的类型对象
@@ -321,7 +373,6 @@ namespace Surging.Core.Caching.RedisCache
 
             var result = await Task.Run(() => redis.Get<T>(GetKeySuffix(key)));
             return result;
-
         }
 
         /// <summary>
@@ -330,10 +381,6 @@ namespace Surging.Core.Caching.RedisCache
         /// <param name="key">KEY键</param>
         /// <param name="obj">需要转化返回的对象</param>
         /// <returns>是否成功</returns>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public bool GetCacheTryParse(string key, out object obj)
         {
             obj = null;
@@ -346,10 +393,6 @@ namespace Surging.Core.Caching.RedisCache
         /// 根据KEY键删除缓存
         /// </summary>
         /// <param name="key">KEY键</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public void Remove(string key)
         {
             var node = GetRedisNode(key);
@@ -363,63 +406,43 @@ namespace Surging.Core.Caching.RedisCache
                 MaxSize = int.Parse(node.MaxSize),
             });
             redis.Remove(GetKeySuffix(key));
-
         }
 
         /// <summary>
         /// 根据KEY键异步删除缓存
         /// </summary>
         /// <param name="key">KEY键</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public void RemoveAsync(string key)
         {
             this.RemoveTaskAsync(key);
         }
 
-        public long DefaultExpireTime
+        /// <summary>
+        /// The AddTaskAsync
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <param name="value">The value<see cref="object"/></param>
+        /// <param name="timeSpan">The timeSpan<see cref="TimeSpan"/></param>
+        private async void AddTaskAsync(string key, object value, TimeSpan timeSpan)
         {
-            get
-            {
-                return _defaultExpireTime.Value;
-            }
-            set
-            {
-                _defaultExpireTime = new Lazy<long>(() => value);
-            }
-
+            await Task.Run(() => this.Add(key, value, timeSpan));
         }
 
-        public string KeySuffix
+        /// <summary>
+        /// The GetKeySuffix
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <returns>The <see cref="string"/></returns>
+        private string GetKeySuffix(string key)
         {
-            get
-            {
-                return _keySuffix;
-            }
-            set
-            {
-                _keySuffix = value;
-            }
+            return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
         }
 
-
-        public int ConnectTimeout
-        {
-            get
-            {
-                return _connectTimeout.Value;
-            }
-            set
-            {
-                _connectTimeout = new Lazy<int>(() => value);
-            }
-        }
-        #endregion
-
-        #region 私有方法
-
+        /// <summary>
+        /// The GetRedisClient
+        /// </summary>
+        /// <param name="info">The info<see cref="CacheEndpoint"/></param>
+        /// <returns>The <see cref="IDatabase"/></returns>
         private IDatabase GetRedisClient(CacheEndpoint info)
         {
             return
@@ -427,6 +450,11 @@ namespace Surging.Core.Caching.RedisCache
                     .GetClient(info, ConnectTimeout);
         }
 
+        /// <summary>
+        /// The GetRedisNode
+        /// </summary>
+        /// <param name="item">The item<see cref="string"/></param>
+        /// <returns>The <see cref="ConsistentHashNode"/></returns>
         private ConsistentHashNode GetRedisNode(string item)
         {
             if (addressResolver != null)
@@ -441,35 +469,26 @@ namespace Surging.Core.Caching.RedisCache
             }
         }
 
+        /// <summary>
+        /// The GetTaskAsync
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <returns>The <see cref="Task{T}"/></returns>
         private async Task<T> GetTaskAsync<T>(string key)
         {
             return await Task.Run(() => this.Get<T>(key));
         }
 
-        private async void AddTaskAsync(string key, object value, TimeSpan timeSpan)
-        {
-            await Task.Run(() => this.Add(key, value, timeSpan));
-        }
-
+        /// <summary>
+        /// The RemoveTaskAsync
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
         private async void RemoveTaskAsync(string key)
         {
             await Task.Run(() => this.Remove(key));
         }
 
-        private string GetKeySuffix(string key)
-        {
-            return string.IsNullOrEmpty(KeySuffix) ? key : string.Format("_{0}_{1}", KeySuffix, key);
-        }
-
-        public async Task<bool> ConnectionAsync(CacheEndpoint endpoint)
-        {
-            var connection = await _cacheClient
-                 .Value.ConnectionAsync(endpoint, ConnectTimeout);
-            return connection;
-        }
-
-        #endregion
-
-
+        #endregion 方法
     }
 }

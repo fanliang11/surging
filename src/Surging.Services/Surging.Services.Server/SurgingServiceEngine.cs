@@ -7,20 +7,26 @@ using System.Text;
 
 namespace Surging.Services.Server
 {
-   public class SurgingServiceEngine: VirtualPathProviderServiceEngine
+    /// <summary>
+    /// Defines the <see cref="SurgingServiceEngine" />
+    /// </summary>
+    public class SurgingServiceEngine : VirtualPathProviderServiceEngine
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SurgingServiceEngine"/> class.
+        /// </summary>
         public SurgingServiceEngine()
         {
-        
             ModuleServiceLocationFormats = new[] {
                 EnvironmentHelper.GetEnvironmentVariable("${ModulePath1}|Modules"),
             };
-            ComponentServiceLocationFormats  = new[] {
+            ComponentServiceLocationFormats = new[] {
                  EnvironmentHelper.GetEnvironmentVariable("${ComponentPath1}|Components"),
             };
-            //ModuleServiceLocationFormats = new[] {
-            //   ""
-            //};
         }
+
+        #endregion 构造函数
     }
 }

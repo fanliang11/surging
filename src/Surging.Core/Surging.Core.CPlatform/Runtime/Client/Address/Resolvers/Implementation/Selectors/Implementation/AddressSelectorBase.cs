@@ -10,7 +10,14 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
     /// </summary>
     public abstract class AddressSelectorBase : IAddressSelector
     {
-        #region Implementation of IAddressSelector
+        #region 方法
+
+        /// <summary>
+        /// 选择一个地址。
+        /// </summary>
+        /// <param name="context">地址选择上下文。</param>
+        /// <returns>地址模型。</returns>
+        protected abstract ValueTask<AddressModel> SelectAsync(AddressSelectContext context);
 
         /// <summary>
         /// 选择一个地址。
@@ -29,7 +36,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             //  var address = context.Address.ToArray();
             if (context.Address.Count() == 0)
                 throw new ArgumentException("没有任何地址信息。", nameof(context.Address));
-             
+
             if (context.Address.Count() == 1)
             {
                 return context.Address.First();
@@ -41,13 +48,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             }
         }
 
-        #endregion Implementation of IAddressSelector
-
-        /// <summary>
-        /// 选择一个地址。
-        /// </summary>
-        /// <param name="context">地址选择上下文。</param>
-        /// <returns>地址模型。</returns>
-        protected abstract ValueTask<AddressModel> SelectAsync(AddressSelectContext context);
+        #endregion 方法
     }
 }

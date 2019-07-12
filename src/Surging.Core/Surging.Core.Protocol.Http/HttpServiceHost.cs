@@ -13,23 +13,41 @@ namespace Surging.Core.Protocol.Http
     /// <summary>
     /// HTTP服务主机
     /// </summary>
-   public class HttpServiceHost : ServiceHostAbstract
+    public class HttpServiceHost : ServiceHostAbstract
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _messageListenerFactory
+        /// </summary>
         private readonly Func<EndPoint, Task<IMessageListener>> _messageListenerFactory;
+
+        /// <summary>
+        /// Defines the _serverMessageListener
+        /// </summary>
         private IMessageListener _serverMessageListener;
 
-        #endregion Field
+        #endregion 字段
 
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpServiceHost"/> class.
+        /// </summary>
+        /// <param name="messageListenerFactory">The messageListenerFactory<see cref="Func{EndPoint, Task{IMessageListener}}"/></param>
+        /// <param name="serviceExecutor">The serviceExecutor<see cref="IServiceExecutor"/></param>
         public HttpServiceHost(Func<EndPoint, Task<IMessageListener>> messageListenerFactory, IServiceExecutor serviceExecutor) : base(serviceExecutor)
         {
             _messageListenerFactory = messageListenerFactory;
         }
 
-        #region Overrides of ServiceHostAbstract
+        #endregion 构造函数
 
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public override void Dispose()
         {
             (_serverMessageListener as IDisposable)?.Dispose();
@@ -54,11 +72,17 @@ namespace Surging.Core.Protocol.Http
             };
         }
 
-        public override async Task StartAsync(string ip,int port)
+        /// <summary>
+        /// The StartAsync
+        /// </summary>
+        /// <param name="ip">The ip<see cref="string"/></param>
+        /// <param name="port">The port<see cref="int"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task StartAsync(string ip, int port)
         {
             if (_serverMessageListener != null)
                 return;
-            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort??0));
+            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort ?? 0));
             _serverMessageListener.Received += async (sender, message) =>
             {
                 await Task.Run(() =>
@@ -68,6 +92,6 @@ namespace Surging.Core.Protocol.Http
             };
         }
 
-        #endregion Overrides of ServiceHostAbstract
+        #endregion 方法
     }
 }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Surging.Core.CPlatform.Convertibles
 {
+    #region 委托
+
     /// <summary>
     /// 类型转换。
     /// </summary>
@@ -11,15 +13,25 @@ namespace Surging.Core.CPlatform.Convertibles
     /// <returns>转换之后的类型，如果无法转换则返回null。</returns>
     public delegate object TypeConvertDelegate(object instance, Type conversionType);
 
+    #endregion 委托
+
+    #region 接口
+
     /// <summary>
     /// 一个抽象的类型转换提供程序。
     /// </summary>
     public interface ITypeConvertibleProvider
     {
+        #region 方法
+
         /// <summary>
         /// 获取类型转换器。
         /// </summary>
         /// <returns>类型转换器集合。</returns>
         IEnumerable<TypeConvertDelegate> GetConverters();
+
+        #endregion 方法
     }
+
+    #endregion 接口
 }

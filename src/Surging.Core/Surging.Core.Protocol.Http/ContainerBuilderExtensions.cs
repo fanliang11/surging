@@ -9,8 +9,13 @@ using Surging.Core.CPlatform.Transport.Codec;
 
 namespace Surging.Core.Protocol.Http
 {
+    /// <summary>
+    /// Defines the <see cref="ContainerBuilderExtensions" />
+    /// </summary>
     public static class ContainerBuilderExtensions
     {
+        #region 方法
+
         /// <summary>
         /// 添加http协议
         /// </summary>
@@ -32,6 +37,10 @@ namespace Surging.Core.Protocol.Http
             return builder;
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilder"/></param>
         private static void RegisterDefaultProtocol(ContainerBuilder builder)
         {
             builder.Register(provider =>
@@ -44,7 +53,6 @@ namespace Surging.Core.Protocol.Http
             }).SingleInstance();
             builder.Register(provider =>
             {
-
                 var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Http.ToString());
                 var messageListener = provider.Resolve<DotNettyHttpServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>
@@ -52,13 +60,15 @@ namespace Surging.Core.Protocol.Http
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-
             }).As<IServiceHost>();
         }
 
+        /// <summary>
+        /// The RegisterHttpProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilder"/></param>
         private static void RegisterHttpProtocol(ContainerBuilder builder)
         {
-
             builder.Register(provider =>
             {
                 return new DotNettyHttpServerMessageListener(provider.Resolve<ILogger<DotNettyHttpServerMessageListener>>(),
@@ -76,8 +86,9 @@ namespace Surging.Core.Protocol.Http
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

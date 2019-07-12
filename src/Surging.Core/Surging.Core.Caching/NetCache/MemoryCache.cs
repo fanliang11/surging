@@ -1,20 +1,43 @@
 ﻿using Surging.Core.Caching.Utilities;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Linq;
-using System.Collections;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Surging.Core.Caching.NetCache
 {
+    /// <summary>
+    /// Defines the <see cref="MemoryCache" />
+    /// </summary>
     public class MemoryCache
     {
-        private static readonly ConcurrentDictionary<string, Tuple<string, object, DateTime>> cache = new ConcurrentDictionary<string, Tuple<string, object, DateTime>>();
-        private const  int taskInterval = 5;
+        #region 常量
 
+        /// <summary>
+        /// Defines the taskInterval
+        /// </summary>
+        private const int taskInterval = 5;
+
+        #endregion 常量
+
+        #region 字段
+
+        /// <summary>
+        /// Defines the cache
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, Tuple<string, object, DateTime>> cache = new ConcurrentDictionary<string, Tuple<string, object, DateTime>>();
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes static members of the <see cref="MemoryCache"/> class.
+        /// </summary>
         static MemoryCache()
         {
             try
@@ -27,6 +50,13 @@ namespace Surging.Core.Caching.NetCache
             }
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Count
+        /// </summary>
         public static int Count
         {
             get
@@ -34,22 +64,44 @@ namespace Surging.Core.Caching.NetCache
                 return cache.Count;
             }
         }
-        
+
+        #endregion 属性
+
+        #region 方法
+
         /// <summary>
-        /// 获得一个Cache对象
+        /// 是否存在缓存
         /// </summary>
         /// <param name="key">标识</param>
-        public static object Get(string key)
+        /// <param name="value">The value<see cref="object"/></param>
+        /// <returns></returns>
+        public static bool Contains(string key, out object value)
         {
-            Check.CheckCondition(() => string.IsNullOrEmpty(key), "key");
-            object result;
-            if (Contains(key, out result))
+            bool isSuccess = false;
+            Tuple<string, object, DateTime> item;
+            value = null;
+            if (cache.TryGetValue(key, out item))
             {
-                return result;
+                value = item.Item2;
+                isSuccess = item.Item3 > DateTime.Now;
             }
-            return null;
+            return isSuccess;
         }
 
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public static void Dispose()
+        {
+            cache.Clear();
+        }
+
+        /// <summary>
+        /// The Get
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="keys">The keys<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="IDictionary{string, T}"/></returns>
         public static IDictionary<string, T> Get<T>(IEnumerable<string> keys)
         {
             if (keys == null)
@@ -70,13 +122,28 @@ namespace Surging.Core.Caching.NetCache
             return dictionary;
         }
 
-        public static bool GetCacheTryParse(string key, out object obj)
+        /// <summary>
+        /// 获得一个Cache对象
+        /// </summary>
+        /// <param name="key">标识</param>
+        /// <returns>The <see cref="object"/></returns>
+        public static object Get(string key)
         {
             Check.CheckCondition(() => string.IsNullOrEmpty(key), "key");
-            obj = Get(key);
-            return (obj != null);
+            object result;
+            if (Contains(key, out result))
+            {
+                return result;
+            }
+            return null;
         }
-        
+
+        /// <summary>
+        /// The Get
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <returns>The <see cref="T"/></returns>
         public static T Get<T>(string key)
         {
             Check.CheckCondition(() => string.IsNullOrEmpty(key), "key");
@@ -89,30 +156,32 @@ namespace Surging.Core.Caching.NetCache
         }
 
         /// <summary>
-        /// 是否存在缓存
+        /// The GetCacheTryParse
         /// </summary>
-        /// <param name="key">标识</param>
-        /// <returns></returns>
-        public static bool Contains(string key, out object value)
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <param name="obj">The obj<see cref="object"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        public static bool GetCacheTryParse(string key, out object obj)
         {
-            bool isSuccess = false;
+            Check.CheckCondition(() => string.IsNullOrEmpty(key), "key");
+            obj = Get(key);
+            return (obj != null);
+        }
+
+        /// <summary>
+        /// The Remove
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
+        public static void Remove(string key)
+        {
             Tuple<string, object, DateTime> item;
-            value = null;
-            if (cache.TryGetValue(key, out item))
-            {
-                value = item.Item2;
-                isSuccess = item.Item3 > DateTime.Now;
-            }
-            return isSuccess;
+            cache.TryRemove(key, out item);
         }
 
-        public static void Set(string key, object value, double cacheSecond)
-        {
-            DateTime cacheTime = DateTime.Now.AddSeconds(cacheSecond);
-            var cacheValue = new Tuple<string, object, DateTime>(key, value, cacheTime);
-            cache.AddOrUpdate(key, cacheValue, (v, oldValue) => cacheValue);
-        }
-
+        /// <summary>
+        /// The RemoveByPattern
+        /// </summary>
+        /// <param name="pattern">The pattern<see cref="string"/></param>
         public static void RemoveByPattern(string pattern)
         {
             var enumerator = cache.GetEnumerator();
@@ -127,17 +196,23 @@ namespace Surging.Core.Caching.NetCache
             }
         }
 
-        public static void Remove(string key)
+        /// <summary>
+        /// The Set
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <param name="value">The value<see cref="object"/></param>
+        /// <param name="cacheSecond">The cacheSecond<see cref="double"/></param>
+        public static void Set(string key, object value, double cacheSecond)
         {
-            Tuple<string, object, DateTime> item;
-            cache.TryRemove(key,out item);
+            DateTime cacheTime = DateTime.Now.AddSeconds(cacheSecond);
+            var cacheValue = new Tuple<string, object, DateTime>(key, value, cacheTime);
+            cache.AddOrUpdate(key, cacheValue, (v, oldValue) => cacheValue);
         }
 
-        public static void Dispose()
-        {
-            cache.Clear();
-        }
-
+        /// <summary>
+        /// The Collect
+        /// </summary>
+        /// <param name="threadID">The threadID<see cref="object"/></param>
         private static void Collect(object threadID)
         {
             while (true)
@@ -158,12 +233,12 @@ namespace Surging.Core.Caching.NetCache
                 }
                 catch
                 {
-                     Dispose();
+                    Dispose();
                     GCThreadProvider.AddThread(new ParameterizedThreadStart(Collect));
                 }
-
             }
-
         }
+
+        #endregion 方法
     }
 }

@@ -1,53 +1,51 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace Surging.Core.System.Module.Attributes
 {
+    /// <summary>
+    /// Defines the <see cref="AssemblyModuleTypeAttribute" />
+    /// </summary>
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false), ComVisible(true)]
-    public sealed class  AssemblyModuleTypeAttribute:Attribute
+    public sealed class AssemblyModuleTypeAttribute : Attribute
     {
-        #region 属性
+        #region 构造函数
 
         /// <summary>
-        /// 获取模块类型
+        /// Initializes a new instance of the <see cref="AssemblyModuleTypeAttribute"/> class.
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/8</para>
-        /// </remarks>
-        public ModuleType Type
+        /// <param name="type">The type<see cref="ModuleType"/></param>
+        public AssemblyModuleTypeAttribute(ModuleType type)
         {
-            get;
-            private set;
+            Type = type;
         }
 
-        public int SerialNumber { get; private set; }
-
-        #endregion
-
-        #region 方法
-
         /// <summary>
-        /// 初始化一个新的 <see cref="AssemblyModuleTypeAttribute"/> 类实例。
+        /// Initializes a new instance of the <see cref="AssemblyModuleTypeAttribute"/> class.
         /// </summary>
         /// <param name="type">模块类型。</param>
         /// <param name="serialNumber">序号 </param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/8</para>
-        /// </remarks>
         public AssemblyModuleTypeAttribute(ModuleType type, int serialNumber)
         {
             Type = type;
             SerialNumber = serialNumber;
         }
 
+        #endregion 构造函数
 
-        public AssemblyModuleTypeAttribute(ModuleType type)
-        {
-            Type = type;
-        }
-        #endregion
+        #region 属性
+
+        /// <summary>
+        /// Gets the SerialNumber
+        /// </summary>
+        public int SerialNumber { get; private set; }
+
+        /// <summary>
+        /// Gets the Type
+        /// 获取模块类型
+        /// </summary>
+        public ModuleType Type { get; private set; }
+
+        #endregion 属性
     }
 }

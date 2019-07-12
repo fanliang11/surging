@@ -8,40 +8,45 @@ using System.Text;
 
 namespace Surging.Core.ApiGateWay
 {
+    /// <summary>
+    /// Defines the <see cref="AppConfig" />
+    /// </summary>
     public static class AppConfig
     {
-        public static IConfigurationRoot Configuration { get; set; }
+        #region 字段
 
-
-        private static string _authorizationServiceKey;
-        public static string AuthorizationServiceKey
-        {
-            get
-            {
-                return Configuration["AuthorizationServiceKey"] ?? _authorizationServiceKey;
-            }
-            internal set
-            {
-
-                _authorizationServiceKey = value;
-            }
-        }
-
-        private static string _authorizationRoutePath;
-        public static string AuthorizationRoutePath
-        {
-            get
-            {
-                return Configuration["AuthorizationRoutePath"] ?? _authorizationRoutePath;
-            }
-            internal set
-            {
-
-                _authorizationRoutePath = value;
-            }
-        }
-
+        /// <summary>
+        /// Defines the _accessTokenExpireTimeSpan
+        /// </summary>
         private static TimeSpan _accessTokenExpireTimeSpan = TimeSpan.FromMinutes(30);
+
+        /// <summary>
+        /// Defines the _authorizationRoutePath
+        /// </summary>
+        private static string _authorizationRoutePath;
+
+        /// <summary>
+        /// Defines the _authorizationServiceKey
+        /// </summary>
+        private static string _authorizationServiceKey;
+
+        /// <summary>
+        /// Defines the _cacheMode
+        /// </summary>
+        private static string _cacheMode = "MemoryCache";
+
+        /// <summary>
+        /// Defines the _tokenEndpointPath
+        /// </summary>
+        private static string _tokenEndpointPath = "oauth2/token";
+
+        #endregion 字段
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the AccessTokenExpireTimeSpan
+        /// </summary>
         public static TimeSpan AccessTokenExpireTimeSpan
         {
             get
@@ -59,45 +64,55 @@ namespace Surging.Core.ApiGateWay
             }
         }
 
-        private static string _tokenEndpointPath = "oauth2/token";
-
-        public static string  TokenEndpointPath
+        /// <summary>
+        /// Gets or sets the AuthorizationRoutePath
+        /// </summary>
+        public static string AuthorizationRoutePath
         {
             get
             {
-                return Configuration["TokenEndpointPath"] ?? _tokenEndpointPath;
+                return Configuration["AuthorizationRoutePath"] ?? _authorizationRoutePath;
             }
             internal set
             {
-                _tokenEndpointPath = value;
+                _authorizationRoutePath = value;
             }
         }
 
-        public static Register Register
+        /// <summary>
+        /// Gets or sets the AuthorizationServiceKey
+        /// </summary>
+        public static string AuthorizationServiceKey
         {
             get
             {
-                var result = new Register();
-                var section= Configuration.GetSection("Register");
-                if (section != null)
-                    result=  section.Get<Register>();
-                return result;
+                return Configuration["AuthorizationServiceKey"] ?? _authorizationServiceKey;
             }
-
+            internal set
+            {
+                _authorizationServiceKey = value;
+            }
         }
 
-        public static ServicePart ServicePart
+        /// <summary>
+        /// Gets the CacheMode
+        /// </summary>
+        public static string CacheMode
         {
             get
             {
-                var result = new ServicePart();
-                var section = Configuration.GetSection("ServicePart");
-                if (section != null)
-                    result = section.Get<ServicePart>();
-                return result;
+                return Configuration["CacheMode"] ?? _cacheMode;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the Configuration
+        /// </summary>
+        public static IConfigurationRoot Configuration { get; set; }
+
+        /// <summary>
+        /// Gets the Policy
+        /// </summary>
         public static AccessPolicy Policy
         {
             get
@@ -110,15 +125,51 @@ namespace Surging.Core.ApiGateWay
             }
         }
 
-        private static string _cacheMode = "MemoryCache";
-
-        public static string CacheMode
+        /// <summary>
+        /// Gets the Register
+        /// </summary>
+        public static Register Register
         {
             get
             {
-                return Configuration["CacheMode"] ?? _cacheMode;
+                var result = new Register();
+                var section = Configuration.GetSection("Register");
+                if (section != null)
+                    result = section.Get<Register>();
+                return result;
             }
-           
         }
+
+        /// <summary>
+        /// Gets the ServicePart
+        /// </summary>
+        public static ServicePart ServicePart
+        {
+            get
+            {
+                var result = new ServicePart();
+                var section = Configuration.GetSection("ServicePart");
+                if (section != null)
+                    result = section.Get<ServicePart>();
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the TokenEndpointPath
+        /// </summary>
+        public static string TokenEndpointPath
+        {
+            get
+            {
+                return Configuration["TokenEndpointPath"] ?? _tokenEndpointPath;
+            }
+            internal set
+            {
+                _tokenEndpointPath = value;
+            }
+        }
+
+        #endregion 属性
     }
 }

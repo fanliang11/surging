@@ -1,4 +1,3 @@
-#region License
 /*
  * HttpHeaderType.cs
  *
@@ -24,21 +23,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore.Net
 {
-  [Flags]
-  internal enum HttpHeaderType
-  {
-    Unspecified = 0,
-    Request = 1,
-    Response = 1 << 1,
-    Restricted = 1 << 2,
-    MultiValue = 1 << 3,
-    MultiValueInRequest = 1 << 4,
-    MultiValueInResponse = 1 << 5
-  }
+    #region Ã¶¾Ù
+
+    /// <summary>
+    /// Defines the HttpHeaderType
+    /// </summary>
+    [Flags]
+    internal enum HttpHeaderType
+    {
+        /// <summary>
+        /// Defines the Unspecified
+        /// </summary>
+        Unspecified = 0,
+
+        /// <summary>
+        /// Defines the Request
+        /// </summary>
+        Request = 1,
+
+        /// <summary>
+        /// Defines the Response
+        /// </summary>
+        Response = 1 << 1,
+
+        /// <summary>
+        /// Defines the Restricted
+        /// </summary>
+        Restricted = 1 << 2,
+
+        /// <summary>
+        /// Defines the MultiValue
+        /// </summary>
+        MultiValue = 1 << 3,
+
+        /// <summary>
+        /// Defines the MultiValueInRequest
+        /// </summary>
+        MultiValueInRequest = 1 << 4,
+
+        /// <summary>
+        /// Defines the MultiValueInResponse
+        /// </summary>
+        MultiValueInResponse = 1 << 5
+    }
+
+    #endregion Ã¶¾Ù
 }

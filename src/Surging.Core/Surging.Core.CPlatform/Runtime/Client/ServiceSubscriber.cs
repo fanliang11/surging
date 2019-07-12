@@ -11,18 +11,29 @@ namespace Surging.Core.CPlatform.Runtime.Client
     /// </summary>
     public class ServiceSubscriber
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the Address
         /// 订阅者服务地址。
         /// </summary>
         public IEnumerable<AddressModel> Address { get; set; }
 
         /// <summary>
+        /// Gets or sets the ServiceDescriptor
         /// 服务描述符。
         /// </summary>
         public ServiceDescriptor ServiceDescriptor { get; set; }
 
-        #region Equality members
+        #endregion 属性
 
+        #region 方法
+
+        /// <summary>
+        /// The Equals
+        /// </summary>
+        /// <param name="obj">The obj<see cref="object"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         public override bool Equals(object obj)
         {
             var model = obj as ServiceSubscriber;
@@ -38,10 +49,16 @@ namespace Surging.Core.CPlatform.Runtime.Client
             return model.Address.Count() == Address.Count() && model.Address.All(addressModel => Address.Contains(addressModel));
         }
 
+        /// <summary>
+        /// The GetHashCode
+        /// </summary>
+        /// <returns>The <see cref="int"/></returns>
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
         }
+
+        #endregion 方法
 
         public static bool operator ==(ServiceSubscriber model1, ServiceSubscriber model2)
         {
@@ -52,7 +69,5 @@ namespace Surging.Core.CPlatform.Runtime.Client
         {
             return !Equals(model1, model2);
         }
-
-        #endregion Equality members
     }
 }

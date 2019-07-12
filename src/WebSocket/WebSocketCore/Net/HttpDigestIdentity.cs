@@ -1,4 +1,3 @@
-#region License
 /*
  * HttpDigestIdentity.cs
  *
@@ -24,7 +23,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 using System.Collections.Specialized;
@@ -32,156 +30,162 @@ using System.Security.Principal;
 
 namespace WebSocketCore.Net
 {
-  /// <summary>
-  /// Holds the username and other parameters from
-  /// an HTTP Digest authentication attempt.
-  /// </summary>
-  public class HttpDigestIdentity : GenericIdentity
-  {
-    #region Private Fields
-
-    private NameValueCollection _parameters;
-
-    #endregion
-
-    #region Internal Constructors
-
-    internal HttpDigestIdentity (NameValueCollection parameters)
-      : base (parameters["username"], "Digest")
+    /// <summary>
+    /// Holds the username and other parameters from
+    /// an HTTP Digest authentication attempt.
+    /// </summary>
+    public class HttpDigestIdentity : GenericIdentity
     {
-      _parameters = parameters;
-    }
+        #region 字段
 
-    #endregion
+        /// <summary>
+        /// Defines the _parameters
+        /// </summary>
+        private NameValueCollection _parameters;
 
-    #region Public Properties
+        #endregion 字段
 
-    /// <summary>
-    /// Gets the algorithm parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the algorithm parameter.
-    /// </value>
-    public string Algorithm {
-      get {
-        return _parameters["algorithm"];
-      }
-    }
+        #region 构造函数
 
-    /// <summary>
-    /// Gets the cnonce parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the cnonce parameter.
-    /// </value>
-    public string Cnonce {
-      get {
-        return _parameters["cnonce"];
-      }
-    }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpDigestIdentity"/> class.
+        /// </summary>
+        /// <param name="parameters">The parameters<see cref="NameValueCollection"/></param>
+        internal HttpDigestIdentity(NameValueCollection parameters)
+      : base(parameters["username"], "Digest")
+        {
+            _parameters = parameters;
+        }
 
-    /// <summary>
-    /// Gets the nc parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the nc parameter.
-    /// </value>
-    public string Nc {
-      get {
-        return _parameters["nc"];
-      }
-    }
+        #endregion 构造函数
 
-    /// <summary>
-    /// Gets the nonce parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the nonce parameter.
-    /// </value>
-    public string Nonce {
-      get {
-        return _parameters["nonce"];
-      }
-    }
+        #region 属性
 
-    /// <summary>
-    /// Gets the opaque parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the opaque parameter.
-    /// </value>
-    public string Opaque {
-      get {
-        return _parameters["opaque"];
-      }
-    }
+        /// <summary>
+        /// Gets the algorithm parameter from a digest authentication attempt.
+        /// </summary>
+        public string Algorithm
+        {
+            get
+            {
+                return _parameters["algorithm"];
+            }
+        }
 
-    /// <summary>
-    /// Gets the qop parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the qop parameter.
-    /// </value>
-    public string Qop {
-      get {
-        return _parameters["qop"];
-      }
-    }
+        /// <summary>
+        /// Gets the cnonce parameter from a digest authentication attempt.
+        /// </summary>
+        public string Cnonce
+        {
+            get
+            {
+                return _parameters["cnonce"];
+            }
+        }
 
-    /// <summary>
-    /// Gets the realm parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the realm parameter.
-    /// </value>
-    public string Realm {
-      get {
-        return _parameters["realm"];
-      }
-    }
+        /// <summary>
+        /// Gets the nc parameter from a digest authentication attempt.
+        /// </summary>
+        public string Nc
+        {
+            get
+            {
+                return _parameters["nc"];
+            }
+        }
 
-    /// <summary>
-    /// Gets the response parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the response parameter.
-    /// </value>
-    public string Response {
-      get {
-        return _parameters["response"];
-      }
-    }
+        /// <summary>
+        /// Gets the nonce parameter from a digest authentication attempt.
+        /// </summary>
+        public string Nonce
+        {
+            get
+            {
+                return _parameters["nonce"];
+            }
+        }
 
-    /// <summary>
-    /// Gets the uri parameter from a digest authentication attempt.
-    /// </summary>
-    /// <value>
-    /// A <see cref="string"/> that represents the uri parameter.
-    /// </value>
-    public string Uri {
-      get {
-        return _parameters["uri"];
-      }
-    }
+        /// <summary>
+        /// Gets the opaque parameter from a digest authentication attempt.
+        /// </summary>
+        public string Opaque
+        {
+            get
+            {
+                return _parameters["opaque"];
+            }
+        }
 
-    #endregion
+        /// <summary>
+        /// Gets the qop parameter from a digest authentication attempt.
+        /// </summary>
+        public string Qop
+        {
+            get
+            {
+                return _parameters["qop"];
+            }
+        }
 
-    #region Internal Methods
+        /// <summary>
+        /// Gets the realm parameter from a digest authentication attempt.
+        /// </summary>
+        public string Realm
+        {
+            get
+            {
+                return _parameters["realm"];
+            }
+        }
 
-    internal bool IsValid (
+        /// <summary>
+        /// Gets the response parameter from a digest authentication attempt.
+        /// </summary>
+        public string Response
+        {
+            get
+            {
+                return _parameters["response"];
+            }
+        }
+
+        /// <summary>
+        /// Gets the uri parameter from a digest authentication attempt.
+        /// </summary>
+        public string Uri
+        {
+            get
+            {
+                return _parameters["uri"];
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The IsValid
+        /// </summary>
+        /// <param name="password">The password<see cref="string"/></param>
+        /// <param name="realm">The realm<see cref="string"/></param>
+        /// <param name="method">The method<see cref="string"/></param>
+        /// <param name="entity">The entity<see cref="string"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        internal bool IsValid(
       string password, string realm, string method, string entity
     )
-    {
-      var copied = new NameValueCollection (_parameters);
-      copied["password"] = password;
-      copied["realm"] = realm;
-      copied["method"] = method;
-      copied["entity"] = entity;
+        {
+            var copied = new NameValueCollection(_parameters);
+            copied["password"] = password;
+            copied["realm"] = realm;
+            copied["method"] = method;
+            copied["entity"] = entity;
 
-      var expected = AuthenticationResponse.CreateRequestDigest (copied);
-      return _parameters["response"] == expected;
+            var expected = AuthenticationResponse.CreateRequestDigest(copied);
+            return _parameters["response"] == expected;
+        }
+
+        #endregion 方法
     }
-
-    #endregion
-  }
 }

@@ -8,9 +8,19 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Consul.Internal.Cluster.Implementation.Selectors.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="ConsulAddressSelectorBase" />
+    /// </summary>
     public abstract class ConsulAddressSelectorBase : IConsulAddressSelector
     {
-        #region Implementation of IAddressSelector
+        #region 方法
+
+        /// <summary>
+        /// 选择一个地址。
+        /// </summary>
+        /// <param name="context">地址选择上下文。</param>
+        /// <returns>地址模型。</returns>
+        protected abstract ValueTask<AddressModel> SelectAsync(AddressSelectContext context);
 
         /// <summary>
         /// 选择一个地址。
@@ -28,7 +38,7 @@ namespace Surging.Core.Consul.Internal.Cluster.Implementation.Selectors.Implemen
 
             //  var address = context.Address.ToArray();
             if (context.Address.Count() == 0)
-                throw new ArgumentException("没有任何地址信息。", nameof(context.Address)); 
+                throw new ArgumentException("没有任何地址信息。", nameof(context.Address));
 
             if (context.Address.Count() == 1)
             {
@@ -41,13 +51,6 @@ namespace Surging.Core.Consul.Internal.Cluster.Implementation.Selectors.Implemen
             }
         }
 
-        #endregion Implementation of IAddressSelector
-
-        /// <summary>
-        /// 选择一个地址。
-        /// </summary>
-        /// <param name="context">地址选择上下文。</param>
-        /// <returns>地址模型。</returns>
-        protected abstract ValueTask<AddressModel> SelectAsync(AddressSelectContext context);
+        #endregion 方法
     }
 }

@@ -16,8 +16,17 @@ using System.Text;
 
 namespace Surging.Core.Protocol.WS
 {
+    /// <summary>
+    /// Defines the <see cref="WSProtocolModule" />
+    /// </summary>
     public class WSProtocolModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -53,9 +62,13 @@ namespace Surging.Core.Protocol.WS
             }
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        /// <param name="options">The options<see cref="WebSocketOptions"/></param>
         private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder, WebSocketOptions options)
         {
-
             builder.Register(provider =>
             {
                 return new DefaultWSServerMessageListener(
@@ -72,10 +85,14 @@ namespace Surging.Core.Protocol.WS
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, null);
-
             }).As<IServiceHost>();
         }
 
+        /// <summary>
+        /// The RegisterWSProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        /// <param name="options">The options<see cref="WebSocketOptions"/></param>
         private static void RegisterWSProtocol(ContainerBuilderWrapper builder, WebSocketOptions options)
         {
             builder.Register(provider =>
@@ -93,8 +110,9 @@ namespace Surging.Core.Protocol.WS
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 });
-
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

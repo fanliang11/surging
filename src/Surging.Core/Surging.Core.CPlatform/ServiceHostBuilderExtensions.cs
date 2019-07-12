@@ -1,30 +1,123 @@
 ﻿using Autofac;
-using Surging.Core.CPlatform.Support;
-using System.Linq;
-using Surging.Core.CPlatform.Routing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Address;
-using System.Threading.Tasks;
-using Surging.Core.ServiceHosting.Internal;
+using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.Engines;
+using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Support;
+using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Utilities;
+using Surging.Core.ServiceHosting.Internal;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform.Runtime.Client;
-using System;
-using Surging.Core.CPlatform.Configurations;
-using Surging.Core.CPlatform.Module;
-using System.Diagnostics;
-using Surging.Core.CPlatform.Engines;
-using Surging.Core.CPlatform.Utilities;
-using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
-using System.IO;
-using Surging.Core.CPlatform.Transport.Implementation;
+using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform
 {
+    /// <summary>
+    /// Defines the <see cref="ServiceHostBuilderExtensions" />
+    /// </summary>
     public static class ServiceHostBuilderExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The BuildServiceEngine
+        /// </summary>
+        /// <param name="container">The container<see cref="IContainer"/></param>
+        public static void BuildServiceEngine(IContainer container)
+        {
+            if (container.IsRegistered<IServiceEngine>())
+            {
+                var builder = new ContainerBuilder();
+
+                container.Resolve<IServiceEngineBuilder>().Build(builder);
+                var configBuilder = container.Resolve<IConfigurationBuilder>();
+                var appSettingPath = Path.Combine(AppConfig.ServerOptions.RootPath, "appsettings.json");
+                configBuilder.AddCPlatformFile("${appsettingspath}|" + appSettingPath, optional: false, reloadOnChange: true);
+                builder.Update(container);
+            }
+        }
+
+        /// <summary>
+        /// The ConfigureRoute
+        /// </summary>
+        /// <param name="mapper">The mapper<see cref="IContainer"/></param>
+        /// <param name="serviceToken">The serviceToken<see cref="string"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public static async Task ConfigureRoute(IContainer mapper, string serviceToken)
+        {
+            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
+             AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
+            {
+                var routeProvider = mapper.Resolve<IServiceRouteProvider>();
+                if (AppConfig.ServerOptions.EnableRouteWatch)
+                    new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
+                        async () => await routeProvider.RegisterRoutes(
+                        Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
+                else
+                    await routeProvider.RegisterRoutes(0);
+            }
+        }
+
+        /// <summary>
+        /// The UseClient
+        /// </summary>
+        /// <param name="hostBuilder">The hostBuilder<see cref="IServiceHostBuilder"/></param>
+        /// <returns>The <see cref="IServiceHostBuilder"/></returns>
+        public static IServiceHostBuilder UseClient(this IServiceHostBuilder hostBuilder)
+        {
+            return hostBuilder.MapServices(mapper =>
+            {
+                var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
+                var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
+                {
+                    i.Descriptor.Metadatas = null;
+                    return new ServiceSubscriber
+                    {
+                        Address = new[] { new IpAddressModel {
+                             Ip = Dns.GetHostEntry(Dns.GetHostName())
+                             .AddressList.FirstOrDefault<IPAddress>
+                             (a => a.AddressFamily.ToString().Equals("InterNetwork")).ToString() } },
+                        ServiceDescriptor = i.Descriptor
+                    };
+                }).ToList();
+                mapper.Resolve<IServiceSubscribeManager>().SetSubscribersAsync(addressDescriptors);
+                mapper.Resolve<IModuleProvider>().Initialize();
+            });
+        }
+
+        /// <summary>
+        /// The UseServer
+        /// </summary>
+        /// <param name="hostBuilder">The hostBuilder<see cref="IServiceHostBuilder"/></param>
+        /// <param name="options">The options<see cref="Action{SurgingServerOptions}"/></param>
+        /// <returns>The <see cref="IServiceHostBuilder"/></returns>
+        public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, Action<SurgingServerOptions> options)
+        {
+            var serverOptions = new SurgingServerOptions();
+            options.Invoke(serverOptions);
+            AppConfig.ServerOptions = serverOptions;
+            return hostBuilder.UseServer(serverOptions.Ip, serverOptions.Port, serverOptions.Token);
+        }
+
+        /// <summary>
+        /// The UseServer
+        /// </summary>
+        /// <param name="hostBuilder">The hostBuilder<see cref="IServiceHostBuilder"/></param>
+        /// <param name="ip">The ip<see cref="string"/></param>
+        /// <param name="port">The port<see cref="int"/></param>
+        /// <param name="token">The token<see cref="string"/></param>
+        /// <returns>The <see cref="IServiceHostBuilder"/></returns>
         public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, string ip, int port, string token = "True")
         {
             return hostBuilder.MapServices(async mapper =>
@@ -50,64 +143,6 @@ namespace Surging.Core.CPlatform
             });
         }
 
-        public static IServiceHostBuilder UseServer(this IServiceHostBuilder hostBuilder, Action<SurgingServerOptions> options)
-        {
-            var serverOptions = new SurgingServerOptions();
-            options.Invoke(serverOptions);
-            AppConfig.ServerOptions = serverOptions;
-            return hostBuilder.UseServer(serverOptions.Ip, serverOptions.Port, serverOptions.Token);
-        }
-
-        public static IServiceHostBuilder UseClient(this IServiceHostBuilder hostBuilder)
-        {
-            return hostBuilder.MapServices(mapper =>
-            {
-                var serviceEntryManager = mapper.Resolve<IServiceEntryManager>();
-                var addressDescriptors = serviceEntryManager.GetEntries().Select(i =>
-                {
-                    i.Descriptor.Metadatas = null;
-                    return new ServiceSubscriber
-                    {
-                        Address = new[] { new IpAddressModel {
-                             Ip = Dns.GetHostEntry(Dns.GetHostName())
-                             .AddressList.FirstOrDefault<IPAddress>
-                             (a => a.AddressFamily.ToString().Equals("InterNetwork")).ToString() } },
-                        ServiceDescriptor = i.Descriptor
-                    };
-                }).ToList();
-                mapper.Resolve<IServiceSubscribeManager>().SetSubscribersAsync(addressDescriptors);
-                mapper.Resolve<IModuleProvider>().Initialize();
-            });
-        }
-
-        public static void BuildServiceEngine(IContainer container)
-        {
-            if (container.IsRegistered<IServiceEngine>())
-            {
-                var builder = new ContainerBuilder();
-
-                container.Resolve<IServiceEngineBuilder>().Build(builder);
-                var configBuilder = container.Resolve<IConfigurationBuilder>();
-                var appSettingPath = Path.Combine(AppConfig.ServerOptions.RootPath, "appsettings.json");
-                configBuilder.AddCPlatformFile("${appsettingspath}|" + appSettingPath, optional: false, reloadOnChange: true);
-                builder.Update(container);
-            }
-        }
-
-        public static async Task ConfigureRoute(IContainer mapper, string serviceToken)
-        {
-            if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
-             AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
-            {
-                var routeProvider = mapper.Resolve<IServiceRouteProvider>();
-                if (AppConfig.ServerOptions.EnableRouteWatch)
-                    new ServiceRouteWatch(mapper.Resolve<CPlatformContainer>(),
-                        async () => await routeProvider.RegisterRoutes(
-                        Math.Round(Convert.ToDecimal(Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds), 2, MidpointRounding.AwayFromZero)));
-                else
-                    await routeProvider.RegisterRoutes(0);
-            }
-        }
-
+        #endregion 方法
     }
 }

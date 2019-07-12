@@ -6,17 +6,35 @@ using System.Text;
 
 namespace Surging.Core.Codec.ProtoBuffer.Utilities
 {
+    /// <summary>
+    /// Defines the <see cref="SerializerUtilitys" />
+    /// </summary>
     public static class SerializerUtilitys
     {
-        public static byte[] Serialize(object instance)
+        #region 方法
+
+        /// <summary>
+        /// The Deserialize
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <returns>The <see cref="T"/></returns>
+        public static T Deserialize<T>(byte[] data)
         {
-            using (var stream = new MemoryStream())
+            if (data == null)
+                return default(T);
+            using (var stream = new MemoryStream(data))
             {
-                Serializer.Serialize(stream, instance);
-                return stream.ToArray();
+                return Serializer.Deserialize<T>(stream);
             }
         }
 
+        /// <summary>
+        /// The Deserialize
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <returns>The <see cref="object"/></returns>
         public static object Deserialize(byte[] data, Type type)
         {
             if (data == null)
@@ -27,14 +45,20 @@ namespace Surging.Core.Codec.ProtoBuffer.Utilities
             }
         }
 
-        public static T Deserialize<T>(byte[] data)
+        /// <summary>
+        /// The Serialize
+        /// </summary>
+        /// <param name="instance">The instance<see cref="object"/></param>
+        /// <returns>The <see cref="byte[]"/></returns>
+        public static byte[] Serialize(object instance)
         {
-            if (data == null)
-                return default(T);
-            using (var stream = new MemoryStream(data))
+            using (var stream = new MemoryStream())
             {
-                return Serializer.Deserialize<T>(stream);
+                Serializer.Serialize(stream, instance);
+                return stream.ToArray();
             }
         }
+
+        #endregion 方法
     }
 }

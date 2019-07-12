@@ -7,18 +7,53 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper.WatcherProvider
 {
+    /// <summary>
+    /// Defines the <see cref="NodeMonitorWatcher" />
+    /// </summary>
     internal class NodeMonitorWatcher : WatcherBase
     {
-        private readonly Func<ValueTask<(ManualResetEvent, ZooKeeper)>> _zooKeeperCall;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _action
+        /// </summary>
         private readonly Action<byte[], byte[]> _action;
+
+        /// <summary>
+        /// Defines the _zooKeeperCall
+        /// </summary>
+        private readonly Func<ValueTask<(ManualResetEvent, ZooKeeper)>> _zooKeeperCall;
+
+        /// <summary>
+        /// Defines the _currentData
+        /// </summary>
         private byte[] _currentData;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NodeMonitorWatcher"/> class.
+        /// </summary>
+        /// <param name="zooKeeperCall">The zooKeeperCall<see cref="Func{ValueTask{(ManualResetEvent, ZooKeeper)}}"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="action">The action<see cref="Action{byte[], byte[]}"/></param>
         public NodeMonitorWatcher(Func<ValueTask<(ManualResetEvent, ZooKeeper)>> zooKeeperCall, string path, Action<byte[], byte[]> action) : base(path)
         {
             _zooKeeperCall = zooKeeperCall;
             _action = action;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The SetCurrentData
+        /// </summary>
+        /// <param name="currentData">The currentData<see cref="byte[]"/></param>
+        /// <returns>The <see cref="NodeMonitorWatcher"/></returns>
         public NodeMonitorWatcher SetCurrentData(byte[] currentData)
         {
             _currentData = currentData;
@@ -26,8 +61,11 @@ namespace Surging.Core.Zookeeper.WatcherProvider
             return this;
         }
 
-        #region Overrides of WatcherBase
-
+        /// <summary>
+        /// The ProcessImpl
+        /// </summary>
+        /// <param name="watchedEvent">The watchedEvent<see cref="WatchedEvent"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         protected override async Task ProcessImpl(WatchedEvent watchedEvent)
         {
             var path = Path;
@@ -44,6 +82,6 @@ namespace Surging.Core.Zookeeper.WatcherProvider
             }
         }
 
-        #endregion Overrides of WatcherBase
+        #endregion 方法
     }
 }

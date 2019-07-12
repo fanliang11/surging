@@ -7,41 +7,45 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.System.Module
 {
-   public class ContainerBuilderWrapper
+    /// <summary>
+    /// Defines the <see cref="ContainerBuilderWrapper" />
+    /// </summary>
+    public class ContainerBuilderWrapper
     {
-        /// <summary>
-        /// 获取内部容器构建对象。
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/4</para>
-        /// </remarks>
-        public ContainerBuilder ContainerBuilder { get; private set; }
+        #region 构造函数
 
         /// <summary>
-        /// 初始化一个新的 <see cref="ContainerBuilderWrapper"/> 类实例。
+        /// Initializes a new instance of the <see cref="ContainerBuilderWrapper"/> class.
         /// </summary>
         /// <param name="builder">容器构建对象。</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/4</para>
-        /// </remarks>
         public ContainerBuilderWrapper(ContainerBuilder builder)
         {
             ContainerBuilder = builder;
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the ContainerBuilder
+        /// 获取内部容器构建对象。
+        /// </summary>
+        public ContainerBuilder ContainerBuilder { get; private set; }
+
+        #endregion 属性
+
+        #region 方法
+
         /// <summary>
         /// 构建容器。
         /// </summary>
         /// <returns></returns>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/4</para>
-        /// </remarks>
         public IContainer Build()
         {
             return ContainerBuilder.Build();
         }
+
+        #endregion 方法
     }
 }

@@ -4,38 +4,34 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Cache
 {
+    /// <summary>
+    /// Defines the <see cref="CacheEndpoint" />
+    /// </summary>
     public abstract class CacheEndpoint
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the Host
         /// 主机
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public string Host
-        {
-            get;
-            set;
-        }
+        public string Host { get; set; }
 
         /// <summary>
+        /// Gets or sets the Port
         /// 端口
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public int Port
-        {
-            get;
-            set;
-        }
+        public int Port { get; set; }
 
-        public abstract override string ToString();
+        #endregion 属性
 
-        #region Equality members
+        #region 方法
 
+        /// <summary>
+        /// The Equals
+        /// </summary>
+        /// <param name="obj">The obj<see cref="object"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         public override bool Equals(object obj)
         {
             var model = obj as CacheEndpoint;
@@ -48,10 +44,22 @@ namespace Surging.Core.CPlatform.Cache
             return model.ToString() == ToString();
         }
 
+        /// <summary>
+        /// The GetHashCode
+        /// </summary>
+        /// <returns>The <see cref="int"/></returns>
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
         }
+
+        /// <summary>
+        /// The ToString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        public abstract override string ToString();
+
+        #endregion 方法
 
         public static bool operator ==(CacheEndpoint model1, CacheEndpoint model2)
         {
@@ -62,7 +70,5 @@ namespace Surging.Core.CPlatform.Cache
         {
             return !Equals(model1, model2);
         }
-        #endregion
-
     }
 }

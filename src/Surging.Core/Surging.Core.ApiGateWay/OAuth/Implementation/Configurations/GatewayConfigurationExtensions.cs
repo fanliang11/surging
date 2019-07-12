@@ -8,23 +8,22 @@ using System.Text;
 
 namespace Surging.Core.ApiGateWay.OAuth.Implementation.Configurations
 {
+    /// <summary>
+    /// Defines the <see cref="GatewayConfigurationExtensions" />
+    /// </summary>
     public static class GatewayConfigurationExtensions
     {
-        public static IConfigurationBuilder AddGatewayFile(this IConfigurationBuilder builder, string path)
-        {
-            return AddGatewayFile(builder, provider: null, path: path, optional: false, reloadOnChange: false);
-        }
+        #region 方法
 
-        public static IConfigurationBuilder AddGatewayFile(this IConfigurationBuilder builder, string path, bool optional)
-        {
-            return AddGatewayFile(builder, provider: null, path: path, optional: optional, reloadOnChange: false);
-        }
-
-        public static IConfigurationBuilder AddGatewayFile(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
-        {
-            return AddGatewayFile(builder, provider: null, path: path, optional: optional, reloadOnChange: reloadOnChange);
-        }
-
+        /// <summary>
+        /// The AddGatewayFile
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
+        /// <param name="provider">The provider<see cref="IFileProvider"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="optional">The optional<see cref="bool"/></param>
+        /// <param name="reloadOnChange">The reloadOnChange<see cref="bool"/></param>
+        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
         public static IConfigurationBuilder AddGatewayFile(this IConfigurationBuilder builder, IFileProvider provider, string path, bool optional, bool reloadOnChange)
         {
             Check.NotNull(builder, "builder");
@@ -45,5 +44,43 @@ namespace Surging.Core.ApiGateWay.OAuth.Implementation.Configurations
             AppConfig.Configuration = builder.Build();
             return builder;
         }
+
+        /// <summary>
+        /// The AddGatewayFile
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        public static IConfigurationBuilder AddGatewayFile(this IConfigurationBuilder builder, string path)
+        {
+            return AddGatewayFile(builder, provider: null, path: path, optional: false, reloadOnChange: false);
+        }
+
+        /// <summary>
+        /// The AddGatewayFile
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="optional">The optional<see cref="bool"/></param>
+        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        public static IConfigurationBuilder AddGatewayFile(this IConfigurationBuilder builder, string path, bool optional)
+        {
+            return AddGatewayFile(builder, provider: null, path: path, optional: optional, reloadOnChange: false);
+        }
+
+        /// <summary>
+        /// The AddGatewayFile
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="optional">The optional<see cref="bool"/></param>
+        /// <param name="reloadOnChange">The reloadOnChange<see cref="bool"/></param>
+        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        public static IConfigurationBuilder AddGatewayFile(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
+        {
+            return AddGatewayFile(builder, provider: null, path: path, optional: optional, reloadOnChange: reloadOnChange);
+        }
+
+        #endregion 方法
     }
 }

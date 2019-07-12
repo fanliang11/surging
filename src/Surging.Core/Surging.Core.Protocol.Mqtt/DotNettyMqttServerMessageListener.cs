@@ -25,20 +25,44 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt
 {
+    /// <summary>
+    /// Defines the <see cref="DotNettyMqttServerMessageListener" />
+    /// </summary>
     public class DotNettyMqttServerMessageListener : IMessageListener, IDisposable
     {
-        #region Field
+        #region 字段
 
-        private readonly ILogger<DotNettyMqttServerMessageListener> _logger;
-        private IChannel _channel;
+        /// <summary>
+        /// Defines the _channelService
+        /// </summary>
         private readonly IChannelService _channelService;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<DotNettyMqttServerMessageListener> _logger;
+
+        /// <summary>
+        /// Defines the _mqttBehaviorProvider
+        /// </summary>
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
-        #endregion Field
 
-        public event ReceivedDelegate Received;
+        /// <summary>
+        /// Defines the _channel
+        /// </summary>
+        private IChannel _channel;
 
-        #region Constructor
-        public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger, 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DotNettyMqttServerMessageListener"/> class.
+        /// </summary>
+        /// <param name="logger">The logger<see cref="ILogger{DotNettyMqttServerMessageListener}"/></param>
+        /// <param name="channelService">The channelService<see cref="IChannelService"/></param>
+        /// <param name="mqttBehaviorProvider">The mqttBehaviorProvider<see cref="IMqttBehaviorProvider"/></param>
+        public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger,
             IChannelService channelService,
             IMqttBehaviorProvider mqttBehaviorProvider)
         {
@@ -46,13 +70,100 @@ namespace Surging.Core.Protocol.Mqtt
             _channelService = channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
         }
-        #endregion
 
+        #endregion 构造函数
+
+        #region 事件
+
+        /// <summary>
+        /// Defines the Received
+        /// </summary>
+        public event ReceivedDelegate Received;
+
+        #endregion 事件
+
+        #region 方法
+
+        /// <summary>
+        /// The ChannelWrite
+        /// </summary>
+        /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+        /// <param name="message">The message<see cref="object"/></param>
+        /// <param name="packetType">The packetType<see cref="PacketType"/></param>
+        /// <param name="mqttHandlerService">The mqttHandlerService<see cref="ServerMqttHandlerService"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public async Task ChannelWrite(IChannelHandlerContext context, object message, PacketType packetType, ServerMqttHandlerService mqttHandlerService)
+        {
+            switch (packetType)
+            {
+                case PacketType.CONNECT:
+                    await mqttHandlerService.Login(context, message as ConnectPacket);
+                    break;
+
+                case PacketType.PUBLISH:
+                    await mqttHandlerService.Publish(context, message as PublishPacket);
+                    break;
+
+                case PacketType.PUBACK:
+                    await mqttHandlerService.PubAck(context, message as PubAckPacket);
+                    break;
+
+                case PacketType.PUBREC:
+                    await mqttHandlerService.PubRec(context, message as PubRecPacket);
+                    break;
+
+                case PacketType.PUBREL:
+                    await mqttHandlerService.PubRel(context, message as PubRelPacket);
+                    break;
+
+                case PacketType.PUBCOMP:
+                    await mqttHandlerService.PubComp(context, message as PubCompPacket);
+                    break;
+
+                case PacketType.SUBSCRIBE:
+                    await mqttHandlerService.Subscribe(context, message as SubscribePacket);
+                    break;
+
+                case PacketType.SUBACK:
+                    await mqttHandlerService.SubAck(context, message as SubAckPacket);
+                    break;
+
+                case PacketType.UNSUBSCRIBE:
+                    await mqttHandlerService.Unsubscribe(context, message as UnsubscribePacket);
+                    break;
+
+                case PacketType.UNSUBACK:
+                    await mqttHandlerService.UnsubAck(context, message as UnsubAckPacket);
+                    break;
+
+                case PacketType.PINGREQ:
+                    await mqttHandlerService.PingReq(context, message as PingReqPacket);
+                    break;
+
+                case PacketType.PINGRESP:
+                    await mqttHandlerService.PingResp(context, message as PingRespPacket);
+                    break;
+
+                case PacketType.DISCONNECT:
+                    await mqttHandlerService.Disconnect(context, message as DisconnectPacket);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public void Dispose()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// The OnReceived
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task OnReceived(IMessageSender sender, TransportMessage message)
         {
             if (Received == null)
@@ -60,6 +171,11 @@ namespace Surging.Core.Protocol.Mqtt
             await Received(sender, message);
         }
 
+        /// <summary>
+        /// The StartAsync
+        /// </summary>
+        /// <param name="endPoint">The endPoint<see cref="EndPoint"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task StartAsync(EndPoint endPoint)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -107,89 +223,93 @@ namespace Surging.Core.Protocol.Mqtt
             }
         }
 
-        public async Task ChannelWrite(IChannelHandlerContext context,object message, PacketType packetType, ServerMqttHandlerService mqttHandlerService)
-        {
-            switch (packetType)
-            {
-                case PacketType.CONNECT:
-                   await mqttHandlerService.Login(context, message as ConnectPacket);
-                    break;
-                case PacketType.PUBLISH:
-                    await mqttHandlerService.Publish(context, message as PublishPacket);
-                    break;
-                case PacketType.PUBACK:
-                    await mqttHandlerService.PubAck(context, message as PubAckPacket);
-                    break;
-                case PacketType.PUBREC:
-                    await mqttHandlerService.PubRec(context, message as PubRecPacket);
-                    break;
-                case PacketType.PUBREL:
-                    await mqttHandlerService.PubRel(context, message as PubRelPacket);
-                    break;
-                case PacketType.PUBCOMP:
-                    await mqttHandlerService.PubComp(context, message as PubCompPacket);
-                    break;
-                case PacketType.SUBSCRIBE:
-                    await mqttHandlerService.Subscribe(context, message as SubscribePacket);
-                    break;
-                case PacketType.SUBACK:
-                    await mqttHandlerService.SubAck(context, message as SubAckPacket);
-                    break;
-                case PacketType.UNSUBSCRIBE:
-                    await mqttHandlerService.Unsubscribe(context, message as UnsubscribePacket);
-                    break;
-                case PacketType.UNSUBACK:
-                    await mqttHandlerService.UnsubAck(context, message as UnsubAckPacket);
-                    break;
-                case PacketType.PINGREQ:
-                    await mqttHandlerService.PingReq(context, message as PingReqPacket);
-                    break;
-                case PacketType.PINGRESP:
-                    await mqttHandlerService.PingResp(context, message as PingRespPacket);
-                    break;
-                case PacketType.DISCONNECT:
-                    await mqttHandlerService.Disconnect(context, message as DisconnectPacket);
-                    break;
-            }
-        }
+        #endregion 方法
 
+        /// <summary>
+        /// Defines the <see cref="ServerHandler" />
+        /// </summary>
         private class ServerHandler : ChannelHandlerAdapter
         {
-            private readonly Action<IChannelHandlerContext, PacketType, object> _readAction;
-            private readonly ILogger _logger; 
+            #region 字段
 
-            public ServerHandler(Action<IChannelHandlerContext,PacketType, object> readAction, 
+            /// <summary>
+            /// Defines the _logger
+            /// </summary>
+            private readonly ILogger _logger;
+
+            /// <summary>
+            /// Defines the _readAction
+            /// </summary>
+            private readonly Action<IChannelHandlerContext, PacketType, object> _readAction;
+
+            #endregion 字段
+
+            #region 构造函数
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ServerHandler"/> class.
+            /// </summary>
+            /// <param name="readAction">The readAction<see cref="Action{IChannelHandlerContext,PacketType, object}"/></param>
+            /// <param name="logger">The logger<see cref="ILogger"/></param>
+            /// <param name="channelService">The channelService<see cref="IChannelService"/></param>
+            /// <param name="mqttBehaviorProvider">The mqttBehaviorProvider<see cref="IMqttBehaviorProvider"/></param>
+            public ServerHandler(Action<IChannelHandlerContext, PacketType, object> readAction,
                 ILogger logger,
                 IChannelService channelService,
-                IMqttBehaviorProvider mqttBehaviorProvider)  
+                IMqttBehaviorProvider mqttBehaviorProvider)
             {
                 _readAction = readAction;
                 _logger = logger;
             }
-             
-            public override void ChannelRead(IChannelHandlerContext context, object message)
-            { 
-                var buffer = message as Packet;
-                _readAction(context, buffer.PacketType, buffer);
-                ReferenceCountUtil.Release(message);
-            }
 
+            #endregion 构造函数
+
+            #region 方法
+
+            /// <summary>
+            /// The ChannelInactive
+            /// </summary>
+            /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
             public override void ChannelInactive(IChannelHandlerContext context)
             {
                 this.SetException(new InvalidOperationException("Channel is closed."));
                 base.ChannelInactive(context);
             }
 
-            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) {
-                _readAction.Invoke(context,PacketType.DISCONNECT,DisconnectPacket.Instance);
+            /// <summary>
+            /// The ChannelRead
+            /// </summary>
+            /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+            /// <param name="message">The message<see cref="object"/></param>
+            public override void ChannelRead(IChannelHandlerContext context, object message)
+            {
+                var buffer = message as Packet;
+                _readAction(context, buffer.PacketType, buffer);
+                ReferenceCountUtil.Release(message);
+            }
+
+            /// <summary>
+            /// The ExceptionCaught
+            /// </summary>
+            /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+            /// <param name="exception">The exception<see cref="Exception"/></param>
+            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
+            {
+                _readAction.Invoke(context, PacketType.DISCONNECT, DisconnectPacket.Instance);
                 this.SetException(exception);
             }
 
-            void SetException(Exception ex)
+            /// <summary>
+            /// The SetException
+            /// </summary>
+            /// <param name="ex">The ex<see cref="Exception"/></param>
+            internal void SetException(Exception ex)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError($"message:{ex.Message},Source:{ex.Source},Trace:{ex.StackTrace}");
             }
+
+            #endregion 方法
         }
     }
 }

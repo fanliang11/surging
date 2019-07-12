@@ -1,54 +1,73 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.CPlatform.Ids;
-using Surging.Core.ProxyGenerator.Utilitys;
 using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Serialization;
+using Surging.Core.ProxyGenerator.Utilitys;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
-#if !NET
-
 using System.Runtime.Loader;
-using Microsoft.Extensions.DependencyModel;
-
-#endif
-
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Surging.Core.CPlatform;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
-    public class ServiceProxyGenerater : IServiceProxyGenerater,IDisposable
+    /// <summary>
+    /// Defines the <see cref="ServiceProxyGenerater" />
+    /// </summary>
+    public class ServiceProxyGenerater : IServiceProxyGenerater, IDisposable
     {
-        #region Field
+        #region 字段
 
-        private readonly IServiceIdGenerator _serviceIdGenerator;
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<ServiceProxyGenerater> _logger;
-        #endregion Field
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _serviceIdGenerator
+        /// </summary>
+        private readonly IServiceIdGenerator _serviceIdGenerator;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceProxyGenerater"/> class.
+        /// </summary>
+        /// <param name="serviceIdGenerator">The serviceIdGenerator<see cref="IServiceIdGenerator"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{ServiceProxyGenerater}"/></param>
         public ServiceProxyGenerater(IServiceIdGenerator serviceIdGenerator, ILogger<ServiceProxyGenerater> logger)
         {
             _serviceIdGenerator = serviceIdGenerator;
             _logger = logger;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IServiceProxyGenerater
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// 生成服务代理。
         /// </summary>
         /// <param name="interfacTypes">需要被代理的接口类型。</param>
+        /// <param name="namespaces">The namespaces<see cref="IEnumerable{string}"/></param>
         /// <returns>服务代理实现。</returns>
         public IEnumerable<Type> GenerateProxys(IEnumerable<Type> interfacTypes, IEnumerable<string> namespaces)
         {
@@ -64,7 +83,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             {
                 assemblys = assemblys.Append(t.Assembly);
             }
-            var trees = interfacTypes.Select(p=>GenerateProxyTree(p,namespaces)).ToList();
+            var trees = interfacTypes.Select(p => GenerateProxyTree(p, namespaces)).ToList();
             var stream = CompilationUtilitys.CompileClientProxy(trees,
                 assemblys
                     .Select(a => MetadataReference.CreateFromFile(a.Location))
@@ -81,7 +100,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
 #else
                 var assembly = AssemblyLoadContext.Default.LoadFromStream(stream);
 #endif
-               return assembly.GetExportedTypes();
+                return assembly.GetExportedTypes();
             }
         }
 
@@ -89,6 +108,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
         /// 生成服务代理代码树。
         /// </summary>
         /// <param name="interfaceType">需要被代理的接口类型。</param>
+        /// <param name="namespaces">The namespaces<see cref="IEnumerable{string}"/></param>
         /// <returns>代码树。</returns>
         public SyntaxTree GenerateProxyTree(Type interfaceType, IEnumerable<string> namespaces)
         {
@@ -128,56 +148,11 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 .NormalizeWhitespace().SyntaxTree;
         }
 
-        #endregion Implementation of IServiceProxyGenerater
-
-        #region Private Method
-
-        private static QualifiedNameSyntax GetQualifiedNameSyntax(Type type)
-        {
-            var fullName = type.Namespace + "." + type.Name;
-            return GetQualifiedNameSyntax(fullName);
-        }
-
-        private static QualifiedNameSyntax GetQualifiedNameSyntax(string fullName)
-        {
-            return GetQualifiedNameSyntax(fullName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries));
-        }
-
-        private static QualifiedNameSyntax GetQualifiedNameSyntax(IReadOnlyCollection<string> names)
-        {
-            var ids = names.Select(IdentifierName).ToArray();
-
-            var index = 0;
-            QualifiedNameSyntax left = null;
-            while (index + 1 < names.Count)
-            {
-                left = left == null ? QualifiedName(ids[index], ids[index + 1]) : QualifiedName(left, ids[index + 1]);
-                index++;
-            }
-            return left;
-        }
-
-        private static SyntaxList<UsingDirectiveSyntax> GetUsings(IEnumerable<string> namespaces)
-        {
-            var directives = new List<UsingDirectiveSyntax>();
-           foreach(var name in namespaces)
-            {
-                directives.Add(UsingDirective(GetQualifiedNameSyntax(name)));
-            }
-            return List(
-                new[]
-                {
-                    UsingDirective(IdentifierName("System")),
-                    UsingDirective(GetQualifiedNameSyntax("System.Threading.Tasks")),
-                    UsingDirective(GetQualifiedNameSyntax("System.Collections.Generic")),
-                    UsingDirective(GetQualifiedNameSyntax(typeof(ITypeConvertibleService).Namespace)),
-                    UsingDirective(GetQualifiedNameSyntax(typeof(IRemoteInvokeService).Namespace)),
-                    UsingDirective(GetQualifiedNameSyntax(typeof(CPlatformContainer).Namespace)),
-                    UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
-                    UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
-                }.Concat(directives));
-        }
-
+        /// <summary>
+        /// The GetConstructorDeclaration
+        /// </summary>
+        /// <param name="className">The className<see cref="string"/></param>
+        /// <returns>The <see cref="ConstructorDeclarationSyntax"/></returns>
         private static ConstructorDeclarationSyntax GetConstructorDeclaration(string className)
         {
             return ConstructorDeclaration(Identifier(className))
@@ -230,12 +205,51 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 .WithBody(Block());
         }
 
-        private IEnumerable<MemberDeclarationSyntax> GenerateMethodDeclarations(IEnumerable<MethodInfo> methods)
+        /// <summary>
+        /// The GetQualifiedNameSyntax
+        /// </summary>
+        /// <param name="names">The names<see cref="IReadOnlyCollection{string}"/></param>
+        /// <returns>The <see cref="QualifiedNameSyntax"/></returns>
+        private static QualifiedNameSyntax GetQualifiedNameSyntax(IReadOnlyCollection<string> names)
         {
-            var array = methods.ToArray();
-            return array.Select(p=>GenerateMethodDeclaration(p)).ToArray();
+            var ids = names.Select(IdentifierName).ToArray();
+
+            var index = 0;
+            QualifiedNameSyntax left = null;
+            while (index + 1 < names.Count)
+            {
+                left = left == null ? QualifiedName(ids[index], ids[index + 1]) : QualifiedName(left, ids[index + 1]);
+                index++;
+            }
+            return left;
         }
 
+        /// <summary>
+        /// The GetQualifiedNameSyntax
+        /// </summary>
+        /// <param name="fullName">The fullName<see cref="string"/></param>
+        /// <returns>The <see cref="QualifiedNameSyntax"/></returns>
+        private static QualifiedNameSyntax GetQualifiedNameSyntax(string fullName)
+        {
+            return GetQualifiedNameSyntax(fullName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries));
+        }
+
+        /// <summary>
+        /// The GetQualifiedNameSyntax
+        /// </summary>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <returns>The <see cref="QualifiedNameSyntax"/></returns>
+        private static QualifiedNameSyntax GetQualifiedNameSyntax(Type type)
+        {
+            var fullName = type.Namespace + "." + type.Name;
+            return GetQualifiedNameSyntax(fullName);
+        }
+
+        /// <summary>
+        /// The GetTypeSyntax
+        /// </summary>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <returns>The <see cref="TypeSyntax"/></returns>
         private static TypeSyntax GetTypeSyntax(Type type)
         {
             //没有返回值。
@@ -262,6 +276,37 @@ namespace Surging.Core.ProxyGenerator.Implementation
                 .WithTypeArgumentList(typeArgumentListSyntax);
         }
 
+        /// <summary>
+        /// The GetUsings
+        /// </summary>
+        /// <param name="namespaces">The namespaces<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="SyntaxList{UsingDirectiveSyntax}"/></returns>
+        private static SyntaxList<UsingDirectiveSyntax> GetUsings(IEnumerable<string> namespaces)
+        {
+            var directives = new List<UsingDirectiveSyntax>();
+            foreach (var name in namespaces)
+            {
+                directives.Add(UsingDirective(GetQualifiedNameSyntax(name)));
+            }
+            return List(
+                new[]
+                {
+                    UsingDirective(IdentifierName("System")),
+                    UsingDirective(GetQualifiedNameSyntax("System.Threading.Tasks")),
+                    UsingDirective(GetQualifiedNameSyntax("System.Collections.Generic")),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(ITypeConvertibleService).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(IRemoteInvokeService).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(CPlatformContainer).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
+                }.Concat(directives));
+        }
+
+        /// <summary>
+        /// The GenerateMethodDeclaration
+        /// </summary>
+        /// <param name="method">The method<see cref="MethodInfo"/></param>
+        /// <returns>The <see cref="MemberDeclarationSyntax"/></returns>
         private MemberDeclarationSyntax GenerateMethodDeclaration(MethodInfo method)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
@@ -283,10 +328,9 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     parameterDeclarationList.Add(Parameter(
                                         Identifier(parameter.Name))
                                         .WithType(GetQualifiedNameSyntax(parameter.ParameterType)));
-
                 }
                 parameterDeclarationList.Add(Token(SyntaxKind.CommaToken));
-               
+
                 parameterList.Add(InitializerExpression(
                     SyntaxKind.ComplexElementInitializerExpression,
                     SeparatedList<ExpressionSyntax>(
@@ -317,7 +361,6 @@ namespace Surging.Core.ProxyGenerator.Implementation
             {
                 expressionSyntax = GenericName(
                 Identifier("Invoke")).WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
-
             }
             else
             {
@@ -373,11 +416,17 @@ namespace Surging.Core.ProxyGenerator.Implementation
             return declaration;
         }
 
-        public void Dispose()
-        { 
-            GC.SuppressFinalize(this);
+        /// <summary>
+        /// The GenerateMethodDeclarations
+        /// </summary>
+        /// <param name="methods">The methods<see cref="IEnumerable{MethodInfo}"/></param>
+        /// <returns>The <see cref="IEnumerable{MemberDeclarationSyntax}"/></returns>
+        private IEnumerable<MemberDeclarationSyntax> GenerateMethodDeclarations(IEnumerable<MethodInfo> methods)
+        {
+            var array = methods.ToArray();
+            return array.Select(p => GenerateMethodDeclaration(p)).ToArray();
         }
 
-        #endregion Private Method
+        #endregion 方法
     }
 }

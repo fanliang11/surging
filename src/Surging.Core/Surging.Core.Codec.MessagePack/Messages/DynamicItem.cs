@@ -8,14 +8,25 @@ using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
+    /// <summary>
+    /// Defines the <see cref="DynamicItem" />
+    /// </summary>
     [MessagePackObject]
     public class DynamicItem
     {
-        #region Constructor
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicItem"/> class.
+        /// </summary>
         public DynamicItem()
-        { }
+        {
+        }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicItem"/> class.
+        /// </summary>
+        /// <param name="value">The value<see cref="object"/></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DynamicItem(object value)
         {
@@ -25,7 +36,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
             var valueType = value.GetType();
             var code = Type.GetTypeCode(valueType);
 
-            if (code != TypeCode.Object && valueType.BaseType!=typeof(Enum))
+            if (code != TypeCode.Object && valueType.BaseType != typeof(Enum))
                 TypeName = valueType.FullName;
             else
                 TypeName = valueType.AssemblyQualifiedName;
@@ -36,18 +47,30 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 Content = SerializerUtilitys.Serialize(value);
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Property
+        #region 属性
 
+        /// <summary>
+        /// Gets or sets the Content
+        /// </summary>
+        [Key(1)]
+        public byte[] Content { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TypeName
+        /// </summary>
         [Key(0)]
         public string TypeName { get; set; }
 
-        [Key(1)]
-        public byte[] Content { get; set; }
-        #endregion Property
+        #endregion 属性
 
-        #region Public Method
+        #region 方法
+
+        /// <summary>
+        /// The Get
+        /// </summary>
+        /// <returns>The <see cref="object"/></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Get()
         {
@@ -65,6 +88,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 return SerializerUtilitys.Deserialize(Content, typeName);
             }
         }
-        #endregion Public Method
+
+        #endregion 方法
     }
 }

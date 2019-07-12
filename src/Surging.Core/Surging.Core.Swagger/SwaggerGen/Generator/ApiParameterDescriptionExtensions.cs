@@ -5,9 +5,21 @@ using System.Reflection;
 
 namespace Surging.Core.SwaggerGen
 {
+    /// <summary>
+    /// Defines the <see cref="ApiParameterDescriptionExtensions" />
+    /// </summary>
     public static class ApiParameterDescriptionExtensions
     {
-          internal static bool TryGetParameterInfo(
+        #region 方法
+
+        /// <summary>
+        /// The TryGetParameterInfo
+        /// </summary>
+        /// <param name="apiParameterDescription">The apiParameterDescription<see cref="ApiParameterDescription"/></param>
+        /// <param name="apiDescription">The apiDescription<see cref="ApiDescription"/></param>
+        /// <param name="parameterInfo">The parameterInfo<see cref="ParameterInfo"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        internal static bool TryGetParameterInfo(
             this ApiParameterDescription apiParameterDescription,
             ApiDescription apiDescription,
             out ParameterInfo parameterInfo)
@@ -25,6 +37,12 @@ namespace Surging.Core.SwaggerGen
             return (parameterInfo != null);
         }
 
+        /// <summary>
+        /// The TryGetPropertyInfo
+        /// </summary>
+        /// <param name="apiParameterDescription">The apiParameterDescription<see cref="ApiParameterDescription"/></param>
+        /// <param name="propertyInfo">The propertyInfo<see cref="PropertyInfo"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         internal static bool TryGetPropertyInfo(
             this ApiParameterDescription apiParameterDescription,
             out PropertyInfo propertyInfo)
@@ -37,5 +55,7 @@ namespace Surging.Core.SwaggerGen
 
             return (propertyInfo != null);
         }
+
+        #endregion 方法
     }
 }

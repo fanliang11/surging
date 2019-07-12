@@ -21,20 +21,72 @@ using System.Threading.Tasks;
 namespace Surging.Core.Consul
 {
     /// <summary>
-    /// consul服务路由管理器 
+    /// consul服务路由管理器
     /// </summary>
     public class ConsulServiceRouteManager : ServiceRouteManagerBase, IDisposable
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _configInfo
+        /// </summary>
         private readonly ConfigInfo _configInfo;
-        private readonly ISerializer<byte[]> _serializer;
-        private readonly IServiceRouteFactory _serviceRouteFactory;
-        private readonly ILogger<ConsulServiceRouteManager> _logger;
-        private readonly ISerializer<string> _stringSerializer;
-        private readonly IClientWatchManager _manager;
-        private ServiceRoute[] _routes;
+
+        /// <summary>
+        /// Defines the _consulClientProvider
+        /// </summary>
         private readonly IConsulClientProvider _consulClientProvider;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<ConsulServiceRouteManager> _logger;
+
+        /// <summary>
+        /// Defines the _manager
+        /// </summary>
+        private readonly IClientWatchManager _manager;
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _serviceHeartbeatManager
+        /// </summary>
         private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
 
+        /// <summary>
+        /// Defines the _serviceRouteFactory
+        /// </summary>
+        private readonly IServiceRouteFactory _serviceRouteFactory;
+
+        /// <summary>
+        /// Defines the _stringSerializer
+        /// </summary>
+        private readonly ISerializer<string> _stringSerializer;
+
+        /// <summary>
+        /// Defines the _routes
+        /// </summary>
+        private ServiceRoute[] _routes;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsulServiceRouteManager"/> class.
+        /// </summary>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{byte[]}"/></param>
+        /// <param name="stringSerializer">The stringSerializer<see cref="ISerializer{string}"/></param>
+        /// <param name="manager">The manager<see cref="IClientWatchManager"/></param>
+        /// <param name="serviceRouteFactory">The serviceRouteFactory<see cref="IServiceRouteFactory"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{ConsulServiceRouteManager}"/></param>
+        /// <param name="serviceHeartbeatManager">The serviceHeartbeatManager<see cref="IServiceHeartbeatManager"/></param>
+        /// <param name="consulClientProvider">The consulClientProvider<see cref="IConsulClientProvider"/></param>
         public ConsulServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceRouteFactory serviceRouteFactory,
        ILogger<ConsulServiceRouteManager> logger,
@@ -50,6 +102,10 @@ namespace Surging.Core.Consul
             _serviceHeartbeatManager = serviceHeartbeatManager;
             EnterRoutes().Wait();
         }
+
+        #endregion 构造函数
+
+        #region 方法
 
         /// <summary>
         /// 清空服务路由
@@ -74,6 +130,9 @@ namespace Surging.Core.Consul
             }
         }
 
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public void Dispose()
         {
         }
@@ -88,6 +147,33 @@ namespace Surging.Core.Consul
             return _routes;
         }
 
+        /// <summary>
+        /// The RemveAddressAsync
+        /// </summary>
+        /// <param name="Address">The Address<see cref="IEnumerable{AddressModel}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
+        {
+            var routes = await GetRoutesAsync();
+            try
+            {
+                foreach (var route in routes)
+                {
+                    route.Address = route.Address.Except(Address);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            await base.SetRoutesAsync(routes);
+        }
+
+        /// <summary>
+        /// The SetRoutesAsync
+        /// </summary>
+        /// <param name="routes">The routes<see cref="IEnumerable{ServiceRoute}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
             var locks = await CreateLock();
@@ -122,23 +208,11 @@ namespace Surging.Core.Consul
             }
         }
 
-        public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
-        {
-            var routes = await GetRoutesAsync();
-            try
-            {
-                foreach (var route in routes)
-                {
-                    route.Address = route.Address.Except(Address);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            await base.SetRoutesAsync(routes);
-        }
-
+        /// <summary>
+        /// The SetRoutesAsync
+        /// </summary>
+        /// <param name="routes">The routes<see cref="IEnumerable{ServiceRouteDescriptor}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         protected override async Task SetRoutesAsync(IEnumerable<ServiceRouteDescriptor> routes)
         {
             var clients = await _consulClientProvider.GetClients();
@@ -153,29 +227,97 @@ namespace Surging.Core.Consul
             }
         }
 
-        #region 私有方法
-
-        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes, AddressModel hostAddr)
+        /// <summary>
+        /// The DataEquals
+        /// </summary>
+        /// <param name="data1">The data1<see cref="IReadOnlyList{byte}"/></param>
+        /// <param name="data2">The data2<see cref="IReadOnlyList{byte}"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
         {
-            routes = routes.ToArray();
-            var clients = await _consulClientProvider.GetClients();
-            foreach (var client in clients)
+            if (data1.Count != data2.Count)
+                return false;
+            for (var i = 0; i < data1.Count; i++)
             {
-                if (_routes != null)
-                {
-                    var oldRouteIds = _routes.Select(i => i.ServiceDescriptor.Id).ToArray();
-                    var newRouteIds = routes.Select(i => i.ServiceDescriptor.Id).ToArray();
-                    var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
-                    foreach (var deletedRouteId in deletedRouteIds)
-                    {
-                        var addresses = _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p => p.Address).FirstOrDefault();
-                        if (addresses.Contains(hostAddr))
-                            await client.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
-                    }
-                }
+                var b1 = data1[i];
+                var b2 = data2[i];
+                if (b1 != b2)
+                    return false;
             }
+            return true;
         }
 
+        /// <summary>
+        /// 数据更新
+        /// </summary>
+        /// <param name="oldChildrens">旧的节点信息</param>
+        /// <param name="newChildrens">最新的节点信息</param>
+        /// <returns></returns>
+        private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
+        {
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"旧的节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的路由节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的路由节点：{string.Join(",", createdChildrens)}");
+
+            //获取新增的路由信息。
+            var newRoutes = (await GetRoutes(createdChildrens)).ToArray();
+
+            var routes = _routes.ToArray();
+            lock (_routes)
+            {
+                _routes = _routes
+    //删除无效的节点路由。
+    .Where(i => !deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}"))
+    //连接上新的路由。
+    .Concat(newRoutes)
+    .ToArray();
+            }
+            //需要删除的路由集合。
+            var deletedRoutes = routes.Where(i => deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
+
+            //触发路由被创建事件。
+            OnCreated(newRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("路由数据更新成功。");
+        }
+
+        /// <summary>
+        /// 转化路径集合
+        /// </summary>
+        /// <param name="datas">信息数据集合</param>
+        /// <returns>返回路径集合</returns>
+        private async Task<string[]> ConvertPaths(string[] datas)
+        {
+            List<string> paths = new List<string>();
+            foreach (var data in datas)
+            {
+                var result = await GetRouteData(data);
+                var serviceId = result?.ServiceDescriptor.Id;
+                if (!string.IsNullOrEmpty(serviceId))
+                    paths.Add(serviceId);
+            }
+            return paths.ToArray();
+        }
+
+        /// <summary>
+        /// The CreateLock
+        /// </summary>
+        /// <returns>The <see cref="Task{List{IDistributedLock}}"/></returns>
         private async Task<List<IDistributedLock>> CreateLock()
         {
             var result = new List<IDistributedLock>();
@@ -190,87 +332,10 @@ namespace Surging.Core.Consul
             return result;
         }
 
-        private async Task<ServiceRoute> GetRoute(byte[] data)
-        {
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"准备转换服务路由，配置内容：{Encoding.UTF8.GetString(data)}。");
-
-            if (data == null)
-                return null;
-
-            var descriptor = _serializer.Deserialize<byte[], ServiceRouteDescriptor>(data);
-            return (await _serviceRouteFactory.CreateServiceRoutesAsync(new[] { descriptor })).First();
-        }
-
-        private async Task<ServiceRoute[]> GetRouteDatas(string[] routes)
-        {
-            List<ServiceRoute> serviceRoutes = new List<ServiceRoute>();
-            foreach (var route in routes)
-            {
-                var serviceRoute = await GetRouteData(route);
-                serviceRoutes.Add(serviceRoute);
-            }
-            return serviceRoutes.ToArray();
-        }
-
-        private async Task<ServiceRoute> GetRouteData(string data)
-        {
-            if (data == null)
-                return null;
-
-            var descriptor = _stringSerializer.Deserialize(data, typeof(ServiceRouteDescriptor)) as ServiceRouteDescriptor;
-            return (await _serviceRouteFactory.CreateServiceRoutesAsync(new[] { descriptor })).First();
-        }
-
-        private async Task<ServiceRoute[]> GetRoutes(IEnumerable<string> childrens)
-        {
-
-            childrens = childrens.ToArray();
-            var routes = new List<ServiceRoute>(childrens.Count());
-
-            foreach (var children in childrens)
-            {
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                    _logger.LogDebug($"准备从节点：{children}中获取路由信息。");
-
-                var route = await GetRoute(children);
-                if (route != null)
-                    routes.Add(route);
-            }
-
-            return routes.ToArray();
-        }
-
-        private async Task<ServiceRoute> GetRoute(string path)
-        {
-            ServiceRoute result = null;
-            var client = await GetConsulClient();
-            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
-                async (oldData, newData) => await NodeChange(oldData, newData), tmpPath =>
-                {
-                    var index = tmpPath.LastIndexOf("/");
-                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
-                });
-
-            var queryResult = await client.KV.Keys(path);
-            if (queryResult.Response != null)
-            {
-                var data = (await client.GetDataAsync(path));
-                if (data != null)
-                {
-                    watcher.SetCurrentData(data);
-                    result = await GetRoute(data);
-                }
-            }
-            return result;
-        }
-
-        private async ValueTask<ConsulClient> GetConsulClient()
-        {
-            var client = await _consulClientProvider.GetClient();
-            return client;
-        }
-
+        /// <summary>
+        /// The EnterRoutes
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task EnterRoutes()
         {
             if (_routes != null && _routes.Length > 0)
@@ -305,38 +370,121 @@ namespace Surging.Core.Consul
             }
         }
 
-        private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
+        /// <summary>
+        /// The GetConsulClient
+        /// </summary>
+        /// <returns>The <see cref="ValueTask{ConsulClient}"/></returns>
+        private async ValueTask<ConsulClient> GetConsulClient()
         {
-            if (data1.Count != data2.Count)
-                return false;
-            for (var i = 0; i < data1.Count; i++)
-            {
-                var b1 = data1[i];
-                var b2 = data2[i];
-                if (b1 != b2)
-                    return false;
-            }
-            return true;
+            var client = await _consulClientProvider.GetClient();
+            return client;
         }
 
         /// <summary>
-        /// 转化路径集合
+        /// The GetRoute
         /// </summary>
-        /// <param name="datas">信息数据集合</param>
-        /// <returns>返回路径集合</returns>
-        private async Task<string[]> ConvertPaths(string[] datas)
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
+        private async Task<ServiceRoute> GetRoute(byte[] data)
         {
-            List<string> paths = new List<string>();
-            foreach (var data in datas)
-            {
-                var result = await GetRouteData(data);
-                var serviceId = result?.ServiceDescriptor.Id;
-                if (!string.IsNullOrEmpty(serviceId))
-                    paths.Add(serviceId);
-            }
-            return paths.ToArray();
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"准备转换服务路由，配置内容：{Encoding.UTF8.GetString(data)}。");
+
+            if (data == null)
+                return null;
+
+            var descriptor = _serializer.Deserialize<byte[], ServiceRouteDescriptor>(data);
+            return (await _serviceRouteFactory.CreateServiceRoutesAsync(new[] { descriptor })).First();
         }
 
+        /// <summary>
+        /// The GetRoute
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
+        private async Task<ServiceRoute> GetRoute(string path)
+        {
+            ServiceRoute result = null;
+            var client = await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+                async (oldData, newData) => await NodeChange(oldData, newData), tmpPath =>
+                {
+                    var index = tmpPath.LastIndexOf("/");
+                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                });
+
+            var queryResult = await client.KV.Keys(path);
+            if (queryResult.Response != null)
+            {
+                var data = (await client.GetDataAsync(path));
+                if (data != null)
+                {
+                    watcher.SetCurrentData(data);
+                    result = await GetRoute(data);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// The GetRouteData
+        /// </summary>
+        /// <param name="data">The data<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
+        private async Task<ServiceRoute> GetRouteData(string data)
+        {
+            if (data == null)
+                return null;
+
+            var descriptor = _stringSerializer.Deserialize(data, typeof(ServiceRouteDescriptor)) as ServiceRouteDescriptor;
+            return (await _serviceRouteFactory.CreateServiceRoutesAsync(new[] { descriptor })).First();
+        }
+
+        /// <summary>
+        /// The GetRouteDatas
+        /// </summary>
+        /// <param name="routes">The routes<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute[]}"/></returns>
+        private async Task<ServiceRoute[]> GetRouteDatas(string[] routes)
+        {
+            List<ServiceRoute> serviceRoutes = new List<ServiceRoute>();
+            foreach (var route in routes)
+            {
+                var serviceRoute = await GetRouteData(route);
+                serviceRoutes.Add(serviceRoute);
+            }
+            return serviceRoutes.ToArray();
+        }
+
+        /// <summary>
+        /// The GetRoutes
+        /// </summary>
+        /// <param name="childrens">The childrens<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute[]}"/></returns>
+        private async Task<ServiceRoute[]> GetRoutes(IEnumerable<string> childrens)
+        {
+            childrens = childrens.ToArray();
+            var routes = new List<ServiceRoute>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取路由信息。");
+
+                var route = await GetRoute(children);
+                if (route != null)
+                    routes.Add(route);
+            }
+
+            return routes.ToArray();
+        }
+
+        /// <summary>
+        /// The NodeChange
+        /// </summary>
+        /// <param name="oldData">The oldData<see cref="byte[]"/></param>
+        /// <param name="newData">The newData<see cref="byte[]"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task NodeChange(byte[] oldData, byte[] newData)
         {
             if (DataEquals(oldData, newData))
@@ -360,55 +508,32 @@ namespace Surging.Core.Consul
         }
 
         /// <summary>
-        /// 数据更新
+        /// The RemoveExceptRoutesAsync
         /// </summary>
-        /// <param name="oldChildrens">旧的节点信息</param>
-        /// <param name="newChildrens">最新的节点信息</param>
-        /// <returns></returns>
-        private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
+        /// <param name="routes">The routes<see cref="IEnumerable{ServiceRoute}"/></param>
+        /// <param name="hostAddr">The hostAddr<see cref="AddressModel"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task RemoveExceptRoutesAsync(IEnumerable<ServiceRoute> routes, AddressModel hostAddr)
         {
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
-
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"旧的节点信息：{string.Join(",", oldChildrens)}");
-
-            //计算出已被删除的节点。
-            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
-            //计算出新增的节点。
-            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
-
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"需要被删除的路由节点：{string.Join(",", deletedChildrens)}");
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"需要被添加的路由节点：{string.Join(",", createdChildrens)}");
-
-            //获取新增的路由信息。
-            var newRoutes = (await GetRoutes(createdChildrens)).ToArray();
-
-            var routes = _routes.ToArray();
-            lock (_routes)
+            routes = routes.ToArray();
+            var clients = await _consulClientProvider.GetClients();
+            foreach (var client in clients)
             {
-                #region 节点变更操作
-                _routes = _routes
-                    //删除无效的节点路由。
-                    .Where(i => !deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}"))
-                    //连接上新的路由。
-                    .Concat(newRoutes)
-                    .ToArray();
-                #endregion
+                if (_routes != null)
+                {
+                    var oldRouteIds = _routes.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var newRouteIds = routes.Select(i => i.ServiceDescriptor.Id).ToArray();
+                    var deletedRouteIds = oldRouteIds.Except(newRouteIds).ToArray();
+                    foreach (var deletedRouteId in deletedRouteIds)
+                    {
+                        var addresses = _routes.Where(p => p.ServiceDescriptor.Id == deletedRouteId).Select(p => p.Address).FirstOrDefault();
+                        if (addresses.Contains(hostAddr))
+                            await client.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
+                    }
+                }
             }
-            //需要删除的路由集合。
-            var deletedRoutes = routes.Where(i => deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}")).ToArray();
-            //触发删除事件。
-            OnRemoved(deletedRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
-
-            //触发路由被创建事件。
-            OnCreated(newRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
-
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
-                _logger.LogInformation("路由数据更新成功。");
         }
-        #endregion
+
+        #endregion 方法
     }
 }

@@ -10,6 +10,30 @@ namespace Surging.Core.CPlatform.Configurations.Remote
     /// </summary>
     public static class RemoteConfigurationExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The AddRemoteSource
+        /// </summary>
+        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
+        /// <param name="source">The source<see cref="RemoteConfigurationSource"/></param>
+        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        public static IConfigurationBuilder AddRemoteSource(this IConfigurationBuilder builder, RemoteConfigurationSource source)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            builder.Add(source);
+            return builder;
+        }
+
         /// <summary>
         /// Adds a remote configuration source to <paramref name="builder"/>.
         /// </summary>
@@ -54,7 +78,7 @@ namespace Surging.Core.CPlatform.Configurations.Remote
         /// </summary>
         /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
         /// <param name="configurationUri">The remote uri to </param>
-        /// <param name="optional">Whether the remote configuration source is optional.</param> 
+        /// <param name="optional">Whether the remote configuration source is optional.</param>
         /// <param name="events">Events that get add </param>
         /// <returns>The <see cref="IConfigurationBuilder"/>.</returns>
         public static IConfigurationBuilder AddRemoteSource(this IConfigurationBuilder builder, Uri configurationUri, bool optional, RemoteConfigurationEvents events)
@@ -83,21 +107,7 @@ namespace Surging.Core.CPlatform.Configurations.Remote
 
             return builder.AddRemoteSource(source);
         }
-        
-        public static IConfigurationBuilder AddRemoteSource(this IConfigurationBuilder builder, RemoteConfigurationSource source)
-        {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
 
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            builder.Add(source);
-            return builder;
-        }
+        #endregion 方法
     }
 }

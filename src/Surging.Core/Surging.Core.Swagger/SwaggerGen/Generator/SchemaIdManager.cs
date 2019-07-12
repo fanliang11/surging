@@ -4,17 +4,46 @@ using System.Linq;
 
 namespace Surging.Core.SwaggerGen
 {
+    /// <summary>
+    /// Defines the <see cref="SchemaIdManager" />
+    /// </summary>
     public class SchemaIdManager
     {
-        private readonly Func<Type, string> _schemaIdSelector;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _schemaIdMap
+        /// </summary>
         private readonly IDictionary<Type, string> _schemaIdMap;
 
+        /// <summary>
+        /// Defines the _schemaIdSelector
+        /// </summary>
+        private readonly Func<Type, string> _schemaIdSelector;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SchemaIdManager"/> class.
+        /// </summary>
+        /// <param name="schemaIdSelector">The schemaIdSelector<see cref="Func{Type, string}"/></param>
         public SchemaIdManager(Func<Type, string> schemaIdSelector)
         {
             _schemaIdSelector = schemaIdSelector;
             _schemaIdMap = new Dictionary<Type, string>();
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The IdFor
+        /// </summary>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <returns>The <see cref="string"/></returns>
         public string IdFor(Type type)
         {
             if (!_schemaIdMap.TryGetValue(type, out string schemaId))
@@ -33,5 +62,7 @@ namespace Surging.Core.SwaggerGen
 
             return schemaId;
         }
+
+        #endregion 方法
     }
 }

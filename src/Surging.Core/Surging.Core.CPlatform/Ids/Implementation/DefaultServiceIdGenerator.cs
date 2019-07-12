@@ -10,14 +10,29 @@ namespace Surging.Core.CPlatform.Ids.Implementation
     /// </summary>
     public class DefaultServiceIdGenerator : IServiceIdGenerator
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<DefaultServiceIdGenerator> _logger;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceIdGenerator"/> class.
+        /// </summary>
+        /// <param name="logger">The logger<see cref="ILogger{DefaultServiceIdGenerator}"/></param>
         public DefaultServiceIdGenerator(ILogger<DefaultServiceIdGenerator> logger)
         {
             _logger = logger;
         }
 
-        #region Implementation of IServiceIdFactory
+        #endregion 构造函数
+
+        #region 方法
 
         /// <summary>
         /// 生成一个服务Id。
@@ -43,6 +58,6 @@ namespace Surging.Core.CPlatform.Ids.Implementation
             return id;
         }
 
-        #endregion Implementation of IServiceIdFactory
+        #endregion 方法
     }
 }

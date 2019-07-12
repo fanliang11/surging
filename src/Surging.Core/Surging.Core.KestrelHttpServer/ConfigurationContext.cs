@@ -8,9 +8,21 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer
 {
+    /// <summary>
+    /// Defines the <see cref="ConfigurationContext" />
+    /// </summary>
     public class ConfigurationContext
     {
-        public ConfigurationContext( IServiceCollection services, 
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationContext"/> class.
+        /// </summary>
+        /// <param name="services">The services<see cref="IServiceCollection"/></param>
+        /// <param name="modules">The modules<see cref="List{AbstractModule}"/></param>
+        /// <param name="virtualPaths">The virtualPaths<see cref="string[]"/></param>
+        /// <param name="configuration">The configuration<see cref="IConfigurationRoot"/></param>
+        public ConfigurationContext(IServiceCollection services,
             List<AbstractModule> modules,
             string[] virtualPaths,
            IConfigurationRoot configuration)
@@ -21,11 +33,30 @@ namespace Surging.Core.KestrelHttpServer
             Configuration = Check.NotNull(configuration, nameof(configuration));
         }
 
-        public IConfigurationRoot Configuration { get; }
-        public IServiceCollection Services { get; }
+        #endregion 构造函数
 
+        #region 属性
+
+        /// <summary>
+        /// Gets the Configuration
+        /// </summary>
+        public IConfigurationRoot Configuration { get; }
+
+        /// <summary>
+        /// Gets the Modules
+        /// </summary>
         public List<AbstractModule> Modules { get; }
 
+        /// <summary>
+        /// Gets the Services
+        /// </summary>
+        public IServiceCollection Services { get; }
+
+        /// <summary>
+        /// Gets the VirtualPaths
+        /// </summary>
         public string[] VirtualPaths { get; }
+
+        #endregion 属性
     }
 }

@@ -19,13 +19,33 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
     /// </summary>
     public class ClrServiceEntryFactory : IClrServiceEntryFactory
     {
-        #region Field
-        private readonly CPlatformContainer _serviceProvider;
-        private readonly IServiceIdGenerator _serviceIdGenerator;
-        private readonly ITypeConvertibleService _typeConvertibleService;
-        #endregion Field
+        #region 字段
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _serviceIdGenerator
+        /// </summary>
+        private readonly IServiceIdGenerator _serviceIdGenerator;
+
+        /// <summary>
+        /// Defines the _serviceProvider
+        /// </summary>
+        private readonly CPlatformContainer _serviceProvider;
+
+        /// <summary>
+        /// Defines the _typeConvertibleService
+        /// </summary>
+        private readonly ITypeConvertibleService _typeConvertibleService;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClrServiceEntryFactory"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The serviceProvider<see cref="CPlatformContainer"/></param>
+        /// <param name="serviceIdGenerator">The serviceIdGenerator<see cref="IServiceIdGenerator"/></param>
+        /// <param name="typeConvertibleService">The typeConvertibleService<see cref="ITypeConvertibleService"/></param>
         public ClrServiceEntryFactory(CPlatformContainer serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService)
         {
             _serviceProvider = serviceProvider;
@@ -33,15 +53,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             _typeConvertibleService = typeConvertibleService;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IClrServiceEntryFactory
+        #region 方法
 
         /// <summary>
         /// 创建服务条目。
         /// </summary>
         /// <param name="service">服务类型。</param>
-        /// <param name="serviceImplementation">服务实现类型。</param>
         /// <returns>服务条目集合。</returns>
         public IEnumerable<ServiceEntry> CreateServiceEntry(Type service)
         {
@@ -51,16 +70,20 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 var serviceRoute = methodInfo.GetCustomAttribute<ServiceRouteAttribute>();
                 var routeTemplateVal = routeTemplate.RouteTemplate;
                 if (!routeTemplate.IsPrefix && serviceRoute != null)
-                     routeTemplateVal = serviceRoute.Template;
+                    routeTemplateVal = serviceRoute.Template;
                 else if (routeTemplate.IsPrefix && serviceRoute != null)
-                   routeTemplateVal = $"{ routeTemplate.RouteTemplate}/{ serviceRoute.Template}";
+                    routeTemplateVal = $"{ routeTemplate.RouteTemplate}/{ serviceRoute.Template}";
                 yield return Create(methodInfo, service.Name, routeTemplateVal);
             }
         }
-        #endregion Implementation of IClrServiceEntryFactory
 
-        #region Private Method
-
+        /// <summary>
+        /// The Create
+        /// </summary>
+        /// <param name="method">The method<see cref="MethodInfo"/></param>
+        /// <param name="serviceName">The serviceName<see cref="string"/></param>
+        /// <param name="routeTemplate">The routeTemplate<see cref="string"/></param>
+        /// <returns>The <see cref="ServiceEntry"/></returns>
         private ServiceEntry Create(MethodInfo method, string serviceName, string routeTemplate)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
@@ -118,7 +141,13 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
              }
             };
         }
-        
+
+        /// <summary>
+        /// The GetHandler
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <param name="method">The method<see cref="MethodInfo"/></param>
+        /// <returns>The <see cref="FastInvokeHandler"/></returns>
         private FastInvokeHandler GetHandler(string key, MethodInfo method)
         {
             var objInstance = ServiceResolver.Current.GetService(null, key);
@@ -129,6 +158,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             }
             return objInstance as FastInvokeHandler;
         }
-        #endregion Private Method
+
+        #endregion 方法
     }
 }

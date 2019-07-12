@@ -7,12 +7,38 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper.WatcherProvider
 {
+    /// <summary>
+    /// Defines the <see cref="ChildrenMonitorWatcher" />
+    /// </summary>
     internal class ChildrenMonitorWatcher : WatcherBase
     {
-        private readonly Func<ValueTask<(ManualResetEvent, ZooKeeper)>> _zooKeeperCall;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _action
+        /// </summary>
         private readonly Action<string[], string[]> _action;
+
+        /// <summary>
+        /// Defines the _zooKeeperCall
+        /// </summary>
+        private readonly Func<ValueTask<(ManualResetEvent, ZooKeeper)>> _zooKeeperCall;
+
+        /// <summary>
+        /// Defines the _currentData
+        /// </summary>
         private string[] _currentData = new string[0];
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChildrenMonitorWatcher"/> class.
+        /// </summary>
+        /// <param name="zooKeeperCall">The zooKeeperCall<see cref="Func{ValueTask{(ManualResetEvent, ZooKeeper)}}"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="action">The action<see cref="Action{string[], string[]}"/></param>
         public ChildrenMonitorWatcher(Func<ValueTask<(ManualResetEvent, ZooKeeper)>> zooKeeperCall, string path, Action<string[], string[]> action)
                 : base(path)
         {
@@ -20,6 +46,15 @@ namespace Surging.Core.Zookeeper.WatcherProvider
             _action = action;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The SetCurrentData
+        /// </summary>
+        /// <param name="currentData">The currentData<see cref="string[]"/></param>
+        /// <returns>The <see cref="ChildrenMonitorWatcher"/></returns>
         public ChildrenMonitorWatcher SetCurrentData(string[] currentData)
         {
             _currentData = currentData ?? new string[0];
@@ -27,12 +62,15 @@ namespace Surging.Core.Zookeeper.WatcherProvider
             return this;
         }
 
-        #region Overrides of WatcherBase
-
+        /// <summary>
+        /// The ProcessImpl
+        /// </summary>
+        /// <param name="watchedEvent">The watchedEvent<see cref="WatchedEvent"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         protected override async Task ProcessImpl(WatchedEvent watchedEvent)
         {
             var path = Path;
-            var zooKeeper =await _zooKeeperCall();
+            var zooKeeper = await _zooKeeperCall();
             Func<ChildrenMonitorWatcher> getWatcher = () => new ChildrenMonitorWatcher(_zooKeeperCall, path, _action);
             switch (watchedEvent.get_Type())
             {
@@ -68,6 +106,7 @@ namespace Surging.Core.Zookeeper.WatcherProvider
                     break;
             }
         }
-        #endregion Overrides of WatcherBase
+
+        #endregion 方法
     }
 }

@@ -7,15 +7,19 @@ namespace Surging.Core.CPlatform.Exceptions
     /// </summary>
     public class CPlatformCommunicationException : CPlatformException
     {
+        #region 构造函数
+
         /// <summary>
-        /// 初始化构造函数
+        /// Initializes a new instance of the <see cref="CPlatformCommunicationException"/> class.
         /// </summary>
         /// <param name="message">异常消息。</param>
+        /// <param name="StatusCode">The StatusCode<see cref="int"/></param>
         /// <param name="innerException">内部异常。</param>
-        public CPlatformCommunicationException(string message,int StatusCode=0, Exception innerException = null) : base(message, innerException)
+        public CPlatformCommunicationException(string message, int StatusCode = 0, Exception innerException = null) : base(message, innerException)
         {
             base.HResult = StatusCode;
         }
 
+        #endregion 构造函数
     }
 }

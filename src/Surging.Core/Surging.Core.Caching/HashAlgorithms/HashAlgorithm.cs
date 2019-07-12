@@ -7,26 +7,30 @@ namespace Surging.Core.Caching.HashAlgorithms
     /// <summary>
     /// 一致性哈希算法
     /// </summary>
-    /// <remarks>
-    /// 	<para>创建：范亮</para>
-    /// 	<para>日期：2016/4/2</para>
-    /// </remarks>
     public class HashAlgorithm : IHashAlgorithm
     {
-        #region 构造函数
-        public int Hash(string item)
-        {
-            var hash = Hash(Encoding.ASCII.GetBytes(item));
-            return (int)hash;
-        }
-        #endregion
-
         #region 常量
-        private const UInt32 m = 0x5bd1e995;
-        private const Int32 r = 24;
-        #endregion
 
-        #region 公共方法
+        /// <summary>
+        /// Defines the m
+        /// </summary>
+        private const UInt32 m = 0x5bd1e995;
+
+        /// <summary>
+        /// Defines the r
+        /// </summary>
+        private const Int32 r = 24;
+
+        #endregion 常量
+
+        #region 方法
+
+        /// <summary>
+        /// The Hash
+        /// </summary>
+        /// <param name="data">The data<see cref="Byte[]"/></param>
+        /// <param name="seed">The seed<see cref="UInt32"/></param>
+        /// <returns>The <see cref="UInt32"/></returns>
         public static UInt32 Hash(Byte[] data, UInt32 seed = 0xc58f1a7b)
         {
             var length = data.Length;
@@ -56,14 +60,17 @@ namespace Surging.Core.Caching.HashAlgorithms
                     h ^= (UInt32)(data[c] << 16);
                     h *= m;
                     break;
+
                 case 2:
                     h ^= (UInt16)(data[c++] | data[c] << 8);
                     h *= m;
                     break;
+
                 case 1:
                     h ^= data[c];
                     h *= m;
                     break;
+
                 default:
                     break;
             }
@@ -73,6 +80,18 @@ namespace Surging.Core.Caching.HashAlgorithms
             h ^= h >> 15;
             return h;
         }
-        #endregion
+
+        /// <summary>
+        /// The Hash
+        /// </summary>
+        /// <param name="item">The item<see cref="string"/></param>
+        /// <returns>The <see cref="int"/></returns>
+        public int Hash(string item)
+        {
+            var hash = Hash(Encoding.ASCII.GetBytes(item));
+            return (int)hash;
+        }
+
+        #endregion 方法
     }
 }

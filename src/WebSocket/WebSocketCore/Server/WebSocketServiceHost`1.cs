@@ -1,4 +1,3 @@
-#region License
 /*
  * WebSocketServiceHost`1.cs
  *
@@ -24,79 +23,110 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore.Server
 {
-  internal class WebSocketServiceHost<TBehavior> : WebSocketServiceHostBase
+    /// <summary>
+    /// Defines the <see cref="WebSocketServiceHost{TBehavior}" />
+    /// </summary>
+    /// <typeparam name="TBehavior"></typeparam>
+    internal class WebSocketServiceHost<TBehavior> : WebSocketServiceHostBase
     where TBehavior : WebSocketBehavior
-  {
-    #region Private Fields
+    {
+        #region 字段
 
-    private Func<TBehavior> _creator;
+        /// <summary>
+        /// Defines the _creator
+        /// </summary>
+        private Func<TBehavior> _creator;
 
-    #endregion
+        #endregion 字段
 
-    #region Internal Constructors
+        #region 构造函数
 
-    internal WebSocketServiceHost (
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketServiceHost{TBehavior}"/> class.
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="creator">The creator<see cref="Func{TBehavior}"/></param>
+        /// <param name="log">The log<see cref="Logger"/></param>
+        internal WebSocketServiceHost(
       string path, Func<TBehavior> creator, Logger log
     )
-      : this (path, creator, null, log)
-    {
-    }
+      : this(path, creator, null, log)
+        {
+        }
 
-    internal WebSocketServiceHost (
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketServiceHost{TBehavior}"/> class.
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="creator">The creator<see cref="Func{TBehavior}"/></param>
+        /// <param name="initializer">The initializer<see cref="Action{TBehavior}"/></param>
+        /// <param name="log">The log<see cref="Logger"/></param>
+        internal WebSocketServiceHost(
       string path,
       Func<TBehavior> creator,
       Action<TBehavior> initializer,
       Logger log
     )
-      : base (path, log)
-    {
-      _creator = createCreator (creator, initializer);
-    }
+      : base(path, log)
+        {
+            _creator = createCreator(creator, initializer);
+        }
 
-    #endregion
+        #endregion 构造函数
 
-    #region Public Properties
+        #region 属性
 
-    public override Type BehaviorType {
-      get {
-        return typeof (TBehavior);
-      }
-    }
+        /// <summary>
+        /// Gets the BehaviorType
+        /// </summary>
+        public override Type BehaviorType
+        {
+            get
+            {
+                return typeof(TBehavior);
+            }
+        }
 
-    #endregion
+        #endregion 属性
 
-    #region Private Methods
+        #region 方法
 
-    private Func<TBehavior> createCreator (
+        /// <summary>
+        /// The CreateSession
+        /// </summary>
+        /// <returns>The <see cref="WebSocketBehavior"/></returns>
+        protected override WebSocketBehavior CreateSession()
+        {
+            return _creator();
+        }
+
+        /// <summary>
+        /// The createCreator
+        /// </summary>
+        /// <param name="creator">The creator<see cref="Func{TBehavior}"/></param>
+        /// <param name="initializer">The initializer<see cref="Action{TBehavior}"/></param>
+        /// <returns>The <see cref="Func{TBehavior}"/></returns>
+        private Func<TBehavior> createCreator(
       Func<TBehavior> creator, Action<TBehavior> initializer
     )
-    {
-      if (initializer == null)
-        return creator;
+        {
+            if (initializer == null)
+                return creator;
 
-      return () => {
-               var ret = creator ();
-               initializer (ret);
+            return () =>
+            {
+                var ret = creator();
+                initializer(ret);
 
-               return ret;
-             };
+                return ret;
+            };
+        }
+
+        #endregion 方法
     }
-
-    #endregion
-
-    #region Protected Methods
-
-    protected override WebSocketBehavior CreateSession ()
-    {
-      return _creator ();
-    }
-
-    #endregion
-  }
 }

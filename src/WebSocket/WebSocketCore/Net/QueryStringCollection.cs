@@ -1,4 +1,3 @@
-#region License
 /*
  * QueryStringCollection.cs
  *
@@ -28,9 +27,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Patrik Torstensson <Patrik.Torstensson@labs2.com>
@@ -38,7 +35,6 @@
  * - Tim Coleman <tim@timcoleman.com>
  * - Gonzalo Paniagua Javier <gonzalo@ximian.com>
  */
-#endregion
 
 using System;
 using System.Collections.Specialized;
@@ -46,23 +42,34 @@ using System.Text;
 
 namespace WebSocketCore.Net
 {
-  internal sealed class QueryStringCollection : NameValueCollection
-  {
-    public override string ToString ()
+    /// <summary>
+    /// Defines the <see cref="QueryStringCollection" />
+    /// </summary>
+    internal sealed class QueryStringCollection : NameValueCollection
     {
-      var cnt = Count;
-      if (cnt == 0)
-        return String.Empty;
+        #region 方法
 
-      var output = new StringBuilder ();
-      var keys = AllKeys;
-      foreach (var key in keys)
-        output.AppendFormat ("{0}={1}&", key, this [key]);
+        /// <summary>
+        /// The ToString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        public override string ToString()
+        {
+            var cnt = Count;
+            if (cnt == 0)
+                return String.Empty;
 
-      if (output.Length > 0)
-        output.Length--;
+            var output = new StringBuilder();
+            var keys = AllKeys;
+            foreach (var key in keys)
+                output.AppendFormat("{0}={1}&", key, this[key]);
 
-      return output.ToString ();
+            if (output.Length > 0)
+                output.Length--;
+
+            return output.ToString();
+        }
+
+        #endregion 方法
     }
-  }
 }

@@ -12,22 +12,43 @@ using System.Net;
 
 namespace Surging.Core.KestrelHttpServer
 {
+    /// <summary>
+    /// Defines the <see cref="KestrelHttpModule" />
+    /// </summary>
     public class KestrelHttpModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ApplicationInitializationContext"/></param>
+        public virtual void Initialize(ApplicationInitializationContext builder)
+        {
+        }
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
         }
 
-        public virtual void Initialize(ApplicationInitializationContext builder)
-        {
-        }
-
-        public virtual void RegisterBuilder(WebHostContext context)
-        {
-        }
-
+        /// <summary>
+        /// The RegisterBuilder
+        /// </summary>
+        /// <param name="context">The context<see cref="ConfigurationContext"/></param>
         public virtual void RegisterBuilder(ConfigurationContext context)
+        {
+        }
+
+        /// <summary>
+        /// The RegisterBuilder
+        /// </summary>
+        /// <param name="context">The context<see cref="WebHostContext"/></param>
+        public virtual void RegisterBuilder(WebHostContext context)
         {
         }
 
@@ -50,6 +71,10 @@ namespace Surging.Core.KestrelHttpServer
             }
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
@@ -73,10 +98,13 @@ namespace Surging.Core.KestrelHttpServer
                     await messageListener.StartAsync(address?.Address, address?.Port);
                     return messageListener;
                 }, executor, messageListener);
-
             }).As<IServiceHost>();
         }
 
+        /// <summary>
+        /// The RegisterHttpProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterHttpProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
@@ -98,11 +126,12 @@ namespace Surging.Core.KestrelHttpServer
                 return new HttpServiceHost(async endPoint =>
                 {
                     var address = endPoint as IPEndPoint;
-                    await messageListener.StartAsync(address?.Address,address?.Port);
+                    await messageListener.StartAsync(address?.Address, address?.Port);
                     return messageListener;
                 }, executor, messageListener);
-
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

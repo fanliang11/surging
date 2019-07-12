@@ -4,9 +4,23 @@ using System.Text;
 
 namespace Surging.Core.ApiGateWay.Configurations
 {
-   public class Services
+    /// <summary>
+    /// Defines the <see cref="Services" />
+    /// </summary>
+    public class Services
     {
-        public  List<ServiceAggregation> serviceAggregation { get; set; }
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the serviceAggregation
+        /// </summary>
+        public List<ServiceAggregation> serviceAggregation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the UrlMapping
+        /// </summary>
         public string UrlMapping { get; set; }
+
+        #endregion 属性
     }
 }

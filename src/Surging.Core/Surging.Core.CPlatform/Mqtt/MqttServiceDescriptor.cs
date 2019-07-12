@@ -12,16 +12,24 @@ namespace Surging.Core.CPlatform.Mqtt
     /// </summary>
     public class MqttEndpointDescriptor
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the Type
         /// 地址类型。
         /// </summary>
         [JsonIgnore]
-        public string Type { get; set; } 
+        public string Type { get; set; }
 
         /// <summary>
+        /// Gets or sets the Value
         /// 地址值。
         /// </summary>
         public string Value { get; set; }
+
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 创建一个描述符。
@@ -38,18 +46,29 @@ namespace Surging.Core.CPlatform.Mqtt
                 Value = serializer.Serialize(address)
             };
         }
+
+        #endregion 方法
     }
 
+    /// <summary>
+    /// Defines the <see cref="MqttServiceDescriptor" />
+    /// </summary>
     public class MqttServiceDescriptor
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the AddressDescriptors
         /// Mqtt地址描述符集合。
         /// </summary>
         public IEnumerable<MqttEndpointDescriptor> AddressDescriptors { get; set; }
 
         /// <summary>
+        /// Gets or sets the MqttDescriptor
         /// Mqtt描述符。
         /// </summary>
         public MqttDescriptor MqttDescriptor { get; set; }
+
+        #endregion 属性
     }
 }

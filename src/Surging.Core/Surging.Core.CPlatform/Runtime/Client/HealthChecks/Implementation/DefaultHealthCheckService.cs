@@ -12,12 +12,13 @@ using System.Threading.Tasks;
 namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
 {
     /// <summary>
-    /// 默认健康检查服务(每10秒会检查一次服务状态，在构造函数中添加服务管理事件) 
+    /// 默认健康检查服务(每10秒会检查一次服务状态，在构造函数中添加服务管理事件)
     /// </summary>
     public class DefaultHealthCheckService : IHealthCheckService, IDisposable
     {
         private readonly ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry> _dictionary =
             new ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry>();
+
         private readonly IServiceRouteManager _serviceRouteManager;
         private readonly int _timeout = 30000;
         private readonly Timer _timer;
@@ -38,7 +39,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         }
 
         /// <summary>
-        /// 默认心跳检查服务(每10秒会检查一次服务状态，在构造函数中添加服务管理事件) 
+        /// 默认心跳检查服务(每10秒会检查一次服务状态，在构造函数中添加服务管理事件)
         /// </summary>
         /// <param name="serviceRouteManager"></param>
         public DefaultHealthCheckService(IServiceRouteManager serviceRouteManager)
@@ -73,16 +74,14 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             //重新监控。
             serviceRouteManager.Changed += async (s, e) =>
             {
-                var keys = e.Route.Address.Select(address => {
+                var keys = e.Route.Address.Select(address =>
+                {
                     var ipAddress = address as IpAddressModel;
                     return new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port);
                 });
                 await Check(_dictionary.Where(i => keys.Contains(i.Key)).Select(i => i.Value), _timeout);
             };
         }
-
-
-        #region Implementation of IHealthCheckService
 
         /// <summary>
         /// 监控一个地址。
@@ -104,8 +103,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         {
             var ipAddress = address as IpAddressModel;
             MonitorEntry entry;
-            var isHealth= !_dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out entry) ? await  Check(address, _timeout) :entry.Health;
-            OnChanged(new HealthCheckEventArgs(address,isHealth));
+            var isHealth = !_dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out entry) ? await Check(address, _timeout) : entry.Health;
+            OnChanged(new HealthCheckEventArgs(address, isHealth));
             return isHealth;
         }
 
@@ -142,19 +141,11 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                 _changed(this, arg);
         }
 
-        #endregion Implementation of IHealthCheckService
-
-        #region Implementation of IDisposable
-
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public void Dispose()
         {
             _timer.Dispose();
         }
-
-        #endregion Implementation of IDisposable
-
-        #region Private Method
 
         private void Remove(IEnumerable<AddressModel> addressModels)
         {
@@ -176,7 +167,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                     return new IpAddressModel(ipEndPoint.Address.ToString(), ipEndPoint.Port);
                 }).ToList();
                 _serviceRouteManager.RemveAddressAsync(addresses).Wait();
-                addresses.ForEach(p => {
+                addresses.ForEach(p =>
+                {
                     var ipAddress = p as IpAddressModel;
                     _dictionary.TryRemove(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out MonitorEntry value);
                 });
@@ -196,7 +188,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
                 }
                 catch
                 {
-
                 }
                 return isHealth;
             }
@@ -223,17 +214,12 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             }
         }
 
-        #endregion Private Method
-
-        #region Help Class
-
         protected class MonitorEntry
         {
             public MonitorEntry(AddressModel addressModel, bool health = true)
             {
                 EndPoint = addressModel.CreateEndPoint();
                 Health = health;
-
             }
 
             public int UnhealthyTimes { get; set; }
@@ -241,7 +227,5 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             public EndPoint EndPoint { get; set; }
             public bool Health { get; set; }
         }
-
-        #endregion Help Class
     }
 }

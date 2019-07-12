@@ -30,29 +30,80 @@ namespace Surging.Core.DotNetty
     /// </summary>
     public class DotNettyTransportClientFactory : ITransportClientFactory, IDisposable
     {
-        #region Field
+        #region 字段
 
-        private readonly ITransportMessageEncoder _transportMessageEncoder;
-        private readonly ITransportMessageDecoder _transportMessageDecoder;
-        private readonly ILogger<DotNettyTransportClientFactory> _logger;
-        private readonly IServiceExecutor _serviceExecutor;
-        private readonly IHealthCheckService _healthCheckService;
-        private readonly ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>> _clients = new ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>>();
-        private readonly Bootstrap _bootstrap;
-
-        private static readonly AttributeKey<IMessageSender> messageSenderKey = AttributeKey<IMessageSender>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageSender));
+        /// <summary>
+        /// Defines the messageListenerKey
+        /// </summary>
         private static readonly AttributeKey<IMessageListener> messageListenerKey = AttributeKey<IMessageListener>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageListener));
+
+        /// <summary>
+        /// Defines the messageSenderKey
+        /// </summary>
+        private static readonly AttributeKey<IMessageSender> messageSenderKey = AttributeKey<IMessageSender>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageSender));
+
+        /// <summary>
+        /// Defines the origEndPointKey
+        /// </summary>
         private static readonly AttributeKey<EndPoint> origEndPointKey = AttributeKey<EndPoint>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(EndPoint));
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _bootstrap
+        /// </summary>
+        private readonly Bootstrap _bootstrap;
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _clients
+        /// </summary>
+        private readonly ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>> _clients = new ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>>();
 
+        /// <summary>
+        /// Defines the _healthCheckService
+        /// </summary>
+        private readonly IHealthCheckService _healthCheckService;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<DotNettyTransportClientFactory> _logger;
+
+        /// <summary>
+        /// Defines the _serviceExecutor
+        /// </summary>
+        private readonly IServiceExecutor _serviceExecutor;
+
+        /// <summary>
+        /// Defines the _transportMessageDecoder
+        /// </summary>
+        private readonly ITransportMessageDecoder _transportMessageDecoder;
+
+        /// <summary>
+        /// Defines the _transportMessageEncoder
+        /// </summary>
+        private readonly ITransportMessageEncoder _transportMessageEncoder;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DotNettyTransportClientFactory"/> class.
+        /// </summary>
+        /// <param name="codecFactory">The codecFactory<see cref="ITransportMessageCodecFactory"/></param>
+        /// <param name="healthCheckService">The healthCheckService<see cref="IHealthCheckService"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DotNettyTransportClientFactory}"/></param>
         public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger)
             : this(codecFactory, healthCheckService, logger, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DotNettyTransportClientFactory"/> class.
+        /// </summary>
+        /// <param name="codecFactory">The codecFactory<see cref="ITransportMessageCodecFactory"/></param>
+        /// <param name="healthCheckService">The healthCheckService<see cref="IHealthCheckService"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DotNettyTransportClientFactory}"/></param>
+        /// <param name="serviceExecutor">The serviceExecutor<see cref="IServiceExecutor"/></param>
         public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger, IServiceExecutor serviceExecutor)
         {
             _transportMessageEncoder = codecFactory.GetEncoder();
@@ -71,9 +122,9 @@ namespace Surging.Core.DotNetty
             }));
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of ITransportClientFactory
+        #region 方法
 
         /// <summary>
         /// 创建客户端。
@@ -120,11 +171,9 @@ namespace Surging.Core.DotNetty
             }
         }
 
-        #endregion Implementation of ITransportClientFactory
-
-        #region Implementation of IDisposable
-
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public void Dispose()
         {
             foreach (var client in _clients.Values.Where(i => i.IsValueCreated))
@@ -133,12 +182,14 @@ namespace Surging.Core.DotNetty
             }
         }
 
-        #endregion Implementation of IDisposable
-
+        /// <summary>
+        /// The GetBootstrap
+        /// </summary>
+        /// <returns>The <see cref="Bootstrap"/></returns>
         private static Bootstrap GetBootstrap()
         {
             IEventLoopGroup group;
-            
+
             var bootstrap = new Bootstrap();
             if (AppConfig.ServerOptions.Libuv)
             {
@@ -159,22 +210,51 @@ namespace Surging.Core.DotNetty
             return bootstrap;
         }
 
+        #endregion 方法
+
+        /// <summary>
+        /// Defines the <see cref="DefaultChannelHandler" />
+        /// </summary>
         protected class DefaultChannelHandler : ChannelHandlerAdapter
         {
+            #region 字段
+
+            /// <summary>
+            /// Defines the _factory
+            /// </summary>
             private readonly DotNettyTransportClientFactory _factory;
 
+            #endregion 字段
+
+            #region 构造函数
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="DefaultChannelHandler"/> class.
+            /// </summary>
+            /// <param name="factory">The factory<see cref="DotNettyTransportClientFactory"/></param>
             public DefaultChannelHandler(DotNettyTransportClientFactory factory)
             {
                 this._factory = factory;
             }
 
-            #region Overrides of ChannelHandlerAdapter
+            #endregion 构造函数
 
+            #region 方法
+
+            /// <summary>
+            /// The ChannelInactive
+            /// </summary>
+            /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
             public override void ChannelInactive(IChannelHandlerContext context)
             {
                 _factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value);
             }
 
+            /// <summary>
+            /// The ChannelRead
+            /// </summary>
+            /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+            /// <param name="message">The message<see cref="object"/></param>
             public override void ChannelRead(IChannelHandlerContext context, object message)
             {
                 var transportMessage = message as TransportMessage;
@@ -184,7 +264,7 @@ namespace Surging.Core.DotNetty
                 messageListener.OnReceived(messageSender, transportMessage);
             }
 
-            #endregion Overrides of ChannelHandlerAdapter
+            #endregion 方法
         }
     }
 }

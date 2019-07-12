@@ -11,14 +11,29 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
     /// </summary>
     public class DefaultTypeConvertibleProvider : ITypeConvertibleProvider
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
         private readonly ISerializer<object> _serializer;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultTypeConvertibleProvider"/> class.
+        /// </summary>
+        /// <param name="serializer">The serializer<see cref="ISerializer{object}"/></param>
         public DefaultTypeConvertibleProvider(ISerializer<object> serializer)
         {
             _serializer = serializer;
         }
 
-        #region Implementation of ITypeConvertibleProvider
+        #endregion 构造函数
+
+        #region 方法
 
         /// <summary>
         /// 获取类型转换器。
@@ -36,10 +51,6 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             yield return ComplexTypeConvert;
         }
 
-        #endregion Implementation of ITypeConvertibleProvider
-
-        #region Private Method
-
         /// <summary>
         /// 枚举类型转换器
         /// </summary>
@@ -51,6 +62,20 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             if (instance == null || !conversionType.GetTypeInfo().IsEnum)
                 return null;
             return Enum.Parse(conversionType, instance.ToString());
+        }
+
+        /// <summary>
+        /// GUID转换器
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="conversionType"></param>
+        /// <returns></returns>
+        private static object GuidTypeConvert(object instance, Type conversionType)
+        {
+            if (instance == null || conversionType != typeof(Guid))
+                return null;
+            Guid.TryParse(instance.ToString(), out Guid result);
+            return result;
         }
 
         /// <summary>
@@ -84,20 +109,6 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             }
         }
 
-        /// <summary>
-        /// GUID转换器
-        /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="conversionType"></param>
-        /// <returns></returns>
-        private static object GuidTypeConvert(object instance, Type conversionType)
-        {
-            if (instance == null || conversionType != typeof(Guid))
-                return null;
-            Guid.TryParse(instance.ToString(), out Guid result);
-            return result;
-        }
-
-        #endregion Private Method
+        #endregion 方法
     }
 }

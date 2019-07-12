@@ -1,19 +1,60 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
+using Surging.Core.KestrelHttpServer.Internal;
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Net.Http.Headers;
-using System.IO;
-using Surging.Core.KestrelHttpServer.Internal;
 
 namespace Surging.Core.KestrelHttpServer
 {
-   public class FileContentResult : FileResult
+    /// <summary>
+    /// Defines the <see cref="FileContentResult" />
+    /// </summary>
+    public class FileContentResult : FileResult
     {
-        private byte[] _fileContents;
+        #region 常量
+
+        /// <summary>
+        /// Defines the BufferSize
+        /// </summary>
         protected const int BufferSize = 64 * 1024;
 
+        #endregion 常量
+
+        #region 字段
+
+        /// <summary>
+        /// Defines the _fileContents
+        /// </summary>
+        private byte[] _fileContents;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileContentResult"/> class.
+        /// </summary>
+        /// <param name="fileContents">The fileContents<see cref="byte[]"/></param>
+        /// <param name="contentType">The contentType<see cref="MediaTypeHeaderValue"/></param>
+        public FileContentResult(byte[] fileContents, MediaTypeHeaderValue contentType)
+            : base(contentType?.ToString())
+        {
+            if (fileContents == null)
+            {
+                throw new ArgumentNullException(nameof(fileContents));
+            }
+
+            FileContents = fileContents;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileContentResult"/> class.
+        /// </summary>
+        /// <param name="fileContents">The fileContents<see cref="byte[]"/></param>
+        /// <param name="contentType">The contentType<see cref="string"/></param>
         public FileContentResult(byte[] fileContents, string contentType)
             : this(fileContents, MediaTypeHeaderValue.Parse(contentType))
         {
@@ -23,7 +64,13 @@ namespace Surging.Core.KestrelHttpServer
             }
         }
 
-        public FileContentResult(byte[] fileContents, string contentType,string fileDownloadName)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileContentResult"/> class.
+        /// </summary>
+        /// <param name="fileContents">The fileContents<see cref="byte[]"/></param>
+        /// <param name="contentType">The contentType<see cref="string"/></param>
+        /// <param name="fileDownloadName">The fileDownloadName<see cref="string"/></param>
+        public FileContentResult(byte[] fileContents, string contentType, string fileDownloadName)
       : this(fileContents, MediaTypeHeaderValue.Parse(contentType))
         {
             if (fileContents == null)
@@ -37,17 +84,13 @@ namespace Surging.Core.KestrelHttpServer
             this.FileDownloadName = fileDownloadName;
         }
 
-        public FileContentResult(byte[] fileContents, MediaTypeHeaderValue contentType)
-            : base(contentType?.ToString())
-        {
-            if (fileContents == null)
-            {
-                throw new ArgumentNullException(nameof(fileContents));
-            }
+        #endregion 构造函数
 
-            FileContents = fileContents;
-        }
-        
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the FileContents
+        /// </summary>
         public byte[] FileContents
         {
             get => _fileContents;
@@ -62,6 +105,15 @@ namespace Surging.Core.KestrelHttpServer
             }
         }
 
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The ExecuteResultAsync
+        /// </summary>
+        /// <param name="context">The context<see cref="ActionContext"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null)
@@ -86,5 +138,7 @@ namespace Surging.Core.KestrelHttpServer
                 context.HttpContext.Abort();
             }
         }
+
+        #endregion 方法
     }
 }

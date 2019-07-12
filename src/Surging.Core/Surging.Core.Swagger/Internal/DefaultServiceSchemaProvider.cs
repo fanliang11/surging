@@ -8,15 +8,39 @@ using System.Text;
 
 namespace Surging.Core.Swagger.Internal
 {
-   public class DefaultServiceSchemaProvider : IServiceSchemaProvider
+    /// <summary>
+    /// Defines the <see cref="DefaultServiceSchemaProvider" />
+    /// </summary>
+    public class DefaultServiceSchemaProvider : IServiceSchemaProvider
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _serviceEntryProvider
+        /// </summary>
         private readonly IServiceEntryProvider _serviceEntryProvider;
 
-        public DefaultServiceSchemaProvider( IServiceEntryProvider serviceEntryProvider)
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceSchemaProvider"/> class.
+        /// </summary>
+        /// <param name="serviceEntryProvider">The serviceEntryProvider<see cref="IServiceEntryProvider"/></param>
+        public DefaultServiceSchemaProvider(IServiceEntryProvider serviceEntryProvider)
         {
             _serviceEntryProvider = serviceEntryProvider;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The GetSchemaFilesPath
+        /// </summary>
+        /// <returns>The <see cref="IEnumerable{string}"/></returns>
         public IEnumerable<string> GetSchemaFilesPath()
         {
             var result = new List<string>();
@@ -32,5 +56,7 @@ namespace Surging.Core.Swagger.Internal
             }
             return result;
         }
+
+        #endregion 方法
     }
 }

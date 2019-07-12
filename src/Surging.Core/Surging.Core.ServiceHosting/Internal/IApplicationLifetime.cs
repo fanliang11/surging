@@ -5,19 +5,51 @@ using System.Threading;
 
 namespace Surging.Core.ServiceHosting.Internal
 {
-   public  interface IApplicationLifetime
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IApplicationLifetime" />
+    /// </summary>
+    public interface IApplicationLifetime
     {
+        #region 属性
+
+        /// <summary>
+        /// Gets the ApplicationStarted
+        /// </summary>
         CancellationToken ApplicationStarted { get; }
- 
-        CancellationToken ApplicationStopping { get; }
-         
+
+        /// <summary>
+        /// Gets the ApplicationStopped
+        /// </summary>
         CancellationToken ApplicationStopped { get; }
 
- 
-        void StopApplication();
+        /// <summary>
+        /// Gets the ApplicationStopping
+        /// </summary>
+        CancellationToken ApplicationStopping { get; }
 
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The NotifyStarted
+        /// </summary>
+        void NotifyStarted();
+
+        /// <summary>
+        /// The NotifyStopped
+        /// </summary>
         void NotifyStopped();
 
-        void NotifyStarted();
+        /// <summary>
+        /// The StopApplication
+        /// </summary>
+        void StopApplication();
+
+        #endregion 方法
     }
+
+    #endregion 接口
 }

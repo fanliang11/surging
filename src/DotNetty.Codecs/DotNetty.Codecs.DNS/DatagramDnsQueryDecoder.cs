@@ -1,24 +1,55 @@
-﻿using DotNetty.Transport.Channels.Sockets;
+﻿using DotNetty.Buffers;
+using DotNetty.Codecs.DNS.Messages;
+using DotNetty.Codecs.DNS.Records;
+using DotNetty.Transport.Channels;
+using DotNetty.Transport.Channels.Sockets;
 using System;
 using System.Collections.Generic;
-using DotNetty.Transport.Channels;
-using DotNetty.Codecs.DNS.Messages;
-using DotNetty.Buffers;
-using DotNetty.Codecs.DNS.Records;
 
 namespace DotNetty.Codecs.DNS
 {
+    /// <summary>
+    /// Defines the <see cref="DatagramDnsQueryDecoder" />
+    /// </summary>
     public class DatagramDnsQueryDecoder : MessageToMessageDecoder<DatagramPacket>
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the recordDecoder
+        /// </summary>
         private readonly IDnsRecordDecoder recordDecoder;
 
-        public DatagramDnsQueryDecoder() : this(new DefaultDnsRecordDecoder()) { }
+        #endregion 字段
 
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatagramDnsQueryDecoder"/> class.
+        /// </summary>
+        public DatagramDnsQueryDecoder() : this(new DefaultDnsRecordDecoder())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatagramDnsQueryDecoder"/> class.
+        /// </summary>
+        /// <param name="recordDecoder">The recordDecoder<see cref="IDnsRecordDecoder"/></param>
         public DatagramDnsQueryDecoder(IDnsRecordDecoder recordDecoder)
         {
             this.recordDecoder = recordDecoder ?? throw new ArgumentNullException(nameof(recordDecoder));
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The Decode
+        /// </summary>
+        /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+        /// <param name="message">The message<see cref="DatagramPacket"/></param>
+        /// <param name="output">The output<see cref="List{object}"/></param>
         protected override void Decode(IChannelHandlerContext context, DatagramPacket message, List<object> output)
         {
             IByteBuffer buffer = message.Content;
@@ -47,6 +78,12 @@ namespace DotNetty.Codecs.DNS
             }
         }
 
+        /// <summary>
+        /// The NewQuery
+        /// </summary>
+        /// <param name="packet">The packet<see cref="DatagramPacket"/></param>
+        /// <param name="buffer">The buffer<see cref="IByteBuffer"/></param>
+        /// <returns>The <see cref="IDnsQuery"/></returns>
         private static IDnsQuery NewQuery(DatagramPacket packet, IByteBuffer buffer)
         {
             int id = buffer.ReadUnsignedShort();
@@ -55,7 +92,7 @@ namespace DotNetty.Codecs.DNS
                 throw new CorruptedFrameException("not a query");
 
             IDnsQuery query = new DatagramDnsQuery(
-                packet.Sender, packet.Recipient, id, 
+                packet.Sender, packet.Recipient, id,
                 DnsOpCode.From((byte)(flags >> 11 & 0xf)));
 
             query.IsRecursionDesired = (flags >> 8 & 1) == 1;
@@ -63,6 +100,12 @@ namespace DotNetty.Codecs.DNS
             return query;
         }
 
+        /// <summary>
+        /// The DecodeQuestions
+        /// </summary>
+        /// <param name="query">The query<see cref="IDnsQuery"/></param>
+        /// <param name="buffer">The buffer<see cref="IByteBuffer"/></param>
+        /// <param name="questionCount">The questionCount<see cref="int"/></param>
         private void DecodeQuestions(IDnsQuery query, IByteBuffer buffer, int questionCount)
         {
             for (int i = questionCount; i > 0; i--)
@@ -71,6 +114,13 @@ namespace DotNetty.Codecs.DNS
             }
         }
 
+        /// <summary>
+        /// The DecodeRecords
+        /// </summary>
+        /// <param name="query">The query<see cref="IDnsQuery"/></param>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="buffer">The buffer<see cref="IByteBuffer"/></param>
+        /// <param name="count">The count<see cref="int"/></param>
         private void DecodeRecords(IDnsQuery query, DnsSection section, IByteBuffer buffer, int count)
         {
             for (int i = count; i > 0; i--)
@@ -82,5 +132,7 @@ namespace DotNetty.Codecs.DNS
                 query.AddRecord(section, r);
             }
         }
+
+        #endregion 方法
     }
 }

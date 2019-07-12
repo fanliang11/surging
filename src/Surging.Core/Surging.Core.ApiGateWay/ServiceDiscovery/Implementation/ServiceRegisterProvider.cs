@@ -14,7 +14,31 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
     /// </summary>
     public class ServiceRegisterProvider : ServiceBase, IServiceRegisterProvider
     {
-        public async  Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null)
+        #region 方法
+
+        /// <summary>
+        /// The ConvertAddressModel
+        /// </summary>
+        /// <param name="connection">The connection<see cref="string"/></param>
+        /// <returns>The <see cref="AddressModel"/></returns>
+        public AddressModel ConvertAddressModel(string connection)
+        {
+            var address = connection.Split(":");
+            if (address.Length > 1)
+            {
+                int port;
+                int.TryParse(address[1], out port);
+                return new IpAddressModel(address[0], port);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// The GetAddressAsync
+        /// </summary>
+        /// <param name="condition">The condition<see cref="string"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceAddressModel}}"/></returns>
+        public async Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null)
         {
             var result = new List<ServiceAddressModel>();
             var registerConfig = AppConfig.Register;
@@ -23,14 +47,12 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
             {
                 foreach (var address in addresses)
                 {
-
                     var addr = ConvertAddressModel(address);
                     result.Add(new ServiceAddressModel
                     {
                         Address = addr,
                         IsHealth = await GetService<IHealthCheckService>().IsHealth(addr)
                     });
-
                 }
             }
             else
@@ -50,16 +72,6 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
             return result;
         }
 
-        public AddressModel ConvertAddressModel(string connection)
-        {
-            var address = connection.Split(":");
-            if (address.Length > 1)
-            {
-                int port;
-                int.TryParse(address[1], out port);
-                return new IpAddressModel(address[0], port);
-            }
-            return null;
-        }
+        #endregion 方法
     }
 }

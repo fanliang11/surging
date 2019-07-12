@@ -12,15 +12,27 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
     /// </summary>
     public class DefaultTypeConvertibleService : ITypeConvertibleService
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _converters
+        /// </summary>
         private readonly IEnumerable<TypeConvertDelegate> _converters;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<DefaultTypeConvertibleService> _logger;
 
-        #endregion Field
+        #endregion 字段
 
-        #region Constructor
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultTypeConvertibleService"/> class.
+        /// </summary>
+        /// <param name="providers">The providers<see cref="IEnumerable{ITypeConvertibleProvider}"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DefaultTypeConvertibleService}"/></param>
         public DefaultTypeConvertibleService(IEnumerable<ITypeConvertibleProvider> providers, ILogger<DefaultTypeConvertibleService> logger)
         {
             _logger = logger;
@@ -30,9 +42,9 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             _converters = providers.SelectMany(p => p.GetConverters()).ToArray();
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of ITypeConvertibleService
+        #region 方法
 
         /// <summary>
         /// 转换。
@@ -65,10 +77,10 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             var exception = new CPlatformException($"无法将实例：{instance}转换为{conversionType}。");
 
             if (_logger.IsEnabled(LogLevel.Error))
-                _logger.LogError(exception,$"将 {instance.GetType()} 转换成 {conversionType} 时发生了错误。");
+                _logger.LogError(exception, $"将 {instance.GetType()} 转换成 {conversionType} 时发生了错误。");
             throw exception;
         }
 
-        #endregion Implementation of ITypeConvertibleService
+        #endregion 方法
     }
 }

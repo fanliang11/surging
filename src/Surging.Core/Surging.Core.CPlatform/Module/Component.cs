@@ -4,35 +4,61 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Module
 {
-    #region 组件生命周期枚举类
-    
+    #region 枚举
+
+    /// <summary>
+    /// Defines the LifetimeScope
+    /// </summary>
     public enum LifetimeScope
     {
+        /// <summary>
+        /// Defines the InstancePerDependency
+        /// </summary>
         InstancePerDependency,
-        
+
+        /// <summary>
+        /// Defines the InstancePerHttpRequest
+        /// </summary>
         InstancePerHttpRequest,
-        
+
+        /// <summary>
+        /// Defines the SingleInstance
+        /// </summary>
         SingleInstance
     }
 
-    #endregion
+    #endregion 枚举
 
-    #region 组件类
-    
+    /// <summary>
+    /// Defines the <see cref="Component" />
+    /// </summary>
     public class Component
     {
-        #region 实例属性
-        
-        public string ServiceType { get; set; }
+        #region 属性
 
+        /// <summary>
+        /// Gets or sets the ImplementType
+        /// </summary>
         public string ImplementType { get; set; }
 
+        /// <summary>
+        /// Gets or sets the LifetimeScope
+        /// </summary>
         public LifetimeScope LifetimeScope { get; set; }
 
-        #endregion
+        /// <summary>
+        /// Gets or sets the ServiceType
+        /// </summary>
+        public string ServiceType { get; set; }
 
-        #region 实例方法
-        
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The ToString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -44,8 +70,6 @@ namespace Surging.Core.CPlatform.Module
             return sb.ToString();
         }
 
-        #endregion
+        #endregion 方法
     }
-
-    #endregion
 }

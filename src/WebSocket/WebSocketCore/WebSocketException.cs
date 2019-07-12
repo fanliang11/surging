@@ -1,4 +1,3 @@
-#region License
 /*
  * WebSocketException.cs
  *
@@ -24,86 +23,122 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore
 {
-  /// <summary>
-  /// The exception that is thrown when a fatal error occurs in
-  /// the WebSocket communication.
-  /// </summary>
-  public class WebSocketException : Exception
-  {
-    #region Private Fields
-
-    private CloseStatusCode _code;
-
-    #endregion
-
-    #region Internal Constructors
-
-    internal WebSocketException ()
-      : this (CloseStatusCode.Abnormal, null, null)
+    /// <summary>
+    /// The exception that is thrown when a fatal error occurs in
+    /// the WebSocket communication.
+    /// </summary>
+    public class WebSocketException : Exception
     {
-    }
+        #region 字段
 
-    internal WebSocketException (Exception innerException)
-      : this (CloseStatusCode.Abnormal, null, innerException)
-    {
-    }
+        /// <summary>
+        /// Defines the _code
+        /// </summary>
+        private CloseStatusCode _code;
 
-    internal WebSocketException (string message)
-      : this (CloseStatusCode.Abnormal, message, null)
-    {
-    }
+        #endregion 字段
 
-    internal WebSocketException (CloseStatusCode code)
-      : this (code, null, null)
-    {
-    }
+        #region 构造函数
 
-    internal WebSocketException (string message, Exception innerException)
-      : this (CloseStatusCode.Abnormal, message, innerException)
-    {
-    }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        internal WebSocketException()
+      : this(CloseStatusCode.Abnormal, null, null)
+        {
+        }
 
-    internal WebSocketException (CloseStatusCode code, Exception innerException)
-      : this (code, null, innerException)
-    {
-    }
-
-    internal WebSocketException (CloseStatusCode code, string message)
-      : this (code, message, null)
-    {
-    }
-
-    internal WebSocketException (
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="CloseStatusCode"/></param>
+        /// <param name="message">The message<see cref="string"/></param>
+        /// <param name="innerException">The innerException<see cref="Exception"/></param>
+        internal WebSocketException(
       CloseStatusCode code, string message, Exception innerException
     )
-      : base (message ?? code.GetMessage (), innerException)
-    {
-      _code = code;
+      : base(message ?? code.GetMessage(), innerException)
+        {
+            _code = code;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="CloseStatusCode"/></param>
+        internal WebSocketException(CloseStatusCode code)
+      : this(code, null, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="CloseStatusCode"/></param>
+        /// <param name="innerException">The innerException<see cref="Exception"/></param>
+        internal WebSocketException(CloseStatusCode code, Exception innerException)
+      : this(code, null, innerException)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="CloseStatusCode"/></param>
+        /// <param name="message">The message<see cref="string"/></param>
+        internal WebSocketException(CloseStatusCode code, string message)
+      : this(code, message, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        /// <param name="innerException">The innerException<see cref="Exception"/></param>
+        internal WebSocketException(Exception innerException)
+      : this(CloseStatusCode.Abnormal, null, innerException)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        /// <param name="message">The message<see cref="string"/></param>
+        internal WebSocketException(string message)
+      : this(CloseStatusCode.Abnormal, message, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketException"/> class.
+        /// </summary>
+        /// <param name="message">The message<see cref="string"/></param>
+        /// <param name="innerException">The innerException<see cref="Exception"/></param>
+        internal WebSocketException(string message, Exception innerException)
+      : this(CloseStatusCode.Abnormal, message, innerException)
+        {
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the status code indicating the cause of the exception.
+        /// </summary>
+        public CloseStatusCode Code
+        {
+            get
+            {
+                return _code;
+            }
+        }
+
+        #endregion 属性
     }
-
-    #endregion
-
-    #region Public Properties
-
-    /// <summary>
-    /// Gets the status code indicating the cause of the exception.
-    /// </summary>
-    /// <value>
-    /// One of the <see cref="CloseStatusCode"/> enum values that represents
-    /// the status code indicating the cause of the exception.
-    /// </value>
-    public CloseStatusCode Code {
-      get {
-        return _code;
-      }
-    }
-
-    #endregion
-  }
 }

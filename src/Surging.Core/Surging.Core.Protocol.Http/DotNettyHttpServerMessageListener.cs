@@ -21,24 +21,57 @@ using System.Web;
 
 namespace Surging.Core.Protocol.Http
 {
-    class DotNettyHttpServerMessageListener : IMessageListener, IDisposable
+    /// <summary>
+    /// Defines the <see cref="DotNettyHttpServerMessageListener" />
+    /// </summary>
+    internal class DotNettyHttpServerMessageListener : IMessageListener, IDisposable
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<DotNettyHttpServerMessageListener> _logger;
-        private readonly ITransportMessageDecoder _transportMessageDecoder;
-        private readonly ITransportMessageEncoder _transportMessageEncoder;
-        private IChannel _channel;
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
         private readonly ISerializer<string> _serializer;
+
+        /// <summary>
+        /// Defines the _serviceRouteProvider
+        /// </summary>
         private readonly IServiceRouteProvider _serviceRouteProvider;
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _transportMessageDecoder
+        /// </summary>
+        private readonly ITransportMessageDecoder _transportMessageDecoder;
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _transportMessageEncoder
+        /// </summary>
+        private readonly ITransportMessageEncoder _transportMessageEncoder;
 
+        /// <summary>
+        /// Defines the _channel
+        /// </summary>
+        private IChannel _channel;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DotNettyHttpServerMessageListener"/> class.
+        /// </summary>
+        /// <param name="logger">The logger<see cref="ILogger{DotNettyHttpServerMessageListener}"/></param>
+        /// <param name="codecFactory">The codecFactory<see cref="ITransportMessageCodecFactory"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
+        /// <param name="serviceRouteProvider">The serviceRouteProvider<see cref="IServiceRouteProvider"/></param>
         public DotNettyHttpServerMessageListener(ILogger<DotNettyHttpServerMessageListener> logger,
-            ITransportMessageCodecFactory codecFactory, 
-            ISerializer<string> serializer, 
+            ITransportMessageCodecFactory codecFactory,
+            ISerializer<string> serializer,
             IServiceRouteProvider serviceRouteProvider)
         {
             _logger = logger;
@@ -48,11 +81,41 @@ namespace Surging.Core.Protocol.Http
             _serviceRouteProvider = serviceRouteProvider;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IMessageListener
+        #region 事件
 
+        /// <summary>
+        /// Defines the Received
+        /// </summary>
         public event ReceivedDelegate Received;
+
+        #endregion 事件
+
+        #region 方法
+
+        /// <summary>
+        /// The CloseAsync
+        /// </summary>
+        public void CloseAsync()
+        {
+            Task.Run(async () =>
+            {
+                await _channel.EventLoop.ShutdownGracefullyAsync();
+                await _channel.CloseAsync();
+            }).Wait();
+        }
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            Task.Run(async () =>
+            {
+                await _channel.DisconnectAsync();
+            }).Wait();
+        }
 
         /// <summary>
         /// 触发接收到消息事件。
@@ -67,8 +130,11 @@ namespace Surging.Core.Protocol.Http
             await Received(sender, message);
         }
 
-        #endregion Implementation of IMessageListener
-
+        /// <summary>
+        /// The StartAsync
+        /// </summary>
+        /// <param name="endPoint">The endPoint<see cref="EndPoint"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task StartAsync(EndPoint endPoint)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -106,43 +172,55 @@ namespace Surging.Core.Protocol.Http
             {
                 _logger.LogError($"Http服务主机启动失败，监听地址：{endPoint}。 ");
             }
-
         }
 
-        public void CloseAsync()
-        {
-            Task.Run(async () =>
-            {
-                await _channel.EventLoop.ShutdownGracefullyAsync();
-                await _channel.CloseAsync();
-            }).Wait();
-        }
+        #endregion 方法
 
-        #region Implementation of IDisposable
-
-        
-        public void Dispose()
-        {
-            Task.Run(async () =>
-            {
-                await _channel.DisconnectAsync();
-            }).Wait();
-        }
-
-        #endregion Implementation of IDisposable
-
-        #region Help Class
+        /// <summary>
+        /// Defines the <see cref="ServerHandler" />
+        /// </summary>
         private class ServerHandler : SimpleChannelInboundHandler<IFullHttpRequest>
         {
-            readonly TaskCompletionSource completion = new TaskCompletionSource();
+            #region 字段
 
-            private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
+            /// <summary>
+            /// Defines the completion
+            /// </summary>
+            internal readonly TaskCompletionSource completion = new TaskCompletionSource();
+
+            /// <summary>
+            /// Defines the _logger
+            /// </summary>
             private readonly ILogger _logger;
+
+            /// <summary>
+            /// Defines the _readAction
+            /// </summary>
+            private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
+
+            /// <summary>
+            /// Defines the _serializer
+            /// </summary>
             private readonly ISerializer<string> _serializer;
+
+            /// <summary>
+            /// Defines the _serviceRouteProvider
+            /// </summary>
             private readonly IServiceRouteProvider _serviceRouteProvider;
 
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, 
-                ILogger logger, 
+            #endregion 字段
+
+            #region 构造函数
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ServerHandler"/> class.
+            /// </summary>
+            /// <param name="readAction">The readAction<see cref="Action{IChannelHandlerContext, TransportMessage}"/></param>
+            /// <param name="logger">The logger<see cref="ILogger"/></param>
+            /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
+            /// <param name="serviceRouteProvider">The serviceRouteProvider<see cref="IServiceRouteProvider"/></param>
+            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction,
+                ILogger logger,
                 ISerializer<string> serializer,
                 IServiceRouteProvider serviceRouteProvider)
             {
@@ -152,12 +230,53 @@ namespace Surging.Core.Protocol.Http
                 _serviceRouteProvider = serviceRouteProvider;
             }
 
+            #endregion 构造函数
+
+            #region 方法
+
+            /// <summary>
+            /// The ExceptionCaught
+            /// </summary>
+            /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+            /// <param name="exception">The exception<see cref="Exception"/></param>
+            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) => this.completion.TrySetException(exception);
+
+            /// <summary>
+            /// The GetParameters
+            /// </summary>
+            /// <param name="msg">The msg<see cref="string"/></param>
+            /// <param name="routePath">The routePath<see cref="string"/></param>
+            /// <returns>The <see cref="IDictionary{string, object}"/></returns>
+            public IDictionary<string, object> GetParameters(string msg, out string routePath)
+            {
+                var urlSpan = msg.AsSpan();
+                var len = urlSpan.IndexOf("?");
+                if (len == -1)
+                {
+                    routePath = urlSpan.TrimStart("/").ToString().ToLower();
+                    return new Dictionary<string, object>();
+                }
+                routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
+                var paramStr = urlSpan.Slice(len + 1).ToString();
+                var parameters = paramStr.Split('&');
+                return parameters.ToList().Select(p => p.Split("=")).ToDictionary(p => p[0].ToLower(), p => (object)p[1]);
+            }
+
+            /// <summary>
+            /// The WaitForCompletion
+            /// </summary>
+            /// <returns>The <see cref="bool"/></returns>
             public bool WaitForCompletion()
             {
                 this.completion.Task.Wait(TimeSpan.FromSeconds(5));
                 return this.completion.Task.Status == TaskStatus.RanToCompletion;
             }
 
+            /// <summary>
+            /// The ChannelRead0
+            /// </summary>
+            /// <param name="ctx">The ctx<see cref="IChannelHandlerContext"/></param>
+            /// <param name="msg">The msg<see cref="IFullHttpRequest"/></param>
             protected override void ChannelRead0(IChannelHandlerContext ctx, IFullHttpRequest msg)
             {
                 var data = new byte[msg.Content.ReadableBytes];
@@ -175,7 +294,7 @@ namespace Surging.Core.Protocol.Http
                         var @params = RouteTemplateSegmenter.Segment(serviceRoute.ServiceDescriptor.RoutePath, path);
                         foreach (var param in @params)
                         {
-                            parameters.Add(param.Key,param.Value);
+                            parameters.Add(param.Key, param.Value);
                         }
                     }
                     if (msg.Method.Name == "POST")
@@ -199,24 +318,7 @@ namespace Surging.Core.Protocol.Http
                 });
             }
 
-            public IDictionary<string, object> GetParameters(string msg, out string routePath)
-            {
-                var urlSpan = msg.AsSpan();
-                var len = urlSpan.IndexOf("?");
-                if (len == -1)
-                {
-                    routePath = urlSpan.TrimStart("/").ToString().ToLower();
-                    return new  Dictionary<string, object>();
-                }
-                routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
-                var paramStr = urlSpan.Slice(len + 1).ToString();
-                var parameters = paramStr.Split('&');
-                return parameters.ToList().Select(p => p.Split("=")).ToDictionary(p => p[0].ToLower(), p => (object)p[1]);
-            }
-
-            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) => this.completion.TrySetException(exception);
+            #endregion 方法
         }
-
-        #endregion Help Class
     }
 }

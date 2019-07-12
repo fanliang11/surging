@@ -7,8 +7,16 @@ using System.Text;
 
 namespace Surging.Core.ProxyGenerator.Interceptors
 {
-    public  class InvocationMethods
+    /// <summary>
+    /// Defines the <see cref="InvocationMethods" />
+    /// </summary>
+    public class InvocationMethods
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the CompositionInvocationConstructor
+        /// </summary>
         public static readonly ConstructorInfo CompositionInvocationConstructor =
         typeof(ActionInvocation).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null,
                                                      new[]
@@ -22,6 +30,6 @@ namespace Surging.Core.ProxyGenerator.Interceptors
                                                      },
                                                      null);
 
-
+        #endregion 字段
     }
 }

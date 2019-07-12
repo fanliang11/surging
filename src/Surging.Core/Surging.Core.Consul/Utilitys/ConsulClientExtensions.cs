@@ -1,15 +1,26 @@
 ﻿using Consul;
 using System;
-using System.Threading.Tasks;
 using System.Linq;
-using System.Text;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Consul.Utilitys
 {
+    /// <summary>
+    /// Defines the <see cref="ConsulClientExtensions" />
+    /// </summary>
     public static class ConsulClientExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The GetChildrenAsync
+        /// </summary>
+        /// <param name="client">The client<see cref="ConsulClient"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{string[]}"/></returns>
         public static async Task<string[]> GetChildrenAsync(this ConsulClient client, string path)
         {
             try
@@ -23,6 +34,12 @@ namespace Surging.Core.Consul.Utilitys
             }
         }
 
+        /// <summary>
+        /// The GetDataAsync
+        /// </summary>
+        /// <param name="client">The client<see cref="ConsulClient"/></param>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{byte[]}"/></returns>
         public static async Task<byte[]> GetDataAsync(this ConsulClient client, string path)
         {
             try
@@ -35,6 +52,7 @@ namespace Surging.Core.Consul.Utilitys
                 return null;
             }
         }
+
+        #endregion 方法
     }
 }
-

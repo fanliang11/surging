@@ -2,22 +2,26 @@
 
 namespace Surging.Core.CPlatform.Transport.Codec.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="JsonTransportMessageCodecFactory" />
+    /// </summary>
     public class JsonTransportMessageCodecFactory : ITransportMessageCodecFactory
     {
-        #region Field
-        private readonly ITransportMessageEncoder _transportMessageEncoder = new JsonTransportMessageEncoder();
-        private readonly ITransportMessageDecoder _transportMessageDecoder = new JsonTransportMessageDecoder();
-        #endregion Field
+        #region 字段
 
-        #region Implementation of ITransportMessageCodecFactory
         /// <summary>
-        /// 获取编码器。
+        /// Defines the _transportMessageDecoder
         /// </summary>
-        /// <returns>编码器实例。</returns>
-        public ITransportMessageEncoder GetEncoder()
-        {
-            return _transportMessageEncoder;
-        }
+        private readonly ITransportMessageDecoder _transportMessageDecoder = new JsonTransportMessageDecoder();
+
+        /// <summary>
+        /// Defines the _transportMessageEncoder
+        /// </summary>
+        private readonly ITransportMessageEncoder _transportMessageEncoder = new JsonTransportMessageEncoder();
+
+        #endregion 字段
+
+        #region 方法
 
         /// <summary>
         /// 获取解码器。
@@ -28,6 +32,15 @@ namespace Surging.Core.CPlatform.Transport.Codec.Implementation
             return _transportMessageDecoder;
         }
 
-        #endregion Implementation of ITransportMessageCodecFactory
+        /// <summary>
+        /// 获取编码器。
+        /// </summary>
+        /// <returns>编码器实例。</returns>
+        public ITransportMessageEncoder GetEncoder()
+        {
+            return _transportMessageEncoder;
+        }
+
+        #endregion 方法
     }
 }

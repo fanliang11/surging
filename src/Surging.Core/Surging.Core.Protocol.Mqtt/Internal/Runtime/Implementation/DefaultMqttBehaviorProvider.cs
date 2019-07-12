@@ -5,34 +5,61 @@ using System.Linq;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="DefaultMqttBehaviorProvider" />
+    /// </summary>
     public class DefaultMqttBehaviorProvider : IMqttBehaviorProvider
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _serviceEntryProvider
+        /// </summary>
         private readonly IServiceEntryProvider _serviceEntryProvider;
+
+        /// <summary>
+        /// Defines the _serviceProvider
+        /// </summary>
         private readonly CPlatformContainer _serviceProvider;
+
+        /// <summary>
+        /// Defines the _mqttBehavior
+        /// </summary>
         private MqttBehavior _mqttBehavior;
 
-        #endregion Field
+        #endregion 字段
 
-        #region Constructor
+        #region 构造函数
 
-        public DefaultMqttBehaviorProvider(IServiceEntryProvider serviceEntryProvider,  CPlatformContainer serviceProvider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultMqttBehaviorProvider"/> class.
+        /// </summary>
+        /// <param name="serviceEntryProvider">The serviceEntryProvider<see cref="IServiceEntryProvider"/></param>
+        /// <param name="serviceProvider">The serviceProvider<see cref="CPlatformContainer"/></param>
+        public DefaultMqttBehaviorProvider(IServiceEntryProvider serviceEntryProvider, CPlatformContainer serviceProvider)
         {
             _serviceEntryProvider = serviceEntryProvider;
             _serviceProvider = serviceProvider;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
+        #region 方法
+
+        /// <summary>
+        /// The GetMqttBehavior
+        /// </summary>
+        /// <returns>The <see cref="MqttBehavior"/></returns>
         public MqttBehavior GetMqttBehavior()
         {
             if (_mqttBehavior == null)
             {
-                 _mqttBehavior = _serviceEntryProvider.GetTypes()
-                    .Select(type=> _serviceProvider.GetInstances(type) as MqttBehavior ).Where(p=>p!=null).FirstOrDefault(); 
+                _mqttBehavior = _serviceEntryProvider.GetTypes()
+                   .Select(type => _serviceProvider.GetInstances(type) as MqttBehavior).Where(p => p != null).FirstOrDefault();
             }
             return _mqttBehavior;
         }
+
+        #endregion 方法
     }
 }

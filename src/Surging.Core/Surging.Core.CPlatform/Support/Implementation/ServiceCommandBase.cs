@@ -5,11 +5,35 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
-    public abstract class ServiceCommandBase: IServiceCommandProvider
-    { 
-        public abstract ValueTask<ServiceCommand> GetCommand(string serviceId);
-        ConcurrentDictionary<string,  object> scripts = new ConcurrentDictionary<string,  object>();
+    /// <summary>
+    /// Defines the <see cref="ServiceCommandBase" />
+    /// </summary>
+    public abstract class ServiceCommandBase : IServiceCommandProvider
+    {
+        #region 字段
 
+        /// <summary>
+        /// Defines the scripts
+        /// </summary>
+        internal ConcurrentDictionary<string, object> scripts = new ConcurrentDictionary<string, object>();
+
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The GetCommand
+        /// </summary>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <returns>The <see cref="ValueTask{ServiceCommand}"/></returns>
+        public abstract ValueTask<ServiceCommand> GetCommand(string serviceId);
+
+        /// <summary>
+        /// The Run
+        /// </summary>
+        /// <param name="text">The text<see cref="string"/></param>
+        /// <param name="InjectionNamespaces">The InjectionNamespaces<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task{object}"/></returns>
         public async Task<object> Run(string text, params string[] InjectionNamespaces)
         {
             object result = scripts;
@@ -31,5 +55,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
             return result;
         }
+
+        #endregion 方法
     }
 }

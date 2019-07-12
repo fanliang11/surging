@@ -15,19 +15,44 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="DefaultServiceExecutor" />
+    /// </summary>
     public class DefaultServiceExecutor : IServiceExecutor
     {
-        #region Field
+        #region 字段
 
-        private readonly IServiceEntryLocate _serviceEntryLocate;
-        private readonly ILogger<DefaultServiceExecutor> _logger;
-        private readonly IServiceRouteProvider _serviceRouteProvider;
+        /// <summary>
+        /// Defines the _authorizationFilter
+        /// </summary>
         private readonly IAuthorizationFilter _authorizationFilter;
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<DefaultServiceExecutor> _logger;
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _serviceEntryLocate
+        /// </summary>
+        private readonly IServiceEntryLocate _serviceEntryLocate;
 
+        /// <summary>
+        /// Defines the _serviceRouteProvider
+        /// </summary>
+        private readonly IServiceRouteProvider _serviceRouteProvider;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceExecutor"/> class.
+        /// </summary>
+        /// <param name="serviceEntryLocate">The serviceEntryLocate<see cref="IServiceEntryLocate"/></param>
+        /// <param name="serviceRouteProvider">The serviceRouteProvider<see cref="IServiceRouteProvider"/></param>
+        /// <param name="authorizationFilter">The authorizationFilter<see cref="IAuthorizationFilter"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DefaultServiceExecutor}"/></param>
         public DefaultServiceExecutor(IServiceEntryLocate serviceEntryLocate, IServiceRouteProvider serviceRouteProvider,
             IAuthorizationFilter authorizationFilter,
             ILogger<DefaultServiceExecutor> logger)
@@ -38,24 +63,24 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             _authorizationFilter = authorizationFilter;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IServiceExecutor
+        #region 方法
 
         /// <summary>
         /// 执行。
         /// </summary>
         /// <param name="sender">消息发送者。</param>
         /// <param name="message">调用消息。</param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task ExecuteAsync(IMessageSender sender, TransportMessage message)
         {
-
             if (_logger.IsEnabled(LogLevel.Trace))
                 _logger.LogTrace("服务提供者接收到消息。");
 
             if (!message.IsInvokeMessage())
                 return;
-          
+
             RemoteInvokeMessage remoteInvokeMessage;
             try
             {
@@ -63,12 +88,12 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception,"将接收到的消息反序列化成 TransportMessage<RemoteInvokeMessage> 时发送了错误。");
+                _logger.LogError(exception, "将接收到的消息反序列化成 TransportMessage<RemoteInvokeMessage> 时发送了错误。");
                 return;
             }
-             
+
             var entry = _serviceEntryLocate.Locate(remoteInvokeMessage);
-             
+
             if (entry == null)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
@@ -76,10 +101,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 return;
             }
 
-            if(remoteInvokeMessage.Attachments !=null)
+            if (remoteInvokeMessage.Attachments != null)
             {
-                foreach(var attachment in remoteInvokeMessage.Attachments)
-                RpcContext.GetContext().SetAttachment(attachment.Key,attachment.Value);
+                foreach (var attachment in remoteInvokeMessage.Attachments)
+                    RpcContext.GetContext().SetAttachment(attachment.Key, attachment.Value);
             }
 
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -91,7 +116,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             if (entry.Descriptor.WaitExecution())
             {
                 //执行本地代码。
-                await  LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage);
+                await LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage);
                 //向客户端发送调用结果。
                 await SendRemoteInvokeResult(sender, message.Id, resultMessage);
             }
@@ -103,15 +128,36 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 await Task.Factory.StartNew(async () =>
                 {
                     //执行本地代码。
-                  await   LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage);
-            }, TaskCreationOptions.LongRunning);
+                    await LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage);
+                }, TaskCreationOptions.LongRunning);
+            }
         }
+
+        /// <summary>
+        /// The GetExceptionMessage
+        /// </summary>
+        /// <param name="exception">The exception<see cref="Exception"/></param>
+        /// <returns>The <see cref="string"/></returns>
+        private static string GetExceptionMessage(Exception exception)
+        {
+            if (exception == null)
+                return string.Empty;
+
+            var message = exception.Message;
+            if (exception.InnerException != null)
+            {
+                message += "|InnerException:" + GetExceptionMessage(exception.InnerException);
+            }
+            return message;
         }
 
-        #endregion Implementation of IServiceExecutor
-
-        #region Private Method
-
+        /// <summary>
+        /// The LocalExecuteAsync
+        /// </summary>
+        /// <param name="entry">The entry<see cref="ServiceEntry"/></param>
+        /// <param name="remoteInvokeMessage">The remoteInvokeMessage<see cref="RemoteInvokeMessage"/></param>
+        /// <param name="resultMessage">The resultMessage<see cref="RemoteInvokeResultMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task LocalExecuteAsync(ServiceEntry entry, RemoteInvokeMessage remoteInvokeMessage, RemoteInvokeResultMessage resultMessage)
         {
             try
@@ -145,7 +191,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 resultMessage.StatusCode = exception.HResult;
             }
         }
-         
+
+        /// <summary>
+        /// The SendRemoteInvokeResult
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="messageId">The messageId<see cref="string"/></param>
+        /// <param name="resultMessage">The resultMessage<see cref="RemoteInvokeResultMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task SendRemoteInvokeResult(IMessageSender sender, string messageId, RemoteInvokeResultMessage resultMessage)
         {
             try
@@ -160,23 +213,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             catch (Exception exception)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError(exception,"发送响应消息时候发生了异常。" );
+                    _logger.LogError(exception, "发送响应消息时候发生了异常。");
             }
-        } 
-
-        private static string GetExceptionMessage(Exception exception)
-        {
-            if (exception == null)
-                return string.Empty;
-
-            var message = exception.Message;
-            if (exception.InnerException != null)
-            {
-                message += "|InnerException:" + GetExceptionMessage(exception.InnerException);
-            }
-            return message;
         }
 
-        #endregion Private Method
+        #endregion 方法
     }
 }

@@ -5,8 +5,32 @@ using System.Text;
 
 namespace Surging.Core.SwaggerGen
 {
+    /// <summary>
+    /// Defines the <see cref="XmlCommentsMemberNameHelper" />
+    /// </summary>
     public class XmlCommentsMemberNameHelper
     {
+        #region 方法
+
+        /// <summary>
+        /// The GetMemberNameForMember
+        /// </summary>
+        /// <param name="memberInfo">The memberInfo<see cref="MemberInfo"/></param>
+        /// <returns>The <see cref="string"/></returns>
+        public static string GetMemberNameForMember(MemberInfo memberInfo)
+        {
+            var builder = new StringBuilder(((memberInfo.MemberType & MemberTypes.Field) != 0) ? "F:" : "P:");
+            builder.Append(QualifiedNameFor(memberInfo.DeclaringType));
+            builder.Append($".{memberInfo.Name}");
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// The GetMemberNameForMethod
+        /// </summary>
+        /// <param name="method">The method<see cref="MethodInfo"/></param>
+        /// <returns>The <see cref="string"/></returns>
         public static string GetMemberNameForMethod(MethodInfo method)
         {
             var builder = new StringBuilder("M:");
@@ -29,6 +53,11 @@ namespace Surging.Core.SwaggerGen
             return builder.ToString();
         }
 
+        /// <summary>
+        /// The GetMemberNameForType
+        /// </summary>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <returns>The <see cref="string"/></returns>
         public static string GetMemberNameForType(Type type)
         {
             var builder = new StringBuilder("T:");
@@ -37,15 +66,12 @@ namespace Surging.Core.SwaggerGen
             return builder.ToString();
         }
 
-        public static string GetMemberNameForMember(MemberInfo memberInfo)
-        {
-            var builder = new StringBuilder(((memberInfo.MemberType & MemberTypes.Field) != 0) ? "F:" : "P:");
-            builder.Append(QualifiedNameFor(memberInfo.DeclaringType));
-            builder.Append($".{memberInfo.Name}");
-
-            return builder.ToString();
-        }
-
+        /// <summary>
+        /// The QualifiedNameFor
+        /// </summary>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <param name="expandGenericArgs">The expandGenericArgs<see cref="bool"/></param>
+        /// <returns>The <see cref="string"/></returns>
         private static string QualifiedNameFor(Type type, bool expandGenericArgs = false)
         {
             if (type.IsArray)
@@ -80,5 +106,7 @@ namespace Surging.Core.SwaggerGen
 
             return builder.ToString();
         }
+
+        #endregion 方法
     }
 }

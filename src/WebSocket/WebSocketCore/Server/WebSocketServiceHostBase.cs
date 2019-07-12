@@ -1,4 +1,3 @@
-#region License
 /*
  * WebSocketServiceHost.cs
  *
@@ -24,50 +23,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Contributors
 /*
  * Contributors:
  * - Juan Manuel Lallana <juan.manuel.lallana@gmail.com>
  */
-#endregion
 
 using System;
 using WebSocketCore.Net.WebSockets;
 
 namespace WebSocketCore.Server
 {
-  /// <summary>
-  /// Exposes the methods and properties used to access the information in
-  /// a WebSocket service provided by the <see cref="WebSocketServer"/> or
-  /// <see cref="HttpServer"/>.
-  /// </summary>
-  /// <remarks>
-  /// This class is an abstract class.
-  /// </remarks>
-  public abstract class WebSocketServiceHostBase
-  {
-        #region Private Fields
-
-        private Logger _log;
-        private string _path;
-        private WebSocketSessionManager _sessions;
-
-        #endregion
-
-        #region Protected Constructors
+    /// <summary>
+    /// Exposes the methods and properties used to access the information in
+    /// a WebSocket service provided by the <see cref="WebSocketServer"/> or
+    /// <see cref="HttpServer"/>.
+    /// </summary>
+    public abstract class WebSocketServiceHostBase
+    {
+        #region 字段
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WebSocketServiceHostBase"/> class
-        /// with the specified <paramref name="path"/> and <paramref name="log"/>.
+        /// Defines the _log
         /// </summary>
-        /// <param name="path">
-        /// A <see cref="string"/> that represents the absolute path to the service.
-        /// </param>
-        /// <param name="log">
-        /// A <see cref="Logger"/> that represents the logging function for the service.
-        /// </param>
+        private Logger _log;
+
+        /// <summary>
+        /// Defines the _path
+        /// </summary>
+        private string _path;
+
+        /// <summary>
+        /// Defines the _sessions
+        /// </summary>
+        private WebSocketSessionManager _sessions;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketServiceHostBase"/> class.
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <param name="log">The log<see cref="Logger"/></param>
         protected WebSocketServiceHostBase(string path, Logger log)
         {
             _path = path;
@@ -76,52 +75,19 @@ namespace WebSocketCore.Server
             _sessions = new WebSocketSessionManager(log);
         }
 
-        #endregion
+        #endregion 构造函数
 
-        #region Internal Properties
-
-        internal ServerState State
-        {
-            get
-            {
-                return _sessions.State;
-            }
-        }
-
-        #endregion
-
-        #region Protected Properties
+        #region 属性
 
         /// <summary>
-        /// Gets the logging function for the service.
+        /// Gets the <see cref="Type"/> of the behavior of the service.
         /// </summary>
-        /// <value>
-        /// A <see cref="Logger"/> that provides the logging function.
-        /// </value>
-        protected Logger Log
-        {
-            get
-            {
-                return _log;
-            }
-        }
-
-        #endregion
-
-        #region Public Properties
+        public abstract Type BehaviorType { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the service cleans up
         /// the inactive sessions periodically.
         /// </summary>
-        /// <remarks>
-        /// The set operation does nothing if the service has already started or
-        /// it is shutting down.
-        /// </remarks>
-        /// <value>
-        /// <c>true</c> if the service cleans up the inactive sessions every
-        /// 60 seconds; otherwise, <c>false</c>.
-        /// </value>
         public bool KeepClean
         {
             get
@@ -138,10 +104,6 @@ namespace WebSocketCore.Server
         /// <summary>
         /// Gets the path to the service.
         /// </summary>
-        /// <value>
-        /// A <see cref="string"/> that represents the absolute path to
-        /// the service.
-        /// </value>
         public string Path
         {
             get
@@ -153,10 +115,6 @@ namespace WebSocketCore.Server
         /// <summary>
         /// Gets the management function for the sessions in the service.
         /// </summary>
-        /// <value>
-        /// A <see cref="WebSocketSessionManager"/> that manages the sessions in
-        /// the service.
-        /// </value>
         public WebSocketSessionManager Sessions
         {
             get
@@ -166,28 +124,9 @@ namespace WebSocketCore.Server
         }
 
         /// <summary>
-        /// Gets the <see cref="Type"/> of the behavior of the service.
-        /// </summary>
-        /// <value>
-        /// A <see cref="Type"/> that represents the type of the behavior of
-        /// the service.
-        /// </value>
-        public abstract Type BehaviorType { get; }
-
-        /// <summary>
         /// Gets or sets the time to wait for the response to the WebSocket Ping or
         /// Close.
         /// </summary>
-        /// <remarks>
-        /// The set operation does nothing if the service has already started or
-        /// it is shutting down.
-        /// </remarks>
-        /// <value>
-        /// A <see cref="TimeSpan"/> to wait for the response.
-        /// </value>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// The value specified for a set operation is zero or less.
-        /// </exception>
         public TimeSpan WaitTime
         {
             get
@@ -201,38 +140,65 @@ namespace WebSocketCore.Server
             }
         }
 
-        #endregion
+        /// <summary>
+        /// Gets the State
+        /// </summary>
+        internal ServerState State
+        {
+            get
+            {
+                return _sessions.State;
+            }
+        }
 
-        #region Internal Methods
+        /// <summary>
+        /// Gets the logging function for the service.
+        /// </summary>
+        protected Logger Log
+        {
+            get
+            {
+                return _log;
+            }
+        }
 
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Start
+        /// </summary>
         internal void Start()
         {
             _sessions.Start();
         }
 
+        /// <summary>
+        /// The StartSession
+        /// </summary>
+        /// <param name="context">The context<see cref="WebSocketContext"/></param>
         internal void StartSession(WebSocketContext context)
         {
             CreateSession().Start(context, _sessions);
         }
 
+        /// <summary>
+        /// The Stop
+        /// </summary>
+        /// <param name="code">The code<see cref="ushort"/></param>
+        /// <param name="reason">The reason<see cref="string"/></param>
         internal void Stop(ushort code, string reason)
         {
             _sessions.Stop(code, reason);
         }
 
-        #endregion
-
-        #region Protected Methods
-
         /// <summary>
         /// Creates a new session for the service.
         /// </summary>
-        /// <returns>
-        /// A <see cref="WebSocketBehavior"/> instance that represents
-        /// the new session.
-        /// </returns>
+        /// <returns>The <see cref="WebSocketBehavior"/></returns>
         protected abstract WebSocketBehavior CreateSession();
 
-        #endregion
+        #endregion 方法
     }
 }

@@ -7,19 +7,35 @@ namespace Surging.Core.CPlatform.Messages
     /// </summary>
     public class RemoteInvokeMessage
     {
+        #region 属性
+
         /// <summary>
-        /// 服务Id。
+        /// Gets or sets the Attachments
         /// </summary>
-        public string ServiceId { get; set; }
-         
+        public IDictionary<string, object> Attachments { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether DecodeJOject
+        /// </summary>
         public bool DecodeJOject { get; set; }
 
-        public string ServiceKey { get; set; }
         /// <summary>
+        /// Gets or sets the Parameters
         /// 服务参数。
         /// </summary>
         public IDictionary<string, object> Parameters { get; set; }
 
-        public IDictionary<string, object> Attachments { get; set; }
+        /// <summary>
+        /// Gets or sets the ServiceId
+        /// 服务Id。
+        /// </summary>
+        public string ServiceId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ServiceKey
+        /// </summary>
+        public string ServiceKey { get; set; }
+
+        #endregion 属性
     }
 }

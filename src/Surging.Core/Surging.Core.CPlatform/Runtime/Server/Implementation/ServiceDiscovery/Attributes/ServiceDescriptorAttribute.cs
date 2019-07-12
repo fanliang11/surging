@@ -7,10 +7,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
     /// </summary>
     public abstract class ServiceDescriptorAttribute : Attribute
     {
+        #region 方法
+
         /// <summary>
         /// 应用标记。
         /// </summary>
         /// <param name="descriptor">服务描述符。</param>
         public abstract void Apply(ServiceDescriptor descriptor);
+
+        #endregion 方法
     }
 }
