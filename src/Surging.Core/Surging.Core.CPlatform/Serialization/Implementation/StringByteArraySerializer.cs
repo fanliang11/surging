@@ -8,32 +8,29 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
     /// </summary>
     public class StringByteArraySerializer : ISerializer<byte[]>
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
         private readonly ISerializer<string> _serializer;
 
-        #endregion Field
+        #endregion 字段
 
-        #region Constructor
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StringByteArraySerializer"/> class.
+        /// </summary>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
         public StringByteArraySerializer(ISerializer<string> serializer)
         {
             _serializer = serializer;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of ISerializer<byte[]>
-
-        /// <summary>
-        /// 序列化。
-        /// </summary>
-        /// <param name="instance">需要序列化的对象。</param>
-        /// <returns>序列化之后的结果。</returns>
-        public byte[] Serialize(object instance)
-        {
-            return Encoding.UTF8.GetBytes(_serializer.Serialize(instance));
-        }
+        #region 方法
 
         /// <summary>
         /// 反序列化。
@@ -46,6 +43,16 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
             return _serializer.Deserialize(Encoding.UTF8.GetString(content), type);
         }
 
-        #endregion Implementation of ISerializer<byte[]>
+        /// <summary>
+        /// 序列化。
+        /// </summary>
+        /// <param name="instance">需要序列化的对象。</param>
+        /// <returns>序列化之后的结果。</returns>
+        public byte[] Serialize(object instance)
+        {
+            return Encoding.UTF8.GetBytes(_serializer.Serialize(instance));
+        }
+
+        #endregion 方法
     }
 }

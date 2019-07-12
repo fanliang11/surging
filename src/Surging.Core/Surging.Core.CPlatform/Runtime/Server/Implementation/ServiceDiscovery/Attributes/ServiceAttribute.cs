@@ -8,42 +8,59 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public class ServiceAttribute : ServiceDescriptorAttribute
     {
+        #region 构造函数
+
         /// <summary>
-        /// 初始化构造函数
+        /// Initializes a new instance of the <see cref="ServiceAttribute"/> class.
         /// </summary>
         public ServiceAttribute()
         {
             IsWaitExecution = true;
         }
 
-        /// <summary>
-        /// 是否需要等待服务执行。
-        /// </summary>
-        public bool IsWaitExecution { get; set; }
+        #endregion 构造函数
+
+        #region 属性
 
         /// <summary>
+        /// Gets or sets the Date
+        /// 日期
+        /// </summary>
+        public string Date { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Director
         /// 负责人
         /// </summary>
         public string Director { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether DisableNetwork
         /// 是否禁用外网访问
         /// </summary>
         public bool DisableNetwork { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether EnableAuthorization
         /// 是否授权
         /// </summary>
         public bool EnableAuthorization { get; set; }
+
         /// <summary>
+        /// Gets or sets a value indicating whether IsWaitExecution
+        /// 是否需要等待服务执行。
+        /// </summary>
+        public bool IsWaitExecution { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Name
         /// 名称
         /// </summary>
         public string Name { get; set; }
-        /// <summary>
-        /// 日期
-        /// </summary>
-        public string Date { get; set; }
-        #region Overrides of DescriptorAttribute
+
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 应用标记。
@@ -60,6 +77,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 .Date(Date);
         }
 
-        #endregion Overrides of ServiceDescriptorAttribute
+        #endregion 方法
     }
 }

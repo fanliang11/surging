@@ -6,10 +6,15 @@ using System.Text;
 
 namespace Surging.Core.Zookeeper.Configurations
 {
+    /// <summary>
+    /// Defines the <see cref="ConfigInfo" />
+    /// </summary>
     public class ConfigInfo
     {
+        #region 构造函数
+
         /// <summary>
-        /// 初始化会话超时为20秒的Zookeeper配置信息。
+        /// Initializes a new instance of the <see cref="ConfigInfo"/> class.
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
         /// <param name="routePath">路由配置路径。</param>
@@ -18,6 +23,8 @@ namespace Surging.Core.Zookeeper.Configurations
         /// <param name="cachePath">缓存中心配置路径</param>
         /// <param name="mqttRoutePath">mqtt路由配置路径</param>
         /// <param name="chRoot">根节点。</param>
+        /// <param name="reloadOnChange">The reloadOnChange<see cref="bool"/></param>
+        /// <param name="enableChildrenMonitor">The enableChildrenMonitor<see cref="bool"/></param>
         public ConfigInfo(string connectionString, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
@@ -37,16 +44,18 @@ namespace Surging.Core.Zookeeper.Configurations
         }
 
         /// <summary>
-        /// 初始化Zookeeper配置信息。
+        /// Initializes a new instance of the <see cref="ConfigInfo"/> class.
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
-        /// <param name="routePath">路由配置路径。</param>
-        /// <param name="commandPath">服务命令配置路径</param>
-        /// <param name="subscriberPath">订阅者配置路径</param>
         /// <param name="sessionTimeout">会话超时时间。</param>
+        /// <param name="routePath">路由配置路径。</param>
+        /// <param name="subscriberPath">订阅者配置路径</param>
+        /// <param name="commandPath">服务命令配置路径</param>
         /// <param name="cachePath">缓存中心配置路径</param>
         /// <param name="mqttRoutePath">mqtt路由配置路径</param>
         /// <param name="chRoot">根节点。</param>
+        /// <param name="reloadOnChange">The reloadOnChange<see cref="bool"/></param>
+        /// <param name="enableChildrenMonitor">The enableChildrenMonitor<see cref="bool"/></param>
         public ConfigInfo(string connectionString, TimeSpan sessionTimeout, string routePath = "/services/serviceRoutes",
             string subscriberPath = "/services/serviceSubscribers",
             string commandPath = "/services/serviceCommands",
@@ -78,60 +87,88 @@ namespace Surging.Core.Zookeeper.Configurations
                     if (address != null)
                     {
                         var ipAddress = address as IpAddressModel;
-                        Addresses = new IpAddressModel[] { ipAddress};
+                        Addresses = new IpAddressModel[] { ipAddress };
                     }
                 }
             }
         }
 
-        public bool EnableChildrenMonitor { get; set; }
+        #endregion 构造函数
 
-        public bool ReloadOnChange { get; set; }
+        #region 属性
 
         /// <summary>
-        /// 连接字符串。
+        /// Gets or sets the Addresses
         /// </summary>
-        public string ConnectionString { get; set; }
+        public IEnumerable<AddressModel> Addresses { get; set; }
 
         /// <summary>
+        /// Gets or sets the CachePath
+        /// 缓存中心配置中心
+        /// </summary>
+        public string CachePath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChRoot
+        /// 根节点。
+        /// </summary>
+        public string ChRoot { get; set; }
+
+        /// <summary>
+        /// Gets or sets the CommandPath
         /// 命令配置路径
         /// </summary>
         public string CommandPath { get; set; }
 
         /// <summary>
+        /// Gets or sets the ConnectionString
+        /// 连接字符串。
+        /// </summary>
+        public string ConnectionString { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether EnableChildrenMonitor
+        /// </summary>
+        public bool EnableChildrenMonitor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the MqttRoutePath
+        /// Mqtt路由配置路径。
+        /// </summary>
+        public string MqttRoutePath { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether ReloadOnChange
+        /// </summary>
+        public bool ReloadOnChange { get; set; }
+
+        /// <summary>
+        /// Gets or sets the RoutePath
         /// 路由配置路径。
         /// </summary>
         public string RoutePath { get; set; }
 
         /// <summary>
-        /// 订阅者配置路径
-        /// </summary>
-        public string SubscriberPath { get; set; }
-
-        /// <summary>
+        /// Gets or sets the SessionTimeout
         /// 会话超时时间。
         /// </summary>
         public TimeSpan SessionTimeout { get; set; }
 
         /// <summary>
-        /// 根节点。
+        /// Gets or sets the SubscriberPath
+        /// 订阅者配置路径
         /// </summary>
-        public string ChRoot { get; set; }
+        public string SubscriberPath { get; set; }
 
+        #endregion 属性
 
-        public IEnumerable<AddressModel> Addresses { get; set; }
+        #region 方法
 
         /// <summary>
-        /// 缓存中心配置中心
+        /// The ConvertAddressModel
         /// </summary>
-        public string CachePath { get; set; }
-
-
-        /// <summary>
-        /// Mqtt路由配置路径。
-        /// </summary>
-        public string MqttRoutePath { get; set; }
-
+        /// <param name="connection">The connection<see cref="string"/></param>
+        /// <returns>The <see cref="AddressModel"/></returns>
         public AddressModel ConvertAddressModel(string connection)
         {
             var address = connection.Split(":");
@@ -143,5 +180,7 @@ namespace Surging.Core.Zookeeper.Configurations
             }
             return null;
         }
+
+        #endregion 方法
     }
 }

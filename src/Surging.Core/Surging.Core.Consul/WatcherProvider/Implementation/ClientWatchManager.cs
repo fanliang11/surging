@@ -12,24 +12,58 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Surging.Core.Consul.WatcherProvider.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="ClientWatchManager" />
+    /// </summary>
     public class ClientWatchManager : IClientWatchManager
     {
-        internal  Dictionary<string, HashSet<Watcher>> dataWatches =
-            new Dictionary<string, HashSet<Watcher>>();
-        private readonly Timer _timer;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<ClientWatchManager> _logger;
 
-        public ClientWatchManager(ILogger<ClientWatchManager> logger,ConfigInfo config)
+        /// <summary>
+        /// Defines the _timer
+        /// </summary>
+        private readonly Timer _timer;
+
+        /// <summary>
+        /// Defines the dataWatches
+        /// </summary>
+        internal Dictionary<string, HashSet<Watcher>> dataWatches =
+            new Dictionary<string, HashSet<Watcher>>();
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClientWatchManager"/> class.
+        /// </summary>
+        /// <param name="logger">The logger<see cref="ILogger{ClientWatchManager}"/></param>
+        /// <param name="config">The config<see cref="ConfigInfo"/></param>
+        public ClientWatchManager(ILogger<ClientWatchManager> logger, ConfigInfo config)
         {
             var timeSpan = TimeSpan.FromSeconds(config.WatchInterval);
             _logger = logger;
             _timer = new Timer(async s =>
             {
-               await Watching();
+                await Watching();
             }, null, timeSpan, timeSpan);
         }
 
-        public Dictionary<string, HashSet<Watcher>> DataWatches { get
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the DataWatches
+        /// </summary>
+        public Dictionary<string, HashSet<Watcher>> DataWatches
+        {
+            get
             {
                 return dataWatches;
             }
@@ -39,6 +73,14 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
             }
         }
 
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Materialize
+        /// </summary>
+        /// <returns>The <see cref="HashSet{Watcher}"/></returns>
         private HashSet<Watcher> Materialize()
         {
             HashSet<Watcher> result = new HashSet<Watcher>();
@@ -52,6 +94,10 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
             return result;
         }
 
+        /// <summary>
+        /// The Watching
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task Watching()
         {
             try
@@ -68,6 +114,7 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
                     _logger.LogError($"message:{ex.Message},Source:{ex.Source},Trace:{ex.StackTrace}");
             }
         }
+
+        #endregion 方法
     }
 }
-

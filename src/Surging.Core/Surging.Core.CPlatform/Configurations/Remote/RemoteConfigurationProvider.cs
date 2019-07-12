@@ -8,30 +8,59 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Configurations.Remote
 {
-    class RemoteConfigurationProvider : ConfigurationProvider
+    /// <summary>
+    /// Defines the <see cref="RemoteConfigurationProvider" />
+    /// </summary>
+    internal class RemoteConfigurationProvider : ConfigurationProvider
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoteConfigurationProvider"/> class.
+        /// </summary>
+        /// <param name="source">The source<see cref="RemoteConfigurationSource"/></param>
         public RemoteConfigurationProvider(RemoteConfigurationSource source)
         {
             Check.NotNull(source, "source");
             if (!string.IsNullOrEmpty(source.ConfigurationKeyPrefix))
             {
                 Check.CheckCondition(() => source.ConfigurationKeyPrefix.Trim().StartsWith(":"), CPlatformResource.InvalidStartCharacter, "source.ConfigurationKeyPrefix", ":");
-                Check.CheckCondition(() => source.ConfigurationKeyPrefix.Trim().EndsWith(":"), CPlatformResource.InvalidEndCharacter, "source.ConfigurationKeyPrefix",":");
+                Check.CheckCondition(() => source.ConfigurationKeyPrefix.Trim().EndsWith(":"), CPlatformResource.InvalidEndCharacter, "source.ConfigurationKeyPrefix", ":");
             }
             Source = source;
             Backchannel = new HttpClient(source.BackchannelHttpHandler ?? new HttpClientHandler());
             Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("获取CacheConfiugration信息");
             Backchannel.Timeout = source.BackchannelTimeout;
-            Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; 
+            Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10;
             Parser = source.Parser ?? new JsonConfigurationParser();
         }
 
-        public RemoteConfigurationSource Source { get; }
+        #endregion 构造函数
 
+        #region 属性
+
+        /// <summary>
+        /// Gets the Backchannel
+        /// </summary>
+        public HttpClient Backchannel { get; }
+
+        /// <summary>
+        /// Gets the Parser
+        /// </summary>
         public IConfigurationParser Parser { get; }
 
-        public HttpClient Backchannel { get; }
-        
+        /// <summary>
+        /// Gets the Source
+        /// </summary>
+        public RemoteConfigurationSource Source { get; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Load
+        /// </summary>
         public override void Load()
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, Source.ConfigurationUri);
@@ -68,5 +97,7 @@ namespace Surging.Core.CPlatform.Configurations.Remote
                 }
             }
         }
+
+        #endregion 方法
     }
 }

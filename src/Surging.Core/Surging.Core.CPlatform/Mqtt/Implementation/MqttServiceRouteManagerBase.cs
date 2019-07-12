@@ -8,24 +8,61 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Mqtt.Implementation
 {
-    public class MqttServiceRouteEventArgs
-    {
-        public MqttServiceRouteEventArgs(MqttServiceRoute route)
-        {
-            Route = route;
-        }
-
-        public MqttServiceRoute Route { get; private set; }
-    }
-
+    /// <summary>
+    /// Defines the <see cref="MqttServiceRouteChangedEventArgs" />
+    /// </summary>
     public class MqttServiceRouteChangedEventArgs : MqttServiceRouteEventArgs
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MqttServiceRouteChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="route">The route<see cref="MqttServiceRoute"/></param>
+        /// <param name="oldRoute">The oldRoute<see cref="MqttServiceRoute"/></param>
         public MqttServiceRouteChangedEventArgs(MqttServiceRoute route, MqttServiceRoute oldRoute) : base(route)
         {
             OldRoute = oldRoute;
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the OldRoute
+        /// </summary>
         public MqttServiceRoute OldRoute { get; set; }
+
+        #endregion 属性
+    }
+
+    /// <summary>
+    /// Defines the <see cref="MqttServiceRouteEventArgs" />
+    /// </summary>
+    public class MqttServiceRouteEventArgs
+    {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MqttServiceRouteEventArgs"/> class.
+        /// </summary>
+        /// <param name="route">The route<see cref="MqttServiceRoute"/></param>
+        public MqttServiceRouteEventArgs(MqttServiceRoute route)
+        {
+            Route = route;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Route
+        /// </summary>
+        public MqttServiceRoute Route { get; private set; }
+
+        #endregion 属性
     }
 
     public abstract class MqttServiceRouteManagerBase : IMqttServiceRouteManager
@@ -59,12 +96,12 @@ namespace Surging.Core.CPlatform.Mqtt.Implementation
         }
 
         public abstract Task ClearAsync();
+
         public abstract Task<IEnumerable<MqttServiceRoute>> GetRoutesAsync();
 
         public abstract Task RemveAddressAsync(IEnumerable<AddressModel> addresses);
 
         public abstract Task RemoveByTopicAsync(string topic, IEnumerable<AddressModel> endpoint);
-
 
         public virtual Task SetRoutesAsync(IEnumerable<MqttServiceRoute> routes)
         {
@@ -78,10 +115,11 @@ namespace Surging.Core.CPlatform.Mqtt.Implementation
                     Type = address.GetType().FullName,
                     Value = _serializer.Serialize(address)
                 }) ?? Enumerable.Empty<MqttEndpointDescriptor>(),
-                 MqttDescriptor = route.MqttDescriptor
+                MqttDescriptor = route.MqttDescriptor
             });
             return SetRoutesAsync(descriptors);
         }
+
         protected abstract Task SetRoutesAsync(IEnumerable<MqttServiceDescriptor> descriptors);
 
         protected void OnCreated(params MqttServiceRouteEventArgs[] args)

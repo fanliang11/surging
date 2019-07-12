@@ -11,60 +11,61 @@ using System.Text;
 
 namespace Surging.Core.DNS.Runtime.Implementation
 {
-   public class DefaultDnsServiceEntryProvider:IDnsServiceEntryProvider
+    /// <summary>
+    /// Defines the <see cref="DefaultDnsServiceEntryProvider" />
+    /// </summary>
+    public class DefaultDnsServiceEntryProvider : IDnsServiceEntryProvider
     {
-        #region Field
+        #region 字段
 
-        private readonly IEnumerable<Type> _types;
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<DefaultDnsServiceEntryProvider> _logger;
+
+        /// <summary>
+        /// Defines the _serviceProvider
+        /// </summary>
         private readonly CPlatformContainer _serviceProvider;
-        private  DnsServiceEntry _dnsServiceEntry;
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _types
+        /// </summary>
+        private readonly IEnumerable<Type> _types;
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _dnsServiceEntry
+        /// </summary>
+        private DnsServiceEntry _dnsServiceEntry;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultDnsServiceEntryProvider"/> class.
+        /// </summary>
+        /// <param name="serviceEntryProvider">The serviceEntryProvider<see cref="IServiceEntryProvider"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DefaultDnsServiceEntryProvider}"/></param>
+        /// <param name="serviceProvider">The serviceProvider<see cref="CPlatformContainer"/></param>
         public DefaultDnsServiceEntryProvider(IServiceEntryProvider serviceEntryProvider,
             ILogger<DefaultDnsServiceEntryProvider> logger,
             CPlatformContainer serviceProvider)
         {
             _types = serviceEntryProvider.GetTypes();
             _logger = logger;
-            _serviceProvider = serviceProvider; 
+            _serviceProvider = serviceProvider;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IServiceEntryProvider
+        #region 方法
 
         /// <summary>
-        /// 获取服务条目集合。
+        /// The CreateServiceEntry
         /// </summary>
-        /// <returns>服务条目集合。</returns>
-        public DnsServiceEntry GetEntry()
-        {
-            var services = _types.ToArray();
-            if (_dnsServiceEntry == null)
-            {
-                _dnsServiceEntry =new DnsServiceEntry();
-                foreach (var service in services)
-                {
-                    var entry = CreateServiceEntry(service);
-                    if (entry != null)
-                    {
-                        _dnsServiceEntry = entry;
-                        break;
-                    }
-                }
-                if (_logger.IsEnabled(LogLevel.Debug))
-                {
-                    _logger.LogDebug($"发现了以下dns服务：{_dnsServiceEntry.Type.FullName}。");
-                }
-            }
-            return _dnsServiceEntry;
-        }
-        #endregion
-
+        /// <param name="service">The service<see cref="Type"/></param>
+        /// <returns>The <see cref="DnsServiceEntry"/></returns>
         public DnsServiceEntry CreateServiceEntry(Type service)
         {
             DnsServiceEntry result = null;
@@ -83,5 +84,34 @@ namespace Surging.Core.DNS.Runtime.Implementation
                 };
             return result;
         }
+
+        /// <summary>
+        /// 获取服务条目集合。
+        /// </summary>
+        /// <returns>服务条目集合。</returns>
+        public DnsServiceEntry GetEntry()
+        {
+            var services = _types.ToArray();
+            if (_dnsServiceEntry == null)
+            {
+                _dnsServiceEntry = new DnsServiceEntry();
+                foreach (var service in services)
+                {
+                    var entry = CreateServiceEntry(service);
+                    if (entry != null)
+                    {
+                        _dnsServiceEntry = entry;
+                        break;
+                    }
+                }
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug($"发现了以下dns服务：{_dnsServiceEntry.Type.FullName}。");
+                }
+            }
+            return _dnsServiceEntry;
+        }
+
+        #endregion 方法
     }
 }

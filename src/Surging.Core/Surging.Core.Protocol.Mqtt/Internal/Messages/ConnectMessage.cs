@@ -4,35 +4,88 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Enums
 {
-    public  class ConnectMessage:MqttMessage
+    /// <summary>
+    /// Defines the <see cref="ConnectMessage" />
+    /// </summary>
+    public class ConnectMessage : MqttMessage
     {
-        public override MessageType MessageType => MessageType.CONNECT;
-        public string ProtocolName { get; set; }
+        #region 属性
 
-        public int ProtocolLevel { get; set; }
-
+        /// <summary>
+        /// Gets or sets a value indicating whether CleanSession
+        /// </summary>
         public bool CleanSession { get; set; }
 
-        public bool HasWill { get; set; }
-
-        public int WillQualityOfService { get; set; }
-
-        public bool WillRetain { get; set; }
-
-        public bool HasPassword { get; set; }
-
-        public bool HasUsername { get; set; }
-
-        public int KeepAliveInSeconds { get; set; }
-
-        public string Username { get; set; }
-
-        public string Password { get; set; }
-
+        /// <summary>
+        /// Gets or sets the ClientId
+        /// </summary>
         public string ClientId { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether HasPassword
+        /// </summary>
+        public bool HasPassword { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether HasUsername
+        /// </summary>
+        public bool HasUsername { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether HasWill
+        /// </summary>
+        public bool HasWill { get; set; }
+
+        /// <summary>
+        /// Gets or sets the KeepAliveInSeconds
+        /// </summary>
+        public int KeepAliveInSeconds { get; set; }
+
+        /// <summary>
+        /// Gets the MessageType
+        /// </summary>
+        public override MessageType MessageType => MessageType.CONNECT;
+
+        /// <summary>
+        /// Gets or sets the Password
+        /// </summary>
+        public string Password { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ProtocolLevel
+        /// </summary>
+        public int ProtocolLevel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ProtocolName
+        /// </summary>
+        public string ProtocolName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Username
+        /// </summary>
+        public string Username { get; set; }
+
+        /// <summary>
+        /// Gets or sets the WillMessage
+        /// </summary>
+        public byte[] WillMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the WillQualityOfService
+        /// </summary>
+        public int WillQualityOfService { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether WillRetain
+        /// </summary>
+        public bool WillRetain { get; set; }
+
+        /// <summary>
+        /// Gets or sets the WillTopic
+        /// </summary>
         public string WillTopic { get; set; }
 
-        public byte[] WillMessage { get; set; }
+        #endregion 属性
     }
 }

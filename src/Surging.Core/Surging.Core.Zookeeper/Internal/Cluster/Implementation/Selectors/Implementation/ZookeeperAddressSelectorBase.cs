@@ -8,9 +8,19 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper.Internal.Cluster.Implementation.Selectors.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="ZookeeperAddressSelectorBase" />
+    /// </summary>
     public abstract class ZookeeperAddressSelectorBase : IZookeeperAddressSelector
     {
-        #region Implementation of IAddressSelector
+        #region 方法
+
+        /// <summary>
+        /// 选择一个地址。
+        /// </summary>
+        /// <param name="context">地址选择上下文。</param>
+        /// <returns>地址模型。</returns>
+        protected abstract ValueTask<AddressModel> SelectAsync(AddressSelectContext context);
 
         /// <summary>
         /// 选择一个地址。
@@ -41,13 +51,6 @@ namespace Surging.Core.Zookeeper.Internal.Cluster.Implementation.Selectors.Imple
             }
         }
 
-        #endregion Implementation of IAddressSelector
-
-        /// <summary>
-        /// 选择一个地址。
-        /// </summary>
-        /// <param name="context">地址选择上下文。</param>
-        /// <returns>地址模型。</returns>
-        protected abstract ValueTask<AddressModel> SelectAsync(AddressSelectContext context);
+        #endregion 方法
     }
 }

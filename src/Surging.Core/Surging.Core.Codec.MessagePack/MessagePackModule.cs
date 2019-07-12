@@ -7,8 +7,17 @@ using System.Text;
 
 namespace Surging.Core.Codec.MessagePack
 {
-   public class MessagePackModule : EnginePartModule
+    /// <summary>
+    /// Defines the <see cref="MessagePackModule" />
+    /// </summary>
+    public class MessagePackModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -23,5 +32,7 @@ namespace Surging.Core.Codec.MessagePack
             base.RegisterBuilder(builder);
             builder.RegisterType<MessagePackTransportMessageCodecFactory>().As<ITransportMessageCodecFactory>().SingleInstance();
         }
+
+        #endregion 方法
     }
 }

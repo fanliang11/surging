@@ -6,8 +6,18 @@ using System.Text.RegularExpressions;
 
 namespace Surging.Core.CPlatform.Address
 {
+    /// <summary>
+    /// Defines the <see cref="AddressHelper" />
+    /// </summary>
     public class AddressHelper
     {
+        #region 方法
+
+        /// <summary>
+        /// The GetIpFromAddress
+        /// </summary>
+        /// <param name="address">The address<see cref="string"/></param>
+        /// <returns>The <see cref="string"/></returns>
         public static string GetIpFromAddress(string address)
         {
             if (IsValidIp(address))
@@ -18,6 +28,11 @@ namespace Surging.Core.CPlatform.Address
             return ips[0].ToString();
         }
 
+        /// <summary>
+        /// The IsValidIp
+        /// </summary>
+        /// <param name="address">The address<see cref="string"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         public static bool IsValidIp(string address)
         {
             if (Regex.IsMatch(address, "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"))
@@ -34,5 +49,7 @@ namespace Surging.Core.CPlatform.Address
             }
             return false;
         }
+
+        #endregion 方法
     }
 }

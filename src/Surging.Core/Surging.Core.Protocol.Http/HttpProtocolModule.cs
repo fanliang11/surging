@@ -13,8 +13,17 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Http
 {
+    /// <summary>
+    /// Defines the <see cref="HttpProtocolModule" />
+    /// </summary>
     public class HttpProtocolModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -39,6 +48,10 @@ namespace Surging.Core.Protocol.Http
             }
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
@@ -51,7 +64,6 @@ namespace Surging.Core.Protocol.Http
             }).SingleInstance();
             builder.Register(provider =>
             {
-
                 var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Http.ToString());
                 var messageListener = provider.Resolve<DotNettyHttpServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>
@@ -59,13 +71,15 @@ namespace Surging.Core.Protocol.Http
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-
             }).As<IServiceHost>();
         }
 
+        /// <summary>
+        /// The RegisterHttpProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterHttpProtocol(ContainerBuilderWrapper builder)
         {
-
             builder.Register(provider =>
             {
                 return new DotNettyHttpServerMessageListener(provider.Resolve<ILogger<DotNettyHttpServerMessageListener>>(),
@@ -83,8 +97,9 @@ namespace Surging.Core.Protocol.Http
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

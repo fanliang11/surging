@@ -10,8 +10,32 @@ namespace Surging.Core.Caching.Configurations.Remote
     /// </summary>
     public static class RemoteConfigurationExtensions
     {
+        #region 方法
+
         /// <summary>
-        ///对于 <paramref name="builder"/>添加远程配置方法
+        /// 对于 <paramref name="builder"/>添加远程配置方法
+        /// </summary>
+        /// <param name="builder"> <see cref="IConfigurationBuilder"/></param>
+        /// <param name="source"> <see cref="RemoteConfigurationSource"/></param>
+        /// <returns><see cref="IConfigurationBuilder"/></returns>
+        public static IConfigurationBuilder AddRemoteSource(this IConfigurationBuilder builder, RemoteConfigurationSource source)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            builder.Add(source);
+            return builder;
+        }
+
+        /// <summary>
+        /// 对于 <paramref name="builder"/>添加远程配置方法
         /// </summary>
         /// <param name="builder">  <see cref="IConfigurationBuilder"/></param>
         /// <param name="configurationUri">远程地址 </param>
@@ -22,7 +46,7 @@ namespace Surging.Core.Caching.Configurations.Remote
         }
 
         /// <summary>
-        ///对于 <paramref name="builder"/>添加远程配置方法
+        /// 对于 <paramref name="builder"/>添加远程配置方法
         /// </summary>
         /// <param name="builder"><see cref="IConfigurationBuilder"/></param>
         /// <param name="configurationUri">远程地址</param>
@@ -50,11 +74,11 @@ namespace Surging.Core.Caching.Configurations.Remote
         }
 
         /// <summary>
-        ///对于 <paramref name="builder"/>添加远程配置方法
+        /// 对于 <paramref name="builder"/>添加远程配置方法
         /// </summary>
         /// <param name="builder"> <see cref="IConfigurationBuilder"/></param>
         /// <param name="configurationUri">远程地址 </param>
-        /// <param name="optional">远程配置源是否可选</param> 
+        /// <param name="optional">远程配置源是否可选</param>
         /// <param name="events">添加事件 </param>
         /// <returns> <see cref="IConfigurationBuilder"/></returns>
         public static IConfigurationBuilder AddRemoteSource(this IConfigurationBuilder builder, Uri configurationUri, bool optional, RemoteConfigurationEvents events)
@@ -80,27 +104,6 @@ namespace Surging.Core.Caching.Configurations.Remote
             return builder.AddRemoteSource(source);
         }
 
-
-        /// <summary>
-        ///对于 <paramref name="builder"/>添加远程配置方法
-        /// </summary>
-        /// <param name="builder"> <see cref="IConfigurationBuilder"/></param>
-        /// <param name="source"> <see cref="RemoteConfigurationSource"/></param>
-        /// <returns><see cref="IConfigurationBuilder"/></returns>
-        public static IConfigurationBuilder AddRemoteSource(this IConfigurationBuilder builder, RemoteConfigurationSource source)
-        {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
-
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            builder.Add(source);
-            return builder;
-        }
+        #endregion 方法
     }
 }

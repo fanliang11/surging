@@ -16,20 +16,45 @@ namespace Surging.Core.CPlatform.Transport.Implementation
     /// </summary>
     public class TransportClient : ITransportClient, IDisposable
     {
-        #region Field
+        #region 字段
 
-        private readonly IMessageSender _messageSender;
-        private readonly IMessageListener _messageListener;
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger _logger;
-        private readonly IServiceExecutor _serviceExecutor;
 
+        /// <summary>
+        /// Defines the _messageListener
+        /// </summary>
+        private readonly IMessageListener _messageListener;
+
+        /// <summary>
+        /// Defines the _messageSender
+        /// </summary>
+        private readonly IMessageSender _messageSender;
+
+        /// <summary>
+        /// Defines the _resultDictionary
+        /// </summary>
         private readonly ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>> _resultDictionary =
             new ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>>();
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _serviceExecutor
+        /// </summary>
+        private readonly IServiceExecutor _serviceExecutor;
 
-        #region Constructor
+        #endregion 字段
 
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransportClient"/> class.
+        /// </summary>
+        /// <param name="messageSender">The messageSender<see cref="IMessageSender"/></param>
+        /// <param name="messageListener">The messageListener<see cref="IMessageListener"/></param>
+        /// <param name="logger">The logger<see cref="ILogger"/></param>
+        /// <param name="serviceExecutor">The serviceExecutor<see cref="IServiceExecutor"/></param>
         public TransportClient(IMessageSender messageSender, IMessageListener messageListener, ILogger logger,
             IServiceExecutor serviceExecutor)
         {
@@ -40,14 +65,28 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             messageListener.Received += MessageListener_Received;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of ITransportClient
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            (_messageSender as IDisposable)?.Dispose();
+            (_messageListener as IDisposable)?.Dispose();
+            foreach (var taskCompletionSource in _resultDictionary.Values)
+            {
+                taskCompletionSource.SetCanceled();
+            }
+        }
 
         /// <summary>
         /// 发送消息。
         /// </summary>
         /// <param name="message">远程调用消息模型。</param>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
         /// <returns>远程调用消息的传输消息。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message, CancellationToken cancellationToken)
@@ -60,7 +99,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
                 var transportMessage = TransportMessage.CreateInvokeMessage(message);
 
                 //注册结果回调
-                var callbackTask = RegisterResultCallbackAsync(transportMessage.Id,cancellationToken);
+                var callbackTask = RegisterResultCallbackAsync(transportMessage.Id, cancellationToken);
 
                 try
                 {
@@ -85,29 +124,42 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             }
         }
 
-        #endregion Implementation of ITransportClient
-
-        #region Implementation of IDisposable
-
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-        public void Dispose()
+        /// <summary>
+        /// The MessageListener_Received
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
         {
-            (_messageSender as IDisposable)?.Dispose();
-            (_messageListener as IDisposable)?.Dispose();
-            foreach (var taskCompletionSource in _resultDictionary.Values)
+            if (_logger.IsEnabled(LogLevel.Trace))
+                _logger.LogTrace("服务消费者接收到消息。");
+
+            ManualResetValueTaskSource<TransportMessage> task;
+            if (!_resultDictionary.TryGetValue(message.Id, out task))
+                return;
+
+            if (message.IsInvokeResultMessage())
             {
-                taskCompletionSource.SetCanceled();
+                var content = message.GetContent<RemoteInvokeResultMessage>();
+                if (!string.IsNullOrEmpty(content.ExceptionMessage))
+                {
+                    task.SetException(new CPlatformCommunicationException(content.ExceptionMessage, content.StatusCode));
+                }
+                else
+                {
+                    task.SetResult(message);
+                }
             }
+            if (_serviceExecutor != null && message.IsInvokeMessage())
+                await _serviceExecutor.ExecuteAsync(sender, message);
         }
-
-        #endregion Implementation of IDisposable
-
-        #region Private Method
 
         /// <summary>
         /// 注册指定消息的回调任务。
         /// </summary>
         /// <param name="id">消息Id。</param>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
         /// <returns>远程调用结果消息模型。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task<RemoteInvokeResultMessage> RegisterResultCallbackAsync(string id, CancellationToken cancellationToken)
@@ -131,31 +183,6 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             }
         }
 
-        private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
-        {
-            if (_logger.IsEnabled(LogLevel.Trace))
-                _logger.LogTrace("服务消费者接收到消息。");
-
-            ManualResetValueTaskSource<TransportMessage> task;
-            if (!_resultDictionary.TryGetValue(message.Id, out task))
-                return;
-
-            if (message.IsInvokeResultMessage())
-            {
-                var content = message.GetContent<RemoteInvokeResultMessage>();
-                if (!string.IsNullOrEmpty(content.ExceptionMessage))
-                {
-                    task.SetException(new CPlatformCommunicationException(content.ExceptionMessage,content.StatusCode));
-                }
-                else
-                {
-                    task.SetResult(message);
-                }
-            }
-            if (_serviceExecutor != null && message.IsInvokeMessage())
-                await _serviceExecutor.ExecuteAsync(sender, message);
-        }
-
-        #endregion Private Method
+        #endregion 方法
     }
 }

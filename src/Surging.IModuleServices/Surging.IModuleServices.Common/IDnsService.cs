@@ -6,8 +6,15 @@ using System.Text;
 
 namespace Surging.IModuleServices.Common
 {
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IDnsService" />
+    /// </summary>
     [ServiceBundle("Dns/{Service}")]
-     public interface IDnsService : IServiceKey
+    public interface IDnsService : IServiceKey
     {
     }
+
+    #endregion 接口
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Surging.Core.CPlatform.Address;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,18 +8,39 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Surging.Core.CPlatform.Address;
 
 namespace Surging.Core.Zookeeper.Internal.Cluster.HealthChecks.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="DefaultHealthCheckService" />
+    /// </summary>
     public class DefaultHealthCheckService : IHealthCheckService
     {
-        private readonly int _timeout = 30000;
-        private readonly Timer _timer;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _dictionary
+        /// </summary>
         private readonly ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry> _dictionary =
     new ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry>();
 
-        #region Implementation of IHealthCheckService
+        /// <summary>
+        /// Defines the _timeout
+        /// </summary>
+        private readonly int _timeout = 30000;
+
+        /// <summary>
+        /// Defines the _timer
+        /// </summary>
+        private readonly Timer _timer;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultHealthCheckService"/> class.
+        /// </summary>
         public DefaultHealthCheckService()
         {
             var timeSpan = TimeSpan.FromSeconds(60);
@@ -29,6 +51,23 @@ namespace Surging.Core.Zookeeper.Internal.Cluster.HealthChecks.Implementation
             }, null, timeSpan, timeSpan);
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            _timer.Dispose();
+        }
+
+        /// <summary>
+        /// The IsHealth
+        /// </summary>
+        /// <param name="address">The address<see cref="AddressModel"/></param>
+        /// <returns>The <see cref="ValueTask{bool}"/></returns>
         public async ValueTask<bool> IsHealth(AddressModel address)
         {
             var ipAddress = address as IpAddressModel;
@@ -37,24 +76,22 @@ namespace Surging.Core.Zookeeper.Internal.Cluster.HealthChecks.Implementation
             return isHealth;
         }
 
+        /// <summary>
+        /// The Monitor
+        /// </summary>
+        /// <param name="address">The address<see cref="AddressModel"/></param>
         public void Monitor(AddressModel address)
         {
             var ipAddress = address as IpAddressModel;
             _dictionary.GetOrAdd(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), k => new MonitorEntry(address));
         }
 
-        #region Implementation of IDisposable
-
-        public void Dispose()
-        {
-            _timer.Dispose();
-        }
-        #endregion
-
-        #endregion Implementation of IDisposable
-
-        #region Private Method
-
+        /// <summary>
+        /// The Check
+        /// </summary>
+        /// <param name="address">The address<see cref="AddressModel"/></param>
+        /// <param name="timeout">The timeout<see cref="int"/></param>
+        /// <returns>The <see cref="Task{bool}"/></returns>
         private static async Task<bool> Check(AddressModel address, int timeout)
         {
             bool isHealth = false;
@@ -67,12 +104,17 @@ namespace Surging.Core.Zookeeper.Internal.Cluster.HealthChecks.Implementation
                 }
                 catch
                 {
-
                 }
                 return isHealth;
             }
         }
 
+        /// <summary>
+        /// The Check
+        /// </summary>
+        /// <param name="entrys">The entrys<see cref="IEnumerable{MonitorEntry}"/></param>
+        /// <param name="timeout">The timeout<see cref="int"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private static async Task Check(IEnumerable<MonitorEntry> entrys, int timeout)
         {
             foreach (var entry in entrys)
@@ -94,26 +136,46 @@ namespace Surging.Core.Zookeeper.Internal.Cluster.HealthChecks.Implementation
             }
         }
 
-        #endregion Private Method
+        #endregion 方法
 
-        #region Help Class
-
+        /// <summary>
+        /// Defines the <see cref="MonitorEntry" />
+        /// </summary>
         protected class MonitorEntry
         {
+            #region 构造函数
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="MonitorEntry"/> class.
+            /// </summary>
+            /// <param name="addressModel">The addressModel<see cref="AddressModel"/></param>
+            /// <param name="health">The health<see cref="bool"/></param>
             public MonitorEntry(AddressModel addressModel, bool health = true)
             {
                 EndPoint = addressModel.CreateEndPoint();
                 Health = health;
-
             }
 
+            #endregion 构造函数
+
+            #region 属性
+
+            /// <summary>
+            /// Gets or sets the EndPoint
+            /// </summary>
+            public EndPoint EndPoint { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether Health
+            /// </summary>
+            public bool Health { get; set; }
+
+            /// <summary>
+            /// Gets or sets the UnhealthyTimes
+            /// </summary>
             public int UnhealthyTimes { get; set; }
 
-            public EndPoint EndPoint { get; set; }
-            public bool Health { get; set; }
+            #endregion 属性
         }
-
-        #endregion Help Class
     }
 }
-

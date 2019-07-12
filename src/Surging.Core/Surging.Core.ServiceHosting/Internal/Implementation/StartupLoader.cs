@@ -12,45 +12,19 @@ using System.Reflection;
 
 namespace Surging.Core.ServiceHosting.Internal.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="StartupLoader" />
+    /// </summary>
     public class StartupLoader
     {
-        public static StartupMethods LoadMethods(IServiceProvider hostingServiceProvider, IConfigurationBuilder config, Type startupType, string environmentName)
-        {
-            var configureMethod = FindConfigureDelegate(startupType, environmentName);
-            var servicesMethod = FindConfigureServicesDelegate(startupType, environmentName);
-            var configureContainerMethod = FindConfigureContainerDelegate(startupType, environmentName);
+        #region 方法
 
-            object instance = null;
-            if (!configureMethod.MethodInfo.IsStatic || (servicesMethod != null && !servicesMethod.MethodInfo.IsStatic))
-            {
-                instance = ActivatorUtilities.CreateInstance(hostingServiceProvider, startupType,config);
-            }
-
-            var configureServicesCallback = servicesMethod.Build(instance);
-            var configureContainerCallback = configureContainerMethod.Build(instance);
-
-            Func<ContainerBuilder, IContainer> configureServices = services =>
-            {
-                IContainer applicationServiceProvider = configureServicesCallback.Invoke(services);
-                if (applicationServiceProvider != null)
-                {
-                    return applicationServiceProvider;
-                }
-                if (configureContainerMethod.MethodInfo != null)
-                {
-                    var serviceProviderFactoryType = typeof(IServiceProviderFactory<>).MakeGenericType(configureContainerMethod.GetContainerType());
-                    var serviceProviderFactory = hostingServiceProvider.GetRequiredService(serviceProviderFactoryType);
-                    var builder = serviceProviderFactoryType.GetMethod(nameof(DefaultServiceProviderFactory.CreateBuilder)).Invoke(serviceProviderFactory, new object[] { services });
-                    configureContainerCallback.Invoke(builder);
-                    applicationServiceProvider = (IContainer)serviceProviderFactoryType.GetMethod(nameof(DefaultServiceProviderFactory.CreateServiceProvider)).Invoke(serviceProviderFactory, new object[] { builder });
-                }
-
-                return applicationServiceProvider;
-            };
-
-            return new StartupMethods(instance, configureMethod.Build(instance), configureServices);
-        }
-
+        /// <summary>
+        /// The FindStartupType
+        /// </summary>
+        /// <param name="startupAssemblyName">The startupAssemblyName<see cref="string"/></param>
+        /// <param name="environmentName">The environmentName<see cref="string"/></param>
+        /// <returns>The <see cref="Type"/></returns>
         public static Type FindStartupType(string startupAssemblyName, string environmentName)
         {
             if (string.IsNullOrEmpty(startupAssemblyName))
@@ -98,18 +72,81 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             return type;
         }
 
-        private static ConfigureBuilder FindConfigureDelegate(Type startupType, string environmentName)
+        /// <summary>
+        /// The LoadMethods
+        /// </summary>
+        /// <param name="hostingServiceProvider">The hostingServiceProvider<see cref="IServiceProvider"/></param>
+        /// <param name="config">The config<see cref="IConfigurationBuilder"/></param>
+        /// <param name="startupType">The startupType<see cref="Type"/></param>
+        /// <param name="environmentName">The environmentName<see cref="string"/></param>
+        /// <returns>The <see cref="StartupMethods"/></returns>
+        public static StartupMethods LoadMethods(IServiceProvider hostingServiceProvider, IConfigurationBuilder config, Type startupType, string environmentName)
         {
-            var configureMethod = FindMethod(startupType, "Configure{0}", environmentName, typeof(void), required: true);
-            return new ConfigureBuilder(configureMethod);
+            var configureMethod = FindConfigureDelegate(startupType, environmentName);
+            var servicesMethod = FindConfigureServicesDelegate(startupType, environmentName);
+            var configureContainerMethod = FindConfigureContainerDelegate(startupType, environmentName);
+
+            object instance = null;
+            if (!configureMethod.MethodInfo.IsStatic || (servicesMethod != null && !servicesMethod.MethodInfo.IsStatic))
+            {
+                instance = ActivatorUtilities.CreateInstance(hostingServiceProvider, startupType, config);
+            }
+
+            var configureServicesCallback = servicesMethod.Build(instance);
+            var configureContainerCallback = configureContainerMethod.Build(instance);
+
+            Func<ContainerBuilder, IContainer> configureServices = services =>
+            {
+                IContainer applicationServiceProvider = configureServicesCallback.Invoke(services);
+                if (applicationServiceProvider != null)
+                {
+                    return applicationServiceProvider;
+                }
+                if (configureContainerMethod.MethodInfo != null)
+                {
+                    var serviceProviderFactoryType = typeof(IServiceProviderFactory<>).MakeGenericType(configureContainerMethod.GetContainerType());
+                    var serviceProviderFactory = hostingServiceProvider.GetRequiredService(serviceProviderFactoryType);
+                    var builder = serviceProviderFactoryType.GetMethod(nameof(DefaultServiceProviderFactory.CreateBuilder)).Invoke(serviceProviderFactory, new object[] { services });
+                    configureContainerCallback.Invoke(builder);
+                    applicationServiceProvider = (IContainer)serviceProviderFactoryType.GetMethod(nameof(DefaultServiceProviderFactory.CreateServiceProvider)).Invoke(serviceProviderFactory, new object[] { builder });
+                }
+
+                return applicationServiceProvider;
+            };
+
+            return new StartupMethods(instance, configureMethod.Build(instance), configureServices);
         }
 
+        /// <summary>
+        /// The FindConfigureContainerDelegate
+        /// </summary>
+        /// <param name="startupType">The startupType<see cref="Type"/></param>
+        /// <param name="environmentName">The environmentName<see cref="string"/></param>
+        /// <returns>The <see cref="ConfigureContainerBuilder"/></returns>
         private static ConfigureContainerBuilder FindConfigureContainerDelegate(Type startupType, string environmentName)
         {
             var configureMethod = FindMethod(startupType, "Configure{0}Container", environmentName, typeof(void), required: false);
             return new ConfigureContainerBuilder(configureMethod);
         }
 
+        /// <summary>
+        /// The FindConfigureDelegate
+        /// </summary>
+        /// <param name="startupType">The startupType<see cref="Type"/></param>
+        /// <param name="environmentName">The environmentName<see cref="string"/></param>
+        /// <returns>The <see cref="ConfigureBuilder"/></returns>
+        private static ConfigureBuilder FindConfigureDelegate(Type startupType, string environmentName)
+        {
+            var configureMethod = FindMethod(startupType, "Configure{0}", environmentName, typeof(void), required: true);
+            return new ConfigureBuilder(configureMethod);
+        }
+
+        /// <summary>
+        /// The FindConfigureServicesDelegate
+        /// </summary>
+        /// <param name="startupType">The startupType<see cref="Type"/></param>
+        /// <param name="environmentName">The environmentName<see cref="string"/></param>
+        /// <returns>The <see cref="ConfigureServicesBuilder"/></returns>
         private static ConfigureServicesBuilder FindConfigureServicesDelegate(Type startupType, string environmentName)
         {
             var servicesMethod = FindMethod(startupType, "Configure{0}Services", environmentName, typeof(IContainer), required: false)
@@ -117,6 +154,15 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             return new ConfigureServicesBuilder(servicesMethod);
         }
 
+        /// <summary>
+        /// The FindMethod
+        /// </summary>
+        /// <param name="startupType">The startupType<see cref="Type"/></param>
+        /// <param name="methodName">The methodName<see cref="string"/></param>
+        /// <param name="environmentName">The environmentName<see cref="string"/></param>
+        /// <param name="returnType">The returnType<see cref="Type"/></param>
+        /// <param name="required">The required<see cref="bool"/></param>
+        /// <returns>The <see cref="MethodInfo"/></returns>
         private static MethodInfo FindMethod(Type startupType, string methodName, string environmentName, Type returnType = null, bool required = true)
         {
             var methodNameWithEnv = string.Format(CultureInfo.InvariantCulture, methodName, environmentName);
@@ -146,7 +192,6 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
                         methodNameWithEnv,
                         methodNameWithNoEnv,
                         startupType.FullName));
-
                 }
                 return null;
             }
@@ -163,5 +208,7 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             }
             return methodInfo;
         }
+
+        #endregion 方法
     }
 }

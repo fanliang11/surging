@@ -6,14 +6,33 @@ using WebSocketCore.Server;
 
 namespace Surging.Core.Protocol.WS.Runtime
 {
-   public  class WSServiceEntry
+    /// <summary>
+    /// Defines the <see cref="WSServiceEntry" />
+    /// </summary>
+    public class WSServiceEntry
     {
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the Behavior
+        /// </summary>
+        public WebSocketBehavior Behavior { get; set; }
+
+        /// <summary>
+        /// Gets or sets the FuncBehavior
+        /// </summary>
+        public Func<WebSocketBehavior> FuncBehavior { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Path
+        /// </summary>
         public string Path { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Type
+        /// </summary>
         public Type Type { get; set; }
 
-        public  WebSocketBehavior Behavior { get; set; }
-
-        public  Func<WebSocketBehavior> FuncBehavior { get; set; }
+        #endregion 属性
     }
 }

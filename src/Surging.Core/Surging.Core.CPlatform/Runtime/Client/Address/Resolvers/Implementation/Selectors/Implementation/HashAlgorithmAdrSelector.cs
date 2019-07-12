@@ -14,14 +14,45 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation
 {
-   public class HashAlgorithmAdrSelector : AddressSelectorBase
+    /// <summary>
+    /// Defines the <see cref="HashAlgorithmAdrSelector" />
+    /// </summary>
+    public class HashAlgorithmAdrSelector : AddressSelectorBase
     {
-        private readonly IHealthCheckService _healthCheckService;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _concurrent
+        /// </summary>
         private readonly ConcurrentDictionary<string, ConsistentHash<AddressModel>> _concurrent =
     new ConcurrentDictionary<string, ConsistentHash<AddressModel>>();
+
+        /// <summary>
+        /// Defines the _hashAlgorithm
+        /// </summary>
+        private readonly IHashAlgorithm _hashAlgorithm;
+
+        /// <summary>
+        /// Defines the _healthCheckService
+        /// </summary>
+        private readonly IHealthCheckService _healthCheckService;
+
+        /// <summary>
+        /// Defines the _unHealths
+        /// </summary>
         private readonly List<ValueTuple<string, AddressModel>> _unHealths =
     new List<ValueTuple<string, AddressModel>>();
-        private readonly IHashAlgorithm _hashAlgorithm;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HashAlgorithmAdrSelector"/> class.
+        /// </summary>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="healthCheckService">The healthCheckService<see cref="IHealthCheckService"/></param>
+        /// <param name="hashAlgorithm">The hashAlgorithm<see cref="IHashAlgorithm"/></param>
         public HashAlgorithmAdrSelector(IServiceRouteManager serviceRouteManager, IHealthCheckService healthCheckService, IHashAlgorithm hashAlgorithm)
         {
             _healthCheckService = healthCheckService;
@@ -31,7 +62,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
-        #region Overrides of AddressSelectorBase
+        #endregion 构造函数
+
+        #region 方法
+
         /// <summary>
         /// 选择一个地址。
         /// </summary>
@@ -47,11 +81,11 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 var hash = new ConsistentHash<AddressModel>(_hashAlgorithm, len);
                 foreach (var address in context.Address)
                 {
-                    hash.Add(address,address.ToString());
+                    hash.Add(address, address.ToString());
                 }
                 return hash;
             });
-            AddressModel addressModel; 
+            AddressModel addressModel;
             var IsHealth = false;
             var index = 0;
             var count = context.Address.Count();
@@ -65,22 +99,34 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 }
                 index++;
                 IsHealth = await _healthCheckService.IsHealth(addressModel);
-                if(!IsHealth)
+                if (!IsHealth)
                 {
-                    addressEntry.Remove(addressModel.ToString()); 
-                    _unHealths.Add(new ValueTuple<string, AddressModel>(key,addressModel));
+                    addressEntry.Remove(addressModel.ToString());
+                    _unHealths.Add(new ValueTuple<string, AddressModel>(key, addressModel));
                     _healthCheckService.Changed += ItemNode_Changed;
                 }
-            } while (!IsHealth); 
+            } while (!IsHealth);
             return addressModel;
         }
-        #endregion Overrides of AddressSelectorBase
 
-        #region Private Method
+        /// <summary>
+        /// The GetCacheKey
+        /// </summary>
+        /// <param name="descriptor">The descriptor<see cref="ServiceDescriptor"/></param>
+        /// <returns>The <see cref="string"/></returns>
+        private static string GetCacheKey(ServiceDescriptor descriptor)
+        {
+            return descriptor.Id;
+        }
 
+        /// <summary>
+        /// The ItemNode_Changed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="HealthCheckEventArgs"/></param>
         private void ItemNode_Changed(object sender, HealthCheckEventArgs e)
-        { 
-            var list= _unHealths.Where(p=>p.Item2.ToString()==e.Address.ToString()).ToList();
+        {
+            var list = _unHealths.Where(p => p.Item2.ToString() == e.Address.ToString()).ToList();
             foreach (var item in list)
             {
                 if (item.Item1 != null && e.Health)
@@ -90,23 +136,23 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                     _unHealths.Remove(item);
                 }
             }
-            if(_unHealths.Count==0)
+            if (_unHealths.Count == 0)
                 _healthCheckService.Changed -= ItemNode_Changed;
         }
 
-        private static string GetCacheKey(ServiceDescriptor descriptor)
-        {
-            return descriptor.Id;
-        }
-
+        /// <summary>
+        /// The ServiceRouteManager_Removed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceRouteEventArgs"/></param>
         private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
         {
             var key = GetCacheKey(e.Route.ServiceDescriptor);
-            var item = _unHealths.Where(p =>  e.Route.Address.Select(addr=> addr.ToString()).Contains(p.Item2.ToString())).ToList();
+            var item = _unHealths.Where(p => e.Route.Address.Select(addr => addr.ToString()).Contains(p.Item2.ToString())).ToList();
             item.ForEach(p => _unHealths.Remove(p));
             _concurrent.TryRemove(key, out ConsistentHash<AddressModel> value);
         }
 
-        #endregion
+        #endregion 方法
     }
 }

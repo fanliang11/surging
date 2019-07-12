@@ -1,4 +1,3 @@
-#region License
 /*
  * InputChunkState.cs
  *
@@ -28,25 +27,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Gonzalo Paniagua Javier <gonzalo@ximian.com>
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore.Net
 {
-  internal enum InputChunkState
-  {
-    None,
-    Data,
-    DataEnded,
-    Trailer,
-    End
-  }
+    #region Ã¶¾Ù
+
+    /// <summary>
+    /// Defines the InputChunkState
+    /// </summary>
+    internal enum InputChunkState
+    {
+        /// <summary>
+        /// Defines the None
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Defines the Data
+        /// </summary>
+        Data,
+
+        /// <summary>
+        /// Defines the DataEnded
+        /// </summary>
+        DataEnded,
+
+        /// <summary>
+        /// Defines the Trailer
+        /// </summary>
+        Trailer,
+
+        /// <summary>
+        /// Defines the End
+        /// </summary>
+        End
+    }
+
+    #endregion Ã¶¾Ù
 }

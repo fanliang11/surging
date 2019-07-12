@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.System.Module
 {
-    #region 组件生命周期枚举类
+    #region 枚举
 
     /// <summary>
     /// 组件生命周期枚举。
@@ -45,71 +45,41 @@ namespace Surging.Core.System.Module
         SingleInstance
     }
 
-    #endregion
-
-    #region 组件类
+    #endregion 枚举
 
     /// <summary>
     /// 组件描述类(定义了接口+实现类)。
     /// </summary>
-    /// <remarks>
-    /// 	<para>创建：范亮</para>
-    /// 	<para>日期：2015/12/4</para>
-    /// </remarks>
     public class Component
     {
-        #region 实例属性
+        #region 属性
 
         /// <summary>
-        /// 获取或设置接口服务类型名称(包含程序集名称的限定名)。
-        /// </summary>
-        /// <value>
-        /// 接口类型名称字符串。
-        /// </value>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/4</para>
-        /// </remarks>
-        public string ServiceType { get; set; }
-
-        /// <summary>
+        /// Gets or sets the ImplementType
         /// 获取或设置接口实现类的类型名称(包含程序集名称的限定名)。
         /// </summary>
-        /// <value>
-        /// 实现类的类型名称字符串。
-        /// </value>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/4</para>
-        /// </remarks>
         public string ImplementType { get; set; }
 
         /// <summary>
+        /// Gets or sets the LifetimeScope
         /// 获取或设置组件生命周期枚举。
         /// </summary>
-        /// <value>
-        /// 生命周期枚举值：InstancePerDependency | InstancePerHttpRequest | SingleInstance 。
-        /// </value>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/4</para>
-        /// </remarks>
         public LifetimeScope LifetimeScope { get; set; }
 
-        #endregion
+        /// <summary>
+        /// Gets or sets the ServiceType
+        /// 获取或设置接口服务类型名称(包含程序集名称的限定名)。
+        /// </summary>
+        public string ServiceType { get; set; }
 
-        #region 实例方法
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 获取组件的字符串文本描述信息。
         /// </summary>
-        /// <returns>
-        /// 返回组件对象的字符串文本描述信息。
-        /// </returns>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2015/12/4</para>
-        /// </remarks>
+        /// <returns>The <see cref="string"/></returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -121,8 +91,6 @@ namespace Surging.Core.System.Module
             return sb.ToString();
         }
 
-        #endregion
+        #endregion 方法
     }
-
-    #endregion
 }

@@ -20,21 +20,76 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Consul
 {
+    /// <summary>
+    /// Defines the <see cref="ConsulMqttServiceRouteManager" />
+    /// </summary>
     public class ConsulMqttServiceRouteManager : MqttServiceRouteManagerBase, IDisposable
-    { 
+    {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _configInfo
+        /// </summary>
         private readonly ConfigInfo _configInfo;
-        private readonly ISerializer<byte[]> _serializer;
-        private readonly IMqttServiceFactory _mqttServiceFactory;
-        private readonly ILogger<ConsulMqttServiceRouteManager> _logger;
-        private readonly ISerializer<string> _stringSerializer;
-        private readonly IClientWatchManager _manager;
-        private MqttServiceRoute[] _routes;
+
+        /// <summary>
+        /// Defines the _consulClientFactory
+        /// </summary>
         private readonly IConsulClientProvider _consulClientFactory;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<ConsulMqttServiceRouteManager> _logger;
+
+        /// <summary>
+        /// Defines the _manager
+        /// </summary>
+        private readonly IClientWatchManager _manager;
+
+        /// <summary>
+        /// Defines the _mqttServiceFactory
+        /// </summary>
+        private readonly IMqttServiceFactory _mqttServiceFactory;
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _serviceHeartbeatManager
+        /// </summary>
         private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
 
+        /// <summary>
+        /// Defines the _stringSerializer
+        /// </summary>
+        private readonly ISerializer<string> _stringSerializer;
+
+        /// <summary>
+        /// Defines the _routes
+        /// </summary>
+        private MqttServiceRoute[] _routes;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsulMqttServiceRouteManager"/> class.
+        /// </summary>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{byte[]}"/></param>
+        /// <param name="stringSerializer">The stringSerializer<see cref="ISerializer{string}"/></param>
+        /// <param name="manager">The manager<see cref="IClientWatchManager"/></param>
+        /// <param name="mqttServiceFactory">The mqttServiceFactory<see cref="IMqttServiceFactory"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{ConsulMqttServiceRouteManager}"/></param>
+        /// <param name="serviceHeartbeatManager">The serviceHeartbeatManager<see cref="IServiceHeartbeatManager"/></param>
+        /// <param name="consulClientFactory">The consulClientFactory<see cref="IConsulClientProvider"/></param>
         public ConsulMqttServiceRouteManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
        ISerializer<string> stringSerializer, IClientWatchManager manager, IMqttServiceFactory mqttServiceFactory,
-       ILogger<ConsulMqttServiceRouteManager> logger,IServiceHeartbeatManager serviceHeartbeatManager,
+       ILogger<ConsulMqttServiceRouteManager> logger, IServiceHeartbeatManager serviceHeartbeatManager,
        IConsulClientProvider consulClientFactory) : base(stringSerializer)
         {
             _configInfo = configInfo;
@@ -48,6 +103,14 @@ namespace Surging.Core.Consul
             EnterRoutes().Wait();
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The ClearAsync
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task ClearAsync()
         {
             var clients = await _consulClientFactory.GetClients();
@@ -67,6 +130,9 @@ namespace Surging.Core.Consul
             }
         }
 
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public void Dispose()
         {
         }
@@ -81,6 +147,57 @@ namespace Surging.Core.Consul
             return _routes;
         }
 
+        /// <summary>
+        /// The RemoveByTopicAsync
+        /// </summary>
+        /// <param name="topic">The topic<see cref="string"/></param>
+        /// <param name="endpoint">The endpoint<see cref="IEnumerable{AddressModel}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task RemoveByTopicAsync(string topic, IEnumerable<AddressModel> endpoint)
+        {
+            var routes = await GetRoutesAsync();
+            try
+            {
+                var route = routes.Where(p => p.MqttDescriptor.Topic == topic).SingleOrDefault();
+                if (route != null)
+                {
+                    route.MqttEndpoint = route.MqttEndpoint.Except(endpoint);
+                    await base.SetRoutesAsync(new MqttServiceRoute[] { route });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// The RemveAddressAsync
+        /// </summary>
+        /// <param name="endpoint">The endpoint<see cref="IEnumerable{AddressModel}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task RemveAddressAsync(IEnumerable<AddressModel> endpoint)
+        {
+            var routes = await GetRoutesAsync();
+            try
+            {
+                foreach (var route in routes)
+                {
+                    route.MqttEndpoint = route.MqttEndpoint.Except(endpoint);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            await base.SetRoutesAsync(routes);
+        }
+
+        /// <summary>
+        /// The SetRoutesAsync
+        /// </summary>
+        /// <param name="routes">The routes<see cref="IEnumerable{MqttServiceRoute}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task SetRoutesAsync(IEnumerable<MqttServiceRoute> routes)
         {
             var hostAddr = NetUtils.GetHostAddress();
@@ -102,46 +219,15 @@ namespace Surging.Core.Consul
                     route.MqttEndpoint = addresses;
                 }
             }
-           
+
             await base.SetRoutesAsync(routes);
         }
 
-        public override async Task RemveAddressAsync(IEnumerable<AddressModel> endpoint)
-        {
-            var routes = await GetRoutesAsync();
-            try
-            {
-                foreach (var route in routes)
-                {
-                    route.MqttEndpoint = route.MqttEndpoint.Except(endpoint);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            await base.SetRoutesAsync(routes);
-        }
-
-        public override async Task RemoveByTopicAsync(string topic, IEnumerable<AddressModel> endpoint)
-        {
-            var routes = await GetRoutesAsync();
-            try
-            {
-                var route = routes.Where(p => p.MqttDescriptor.Topic == topic).SingleOrDefault();
-                if(route !=null)
-                { 
-                    route.MqttEndpoint = route.MqttEndpoint.Except(endpoint);
-                    await base.SetRoutesAsync(new MqttServiceRoute[] { route });
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-           
-        }
-
+        /// <summary>
+        /// The SetRoutesAsync
+        /// </summary>
+        /// <param name="routes">The routes<see cref="IEnumerable{MqttServiceDescriptor}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         protected override async Task SetRoutesAsync(IEnumerable<MqttServiceDescriptor> routes)
         {
             var clients = await _consulClientFactory.GetClients();
@@ -156,133 +242,12 @@ namespace Surging.Core.Consul
             }
         }
 
-        #region 私有方法
-
-        private async Task RemoveExceptRoutesAsync(IEnumerable<MqttServiceRoute> routes, AddressModel hostAddr)
-        {
-            routes = routes.ToArray();
-            var clients = await _consulClientFactory.GetClients();
-            foreach (var client in clients)
-            {
-                if (_routes != null)
-                {
-                    var oldRouteTopics = _routes.Select(i => i.MqttDescriptor.Topic).ToArray();
-                    var newRouteTopics = routes.Select(i => i.MqttDescriptor.Topic).ToArray();
-                    var deletedRouteTopics = oldRouteTopics.Except(newRouteTopics).ToArray();
-                    foreach (var deletedRouteTopic in deletedRouteTopics)
-                    {
-                        var addresses = _routes.Where(p => p.MqttDescriptor.Topic == deletedRouteTopic).Select(p => p.MqttEndpoint).FirstOrDefault();
-                        if (addresses.Contains(hostAddr))
-                            await client.KV.Delete($"{_configInfo.MqttRoutePath}{deletedRouteTopic}");
-                    }
-                }
-            }
-        }
-
-        private async Task<MqttServiceRoute> GetRoute(byte[] data)
-        {
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"准备转换mqtt服务路由，配置内容：{Encoding.UTF8.GetString(data)}。");
-
-            if (data == null)
-                return null;
-
-            var descriptor = _serializer.Deserialize<byte[], MqttServiceDescriptor>(data);
-            return (await _mqttServiceFactory.CreateMqttServiceRoutesAsync(new[] { descriptor })).First();
-        }
-
-        private async Task<MqttServiceRoute[]> GetRouteDatas(string[] routes)
-        {
-            List<MqttServiceRoute> serviceRoutes = new List<MqttServiceRoute>();
-            foreach (var route in routes)
-            {
-                var serviceRoute = await GetRouteData(route);
-                serviceRoutes.Add(serviceRoute);
-            }
-            return serviceRoutes.ToArray();
-        }
-
-        private async Task<MqttServiceRoute> GetRouteData(string data)
-        {
-            if (data == null)
-                return null;
-
-            var descriptor = _stringSerializer.Deserialize(data, typeof(MqttServiceDescriptor)) as MqttServiceDescriptor;
-            return (await _mqttServiceFactory.CreateMqttServiceRoutesAsync(new[] { descriptor })).First();
-        }
-
-        private async Task<MqttServiceRoute[]> GetRoutes(IEnumerable<string> childrens)
-        {
-
-            childrens = childrens.ToArray();
-            var routes = new List<MqttServiceRoute>(childrens.Count());
-
-            foreach (var children in childrens)
-            {
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                    _logger.LogDebug($"准备从节点：{children}中获取mqtt路由信息。");
-
-                var route = await GetRoute(children);
-                if (route != null)
-                    routes.Add(route);
-            }
-
-            return routes.ToArray();
-        }
-
-        private async Task<MqttServiceRoute> GetRoute(string path)
-        {
-            MqttServiceRoute result = null;
-            var client = await GetConsulClient();
-            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
-                async (oldData, newData) => await NodeChange(oldData, newData),tmpPath=> {
-                    var index = tmpPath.LastIndexOf("/");
-                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
-                }); 
-         
-            var queryResult = await client.KV.Keys(path);
-            if (queryResult.Response != null)
-            {
-                var data = (await client.GetDataAsync(path));
-                if (data != null)
-                {
-                    watcher.SetCurrentData(data);
-                    result = await GetRoute(data);
-                }
-            }
-            return result;
-        }
-
-        private async Task EnterRoutes()
-        {
-            if (_routes != null && _routes.Length > 0)
-                return;
-            Action<string[]> action = null;
-            var client =await GetConsulClient();
-            if (_configInfo.EnableChildrenMonitor)
-            {
-                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.MqttRoutePath,
-             async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
-               (result) => ConvertPaths(result).Result);
-                action = currentData => watcher.SetCurrentData(currentData);
-            }
-            if (client.KV.Keys(_configInfo.MqttRoutePath).Result.Response?.Count() > 0)
-            {
-                var result = await client.GetChildrenAsync(_configInfo.MqttRoutePath);
-                var keys = await client.KV.Keys(_configInfo.MqttRoutePath);
-                var childrens = result;
-                action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.MqttRoutePath}{key}").ToArray());
-                _routes = await GetRoutes(keys.Response);
-            }
-            else
-            {
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
-                    _logger.LogWarning($"无法获取路由信息，因为节点：{_configInfo.MqttRoutePath}，不存在。");
-                _routes = new MqttServiceRoute[0];
-            }
-        }
-         
-
+        /// <summary>
+        /// The DataEquals
+        /// </summary>
+        /// <param name="data1">The data1<see cref="IReadOnlyList{byte}"/></param>
+        /// <param name="data2">The data2<see cref="IReadOnlyList{byte}"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
         {
             if (data1.Count != data2.Count)
@@ -297,52 +262,12 @@ namespace Surging.Core.Consul
             return true;
         }
 
-        private async ValueTask<ConsulClient> GetConsulClient()
-        {
-            var client = await _consulClientFactory.GetClient();
-            return client;
-        }
-
         /// <summary>
-        /// 转化topic集合
+        /// The ChildrenChange
         /// </summary>
-        /// <param name="datas">信息数据集合</param>
-        /// <returns>返回路径集合</returns>
-        private async Task<string[]> ConvertPaths(string[] datas)
-        {
-            List<string> topics = new List<string>();
-            foreach (var data in datas)
-            {
-                var result = await GetRouteData(data);
-                var topic = result?.MqttDescriptor.Topic;
-                if (!string.IsNullOrEmpty(topic))
-                    topics.Add(topic);
-            }
-            return topics.ToArray();
-        }
-
-        private async Task NodeChange(byte[] oldData, byte[] newData)
-        {
-            if (DataEquals(oldData, newData))
-                return;
-
-            var newRoute = await GetRoute(newData);
-            //得到旧的路由。
-            var oldRoute = _routes.FirstOrDefault(i => i.MqttDescriptor.Topic == newRoute.MqttDescriptor.Topic);
-
-            lock (_routes)
-            {
-                //删除旧路由，并添加上新的路由。
-                _routes =
-                    _routes
-                        .Where(i => i.MqttDescriptor.Topic != newRoute.MqttDescriptor.Topic)
-                        .Concat(new[] { newRoute }).ToArray();
-            }
-
-            //触发路由变更事件。
-            OnChanged(new MqttServiceRouteChangedEventArgs(newRoute, oldRoute));
-        }
-
+        /// <param name="oldChildrens">The oldChildrens<see cref="string[]"/></param>
+        /// <param name="newChildrens">The newChildrens<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
@@ -385,6 +310,222 @@ namespace Surging.Core.Consul
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
                 _logger.LogInformation("mqtt路由数据更新成功。");
         }
-        #endregion
+
+        /// <summary>
+        /// 转化topic集合
+        /// </summary>
+        /// <param name="datas">信息数据集合</param>
+        /// <returns>返回路径集合</returns>
+        private async Task<string[]> ConvertPaths(string[] datas)
+        {
+            List<string> topics = new List<string>();
+            foreach (var data in datas)
+            {
+                var result = await GetRouteData(data);
+                var topic = result?.MqttDescriptor.Topic;
+                if (!string.IsNullOrEmpty(topic))
+                    topics.Add(topic);
+            }
+            return topics.ToArray();
+        }
+
+        /// <summary>
+        /// The EnterRoutes
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task EnterRoutes()
+        {
+            if (_routes != null && _routes.Length > 0)
+                return;
+            Action<string[]> action = null;
+            var client = await GetConsulClient();
+            if (_configInfo.EnableChildrenMonitor)
+            {
+                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.MqttRoutePath,
+             async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
+               (result) => ConvertPaths(result).Result);
+                action = currentData => watcher.SetCurrentData(currentData);
+            }
+            if (client.KV.Keys(_configInfo.MqttRoutePath).Result.Response?.Count() > 0)
+            {
+                var result = await client.GetChildrenAsync(_configInfo.MqttRoutePath);
+                var keys = await client.KV.Keys(_configInfo.MqttRoutePath);
+                var childrens = result;
+                action?.Invoke(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.MqttRoutePath}{key}").ToArray());
+                _routes = await GetRoutes(keys.Response);
+            }
+            else
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
+                    _logger.LogWarning($"无法获取路由信息，因为节点：{_configInfo.MqttRoutePath}，不存在。");
+                _routes = new MqttServiceRoute[0];
+            }
+        }
+
+        /// <summary>
+        /// The GetConsulClient
+        /// </summary>
+        /// <returns>The <see cref="ValueTask{ConsulClient}"/></returns>
+        private async ValueTask<ConsulClient> GetConsulClient()
+        {
+            var client = await _consulClientFactory.GetClient();
+            return client;
+        }
+
+        /// <summary>
+        /// The GetRoute
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <returns>The <see cref="Task{MqttServiceRoute}"/></returns>
+        private async Task<MqttServiceRoute> GetRoute(byte[] data)
+        {
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"准备转换mqtt服务路由，配置内容：{Encoding.UTF8.GetString(data)}。");
+
+            if (data == null)
+                return null;
+
+            var descriptor = _serializer.Deserialize<byte[], MqttServiceDescriptor>(data);
+            return (await _mqttServiceFactory.CreateMqttServiceRoutesAsync(new[] { descriptor })).First();
+        }
+
+        /// <summary>
+        /// The GetRoute
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{MqttServiceRoute}"/></returns>
+        private async Task<MqttServiceRoute> GetRoute(string path)
+        {
+            MqttServiceRoute result = null;
+            var client = await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+                async (oldData, newData) => await NodeChange(oldData, newData), tmpPath =>
+                {
+                    var index = tmpPath.LastIndexOf("/");
+                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                });
+
+            var queryResult = await client.KV.Keys(path);
+            if (queryResult.Response != null)
+            {
+                var data = (await client.GetDataAsync(path));
+                if (data != null)
+                {
+                    watcher.SetCurrentData(data);
+                    result = await GetRoute(data);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// The GetRouteData
+        /// </summary>
+        /// <param name="data">The data<see cref="string"/></param>
+        /// <returns>The <see cref="Task{MqttServiceRoute}"/></returns>
+        private async Task<MqttServiceRoute> GetRouteData(string data)
+        {
+            if (data == null)
+                return null;
+
+            var descriptor = _stringSerializer.Deserialize(data, typeof(MqttServiceDescriptor)) as MqttServiceDescriptor;
+            return (await _mqttServiceFactory.CreateMqttServiceRoutesAsync(new[] { descriptor })).First();
+        }
+
+        /// <summary>
+        /// The GetRouteDatas
+        /// </summary>
+        /// <param name="routes">The routes<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task{MqttServiceRoute[]}"/></returns>
+        private async Task<MqttServiceRoute[]> GetRouteDatas(string[] routes)
+        {
+            List<MqttServiceRoute> serviceRoutes = new List<MqttServiceRoute>();
+            foreach (var route in routes)
+            {
+                var serviceRoute = await GetRouteData(route);
+                serviceRoutes.Add(serviceRoute);
+            }
+            return serviceRoutes.ToArray();
+        }
+
+        /// <summary>
+        /// The GetRoutes
+        /// </summary>
+        /// <param name="childrens">The childrens<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="Task{MqttServiceRoute[]}"/></returns>
+        private async Task<MqttServiceRoute[]> GetRoutes(IEnumerable<string> childrens)
+        {
+            childrens = childrens.ToArray();
+            var routes = new List<MqttServiceRoute>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取mqtt路由信息。");
+
+                var route = await GetRoute(children);
+                if (route != null)
+                    routes.Add(route);
+            }
+
+            return routes.ToArray();
+        }
+
+        /// <summary>
+        /// The NodeChange
+        /// </summary>
+        /// <param name="oldData">The oldData<see cref="byte[]"/></param>
+        /// <param name="newData">The newData<see cref="byte[]"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task NodeChange(byte[] oldData, byte[] newData)
+        {
+            if (DataEquals(oldData, newData))
+                return;
+
+            var newRoute = await GetRoute(newData);
+            //得到旧的路由。
+            var oldRoute = _routes.FirstOrDefault(i => i.MqttDescriptor.Topic == newRoute.MqttDescriptor.Topic);
+
+            lock (_routes)
+            {
+                //删除旧路由，并添加上新的路由。
+                _routes =
+                    _routes
+                        .Where(i => i.MqttDescriptor.Topic != newRoute.MqttDescriptor.Topic)
+                        .Concat(new[] { newRoute }).ToArray();
+            }
+
+            //触发路由变更事件。
+            OnChanged(new MqttServiceRouteChangedEventArgs(newRoute, oldRoute));
+        }
+
+        /// <summary>
+        /// The RemoveExceptRoutesAsync
+        /// </summary>
+        /// <param name="routes">The routes<see cref="IEnumerable{MqttServiceRoute}"/></param>
+        /// <param name="hostAddr">The hostAddr<see cref="AddressModel"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task RemoveExceptRoutesAsync(IEnumerable<MqttServiceRoute> routes, AddressModel hostAddr)
+        {
+            routes = routes.ToArray();
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
+            {
+                if (_routes != null)
+                {
+                    var oldRouteTopics = _routes.Select(i => i.MqttDescriptor.Topic).ToArray();
+                    var newRouteTopics = routes.Select(i => i.MqttDescriptor.Topic).ToArray();
+                    var deletedRouteTopics = oldRouteTopics.Except(newRouteTopics).ToArray();
+                    foreach (var deletedRouteTopic in deletedRouteTopics)
+                    {
+                        var addresses = _routes.Where(p => p.MqttDescriptor.Topic == deletedRouteTopic).Select(p => p.MqttEndpoint).FirstOrDefault();
+                        if (addresses.Contains(hostAddr))
+                            await client.KV.Delete($"{_configInfo.MqttRoutePath}{deletedRouteTopic}");
+                    }
+                }
+            }
+        }
+
+        #endregion 方法
     }
 }

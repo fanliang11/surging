@@ -6,10 +6,18 @@ using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack
 {
-   public sealed class MessagePackTransportMessageEncoder:ITransportMessageEncoder
+    /// <summary>
+    /// Defines the <see cref="MessagePackTransportMessageEncoder" />
+    /// </summary>
+    public sealed class MessagePackTransportMessageEncoder : ITransportMessageEncoder
     {
-        #region Implementation of ITransportMessageEncoder
+        #region 方法
 
+        /// <summary>
+        /// The Encode
+        /// </summary>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="byte[]"/></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] Encode(TransportMessage message)
         {
@@ -20,6 +28,7 @@ namespace Surging.Core.Codec.MessagePack
             };
             return SerializerUtilitys.Serialize(transportMessage);
         }
-        #endregion Implementation of ITransportMessageEncoder
+
+        #endregion 方法
     }
 }

@@ -11,18 +11,22 @@ namespace Surging.Core.CPlatform.Routing
     /// </summary>
     public class ServiceAddressDescriptor
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the Type
         /// 地址类型。
         /// </summary>
         [JsonIgnore]
         public string Type { get; set; }
 
         /// <summary>
+        /// Gets or sets the Value
         /// 地址值。
         /// </summary>
         public string Value { get; set; }
 
-        
+        #endregion 属性
     }
 
     /// <summary>
@@ -30,14 +34,20 @@ namespace Surging.Core.CPlatform.Routing
     /// </summary>
     public class ServiceRouteDescriptor
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the AddressDescriptors
         /// 服务地址描述符集合。
         /// </summary>
         public IEnumerable<ServiceAddressDescriptor> AddressDescriptors { get; set; }
 
         /// <summary>
+        /// Gets or sets the ServiceDescriptor
         /// 服务描述符。
         /// </summary>
         public ServiceDescriptor ServiceDescriptor { get; set; }
+
+        #endregion 属性
     }
 }

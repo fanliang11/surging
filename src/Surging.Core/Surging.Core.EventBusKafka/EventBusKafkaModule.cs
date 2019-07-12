@@ -1,21 +1,46 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.EventBus;
 using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.EventBusKafka.Configurations;
 using Surging.Core.EventBusKafka.Implementation;
 using System;
-using System.Collections.Generic; 
-using Microsoft.Extensions.DependencyInjection;
-using Surging.Core.CPlatform.EventBus.Implementation;
-using Surging.Core.CPlatform.Engines;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Surging.Core.EventBusKafka
 {
+    /// <summary>
+    /// Defines the <see cref="EventBusKafkaModule" />
+    /// </summary>
     public class EventBusKafkaModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The AddKafkaMQAdapt
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        /// <returns>The <see cref="EventBusKafkaModule"/></returns>
+        public EventBusKafkaModule AddKafkaMQAdapt(ContainerBuilderWrapper builder)
+        {
+            UseKafkaMQEventAdapt(builder, provider =>
+            new KafkaSubscriptionAdapt(
+                provider.GetService<IConsumeConfigurator>(),
+                provider.GetService<IEnumerable<IIntegrationEventHandler>>()
+                )
+          );
+            return this;
+        }
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             var serviceProvider = context.ServiceProvoider;
@@ -25,20 +50,27 @@ namespace Surging.Core.EventBusKafka
              {
                  KafkaConsumerPersistentConnection connection = serviceProvider.GetInstances<IKafkaPersisterConnection>(KafkaConnectionType.Consumer.ToString()) as KafkaConsumerPersistentConnection;
                  connection.Listening(TimeSpan.FromMilliseconds(AppConfig.Options.Timeout));
-            });
+             });
         }
 
         /// <summary>
-        /// Inject dependent third-party components
+        /// The UseKafkaMQEventAdapt
         /// </summary>
-        /// <param name="builder"></param>
-        protected override void RegisterBuilder(ContainerBuilderWrapper builder)
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        /// <param name="adapt">The adapt<see cref="Func{IServiceProvider, ISubscriptionAdapt}"/></param>
+        /// <returns>The <see cref="ContainerBuilderWrapper"/></returns>
+        public ContainerBuilderWrapper UseKafkaMQEventAdapt(ContainerBuilderWrapper builder, Func<IServiceProvider, ISubscriptionAdapt> adapt)
         {
-            base.RegisterBuilder(builder);
-            UseKafkaMQTransport(builder).AddKafkaMQAdapt(builder);
+            builder.RegisterAdapter(adapt);
+            return builder;
         }
 
-        public  EventBusKafkaModule UseKafkaMQTransport(ContainerBuilderWrapper builder)
+        /// <summary>
+        /// The UseKafkaMQTransport
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        /// <returns>The <see cref="EventBusKafkaModule"/></returns>
+        public EventBusKafkaModule UseKafkaMQTransport(ContainerBuilderWrapper builder)
         {
             AppConfig.Options = new KafkaOptions();
             var section = CPlatform.AppConfig.GetSection("EventBus_Kafka");
@@ -58,21 +90,16 @@ namespace Surging.Core.EventBusKafka
             return this;
         }
 
-        public  ContainerBuilderWrapper UseKafkaMQEventAdapt(ContainerBuilderWrapper builder, Func<IServiceProvider, ISubscriptionAdapt> adapt)
+        /// <summary>
+        /// Inject dependent third-party components
+        /// </summary>
+        /// <param name="builder"></param>
+        protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
-            builder.RegisterAdapter(adapt);
-            return builder;
+            base.RegisterBuilder(builder);
+            UseKafkaMQTransport(builder).AddKafkaMQAdapt(builder);
         }
 
-        public  EventBusKafkaModule AddKafkaMQAdapt(ContainerBuilderWrapper builder)
-        {
-              UseKafkaMQEventAdapt(builder,provider =>
-             new KafkaSubscriptionAdapt(
-                 provider.GetService<IConsumeConfigurator>(),
-                 provider.GetService<IEnumerable<IIntegrationEventHandler>>()
-                 )
-            );
-            return this;
-        }
+        #endregion 方法
     }
 }

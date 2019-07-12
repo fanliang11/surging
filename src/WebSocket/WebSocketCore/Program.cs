@@ -2,11 +2,22 @@
 
 namespace WebSocketCore
 {
-    class Program
+    /// <summary>
+    /// Defines the <see cref="Program" />
+    /// </summary>
+    internal class Program
     {
-        static void Main(string[] args)
+        #region 方法
+
+        /// <summary>
+        /// The Main
+        /// </summary>
+        /// <param name="args">The args<see cref="string[]"/></param>
+        internal static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
         }
+
+        #endregion 方法
     }
 }

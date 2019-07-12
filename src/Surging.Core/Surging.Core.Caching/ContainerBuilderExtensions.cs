@@ -22,14 +22,23 @@ using System.Text;
 namespace Surging.Core.Caching
 {
     /// <summary>
-    /// 容器生成扩展 
+    /// 容器生成扩展
     /// </summary>
     public static class ContainerBuilderExtensions
     {
-        private const string CacheSectionName = "CachingProvider";
+        #region 常量
 
         /// <summary>
-        /// 附加缓存注入 
+        /// Defines the CacheSectionName
+        /// </summary>
+        private const string CacheSectionName = "CachingProvider";
+
+        #endregion 常量
+
+        #region 方法
+
+        /// <summary>
+        /// 附加缓存注入
         /// </summary>
         /// <param name="builder">服务构建者</param>
         /// <returns>服务构建者</returns>
@@ -48,23 +57,45 @@ namespace Surging.Core.Caching
         }
 
         /// <summary>
-        /// 注册本地实例 
+        /// 获取类型的属性值
         /// </summary>
-        /// <param name="typeName"></param>
-        /// <param name="services"></param>
-        private static void RegisterLocalInstance(string typeName, ContainerBuilder services)
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        private static object GetTypedPropertyValue(Property obj)
         {
-            var types = typeof(AppConfig)
-                        .Assembly.GetTypes().Where(p => p.GetTypeInfo().GetInterface(typeName) != null);
-            foreach (var t in types)
+            var mapCollections = obj.Maps;
+            if (mapCollections != null && mapCollections.Any())
             {
-                var attribute = t.GetTypeInfo().GetCustomAttribute<IdentifyCacheAttribute>();
-                services.RegisterGeneric(t).Named(attribute.Name.ToString(), typeof(ICacheClient<>)).SingleInstance();
+                var results = new List<object>();
+                foreach (var map in mapCollections)
+                {
+                    object items = null;
+                    if (map.Properties != null) items = map.Properties.Select(p => GetTypedPropertyValue(p)).ToArray();
+                    results.Add(new
+                    {
+                        Name = Convert.ChangeType(obj.Name, typeof(string)),
+                        Value = Convert.ChangeType(map.Name, typeof(string)),
+                        Items = items
+                    });
+                }
+                return results;
             }
+            else if (!string.IsNullOrEmpty(obj.Value))
+            {
+                return new
+                {
+                    Name = Convert.ChangeType(obj.Name ?? "", typeof(string)),
+                    Value = Convert.ChangeType(obj.Value, typeof(string)),
+                };
+            }
+            else if (!string.IsNullOrEmpty(obj.Ref))
+                return Convert.ChangeType(obj.Ref, typeof(string));
+
+            return null;
         }
 
         /// <summary>
-        /// 注册配置实例 
+        /// 注册配置实例
         /// </summary>
         /// <param name="services"></param>
         private static void RegisterConfigInstance(ContainerBuilder services)
@@ -108,41 +139,21 @@ namespace Surging.Core.Caching
         }
 
         /// <summary>
-        /// 获取类型的属性值 
+        /// 注册本地实例
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        private static object GetTypedPropertyValue(Property obj)
+        /// <param name="typeName"></param>
+        /// <param name="services"></param>
+        private static void RegisterLocalInstance(string typeName, ContainerBuilder services)
         {
-            var mapCollections = obj.Maps;
-            if (mapCollections != null && mapCollections.Any())
+            var types = typeof(AppConfig)
+                        .Assembly.GetTypes().Where(p => p.GetTypeInfo().GetInterface(typeName) != null);
+            foreach (var t in types)
             {
-                var results = new List<object>();
-                foreach (var map in mapCollections)
-                {
-                    object items = null;
-                    if (map.Properties != null) items = map.Properties.Select(p => GetTypedPropertyValue(p)).ToArray();
-                    results.Add(new
-                    {
-                        Name = Convert.ChangeType(obj.Name, typeof(string)),
-                        Value = Convert.ChangeType(map.Name, typeof(string)),
-                        Items = items
-                    });
-                }
-                return results;
+                var attribute = t.GetTypeInfo().GetCustomAttribute<IdentifyCacheAttribute>();
+                services.RegisterGeneric(t).Named(attribute.Name.ToString(), typeof(ICacheClient<>)).SingleInstance();
             }
-            else if (!string.IsNullOrEmpty(obj.Value))
-            {
-                return new
-                {
-                    Name = Convert.ChangeType(obj.Name ?? "", typeof(string)),
-                    Value = Convert.ChangeType(obj.Value, typeof(string)),
-                };
-            }
-            else if (!string.IsNullOrEmpty(obj.Ref))
-                return Convert.ChangeType(obj.Ref, typeof(string));
-
-            return null;
         }
+
+        #endregion 方法
     }
 }

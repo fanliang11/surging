@@ -10,14 +10,44 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
     /// </summary>
     public class DefaultServiceEntryLocate : IServiceEntryLocate
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _serviceEntryManager
+        /// </summary>
         private readonly IServiceEntryManager _serviceEntryManager;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceEntryLocate"/> class.
+        /// </summary>
+        /// <param name="serviceEntryManager">The serviceEntryManager<see cref="IServiceEntryManager"/></param>
         public DefaultServiceEntryLocate(IServiceEntryManager serviceEntryManager)
         {
             _serviceEntryManager = serviceEntryManager;
         }
 
-        #region Implementation of IServiceEntryLocate
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The Locate
+        /// </summary>
+        /// <param name="httpMessage">The httpMessage<see cref="HttpMessage"/></param>
+        /// <returns>The <see cref="ServiceEntry"/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ServiceEntry Locate(HttpMessage httpMessage)
+        {
+            string routePath = httpMessage.RoutePath;
+            if (httpMessage.RoutePath.AsSpan().IndexOf("/") == -1)
+                routePath = $"/{routePath}";
+            var serviceEntries = _serviceEntryManager.GetEntries();
+            return serviceEntries.SingleOrDefault(i => i.RoutePath == routePath && !i.Descriptor.GetMetadata<bool>("IsOverload"));
+        }
 
         /// <summary>
         /// 定位服务条目。
@@ -31,16 +61,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             return serviceEntries.SingleOrDefault(i => i.Descriptor.Id == invokeMessage.ServiceId);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ServiceEntry Locate(HttpMessage httpMessage)
-        {
-            string routePath = httpMessage.RoutePath;
-            if (httpMessage.RoutePath.AsSpan().IndexOf("/") == -1)
-                routePath = $"/{routePath}";
-            var serviceEntries = _serviceEntryManager.GetEntries();
-            return serviceEntries.SingleOrDefault(i => i.RoutePath == routePath && !i.Descriptor.GetMetadata<bool>("IsOverload"));
-        }
-
-        #endregion Implementation of IServiceEntryLocate
+        #endregion 方法
     }
 }

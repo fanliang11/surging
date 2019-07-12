@@ -8,8 +8,17 @@ using System.Text;
 
 namespace Surging.IModuleServices.Common
 {
+    /// <summary>
+    /// Defines the <see cref="IntercepteModule" />
+    /// </summary>
     public class IntercepteModule : SystemModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -25,6 +34,7 @@ namespace Surging.IModuleServices.Common
             //builder.AddClientIntercepted(typeof(CacheProviderInterceptor));
             builder.AddClientIntercepted(typeof(LogProviderInterceptor));
         }
+
+        #endregion 方法
     }
 }
-

@@ -9,20 +9,51 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.KestrelHttpServer
 {
+    /// <summary>
+    /// Defines the <see cref="HttpServerMessageSender" />
+    /// </summary>
     public class HttpServerMessageSender : IMessageSender
     {
-        private readonly ISerializer<string> _serializer;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _context
+        /// </summary>
         private readonly HttpContext _context;
-       public  HttpServerMessageSender(ISerializer<string> serializer,HttpContext httpContext)
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<string> _serializer;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpServerMessageSender"/> class.
+        /// </summary>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
+        /// <param name="httpContext">The httpContext<see cref="HttpContext"/></param>
+        public HttpServerMessageSender(ISerializer<string> serializer, HttpContext httpContext)
         {
             _serializer = serializer;
             _context = httpContext;
         }
-        
+
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The SendAndFlushAsync
+        /// </summary>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task SendAndFlushAsync(TransportMessage message)
         {
             var httpMessage = message.GetContent<HttpResultMessage<Object>>();
-            var actionResult= httpMessage.Entity as IActionResult;
+            var actionResult = httpMessage.Entity as IActionResult;
             if (actionResult == null)
             {
                 var text = _serializer.Serialize(message.Content);
@@ -42,6 +73,11 @@ namespace Surging.Core.KestrelHttpServer
             }
         }
 
+        /// <summary>
+        /// The SendAsync
+        /// </summary>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task SendAsync(TransportMessage message)
         {
             var actionResult = message.GetContent<IActionResult>();
@@ -63,6 +99,7 @@ namespace Surging.Core.KestrelHttpServer
                 });
             }
         }
-        
+
+        #endregion 方法
     }
 }

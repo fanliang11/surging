@@ -8,35 +8,62 @@ using System.Threading.Tasks;
 namespace Surging.Core.CPlatform.Routing.Implementation
 {
     /// <summary>
-    /// 服务路由事件参数。
-    /// </summary>
-    public class ServiceRouteEventArgs
-    {
-        public ServiceRouteEventArgs(ServiceRoute route)
-        {
-            Route = route;
-        }
-
-        /// <summary>
-        /// 服务路由信息。
-        /// </summary>
-        public ServiceRoute Route { get; private set; }
-    }
-
-    /// <summary>
     /// 服务路由变更事件参数。
     /// </summary>
     public class ServiceRouteChangedEventArgs : ServiceRouteEventArgs
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceRouteChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="route">The route<see cref="ServiceRoute"/></param>
+        /// <param name="oldRoute">The oldRoute<see cref="ServiceRoute"/></param>
         public ServiceRouteChangedEventArgs(ServiceRoute route, ServiceRoute oldRoute) : base(route)
         {
             OldRoute = oldRoute;
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the OldRoute
         /// 旧的服务路由信息。
         /// </summary>
         public ServiceRoute OldRoute { get; set; }
+
+        #endregion 属性
+    }
+
+    /// <summary>
+    /// 服务路由事件参数。
+    /// </summary>
+    public class ServiceRouteEventArgs
+    {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceRouteEventArgs"/> class.
+        /// </summary>
+        /// <param name="route">The route<see cref="ServiceRoute"/></param>
+        public ServiceRouteEventArgs(ServiceRoute route)
+        {
+            Route = route;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Route
+        /// 服务路由信息。
+        /// </summary>
+        public ServiceRoute Route { get; private set; }
+
+        #endregion 属性
     }
 
     /// <summary>
@@ -53,8 +80,6 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         {
             _serializer = serializer;
         }
-
-        #region Implementation of IServiceRouteManager
 
         /// <summary>
         /// 服务路由被创建。
@@ -110,6 +135,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
 
             return SetRoutesAsync(descriptors);
         }
+
         public abstract Task RemveAddressAsync(IEnumerable<AddressModel> Address);
 
         /// <summary>
@@ -118,15 +144,13 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         /// <returns>一个任务。</returns>
         public abstract Task ClearAsync();
 
-        #endregion Implementation of IServiceRouteManager
-
         /// <summary>
         /// 设置服务路由。
         /// </summary>
         /// <param name="routes">服务路由集合。</param>
         /// <returns>一个任务。</returns>
         protected abstract Task SetRoutesAsync(IEnumerable<ServiceRouteDescriptor> routes);
-        
+
         protected void OnCreated(params ServiceRouteEventArgs[] args)
         {
             if (_created == null)

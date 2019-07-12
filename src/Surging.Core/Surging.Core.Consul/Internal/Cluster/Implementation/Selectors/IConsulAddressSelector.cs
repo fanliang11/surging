@@ -7,7 +7,14 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Consul.Internal.Cluster.Implementation.Selectors
 {
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IConsulAddressSelector" />
+    /// </summary>
     public interface IConsulAddressSelector : IAddressSelector
-    { 
+    {
     }
+
+    #endregion 接口
 }

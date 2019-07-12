@@ -10,76 +10,57 @@ namespace Surging.Core.Caching.RedisCache
     /// <summary>
     /// redis 终端
     /// </summary>
-    /// <remarks>
-    /// 	<para>创建：范亮</para>
-    /// 	<para>日期：2016/4/2</para>
-    /// </remarks>
     public class RedisEndpoint : CacheEndpoint
     {
-        /// <summary>
-        /// 主机
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public new string Host
-        {
-            get; set;
-        }
+        #region 属性
 
         /// <summary>
-        /// 端口
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public new int Port
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// 密码
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public string Password
-        {
-            get; set;
-        }
-
-        /// <summary>
+        /// Gets or sets the DbIndex
         /// 数据库
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public int DbIndex
-        {
-            get; set;
-        }
+        public int DbIndex { get; set; }
 
-        public int MaxSize
-        {
-            get; set;
-        }
+        /// <summary>
+        /// Gets or sets the Host
+        /// 主机
+        /// </summary>
+        public new string Host { get; set; }
 
-        public int MinSize
-        {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Gets or sets the MaxSize
+        /// </summary>
+        public int MaxSize { get; set; }
 
+        /// <summary>
+        /// Gets or sets the MinSize
+        /// </summary>
+        public int MinSize { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Password
+        /// 密码
+        /// </summary>
+        public string Password { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Port
+        /// 端口
+        /// </summary>
+        public new int Port { get; set; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The ToString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
         public override string ToString()
         {
-            return string.Concat(new string[] { Host, ":", Port.ToString(),"::" ,DbIndex.ToString()});
+            return string.Concat(new string[] { Host, ":", Port.ToString(), "::", DbIndex.ToString() });
         }
- 
+
+        #endregion 方法
     }
 }

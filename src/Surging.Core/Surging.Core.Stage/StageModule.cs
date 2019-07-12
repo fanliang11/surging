@@ -15,28 +15,60 @@ using System.Text;
 
 namespace Surging.Core.Stage
 {
+    /// <summary>
+    /// Defines the <see cref="StageModule" />
+    /// </summary>
     public class StageModule : KestrelHttpModule
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _listener
+        /// </summary>
         private IWebServerListener _listener;
+
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="ApplicationInitializationContext"/></param>
+        public override void Initialize(ApplicationInitializationContext context)
+        {
+        }
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             _listener = context.ServiceProvoider.GetInstances<IWebServerListener>();
         }
 
+        /// <summary>
+        /// The RegisterBuilder
+        /// </summary>
+        /// <param name="context">The context<see cref="ConfigurationContext"/></param>
+        public override void RegisterBuilder(ConfigurationContext context)
+        {
+        }
+
+        /// <summary>
+        /// The RegisterBuilder
+        /// </summary>
+        /// <param name="context">The context<see cref="WebHostContext"/></param>
         public override void RegisterBuilder(WebHostContext context)
         {
             _listener.Listen(context);
         }
 
-        public override void Initialize(ApplicationInitializationContext context)
-        {
-        }
-
-        public override void RegisterBuilder(ConfigurationContext context)
-        {
-       
-        }
-
+        /// <summary>
+        /// The RegisterBuilder
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             var section = CPlatform.AppConfig.GetSection("Stage");
@@ -47,5 +79,7 @@ namespace Surging.Core.Stage
             builder.RegisterType<WebServerListener>().As<IWebServerListener>().SingleInstance();
             builder.RegisterType<AuthorizationFilterAttribute>().As<IAuthorizationFilter>().SingleInstance();
         }
+
+        #endregion 方法
     }
 }

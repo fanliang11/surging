@@ -1,4 +1,3 @@
-#region License
 /*
  * PayloadData.cs
  *
@@ -24,7 +23,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 using System.Collections;
@@ -32,203 +30,281 @@ using System.Collections.Generic;
 
 namespace WebSocketCore
 {
-  internal class PayloadData : IEnumerable<byte>
-  {
-    #region Private Fields
-
-    private ushort _code;
-    private bool   _codeSet;
-    private byte[] _data;
-    private long   _extDataLength;
-    private long   _length;
-    private string _reason;
-    private bool   _reasonSet;
-
-    #endregion
-
-    #region Public Fields
-
     /// <summary>
-    /// Represents the empty payload data.
+    /// Defines the <see cref="PayloadData" />
     /// </summary>
-    public static readonly PayloadData Empty;
-
-    /// <summary>
-    /// Represents the allowable max length.
-    /// </summary>
-    /// <remarks>
-    ///   <para>
-    ///   A <see cref="WebSocketException"/> will occur if the payload data length is
-    ///   greater than the value of this field.
-    ///   </para>
-    ///   <para>
-    ///   If you would like to change the value, you must set it to a value between
-    ///   <c>WebSocket.FragmentLength</c> and <c>Int64.MaxValue</c> inclusive.
-    ///   </para>
-    /// </remarks>
-    public static readonly ulong MaxLength;
-
-    #endregion
-
-    #region Static Constructor
-
-    static PayloadData ()
+    internal class PayloadData : IEnumerable<byte>
     {
-      Empty = new PayloadData ();
-      MaxLength = Int64.MaxValue;
-    }
+        #region 字段
 
-    #endregion
+        /// <summary>
+        /// Represents the empty payload data.
+        /// </summary>
+        public static readonly PayloadData Empty;
 
-    #region Internal Constructors
+        /// <summary>
+        /// Represents the allowable max length.
+        /// </summary>
+        public static readonly ulong MaxLength;
 
-    internal PayloadData ()
-    {
-      _code = 1005;
-      _reason = String.Empty;
+        /// <summary>
+        /// Defines the _code
+        /// </summary>
+        private ushort _code;
 
-      _data = WebSocket.EmptyBytes;
+        /// <summary>
+        /// Defines the _codeSet
+        /// </summary>
+        private bool _codeSet;
 
-      _codeSet = true;
-      _reasonSet = true;
-    }
+        /// <summary>
+        /// Defines the _data
+        /// </summary>
+        private byte[] _data;
 
-    internal PayloadData (byte[] data)
-      : this (data, data.LongLength)
-    {
-    }
+        /// <summary>
+        /// Defines the _extDataLength
+        /// </summary>
+        private long _extDataLength;
 
-    internal PayloadData (byte[] data, long length)
-    {
-      _data = data;
-      _length = length;
-    }
+        /// <summary>
+        /// Defines the _length
+        /// </summary>
+        private long _length;
 
-    internal PayloadData (ushort code, string reason)
-    {
-      _code = code;
-      _reason = reason ?? String.Empty;
+        /// <summary>
+        /// Defines the _reason
+        /// </summary>
+        private string _reason;
 
-      _data = code.Append (reason);
-      _length = _data.LongLength;
+        /// <summary>
+        /// Defines the _reasonSet
+        /// </summary>
+        private bool _reasonSet;
 
-      _codeSet = true;
-      _reasonSet = true;
-    }
+        #endregion 字段
 
-    #endregion
+        #region 构造函数
 
-    #region Internal Properties
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PayloadData"/> class.
+        /// </summary>
+        internal PayloadData()
+        {
+            _code = 1005;
+            _reason = String.Empty;
 
-    internal ushort Code {
-      get {
-        if (!_codeSet) {
-          _code = _length > 1
-                  ? _data.SubArray (0, 2).ToUInt16 (ByteOrder.Big)
-                  : (ushort) 1005;
+            _data = WebSocket.EmptyBytes;
 
-          _codeSet = true;
+            _codeSet = true;
+            _reasonSet = true;
         }
 
-        return _code;
-      }
-    }
-
-    internal long ExtensionDataLength {
-      get {
-        return _extDataLength;
-      }
-
-      set {
-        _extDataLength = value;
-      }
-    }
-
-    internal bool HasReservedCode {
-      get {
-        return _length > 1 && Code.IsReserved ();
-      }
-    }
-
-    internal string Reason {
-      get {
-        if (!_reasonSet) {
-          _reason = _length > 2
-                    ? _data.SubArray (2, _length - 2).UTF8Decode ()
-                    : String.Empty;
-
-          _reasonSet = true;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PayloadData"/> class.
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        internal PayloadData(byte[] data)
+      : this(data, data.LongLength)
+        {
         }
 
-        return _reason;
-      }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PayloadData"/> class.
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <param name="length">The length<see cref="long"/></param>
+        internal PayloadData(byte[] data, long length)
+        {
+            _data = data;
+            _length = length;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PayloadData"/> class.
+        /// </summary>
+        /// <param name="code">The code<see cref="ushort"/></param>
+        /// <param name="reason">The reason<see cref="string"/></param>
+        internal PayloadData(ushort code, string reason)
+        {
+            _code = code;
+            _reason = reason ?? String.Empty;
+
+            _data = code.Append(reason);
+            _length = _data.LongLength;
+
+            _codeSet = true;
+            _reasonSet = true;
+        }
+
+        /// <summary>
+        /// Initializes static members of the <see cref="PayloadData"/> class.
+        /// </summary>
+        static PayloadData()
+        {
+            Empty = new PayloadData();
+            MaxLength = Int64.MaxValue;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the ApplicationData
+        /// </summary>
+        public byte[] ApplicationData
+        {
+            get
+            {
+                return _extDataLength > 0
+                       ? _data.SubArray(_extDataLength, _length - _extDataLength)
+                       : _data;
+            }
+        }
+
+        /// <summary>
+        /// Gets the ExtensionData
+        /// </summary>
+        public byte[] ExtensionData
+        {
+            get
+            {
+                return _extDataLength > 0
+                       ? _data.SubArray(0, _extDataLength)
+                       : WebSocket.EmptyBytes;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Length
+        /// </summary>
+        public ulong Length
+        {
+            get
+            {
+                return (ulong)_length;
+            }
+        }
+
+        /// <summary>
+        /// Gets the Code
+        /// </summary>
+        internal ushort Code
+        {
+            get
+            {
+                if (!_codeSet)
+                {
+                    _code = _length > 1
+                            ? _data.SubArray(0, 2).ToUInt16(ByteOrder.Big)
+                            : (ushort)1005;
+
+                    _codeSet = true;
+                }
+
+                return _code;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the ExtensionDataLength
+        /// </summary>
+        internal long ExtensionDataLength
+        {
+            get
+            {
+                return _extDataLength;
+            }
+
+            set
+            {
+                _extDataLength = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether HasReservedCode
+        /// </summary>
+        internal bool HasReservedCode
+        {
+            get
+            {
+                return _length > 1 && Code.IsReserved();
+            }
+        }
+
+        /// <summary>
+        /// Gets the Reason
+        /// </summary>
+        internal string Reason
+        {
+            get
+            {
+                if (!_reasonSet)
+                {
+                    _reason = _length > 2
+                              ? _data.SubArray(2, _length - 2).UTF8Decode()
+                              : String.Empty;
+
+                    _reasonSet = true;
+                }
+
+                return _reason;
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The GetEnumerator
+        /// </summary>
+        /// <returns>The <see cref="IEnumerator{byte}"/></returns>
+        public IEnumerator<byte> GetEnumerator()
+        {
+            foreach (var b in _data)
+                yield return b;
+        }
+
+        /// <summary>
+        /// The ToArray
+        /// </summary>
+        /// <returns>The <see cref="byte[]"/></returns>
+        public byte[] ToArray()
+        {
+            return _data;
+        }
+
+        /// <summary>
+        /// The ToString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        public override string ToString()
+        {
+            return BitConverter.ToString(_data);
+        }
+
+        /// <summary>
+        /// The Mask
+        /// </summary>
+        /// <param name="key">The key<see cref="byte[]"/></param>
+        internal void Mask(byte[] key)
+        {
+            for (long i = 0; i < _length; i++)
+                _data[i] = (byte)(_data[i] ^ key[i % 4]);
+        }
+
+        /// <summary>
+        /// The GetEnumerator
+        /// </summary>
+        /// <returns>The <see cref="IEnumerator"/></returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        #endregion 方法
     }
-
-    #endregion
-
-    #region Public Properties
-
-    public byte[] ApplicationData {
-      get {
-        return _extDataLength > 0
-               ? _data.SubArray (_extDataLength, _length - _extDataLength)
-               : _data;
-      }
-    }
-
-    public byte[] ExtensionData {
-      get {
-        return _extDataLength > 0
-               ? _data.SubArray (0, _extDataLength)
-               : WebSocket.EmptyBytes;
-      }
-    }
-
-    public ulong Length {
-      get {
-        return (ulong) _length;
-      }
-    }
-
-    #endregion
-
-    #region Internal Methods
-
-    internal void Mask (byte[] key)
-    {
-      for (long i = 0; i < _length; i++)
-        _data[i] = (byte) (_data[i] ^ key[i % 4]);
-    }
-
-    #endregion
-
-    #region Public Methods
-
-    public IEnumerator<byte> GetEnumerator ()
-    {
-      foreach (var b in _data)
-        yield return b;
-    }
-
-    public byte[] ToArray ()
-    {
-      return _data;
-    }
-
-    public override string ToString ()
-    {
-      return BitConverter.ToString (_data);
-    }
-
-    #endregion
-
-    #region Explicit Interface Implementations
-
-    IEnumerator IEnumerable.GetEnumerator ()
-    {
-      return GetEnumerator ();
-    }
-
-    #endregion
-  }
 }

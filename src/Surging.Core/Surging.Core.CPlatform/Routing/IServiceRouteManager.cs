@@ -8,11 +8,19 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Routing
 {
+    #region 接口
+
     /// <summary>
     /// 一个抽象的服务路由发现者。
     /// </summary>
     public interface IServiceRouteManager
     {
+        #region 事件
+
+        /// <summary>
+        /// 服务路由被修改。
+        /// </summary>
+        event EventHandler<ServiceRouteChangedEventArgs> Changed;
 
         /// <summary>
         /// 服务路由被创建。
@@ -24,10 +32,15 @@ namespace Surging.Core.CPlatform.Routing
         /// </summary>
         event EventHandler<ServiceRouteEventArgs> Removed;
 
+        #endregion 事件
+
+        #region 方法
+
         /// <summary>
-        /// 服务路由被修改。
+        /// 清空所有的服务路由。
         /// </summary>
-        event EventHandler<ServiceRouteChangedEventArgs> Changed;
+        /// <returns>一个任务。</returns>
+        Task ClearAsync();
 
         /// <summary>
         /// 获取所有可用的服务路由信息。
@@ -36,46 +49,36 @@ namespace Surging.Core.CPlatform.Routing
         Task<IEnumerable<ServiceRoute>> GetRoutesAsync();
 
         /// <summary>
+        /// 移除地址列表
+        /// </summary>
+        /// <param name="Address">The Address<see cref="IEnumerable{AddressModel}"/></param>
+        /// <returns>一个任务。</returns>
+        Task RemveAddressAsync(IEnumerable<AddressModel> Address);
+
+        /// <summary>
         /// 设置服务路由。
         /// </summary>
         /// <param name="routes">服务路由集合。</param>
         /// <returns>一个任务。</returns>
         Task SetRoutesAsync(IEnumerable<ServiceRoute> routes);
 
-        /// <summary>
-        /// 移除地址列表
-        /// </summary>
-        /// <param name="routes">地址列表。</param>
-        /// <returns>一个任务。</returns>
-        Task RemveAddressAsync(IEnumerable<AddressModel> Address);
-        /// <summary>
-        /// 清空所有的服务路由。
-        /// </summary>
-        /// <returns>一个任务。</returns>
-        Task ClearAsync();
+        #endregion 方法
     }
+
+    #endregion 接口
 
     /// <summary>
     /// 服务路由管理者扩展方法。
     /// </summary>
     public static class ServiceRouteManagerExtensions
     {
-        /// <summary>
-        /// 根据服务Id获取一个服务路由。
-        /// </summary>
-        /// <param name="serviceRouteManager">服务路由管理者。</param>
-        /// <param name="serviceId">服务Id。</param>
-        /// <returns>服务路由。</returns>
-        public static async Task<ServiceRoute> GetAsync(this IServiceRouteManager serviceRouteManager, string serviceId)
-        {
-            return (await serviceRouteManager.GetRoutesAsync()).SingleOrDefault(i => i.ServiceDescriptor.Id == serviceId);
-        }
-
-       
+        #region 方法
 
         /// <summary>
         /// 获取地址
         /// </summary>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="condition">The condition<see cref="string"/></param>
         /// <returns></returns>
         public static async Task<IEnumerable<AddressModel>> GetAddressAsync(this IServiceRouteManager serviceRouteManager, string condition = null)
         {
@@ -109,12 +112,36 @@ namespace Surging.Core.CPlatform.Routing
             return result.Values;
         }
 
+        /// <summary>
+        /// 根据服务Id获取一个服务路由。
+        /// </summary>
+        /// <param name="serviceRouteManager">服务路由管理者。</param>
+        /// <param name="serviceId">服务Id。</param>
+        /// <returns>服务路由。</returns>
+        public static async Task<ServiceRoute> GetAsync(this IServiceRouteManager serviceRouteManager, string serviceId)
+        {
+            return (await serviceRouteManager.GetRoutesAsync()).SingleOrDefault(i => i.ServiceDescriptor.Id == serviceId);
+        }
+
+        /// <summary>
+        /// The GetRoutesAsync
+        /// </summary>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="address">The address<see cref="string"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceRoute}}"/></returns>
         public static async Task<IEnumerable<ServiceRoute>> GetRoutesAsync(this IServiceRouteManager serviceRouteManager, string address)
         {
             var routes = await serviceRouteManager.GetRoutesAsync();
             return routes.Where(p => p.Address.Any(m => m.ToString() == address));
         }
 
+        /// <summary>
+        /// The GetServiceDescriptorAsync
+        /// </summary>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="address">The address<see cref="string"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceDescriptor}}"/></returns>
         public static async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(this IServiceRouteManager serviceRouteManager, string address, string serviceId = null)
         {
             var routes = await serviceRouteManager.GetRoutesAsync();
@@ -129,5 +156,7 @@ namespace Surging.Core.CPlatform.Routing
                .Select(p => p.ServiceDescriptor);
             }
         }
+
+        #endregion 方法
     }
 }

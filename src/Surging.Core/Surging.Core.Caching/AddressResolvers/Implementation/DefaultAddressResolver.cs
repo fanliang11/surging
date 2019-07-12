@@ -19,15 +19,39 @@ namespace Surging.Core.Caching.AddressResolvers.Implementation
     /// </summary>
     public class DefaultAddressResolver : IAddressResolver
     {
+        #region 字段
 
-        #region Field  
-        private readonly ILogger<DefaultAddressResolver> _logger;
-        private readonly IHealthCheckService _healthCheckService;
-        private readonly IServiceCacheManager _serviceCacheManager;
+        /// <summary>
+        /// Defines the _concurrent
+        /// </summary>
         private readonly ConcurrentDictionary<string, ServiceCache> _concurrent =
 new ConcurrentDictionary<string, ServiceCache>();
-        #endregion
 
+        /// <summary>
+        /// Defines the _healthCheckService
+        /// </summary>
+        private readonly IHealthCheckService _healthCheckService;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<DefaultAddressResolver> _logger;
+
+        /// <summary>
+        /// Defines the _serviceCacheManager
+        /// </summary>
+        private readonly IServiceCacheManager _serviceCacheManager;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultAddressResolver"/> class.
+        /// </summary>
+        /// <param name="healthCheckService">The healthCheckService<see cref="IHealthCheckService"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DefaultAddressResolver}"/></param>
+        /// <param name="serviceCacheManager">The serviceCacheManager<see cref="IServiceCacheManager"/></param>
         public DefaultAddressResolver(IHealthCheckService healthCheckService, ILogger<DefaultAddressResolver> logger, IServiceCacheManager serviceCacheManager)
         {
             _healthCheckService = healthCheckService;
@@ -38,9 +62,18 @@ new ConcurrentDictionary<string, ServiceCache>();
             _serviceCacheManager.Created += ServiceCacheManager_Add;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The Resolver
+        /// </summary>
+        /// <param name="cacheId">The cacheId<see cref="string"/></param>
+        /// <param name="item">The item<see cref="string"/></param>
+        /// <returns>The <see cref="ValueTask{ConsistentHashNode}"/></returns>
         public async ValueTask<ConsistentHashNode> Resolver(string cacheId, string item)
         {
-
             _concurrent.TryGetValue(cacheId, out ServiceCache descriptor);
             if (descriptor == null)
             {
@@ -86,34 +119,21 @@ new ConcurrentDictionary<string, ServiceCache>();
             return hash != null ? hash.GetItemNode(item) : default(ConsistentHashNode);
         }
 
-
+        /// <summary>
+        /// The GetKey
+        /// </summary>
+        /// <param name="descriptor">The descriptor<see cref="CacheDescriptor"/></param>
+        /// <returns>The <see cref="string"/></returns>
         private static string GetKey(CacheDescriptor descriptor)
         {
             return descriptor.Id;
         }
 
-        private void ServiceCacheManager_Removed(object sender, ServiceCacheEventArgs e)
-        {
-            var key = GetKey(e.Cache.CacheDescriptor);
-            if (CacheContainer.IsRegistered<RedisContext>(e.Cache.CacheDescriptor.Prefix))
-            {
-                var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
-                ServiceCache value;
-                _concurrent.TryRemove(key, out value);
-                ConsistentHash<ConsistentHashNode> hash;
-                redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
-                if (hash != null)
-                    foreach (var node in e.Cache.CacheEndpoint)
-                    {
-              
-                         var hashNode = node as ConsistentHashNode;
-                        var addr = string.Format("{0}:{1}", hashNode.Host, hashNode.Port);
-                        hash.Remove(addr);
-                        hash.Add(hashNode, addr);
-                    }
-            }
-        }
-
+        /// <summary>
+        /// The ServiceCacheManager_Add
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceCacheEventArgs"/></param>
         private void ServiceCacheManager_Add(object sender, ServiceCacheEventArgs e)
         {
             var key = GetKey(e.Cache.CacheDescriptor);
@@ -133,5 +153,33 @@ new ConcurrentDictionary<string, ServiceCache>();
                     }
             }
         }
+
+        /// <summary>
+        /// The ServiceCacheManager_Removed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceCacheEventArgs"/></param>
+        private void ServiceCacheManager_Removed(object sender, ServiceCacheEventArgs e)
+        {
+            var key = GetKey(e.Cache.CacheDescriptor);
+            if (CacheContainer.IsRegistered<RedisContext>(e.Cache.CacheDescriptor.Prefix))
+            {
+                var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
+                ServiceCache value;
+                _concurrent.TryRemove(key, out value);
+                ConsistentHash<ConsistentHashNode> hash;
+                redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
+                if (hash != null)
+                    foreach (var node in e.Cache.CacheEndpoint)
+                    {
+                        var hashNode = node as ConsistentHashNode;
+                        var addr = string.Format("{0}:{1}", hashNode.Host, hashNode.Port);
+                        hash.Remove(addr);
+                        hash.Add(hashNode, addr);
+                    }
+            }
+        }
+
+        #endregion 方法
     }
 }

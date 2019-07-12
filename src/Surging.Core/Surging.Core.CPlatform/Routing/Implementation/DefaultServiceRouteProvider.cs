@@ -14,18 +14,56 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Routing.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="DefaultServiceRouteProvider" />
+    /// </summary>
     public class DefaultServiceRouteProvider : IServiceRouteProvider
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _concurrent
+        /// </summary>
         private readonly ConcurrentDictionary<string, ServiceRoute> _concurrent =
        new ConcurrentDictionary<string, ServiceRoute>();
 
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<DefaultServiceRouteProvider> _logger;
+
+        /// <summary>
+        /// Defines the _serviceEntryManager
+        /// </summary>
+        private readonly IServiceEntryManager _serviceEntryManager;
+
+        /// <summary>
+        /// Defines the _serviceRoute
+        /// </summary>
         private readonly ConcurrentDictionary<string, ServiceRoute> _serviceRoute =
        new ConcurrentDictionary<string, ServiceRoute>();
 
-        private readonly IServiceEntryManager _serviceEntryManager;
-        private readonly ILogger<DefaultServiceRouteProvider> _logger;
+        /// <summary>
+        /// Defines the _serviceRouteManager
+        /// </summary>
         private readonly IServiceRouteManager _serviceRouteManager;
+
+        /// <summary>
+        /// Defines the _serviceTokenGenerator
+        /// </summary>
         private readonly IServiceTokenGenerator _serviceTokenGenerator;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultServiceRouteProvider"/> class.
+        /// </summary>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DefaultServiceRouteProvider}"/></param>
+        /// <param name="serviceEntryManager">The serviceEntryManager<see cref="IServiceEntryManager"/></param>
+        /// <param name="serviceTokenGenerator">The serviceTokenGenerator<see cref="IServiceTokenGenerator"/></param>
         public DefaultServiceRouteProvider(IServiceRouteManager serviceRouteManager, ILogger<DefaultServiceRouteProvider> logger,
             IServiceEntryManager serviceEntryManager, IServiceTokenGenerator serviceTokenGenerator)
         {
@@ -38,6 +76,52 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             _logger = logger;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The GetRouteByPath
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="ValueTask{ServiceRoute}"/></returns>
+        public ValueTask<ServiceRoute> GetRouteByPath(string path)
+        {
+            _serviceRoute.TryGetValue(path.ToLower(), out ServiceRoute route);
+            if (route == null)
+            {
+                return new ValueTask<ServiceRoute>(GetRouteByPathAsync(path));
+            }
+            else
+            {
+                return new ValueTask<ServiceRoute>(route);
+            }
+        }
+
+        /// <summary>
+        /// The GetRouteByPathRegex
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="ValueTask{ServiceRoute}"/></returns>
+        public ValueTask<ServiceRoute> GetRouteByPathRegex(string path)
+        {
+            path = path.ToLower();
+            _serviceRoute.TryGetValue(path, out ServiceRoute route);
+            if (route == null)
+            {
+                return new ValueTask<ServiceRoute>(GetRouteByPathRegexAsync(path));
+            }
+            else
+            {
+                return new ValueTask<ServiceRoute>(route);
+            }
+        }
+
+        /// <summary>
+        /// The Locate
+        /// </summary>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
         public async Task<ServiceRoute> Locate(string serviceId)
         {
             _concurrent.TryGetValue(serviceId, out ServiceRoute route);
@@ -56,42 +140,13 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
-
-
-        public ValueTask<ServiceRoute> GetRouteByPath(string path)
-        {
-            _serviceRoute.TryGetValue(path.ToLower(), out ServiceRoute route);
-            if (route == null)
-            {
-                return new ValueTask<ServiceRoute>(GetRouteByPathAsync(path));
-            }
-            else
-            {
-                return new ValueTask<ServiceRoute>(route);
-            }
-        }
-
-        public ValueTask<ServiceRoute> GetRouteByPathRegex(string path)
-        {
-            path = path.ToLower();
-            _serviceRoute.TryGetValue(path, out ServiceRoute route);
-            if (route == null)
-            {
-                return new ValueTask<ServiceRoute>(GetRouteByPathRegexAsync(path));
-            }
-            else
-            {
-                return new ValueTask<ServiceRoute>(route);
-            }
-        }
-
-        public async Task<ServiceRoute> SearchRoute(string path)
-        {
-            return await SearchRouteAsync(path);
-        }
-
+        /// <summary>
+        /// The RegisterRoutes
+        /// </summary>
+        /// <param name="processorTime">The processorTime<see cref="decimal"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task RegisterRoutes(decimal processorTime)
-        { 
+        {
             var ports = AppConfig.ServerOptions.Ports;
             var addess = NetUtils.GetHostAddress();
             addess.ProcessorTime = processorTime;
@@ -105,44 +160,34 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                     ServiceDescriptor = i.Descriptor
                 };
             }).ToList();
-           await  _serviceRouteManager.SetRoutesAsync(addressDescriptors);
+            await _serviceRouteManager.SetRoutesAsync(addressDescriptors);
         }
 
-        #region 私有方法
+        /// <summary>
+        /// The SearchRoute
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
+        public async Task<ServiceRoute> SearchRoute(string path)
+        {
+            return await SearchRouteAsync(path);
+        }
+
+        /// <summary>
+        /// The GetCacheKey
+        /// </summary>
+        /// <param name="descriptor">The descriptor<see cref="ServiceDescriptor"/></param>
+        /// <returns>The <see cref="string"/></returns>
         private static string GetCacheKey(ServiceDescriptor descriptor)
         {
             return descriptor.Id;
         }
 
-        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
-        {
-            var key = GetCacheKey(e.Route.ServiceDescriptor);
-            ServiceRoute value;
-            _concurrent.TryRemove(key, out value);
-            _serviceRoute.TryRemove(e.Route.ServiceDescriptor.RoutePath, out value);
-        }
-
-        private void ServiceRouteManager_Add(object sender, ServiceRouteEventArgs e)
-        {
-            var key = GetCacheKey(e.Route.ServiceDescriptor);
-            _concurrent.GetOrAdd(key, e.Route);
-            _serviceRoute.GetOrAdd(e.Route.ServiceDescriptor.RoutePath, e.Route);
-        }
-
-        private async Task<ServiceRoute> SearchRouteAsync(string path)
-        {
-            var routes = await _serviceRouteManager.GetRoutesAsync();
-            var route = routes.FirstOrDefault(i => String.Compare(i.ServiceDescriptor.RoutePath, path, true) == 0);
-            if (route == null)
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                    _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
-            }
-            else
-                _serviceRoute.GetOrAdd(path, route);
-            return route;
-        }
-
+        /// <summary>
+        /// The GetRouteByPathAsync
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
         private async Task<ServiceRoute> GetRouteByPathAsync(string path)
         {
             var routes = await _serviceRouteManager.GetRoutesAsync();
@@ -157,18 +202,22 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
+        /// <summary>
+        /// The GetRouteByPathRegexAsync
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
         private async Task<ServiceRoute> GetRouteByPathRegexAsync(string path)
         {
             var routes = await _serviceRouteManager.GetRoutesAsync();
             var pattern = "/{.*?}";
 
-           var route = routes.FirstOrDefault(i =>
-            {
-                var routePath = Regex.Replace(i.ServiceDescriptor.RoutePath, pattern, "");
-                var newPath = path.Replace(routePath, "");
-                return (newPath.StartsWith("/")|| newPath.Length==0) && i.ServiceDescriptor.RoutePath.Split("/").Length == path.Split("/").Length && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload");
-            });
-
+            var route = routes.FirstOrDefault(i =>
+             {
+                 var routePath = Regex.Replace(i.ServiceDescriptor.RoutePath, pattern, "");
+                 var newPath = path.Replace(routePath, "");
+                 return (newPath.StartsWith("/") || newPath.Length == 0) && i.ServiceDescriptor.RoutePath.Split("/").Length == path.Split("/").Length && !i.ServiceDescriptor.GetMetadata<bool>("IsOverload");
+             });
 
             if (route == null)
             {
@@ -176,10 +225,54 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                     _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
             }
             else
-              if(!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))  _serviceRoute.GetOrAdd(path, route);
+              if (!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern)) _serviceRoute.GetOrAdd(path, route);
             return route;
         }
 
-        #endregion
+        /// <summary>
+        /// The SearchRouteAsync
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceRoute}"/></returns>
+        private async Task<ServiceRoute> SearchRouteAsync(string path)
+        {
+            var routes = await _serviceRouteManager.GetRoutesAsync();
+            var route = routes.FirstOrDefault(i => String.Compare(i.ServiceDescriptor.RoutePath, path, true) == 0);
+            if (route == null)
+            {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                    _logger.LogWarning($"根据服务路由路径：{path}，找不到相关服务信息。");
+            }
+            else
+                _serviceRoute.GetOrAdd(path, route);
+            return route;
+        }
+
+        /// <summary>
+        /// The ServiceRouteManager_Add
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceRouteEventArgs"/></param>
+        private void ServiceRouteManager_Add(object sender, ServiceRouteEventArgs e)
+        {
+            var key = GetCacheKey(e.Route.ServiceDescriptor);
+            _concurrent.GetOrAdd(key, e.Route);
+            _serviceRoute.GetOrAdd(e.Route.ServiceDescriptor.RoutePath, e.Route);
+        }
+
+        /// <summary>
+        /// The ServiceRouteManager_Removed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceRouteEventArgs"/></param>
+        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
+        {
+            var key = GetCacheKey(e.Route.ServiceDescriptor);
+            ServiceRoute value;
+            _concurrent.TryRemove(key, out value);
+            _serviceRoute.TryRemove(e.Route.ServiceDescriptor.RoutePath, out value);
+        }
+
+        #endregion 方法
     }
 }

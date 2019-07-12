@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace Surging.Core.Common.Extensions
 {
@@ -10,16 +10,7 @@ namespace Surging.Core.Common.Extensions
     /// </summary>
     public static class EnumExtensions
     {
-        /// <summary>
-        ///  获取对枚举的描述信息
-        /// </summary>
-        /// <param name="value">枚举</param>
-        /// <returns>返回枚举的描述信息</returns>
-        public static string GetDisplay(this Enum value)
-        {
-            var attr = value.GetAttribute<DisplayAttribute>();
-            return attr == null ? "" : attr.Name;
-        }
+        #region 方法
 
         /// <summary>
         /// 获取枚举的自定义属性
@@ -31,17 +22,17 @@ namespace Surging.Core.Common.Extensions
         {
             FieldInfo field = value.GetType().GetField(value.ToString());
             return field.GetCustomAttribute(typeof(T)) as T;
-
         }
 
         /// <summary>
-        /// 获取枚举的值
+        /// 获取对枚举的描述信息
         /// </summary>
         /// <param name="value">枚举</param>
-        /// <returns>返回枚举的值</returns>
-        public static int GetValue(this Enum value)
+        /// <returns>返回枚举的描述信息</returns>
+        public static string GetDisplay(this Enum value)
         {
-            return Convert.ToInt32(value);
+            var attr = value.GetAttribute<DisplayAttribute>();
+            return attr == null ? "" : attr.Name;
         }
 
         /// <summary>
@@ -68,5 +59,17 @@ namespace Surging.Core.Common.Extensions
             }
             return list;
         }
+
+        /// <summary>
+        /// 获取枚举的值
+        /// </summary>
+        /// <param name="value">枚举</param>
+        /// <returns>返回枚举的值</returns>
+        public static int GetValue(this Enum value)
+        {
+            return Convert.ToInt32(value);
+        }
+
+        #endregion 方法
     }
 }

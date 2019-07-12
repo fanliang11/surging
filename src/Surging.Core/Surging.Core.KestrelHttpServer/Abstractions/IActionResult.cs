@@ -6,8 +6,24 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.KestrelHttpServer
 {
-   public interface IActionResult
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IActionResult" />
+    /// </summary>
+    public interface IActionResult
     {
+        #region 方法
+
+        /// <summary>
+        /// The ExecuteResultAsync
+        /// </summary>
+        /// <param name="context">The context<see cref="ActionContext"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         Task ExecuteResultAsync(ActionContext context);
+
+        #endregion 方法
     }
+
+    #endregion 接口
 }

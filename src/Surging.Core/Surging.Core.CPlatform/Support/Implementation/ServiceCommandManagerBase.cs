@@ -8,37 +8,63 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
+    /// <summary>
+    /// 服务命令变更事件参数。
+    /// </summary>
+    public class ServiceCommandChangedEventArgs : ServiceCommandEventArgs
+    {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceCommandChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="serviceCommand">The serviceCommand<see cref="ServiceCommandDescriptor"/></param>
+        /// <param name="oldServiceCommand">The oldServiceCommand<see cref="ServiceCommandDescriptor"/></param>
+        public ServiceCommandChangedEventArgs(ServiceCommandDescriptor serviceCommand, ServiceCommandDescriptor oldServiceCommand) : base(serviceCommand)
+        {
+            OldServiceCommand = oldServiceCommand;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the OldServiceCommand
+        /// 旧的服务命令信息。
+        /// </summary>
+        public ServiceCommandDescriptor OldServiceCommand { get; set; }
+
+        #endregion 属性
+    }
 
     /// <summary>
     /// 服务命令事件参数。
     /// </summary>
     public class ServiceCommandEventArgs
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceCommandEventArgs"/> class.
+        /// </summary>
+        /// <param name="serviceCommand">The serviceCommand<see cref="ServiceCommandDescriptor"/></param>
         public ServiceCommandEventArgs(ServiceCommandDescriptor serviceCommand)
         {
             Command = serviceCommand;
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
         /// <summary>
+        /// Gets the Command
         /// 服务命令信息。
         /// </summary>
         public ServiceCommandDescriptor Command { get; private set; }
-    }
 
-    /// <summary>
-    /// 服务命令变更事件参数。
-    /// </summary>
-    public class ServiceCommandChangedEventArgs : ServiceCommandEventArgs
-    {
-        public ServiceCommandChangedEventArgs(ServiceCommandDescriptor serviceCommand, ServiceCommandDescriptor oldServiceCommand) : base(serviceCommand)
-        {
-            OldServiceCommand = oldServiceCommand;
-        }
-
-        /// <summary>
-        /// 旧的服务命令信息。
-        /// </summary>
-        public ServiceCommandDescriptor OldServiceCommand { get; set; }
+        #endregion 属性
     }
 
     public abstract class ServiceCommandManagerBase : IServiceCommandManager
@@ -48,13 +74,12 @@ namespace Surging.Core.CPlatform.Support.Implementation
         private EventHandler<ServiceCommandEventArgs> _created;
         private EventHandler<ServiceCommandEventArgs> _removed;
         private EventHandler<ServiceCommandChangedEventArgs> _changed;
+
         protected ServiceCommandManagerBase(ISerializer<string> serializer, IServiceEntryManager serviceEntryManager)
         {
             _serializer = serializer;
             _serviceEntryManager = serviceEntryManager;
         }
-
-        #region Implementation of IServiceRouteManager
 
         /// <summary>
         /// 服务命令被创建。
@@ -91,7 +116,6 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         protected abstract Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> routes);
 
-
         public virtual async Task SetServiceCommandsAsync()
         {
             List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>();
@@ -110,8 +134,6 @@ namespace Surging.Core.CPlatform.Support.Implementation
         /// </summary>
         /// <returns>一个任务。</returns>
         public abstract Task ClearAsync();
-
-        #endregion Implementation of IServiceRouteManager
 
         /// <summary>
         /// 设置服务命令。
@@ -161,7 +183,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                     Injection = command.Injection,
                     RequestCacheEnabled = command.RequestCacheEnabled,
                     Strategy = command.Strategy,
-                    ShuntStrategy=command.ShuntStrategy,
+                    ShuntStrategy = command.ShuntStrategy,
                     InjectionNamespaces = command.InjectionNamespaces,
                     BreakeErrorThresholdPercentage = command.BreakeErrorThresholdPercentage,
                     BreakerForceClosed = command.BreakerForceClosed,

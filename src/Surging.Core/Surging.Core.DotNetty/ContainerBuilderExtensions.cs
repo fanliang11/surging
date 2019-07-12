@@ -10,14 +10,18 @@ using System;
 
 namespace Surging.Core.DotNetty
 {
+    /// <summary>
+    /// Defines the <see cref="ContainerBuilderExtensions" />
+    /// </summary>
     public static class ContainerBuilderExtensions
     {
+        #region 方法
+
         /// <summary>
         /// 使用DotNetty进行传输。
         /// </summary>
         /// <param name="builder">服务构建者。</param>
         /// <returns>服务构建者。</returns>
-
         [Obsolete]
         public static IServiceBuilder UseDotNettyTransport(this IServiceBuilder builder)
         {
@@ -41,6 +45,10 @@ namespace Surging.Core.DotNetty
             return builder;
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilder"/></param>
         private static void RegisterDefaultProtocol(ContainerBuilder builder)
         {
             builder.Register(provider =>
@@ -50,7 +58,6 @@ namespace Surging.Core.DotNetty
             }).SingleInstance();
             builder.Register(provider =>
             {
-
                 var serviceExecutor = provider.ResolveKeyed<IServiceExecutor>(CommunicationProtocol.Tcp.ToString());
                 var messageListener = provider.Resolve<DotNettyServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>
@@ -60,5 +67,7 @@ namespace Surging.Core.DotNetty
                 }, serviceExecutor);
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

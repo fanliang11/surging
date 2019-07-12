@@ -4,76 +4,43 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Linq;
 
 namespace Surging.Core.Caching.RedisCache
 {
     /// <summary>
     /// redis数据上下文
     /// </summary>
-    /// <remarks>
-    /// 	<para>创建：范亮</para>
-    /// 	<para>日期：2016/4/2</para>
-    /// </remarks>
     public class RedisContext
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _hashAlgorithm
+        /// </summary>
         private readonly IHashAlgorithm _hashAlgorithm;
+
+        /// <summary>
+        /// Defines the _bucket
+        /// </summary>
+        internal string _bucket = null;
+
         /// <summary>
         /// 缓存对象集合容器池
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         internal Lazy<Dictionary<string, List<string>>> _cachingContextPool;
-
-        /// <summary>
-        /// 密码
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        internal string _password = null;
-
-        internal string _bucket = null;
-        /// <summary>
-        /// 默认缓存失效时间
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        internal string _defaultExpireTime=null;
 
         /// <summary>
         /// 连接失效时间
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         internal string _connectTimeout = null;
 
         /// <summary>
-        /// 规则名（现在只实现哈希一致性）
+        /// 默认缓存失效时间
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        internal string _ruleName = null;
-
-        /// <summary>
-        /// 哈希节点容器
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        internal ConcurrentDictionary<string, ConsistentHash<ConsistentHashNode>> dicHash;
+        internal string _defaultExpireTime = null;
 
         /// <summary>
         /// 对象池上限
@@ -83,18 +50,32 @@ namespace Surging.Core.Caching.RedisCache
         /// <summary>
         /// 对象池下限
         /// </summary>
-        internal string _minSize=null;
+        internal string _minSize = null;
+
+        /// <summary>
+        /// 密码
+        /// </summary>
+        internal string _password = null;
+
+        /// <summary>
+        /// 规则名（现在只实现哈希一致性）
+        /// </summary>
+        internal string _ruleName = null;
+
+        /// <summary>
+        /// 哈希节点容器
+        /// </summary>
+        internal ConcurrentDictionary<string, ConsistentHash<ConsistentHashNode>> dicHash;
+
+        #endregion 字段
 
         #region 构造函数
+
         /// <summary>
-        /// redis数据上下文
+        /// Initializes a new instance of the <see cref="RedisContext"/> class.
         /// </summary>
         /// <param name="rule">规则</param>
         /// <param name="args">参数</param>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         public RedisContext(string rule, params object[] args)
         {
             if (CacheContainer.IsRegistered<IHashAlgorithm>())
@@ -142,10 +123,14 @@ namespace Surging.Core.Caching.RedisCache
             dicHash = new ConcurrentDictionary<string, ConsistentHash<ConsistentHashNode>>();
             InitSettingHashStorage();
         }
-        #endregion
+
+        #endregion 构造函数
 
         #region 属性
 
+        /// <summary>
+        /// Gets the ConnectTimeout
+        /// </summary>
         public string ConnectTimeout
         {
             get
@@ -154,6 +139,18 @@ namespace Surging.Core.Caching.RedisCache
             }
         }
 
+        /// <summary>
+        /// Gets the DataContextPool
+        /// 缓存对象集合容器池
+        /// </summary>
+        public Dictionary<string, List<string>> DataContextPool
+        {
+            get { return _cachingContextPool.Value; }
+        }
+
+        /// <summary>
+        /// Gets the DefaultExpireTime
+        /// </summary>
         public string DefaultExpireTime
         {
             get
@@ -161,28 +158,14 @@ namespace Surging.Core.Caching.RedisCache
                 return _defaultExpireTime;
             }
         }
-        /// <summary>
-        /// 缓存对象集合容器池
-        /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
-        public Dictionary<string, List<string>> DataContextPool
-        {
-            get { return _cachingContextPool.Value; }
-        }
-        #endregion
 
-        #region 私有方法
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 初始化设置哈希节点容器
         /// </summary>
-        /// <remarks>
-        /// 	<para>创建：范亮</para>
-        /// 	<para>日期：2016/4/2</para>
-        /// </remarks>
         private void InitSettingHashStorage()
         {
             foreach (var dataContext in DataContextPool)
@@ -217,12 +200,12 @@ namespace Surging.Core.Caching.RedisCache
                         MinSize = this._minSize,
                         Db = db.ToString()
                     };
-                    hash.Add(node,string.Format("{0}:{1}",node.Host,node.Port));
+                    hash.Add(node, string.Format("{0}:{1}", node.Host, node.Port));
                     dicHash.GetOrAdd(targetType.ToString(), hash);
                 });
             }
         }
 
-        #endregion
+        #endregion 方法
     }
 }

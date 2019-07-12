@@ -1,5 +1,4 @@
-﻿
-using Surging.Core.System.Module;
+﻿using Surging.Core.System.Module;
 using Surging.Core.System.Module.Attributes;
 using System.Reflection;
 using System.Runtime.CompilerServices;

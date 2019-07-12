@@ -5,22 +5,34 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Cache
 {
+    /// <summary>
+    /// Defines the <see cref="ServiceCache" />
+    /// </summary>
     public class ServiceCache
     {
+        #region 属性
+
         /// <summary>
-        /// 服务可用地址。
-        /// </summary>
-        public IEnumerable<CacheEndpoint> CacheEndpoint { get; set; }
-        /// <summary>
+        /// Gets or sets the CacheDescriptor
         /// 服务描述符。
         /// </summary>
         public CacheDescriptor CacheDescriptor { get; set; }
 
-        #region Equality members
+        /// <summary>
+        /// Gets or sets the CacheEndpoint
+        /// 服务可用地址。
+        /// </summary>
+        public IEnumerable<CacheEndpoint> CacheEndpoint { get; set; }
 
-        /// <summary>Determines whether the specified object is equal to the current object.</summary>
-        /// <returns>true if the specified object  is equal to the current object; otherwise, false.</returns>
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Equals
+        /// </summary>
         /// <param name="obj">The object to compare with the current object. </param>
+        /// <returns>true if the specified object  is equal to the current object; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
             var model = obj as ServiceCache;
@@ -36,12 +48,16 @@ namespace Surging.Core.CPlatform.Cache
             return model.CacheEndpoint.Count() == CacheEndpoint.Count() && model.CacheEndpoint.All(addressModel => CacheEndpoint.Contains(addressModel));
         }
 
-        /// <summary>Serves as the default hash function. </summary>
+        /// <summary>
+        /// The GetHashCode
+        /// </summary>
         /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
         }
+
+        #endregion 方法
 
         public static bool operator ==(ServiceCache model1, ServiceCache model2)
         {
@@ -52,7 +68,5 @@ namespace Surging.Core.CPlatform.Cache
         {
             return !Equals(model1, model2);
         }
-
-        #endregion Equality members
     }
 }

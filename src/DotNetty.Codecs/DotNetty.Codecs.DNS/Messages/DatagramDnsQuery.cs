@@ -4,25 +4,67 @@ using System.Net;
 
 namespace DotNetty.Codecs.DNS.Messages
 {
+    /// <summary>
+    /// Defines the <see cref="DatagramDnsQuery" />
+    /// </summary>
     public class DatagramDnsQuery : DefaultDnsQuery, IAddressedEnvelope<DatagramDnsQuery>
     {
-        public DatagramDnsQuery Content => this;
+        #region 构造函数
 
-        public EndPoint Sender { get; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatagramDnsQuery"/> class.
+        /// </summary>
+        /// <param name="sender">The sender<see cref="EndPoint"/></param>
+        /// <param name="recipient">The recipient<see cref="EndPoint"/></param>
+        /// <param name="id">The id<see cref="int"/></param>
+        public DatagramDnsQuery(EndPoint sender, EndPoint recipient, int id) : this(sender, recipient, id, DnsOpCode.QUERY)
+        {
+        }
 
-        public EndPoint Recipient { get; }
-
-        public DatagramDnsQuery(EndPoint sender, EndPoint recipient, int id) : this(sender, recipient, id, DnsOpCode.QUERY) { }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatagramDnsQuery"/> class.
+        /// </summary>
+        /// <param name="sender">The sender<see cref="EndPoint"/></param>
+        /// <param name="recipient">The recipient<see cref="EndPoint"/></param>
+        /// <param name="id">The id<see cref="int"/></param>
+        /// <param name="opCode">The opCode<see cref="DnsOpCode"/></param>
         public DatagramDnsQuery(EndPoint sender, EndPoint recipient, int id, DnsOpCode opCode) : base(id, opCode)
         {
             if (recipient == null && sender == null)
                 throw new ArgumentNullException("recipient and sender");
-            
+
             Sender = sender;
             Recipient = recipient;
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Content
+        /// </summary>
+        public DatagramDnsQuery Content => this;
+
+        /// <summary>
+        /// Gets the Recipient
+        /// </summary>
+        public EndPoint Recipient { get; }
+
+        /// <summary>
+        /// Gets the Sender
+        /// </summary>
+        public EndPoint Sender { get; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Equals
+        /// </summary>
+        /// <param name="obj">The obj<see cref="object"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         public override bool Equals(object obj)
         {
             if (this == obj)
@@ -58,6 +100,10 @@ namespace DotNetty.Codecs.DNS.Messages
             return true;
         }
 
+        /// <summary>
+        /// The GetHashCode
+        /// </summary>
+        /// <returns>The <see cref="int"/></returns>
         public override int GetHashCode()
         {
             int hashCode = base.GetHashCode();
@@ -69,5 +115,7 @@ namespace DotNetty.Codecs.DNS.Messages
 
             return hashCode;
         }
+
+        #endregion 方法
     }
 }

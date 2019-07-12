@@ -5,7 +5,14 @@ using System.Text;
 
 namespace Surging.Core.Zookeeper.Internal.Cluster.Implementation.Selectors
 {
-    public interface IZookeeperAddressSelector: IAddressSelector
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IZookeeperAddressSelector" />
+    /// </summary>
+    public interface IZookeeperAddressSelector : IAddressSelector
     {
     }
+
+    #endregion 接口
 }

@@ -13,33 +13,49 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DNS
 {
-   public class DnsServiceExecutor : IServiceExecutor
+    /// <summary>
+    /// Defines the <see cref="DnsServiceExecutor" />
+    /// </summary>
+    public class DnsServiceExecutor : IServiceExecutor
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _dnsServiceEntryProvider
+        /// </summary>
         private readonly IDnsServiceEntryProvider _dnsServiceEntryProvider;
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<DnsServiceExecutor> _logger;
 
-        #endregion Field
+        #endregion 字段
 
-        #region Constructor
+        #region 构造函数
 
-        public DnsServiceExecutor(IDnsServiceEntryProvider dnsServiceEntryProvider, 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DnsServiceExecutor"/> class.
+        /// </summary>
+        /// <param name="dnsServiceEntryProvider">The dnsServiceEntryProvider<see cref="IDnsServiceEntryProvider"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DnsServiceExecutor}"/></param>
+        public DnsServiceExecutor(IDnsServiceEntryProvider dnsServiceEntryProvider,
             ILogger<DnsServiceExecutor> logger)
         {
             _dnsServiceEntryProvider = dnsServiceEntryProvider;
             _logger = logger;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IServiceExecutor
+        #region 方法
 
         /// <summary>
         /// 执行。
         /// </summary>
         /// <param name="sender">消息发送者。</param>
         /// <param name="message">调用消息。</param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task ExecuteAsync(IMessageSender sender, TransportMessage message)
         {
             if (_logger.IsEnabled(LogLevel.Trace))
@@ -69,18 +85,19 @@ namespace Surging.Core.DNS
             await SendRemoteInvokeResult(sender, dnsTransportMessage);
         }
 
-        #endregion Implementation of IServiceExecutor
-
-        #region Private Method
-
-    
+        /// <summary>
+        /// The LocalExecuteAsync
+        /// </summary>
+        /// <param name="entry">The entry<see cref="DnsServiceEntry"/></param>
+        /// <param name="message">The message<see cref="DnsTransportMessage"/></param>
+        /// <returns>The <see cref="Task{DnsTransportMessage}"/></returns>
         private async Task<DnsTransportMessage> LocalExecuteAsync(DnsServiceEntry entry, DnsTransportMessage message)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
             try
             {
                 var dnsQuestion = message.DnsQuestion;
-                message.Address= await entry.Behavior.DomainResolve(dnsQuestion.Name);
+                message.Address = await entry.Behavior.DomainResolve(dnsQuestion.Name);
             }
             catch (Exception exception)
             {
@@ -90,6 +107,12 @@ namespace Surging.Core.DNS
             return message;
         }
 
+        /// <summary>
+        /// The SendRemoteInvokeResult
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="resultMessage">The resultMessage<see cref="DnsTransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task SendRemoteInvokeResult(IMessageSender sender, DnsTransportMessage resultMessage)
         {
             try
@@ -108,6 +131,6 @@ namespace Surging.Core.DNS
             }
         }
 
-        #endregion Private Method
+        #endregion 方法
     }
 }

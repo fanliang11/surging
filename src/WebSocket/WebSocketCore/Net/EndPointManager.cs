@@ -1,4 +1,3 @@
-#region License
 /*
  * EndPointManager.cs
  *
@@ -28,21 +27,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Gonzalo Paniagua Javier <gonzalo@ximian.com>
  */
-#endregion
 
-#region Contributors
 /*
  * Contributors:
  * - Liryna <liryna.stark@gmail.com>
  */
-#endregion
 
 using System;
 using System.Collections;
@@ -51,190 +45,236 @@ using System.Net;
 
 namespace WebSocketCore.Net
 {
-  internal sealed class EndPointManager
-  {
-    #region Private Fields
-
-    private static readonly Dictionary<IPEndPoint, EndPointListener> _endpoints;
-
-    #endregion
-
-    #region Static Constructor
-
-    static EndPointManager ()
+    /// <summary>
+    /// Defines the <see cref="EndPointManager" />
+    /// </summary>
+    internal sealed class EndPointManager
     {
-      _endpoints = new Dictionary<IPEndPoint, EndPointListener> ();
-    }
+        #region 字段
 
-    #endregion
+        /// <summary>
+        /// Defines the _endpoints
+        /// </summary>
+        private static readonly Dictionary<IPEndPoint, EndPointListener> _endpoints;
 
-    #region Private Constructors
+        #endregion 字段
 
-    private EndPointManager ()
-    {
-    }
+        #region 构造函数
 
-    #endregion
-
-    #region Private Methods
-
-    private static void addPrefix (string uriPrefix, HttpListener listener)
-    {
-      var pref = new HttpListenerPrefix (uriPrefix);
-
-      var addr = convertToIPAddress (pref.Host);
-      if (addr == null)
-        throw new HttpListenerException (87, "Includes an invalid host.");
-
-      if (!addr.IsLocal ())
-        throw new HttpListenerException (87, "Includes an invalid host.");
-
-      int port;
-      if (!Int32.TryParse (pref.Port, out port))
-        throw new HttpListenerException (87, "Includes an invalid port.");
-
-      if (!port.IsPortNumber ())
-        throw new HttpListenerException (87, "Includes an invalid port.");
-
-      var path = pref.Path;
-      if (path.IndexOf ('%') != -1)
-        throw new HttpListenerException (87, "Includes an invalid path.");
-
-      if (path.IndexOf ("//", StringComparison.Ordinal) != -1)
-        throw new HttpListenerException (87, "Includes an invalid path.");
-
-      var endpoint = new IPEndPoint (addr, port);
-
-      EndPointListener lsnr;
-      if (_endpoints.TryGetValue (endpoint, out lsnr)) {
-        if (lsnr.IsSecure ^ pref.IsSecure)
-          throw new HttpListenerException (87, "Includes an invalid scheme.");
-      }
-      else {
-        lsnr =
-          new EndPointListener (
-            endpoint,
-            pref.IsSecure,
-            listener.CertificateFolderPath,
-            listener.SslConfiguration,
-            listener.ReuseAddress
-          );
-
-        _endpoints.Add (endpoint, lsnr);
-      }
-
-      lsnr.AddPrefix (pref, listener);
-    }
-
-    private static IPAddress convertToIPAddress (string hostname)
-    {
-      if (hostname == "*")
-        return IPAddress.Any;
-
-      if (hostname == "+")
-        return IPAddress.Any;
-
-      return hostname.ToIPAddress ();
-    }
-
-    private static void removePrefix (string uriPrefix, HttpListener listener)
-    {
-      var pref = new HttpListenerPrefix (uriPrefix);
-
-      var addr = convertToIPAddress (pref.Host);
-      if (addr == null)
-        return;
-
-      if (!addr.IsLocal ())
-        return;
-
-      int port;
-      if (!Int32.TryParse (pref.Port, out port))
-        return;
-
-      if (!port.IsPortNumber ())
-        return;
-
-      var path = pref.Path;
-      if (path.IndexOf ('%') != -1)
-        return;
-
-      if (path.IndexOf ("//", StringComparison.Ordinal) != -1)
-        return;
-
-      var endpoint = new IPEndPoint (addr, port);
-
-      EndPointListener lsnr;
-      if (!_endpoints.TryGetValue (endpoint, out lsnr))
-        return;
-
-      if (lsnr.IsSecure ^ pref.IsSecure)
-        return;
-
-      lsnr.RemovePrefix (pref, listener);
-    }
-
-    #endregion
-
-    #region Internal Methods
-
-    internal static bool RemoveEndPoint (IPEndPoint endpoint)
-    {
-      lock (((ICollection) _endpoints).SyncRoot) {
-        EndPointListener lsnr;
-        if (!_endpoints.TryGetValue (endpoint, out lsnr))
-          return false;
-
-        _endpoints.Remove (endpoint);
-        lsnr.Close ();
-
-        return true;
-      }
-    }
-
-    #endregion
-
-    #region Public Methods
-
-    public static void AddListener (HttpListener listener)
-    {
-      var added = new List<string> ();
-      lock (((ICollection) _endpoints).SyncRoot) {
-        try {
-          foreach (var pref in listener.Prefixes) {
-            addPrefix (pref, listener);
-            added.Add (pref);
-          }
+        /// <summary>
+        /// Prevents a default instance of the <see cref="EndPointManager"/> class from being created.
+        /// </summary>
+        private EndPointManager()
+        {
         }
-        catch {
-          foreach (var pref in added)
-            removePrefix (pref, listener);
 
-          throw;
+        /// <summary>
+        /// Initializes static members of the <see cref="EndPointManager"/> class.
+        /// </summary>
+        static EndPointManager()
+        {
+            _endpoints = new Dictionary<IPEndPoint, EndPointListener>();
         }
-      }
-    }
 
-    public static void AddPrefix (string uriPrefix, HttpListener listener)
-    {
-      lock (((ICollection) _endpoints).SyncRoot)
-        addPrefix (uriPrefix, listener);
-    }
+        #endregion 构造函数
 
-    public static void RemoveListener (HttpListener listener)
-    {
-      lock (((ICollection) _endpoints).SyncRoot) {
-        foreach (var pref in listener.Prefixes)
-          removePrefix (pref, listener);
-      }
-    }
+        #region 方法
 
-    public static void RemovePrefix (string uriPrefix, HttpListener listener)
-    {
-      lock (((ICollection) _endpoints).SyncRoot)
-        removePrefix (uriPrefix, listener);
-    }
+        /// <summary>
+        /// The AddListener
+        /// </summary>
+        /// <param name="listener">The listener<see cref="HttpListener"/></param>
+        public static void AddListener(HttpListener listener)
+        {
+            var added = new List<string>();
+            lock (((ICollection)_endpoints).SyncRoot)
+            {
+                try
+                {
+                    foreach (var pref in listener.Prefixes)
+                    {
+                        addPrefix(pref, listener);
+                        added.Add(pref);
+                    }
+                }
+                catch
+                {
+                    foreach (var pref in added)
+                        removePrefix(pref, listener);
 
-    #endregion
-  }
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The AddPrefix
+        /// </summary>
+        /// <param name="uriPrefix">The uriPrefix<see cref="string"/></param>
+        /// <param name="listener">The listener<see cref="HttpListener"/></param>
+        public static void AddPrefix(string uriPrefix, HttpListener listener)
+        {
+            lock (((ICollection)_endpoints).SyncRoot)
+                addPrefix(uriPrefix, listener);
+        }
+
+        /// <summary>
+        /// The RemoveListener
+        /// </summary>
+        /// <param name="listener">The listener<see cref="HttpListener"/></param>
+        public static void RemoveListener(HttpListener listener)
+        {
+            lock (((ICollection)_endpoints).SyncRoot)
+            {
+                foreach (var pref in listener.Prefixes)
+                    removePrefix(pref, listener);
+            }
+        }
+
+        /// <summary>
+        /// The RemovePrefix
+        /// </summary>
+        /// <param name="uriPrefix">The uriPrefix<see cref="string"/></param>
+        /// <param name="listener">The listener<see cref="HttpListener"/></param>
+        public static void RemovePrefix(string uriPrefix, HttpListener listener)
+        {
+            lock (((ICollection)_endpoints).SyncRoot)
+                removePrefix(uriPrefix, listener);
+        }
+
+        /// <summary>
+        /// The RemoveEndPoint
+        /// </summary>
+        /// <param name="endpoint">The endpoint<see cref="IPEndPoint"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        internal static bool RemoveEndPoint(IPEndPoint endpoint)
+        {
+            lock (((ICollection)_endpoints).SyncRoot)
+            {
+                EndPointListener lsnr;
+                if (!_endpoints.TryGetValue(endpoint, out lsnr))
+                    return false;
+
+                _endpoints.Remove(endpoint);
+                lsnr.Close();
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// The addPrefix
+        /// </summary>
+        /// <param name="uriPrefix">The uriPrefix<see cref="string"/></param>
+        /// <param name="listener">The listener<see cref="HttpListener"/></param>
+        private static void addPrefix(string uriPrefix, HttpListener listener)
+        {
+            var pref = new HttpListenerPrefix(uriPrefix);
+
+            var addr = convertToIPAddress(pref.Host);
+            if (addr == null)
+                throw new HttpListenerException(87, "Includes an invalid host.");
+
+            if (!addr.IsLocal())
+                throw new HttpListenerException(87, "Includes an invalid host.");
+
+            int port;
+            if (!Int32.TryParse(pref.Port, out port))
+                throw new HttpListenerException(87, "Includes an invalid port.");
+
+            if (!port.IsPortNumber())
+                throw new HttpListenerException(87, "Includes an invalid port.");
+
+            var path = pref.Path;
+            if (path.IndexOf('%') != -1)
+                throw new HttpListenerException(87, "Includes an invalid path.");
+
+            if (path.IndexOf("//", StringComparison.Ordinal) != -1)
+                throw new HttpListenerException(87, "Includes an invalid path.");
+
+            var endpoint = new IPEndPoint(addr, port);
+
+            EndPointListener lsnr;
+            if (_endpoints.TryGetValue(endpoint, out lsnr))
+            {
+                if (lsnr.IsSecure ^ pref.IsSecure)
+                    throw new HttpListenerException(87, "Includes an invalid scheme.");
+            }
+            else
+            {
+                lsnr =
+                  new EndPointListener(
+                    endpoint,
+                    pref.IsSecure,
+                    listener.CertificateFolderPath,
+                    listener.SslConfiguration,
+                    listener.ReuseAddress
+                  );
+
+                _endpoints.Add(endpoint, lsnr);
+            }
+
+            lsnr.AddPrefix(pref, listener);
+        }
+
+        /// <summary>
+        /// The convertToIPAddress
+        /// </summary>
+        /// <param name="hostname">The hostname<see cref="string"/></param>
+        /// <returns>The <see cref="IPAddress"/></returns>
+        private static IPAddress convertToIPAddress(string hostname)
+        {
+            if (hostname == "*")
+                return IPAddress.Any;
+
+            if (hostname == "+")
+                return IPAddress.Any;
+
+            return hostname.ToIPAddress();
+        }
+
+        /// <summary>
+        /// The removePrefix
+        /// </summary>
+        /// <param name="uriPrefix">The uriPrefix<see cref="string"/></param>
+        /// <param name="listener">The listener<see cref="HttpListener"/></param>
+        private static void removePrefix(string uriPrefix, HttpListener listener)
+        {
+            var pref = new HttpListenerPrefix(uriPrefix);
+
+            var addr = convertToIPAddress(pref.Host);
+            if (addr == null)
+                return;
+
+            if (!addr.IsLocal())
+                return;
+
+            int port;
+            if (!Int32.TryParse(pref.Port, out port))
+                return;
+
+            if (!port.IsPortNumber())
+                return;
+
+            var path = pref.Path;
+            if (path.IndexOf('%') != -1)
+                return;
+
+            if (path.IndexOf("//", StringComparison.Ordinal) != -1)
+                return;
+
+            var endpoint = new IPEndPoint(addr, port);
+
+            EndPointListener lsnr;
+            if (!_endpoints.TryGetValue(endpoint, out lsnr))
+                return;
+
+            if (lsnr.IsSecure ^ pref.IsSecure)
+                return;
+
+            lsnr.RemovePrefix(pref, listener);
+        }
+
+        #endregion 方法
+    }
 }

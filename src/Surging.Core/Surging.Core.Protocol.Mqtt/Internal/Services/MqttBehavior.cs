@@ -13,18 +13,50 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Services
 {
-    public abstract class MqttBehavior: ServiceBase
+    /// <summary>
+    /// Defines the <see cref="MqttBehavior" />
+    /// </summary>
+    public abstract class MqttBehavior : ServiceBase
     {
-        public async Task Publish(string deviceId, MqttWillMessage willMessage)
+        #region 方法
+
+        /// <summary>
+        /// The Authorized
+        /// </summary>
+        /// <param name="username">The username<see cref="string"/></param>
+        /// <param name="password">The password<see cref="string"/></param>
+        /// <returns>The <see cref="Task{bool}"/></returns>
+        public abstract Task<bool> Authorized(string username, string password);
+
+        /// <summary>
+        /// The GetDeviceIsOnine
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <returns>The <see cref="Task{bool}"/></returns>
+        public async Task<bool> GetDeviceIsOnine(string deviceId)
         {
-            await GetService<IChannelService>().Publish(deviceId, willMessage);
+            return await this.GetService<IChannelService>().GetDeviceIsOnine(deviceId);
         }
 
-        public async Task RemotePublish(string deviceId, MqttWillMessage willMessage)
+        /// <summary>
+        /// The GetService
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The <see cref="T"/></returns>
+        public override T GetService<T>()
         {
-            await GetService<IChannelService>().RemotePublishMessage(deviceId, willMessage);
+            if (ServiceLocator.Current.IsRegistered<T>())
+                return base.GetService<T>();
+            else
+                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
         }
 
+        /// <summary>
+        /// The GetService
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <returns>The <see cref="T"/></returns>
         public override T GetService<T>(string key)
         {
             if (ServiceLocator.Current.IsRegisteredWithKey<T>(key))
@@ -33,15 +65,25 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
                 return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
         }
 
-        public override T GetService<T>()
+        /// <summary>
+        /// The GetService
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <returns>The <see cref="object"/></returns>
+        public override object GetService(string key, Type type)
         {
-            if (ServiceLocator.Current.IsRegistered<T>())
-                return base.GetService<T>();
+            if (ServiceLocator.Current.IsRegisteredWithKey(key, type))
+                return base.GetService(key, type);
             else
-                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
-
+                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key, type);
         }
 
+        /// <summary>
+        /// The GetService
+        /// </summary>
+        /// <param name="type">The type<see cref="Type"/></param>
+        /// <returns>The <see cref="object"/></returns>
         public override object GetService(Type type)
         {
             if (ServiceLocator.Current.IsRegistered(type))
@@ -50,25 +92,37 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
                 return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(type);
         }
 
-        public override object GetService(string key, Type type)
-        {
-            if (ServiceLocator.Current.IsRegisteredWithKey(key, type))
-                return base.GetService(key, type);
-            else
-                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key, type);
-
-        }
-
+        /// <summary>
+        /// The Publish
+        /// </summary>
+        /// <param name="@event">The event<see cref="IntegrationEvent"/></param>
         public void Publish(IntegrationEvent @event)
         {
             GetService<IEventBus>().Publish(@event);
         }
 
-        public async Task<bool> GetDeviceIsOnine(string deviceId)
+        /// <summary>
+        /// The Publish
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <param name="willMessage">The willMessage<see cref="MqttWillMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public async Task Publish(string deviceId, MqttWillMessage willMessage)
         {
-           return  await this.GetService<IChannelService>().GetDeviceIsOnine(deviceId);
+            await GetService<IChannelService>().Publish(deviceId, willMessage);
         }
 
-        public abstract Task<bool> Authorized(string username, string password);
+        /// <summary>
+        /// The RemotePublish
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <param name="willMessage">The willMessage<see cref="MqttWillMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public async Task RemotePublish(string deviceId, MqttWillMessage willMessage)
+        {
+            await GetService<IChannelService>().RemotePublishMessage(deviceId, willMessage);
+        }
+
+        #endregion 方法
     }
 }

@@ -1,10 +1,10 @@
-﻿using Surging.Core.System;
+﻿using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Runtime.Client;
+using Surging.Core.System;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Surging.Core.CPlatform.Runtime.Client;
-using Surging.Core.CPlatform;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
@@ -13,6 +13,13 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
     /// </summary>
     public class ServiceSubscribeProvider : ServiceBase, IServiceSubscribeProvider
     {
+        #region 方法
+
+        /// <summary>
+        /// The GetAddressAsync
+        /// </summary>
+        /// <param name="condition">The condition<see cref="string"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceAddressModel}}"/></returns>
         public async Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null)
         {
             var result = new List<ServiceAddressModel>();
@@ -27,9 +34,17 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
             return result;
         }
 
+        /// <summary>
+        /// The GetServiceDescriptorAsync
+        /// </summary>
+        /// <param name="address">The address<see cref="string"/></param>
+        /// <param name="condition">The condition<see cref="string"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceDescriptor}}"/></returns>
         public async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(string address, string condition = null)
         {
             return await GetService<IServiceSubscribeManager>().GetServiceDescriptorAsync(address, condition);
         }
+
+        #endregion 方法
     }
 }

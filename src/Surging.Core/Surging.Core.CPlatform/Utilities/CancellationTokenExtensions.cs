@@ -6,8 +6,18 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Utilities
 {
+    /// <summary>
+    /// Defines the <see cref="CancellationTokenExtensions" />
+    /// </summary>
     public static class CancellationTokenExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The WhenCanceled
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public static Task WhenCanceled(this CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -15,6 +25,13 @@ namespace Surging.Core.CPlatform.Utilities
             return tcs.Task;
         }
 
+        /// <summary>
+        /// The WithCancellation
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="task">The task<see cref="Task{T}"/></param>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task{T}"/></returns>
         public static async Task<T> WithCancellation<T>(
     this Task<T> task, CancellationToken cancellationToken)
         {
@@ -26,6 +43,14 @@ namespace Surging.Core.CPlatform.Utilities
             return await task;
         }
 
+        /// <summary>
+        /// The WithCancellation
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="task">The task<see cref="Task{T}"/></param>
+        /// <param name="cts">The cts<see cref="CancellationTokenSource"/></param>
+        /// <param name="requestTimeout">The requestTimeout<see cref="int"/></param>
+        /// <returns>The <see cref="Task{T}"/></returns>
         public static async Task<T> WithCancellation<T>(
     this Task<T> task, CancellationTokenSource cts, int requestTimeout)
         {
@@ -36,5 +61,7 @@ namespace Surging.Core.CPlatform.Utilities
             }
             throw new TimeoutException();
         }
+
+        #endregion 方法
     }
 }

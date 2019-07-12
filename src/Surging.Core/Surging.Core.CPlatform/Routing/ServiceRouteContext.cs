@@ -8,12 +8,28 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Routing
 {
-    public class ServiceRouteContext 
-    { 
-        public ServiceRoute  Route { get; set; }
+    /// <summary>
+    /// Defines the <see cref="ServiceRouteContext" />
+    /// </summary>
+    public class ServiceRouteContext
+    {
+        #region 属性
 
+        /// <summary>
+        /// Gets or sets the InvokeMessage
+        /// </summary>
+        public RemoteInvokeMessage InvokeMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ResultMessage
+        /// </summary>
         public RemoteInvokeResultMessage ResultMessage { get; set; }
 
-        public RemoteInvokeMessage InvokeMessage { get; set; }
+        /// <summary>
+        /// Gets or sets the Route
+        /// </summary>
+        public ServiceRoute Route { get; set; }
+
+        #endregion 属性
     }
 }

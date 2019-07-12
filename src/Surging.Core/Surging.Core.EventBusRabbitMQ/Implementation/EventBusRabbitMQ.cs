@@ -23,22 +23,73 @@ using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
 namespace Surging.Core.EventBusRabbitMQ.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="EventBusRabbitMQ" />
+    /// </summary>
     public class EventBusRabbitMQ : IEventBus, IDisposable
     {
-        private readonly string BROKER_NAME;
-        private readonly int _messageTTL;
-        private readonly int _retryCount;
-        private readonly int _rollbackCount;
-        private readonly ushort _prefetchCount;
-        private readonly IRabbitMQPersistentConnection _persistentConnection;
-        private readonly ILogger<EventBusRabbitMQ> _logger;
-        private readonly IEventBusSubscriptionsManager _subsManager;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _exchanges
+        /// </summary>
         private readonly IDictionary<QueueConsumerMode, string> _exchanges;
 
-        private IDictionary<Tuple<string,QueueConsumerMode>, IModel> _consumerChannels;
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<EventBusRabbitMQ> _logger;
 
-        public event EventHandler OnShutdown;
+        /// <summary>
+        /// Defines the _messageTTL
+        /// </summary>
+        private readonly int _messageTTL;
 
+        /// <summary>
+        /// Defines the _persistentConnection
+        /// </summary>
+        private readonly IRabbitMQPersistentConnection _persistentConnection;
+
+        /// <summary>
+        /// Defines the _prefetchCount
+        /// </summary>
+        private readonly ushort _prefetchCount;
+
+        /// <summary>
+        /// Defines the _retryCount
+        /// </summary>
+        private readonly int _retryCount;
+
+        /// <summary>
+        /// Defines the _rollbackCount
+        /// </summary>
+        private readonly int _rollbackCount;
+
+        /// <summary>
+        /// Defines the _subsManager
+        /// </summary>
+        private readonly IEventBusSubscriptionsManager _subsManager;
+
+        /// <summary>
+        /// Defines the BROKER_NAME
+        /// </summary>
+        private readonly string BROKER_NAME;
+
+        /// <summary>
+        /// Defines the _consumerChannels
+        /// </summary>
+        private IDictionary<Tuple<string, QueueConsumerMode>, IModel> _consumerChannels;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventBusRabbitMQ"/> class.
+        /// </summary>
+        /// <param name="persistentConnection">The persistentConnection<see cref="IRabbitMQPersistentConnection"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{EventBusRabbitMQ}"/></param>
+        /// <param name="subsManager">The subsManager<see cref="IEventBusSubscriptionsManager"/></param>
         public EventBusRabbitMQ(IRabbitMQPersistentConnection persistentConnection, ILogger<EventBusRabbitMQ> logger, IEventBusSubscriptionsManager subsManager)
         {
             BROKER_NAME = AppConfig.BrokerName;
@@ -46,7 +97,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             _retryCount = AppConfig.RetryCount;
             _prefetchCount = AppConfig.PrefetchCount;
             _rollbackCount = AppConfig.FailCount;
-            _consumerChannels = new Dictionary<Tuple<string,QueueConsumerMode>, IModel>();
+            _consumerChannels = new Dictionary<Tuple<string, QueueConsumerMode>, IModel>();
             _exchanges = new Dictionary<QueueConsumerMode, string>();
             _exchanges.Add(QueueConsumerMode.Normal, BROKER_NAME);
             _exchanges.Add(QueueConsumerMode.Retry, $"{BROKER_NAME}@{QueueConsumerMode.Retry.ToString()}");
@@ -58,21 +109,38 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 
-        private void SubsManager_OnEventRemoved(object sender, ValueTuple<string, string> tuple)
-        {
-            if (!_persistentConnection.IsConnected)
-            {
-                _persistentConnection.TryConnect();
-            }
+        #endregion 构造函数
 
-            using (var channel = _persistentConnection.CreateModel())
+        #region 事件
+
+        /// <summary>
+        /// Defines the OnShutdown
+        /// </summary>
+        public event EventHandler OnShutdown;
+
+        #endregion 事件
+
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (var key in _consumerChannels.Keys)
             {
-                channel.QueueUnbind(queue: tuple.Item1,
-                    exchange: BROKER_NAME,
-                    routingKey: tuple.Item2);
+                if (_consumerChannels[key] != null)
+                {
+                    _consumerChannels[key].Dispose();
+                }
             }
+            _subsManager.Clear();
         }
 
+        /// <summary>
+        /// The Publish
+        /// </summary>
+        /// <param name="@event">The event<see cref="IntegrationEvent"/></param>
         public void Publish(IntegrationEvent @event)
         {
             if (!_persistentConnection.IsConnected)
@@ -109,6 +177,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             }
         }
 
+        /// <summary>
+        /// The Subscribe
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TH"></typeparam>
+        /// <param name="handler">The handler<see cref="Func{TH}"/></param>
         public void Subscribe<T, TH>(Func<TH> handler)
             where TH : IIntegrationEventHandler<T>
         {
@@ -147,7 +221,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                             CreateConsumerChannel(queueConsumerAttr, eventName, mode));
                         channel.QueueBind(queue: queueName,
                                           exchange: _exchanges[mode],
-                                          routingKey: eventName); 
+                                          routingKey: eventName);
                     }
                 }
             }
@@ -155,6 +229,11 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 _subsManager.AddSubscription<T, TH>(handler, queueConsumerAttr.QueueName);
         }
 
+        /// <summary>
+        /// The Unsubscribe
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TH"></typeparam>
         public void Unsubscribe<T, TH>()
             where TH : IIntegrationEventHandler<T>
         {
@@ -162,6 +241,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 _subsManager.RemoveSubscription<T, TH>();
         }
 
+        /// <summary>
+        /// The FindHandlerByType
+        /// </summary>
+        /// <param name="handlerType">The handlerType<see cref="Type"/></param>
+        /// <param name="handlers">The handlers<see cref="IEnumerable{Func{IIntegrationEventHandler}}"/></param>
+        /// <returns>The <see cref="Func{IIntegrationEventHandler}"/></returns>
         private static Func<IIntegrationEventHandler> FindHandlerByType(Type handlerType, IEnumerable<Func<IIntegrationEventHandler>> handlers)
         {
             foreach (var func in handlers)
@@ -175,18 +260,13 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return null;
         }
 
-        public void Dispose()
-        {
-            foreach (var key in _consumerChannels.Keys)
-            {
-                if (_consumerChannels[key] != null)
-                {
-                    _consumerChannels[key].Dispose();
-                }
-            }
-            _subsManager.Clear();
-        }
-
+        /// <summary>
+        /// The CreateConsumerChannel
+        /// </summary>
+        /// <param name="queueConsumer">The queueConsumer<see cref="QueueConsumerAttribute"/></param>
+        /// <param name="routeKey">The routeKey<see cref="string"/></param>
+        /// <param name="mode">The mode<see cref="QueueConsumerMode"/></param>
+        /// <returns>The <see cref="IModel"/></returns>
         private IModel CreateConsumerChannel(QueueConsumerAttribute queueConsumer, string routeKey, QueueConsumerMode mode)
         {
             IModel result = null;
@@ -199,6 +279,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                            bindConsumer);
                     }
                     break;
+
                 case QueueConsumerMode.Retry:
                     {
                         var bindConsumer = queueConsumer.Modes.Any(p => p == QueueConsumerMode.Retry);
@@ -206,6 +287,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                             bindConsumer);
                     }
                     break;
+
                 case QueueConsumerMode.Fail:
                     {
                         var bindConsumer = queueConsumer.Modes.Any(p => p == QueueConsumerMode.Fail);
@@ -217,6 +299,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return result;
         }
 
+        /// <summary>
+        /// The CreateConsumerChannel
+        /// </summary>
+        /// <param name="queueName">The queueName<see cref="string"/></param>
+        /// <param name="bindConsumer">The bindConsumer<see cref="bool"/></param>
+        /// <returns>The <see cref="IModel"/></returns>
         private IModel CreateConsumerChannel(string queueName, bool bindConsumer)
         {
             var mode = QueueConsumerMode.Normal;
@@ -257,49 +345,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return channel;
         }
 
-        private IModel CreateRetryConsumerChannel(string queueName, string routeKey, bool bindConsumer)
-        {
-            var mode = QueueConsumerMode.Retry;
-            if (!_persistentConnection.IsConnected)
-            {
-                _persistentConnection.TryConnect();
-            }
-            IDictionary<String, Object> arguments = new Dictionary<String, Object>();
-            arguments.Add("x-dead-letter-exchange", _exchanges[QueueConsumerMode.Fail].ToString());
-            arguments.Add("x-message-ttl", _messageTTL);
-            arguments.Add("x-dead-letter-routing-key", routeKey);
-            var channel = _persistentConnection.CreateModel();
-            var retryQueueName = $"{queueName}@{mode.ToString()}";
-            channel.ExchangeDeclare(exchange: _exchanges[mode],
-                                 type: "direct");
-            channel.QueueDeclare(retryQueueName, true, false, false, arguments);
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += async (model, ea) =>
-            {
-                var eventName = ea.RoutingKey;
-                await ProcessEvent(eventName, ea.Body, mode,ea.BasicProperties);
-                channel.BasicAck(ea.DeliveryTag, false);
-            };
-            if (bindConsumer)
-            {
-                channel.BasicQos(0, _prefetchCount, false);
-                channel.BasicConsume(queue: retryQueueName,
-                                      autoAck: false,
-                                     consumer: consumer);
-                channel.CallbackException += (sender, ea) =>
-              {
-                  var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
-                  _consumerChannels[key].Dispose();
-                  _consumerChannels[key] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
-              };
-            }
-            else
-                channel.Close();
-
-
-            return channel;
-        }
-
+        /// <summary>
+        /// The CreateFailConsumerChannel
+        /// </summary>
+        /// <param name="queueName">The queueName<see cref="string"/></param>
+        /// <param name="bindConsumer">The bindConsumer<see cref="bool"/></param>
+        /// <returns>The <see cref="IModel"/></returns>
         private IModel CreateFailConsumerChannel(string queueName, bool bindConsumer)
         {
             var mode = QueueConsumerMode.Fail;
@@ -338,79 +389,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return channel;
         }
 
-        private async Task ProcessEvent(string eventName, byte[] body, QueueConsumerMode mode, IBasicProperties properties)
-        {
-            var message = Encoding.UTF8.GetString(body);
-            if (_subsManager.HasSubscriptionsForEvent(eventName))
-            {
-                var eventType = _subsManager.GetEventTypeByName(eventName);
-                var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
-                var handlers = _subsManager.GetHandlersForEvent(eventName);
-                 var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-                foreach (var handlerfactory in handlers)
-                {
-                    var handler = handlerfactory.DynamicInvoke();
-                    long retryCount = 1; 
-                    try
-                    {
-                        var fastInvoker = GetHandler($"{concreteType.FullName}.Handle", concreteType.GetMethod("Handle"));
-                        await (Task)fastInvoker(handler, new object[] { integrationEvent });
-                    }
-                    catch
-                    {
-                        if (!_persistentConnection.IsConnected)
-                        {
-                            _persistentConnection.TryConnect();
-                        }
-                        retryCount = GetRetryCount(properties);
-                        using (var channel = _persistentConnection.CreateModel())
-                        {
-                            if (retryCount > _retryCount)
-                            {
-                                // 重试次数大于3次，则自动加入到死信队列
-                                var rollbackCount = retryCount - _retryCount;
-                                if (rollbackCount < _rollbackCount)
-                                {
-                                    IDictionary<String, Object> headers = new Dictionary<String, Object>();
-                                    if (!headers.ContainsKey("x-orig-routing-key"))
-                                        headers.Add("x-orig-routing-key", GetOrigRoutingKey(properties, eventName));
-                                    retryCount = rollbackCount;
-                                    channel.BasicPublish(_exchanges[QueueConsumerMode.Fail], eventName, CreateOverrideProperties(properties, headers), body);
-
-                                }
-                            }
-                            else
-                            {
-                                IDictionary<String, Object> headers = properties.Headers;
-                                if (headers == null)
-                                {
-                                    headers = new Dictionary<String, Object>();
-                                }
-                                if (!headers.ContainsKey("x-orig-routing-key"))
-                                    headers.Add("x-orig-routing-key", GetOrigRoutingKey(properties, eventName)); 
-                                channel.BasicPublish(_exchanges[QueueConsumerMode.Retry], eventName, CreateOverrideProperties(properties, headers), body);
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        var baseConcreteType = typeof(BaseIntegrationEventHandler<>).MakeGenericType(eventType); 
-                       if (handler.GetType().BaseType== baseConcreteType)
-                        { 
-                            var context = new EventContext()
-                            {
-                                Content= integrationEvent,
-                                Count = retryCount,
-                                Type = mode.ToString()
-                            };
-                            var fastInvoker = GetHandler($"{baseConcreteType.FullName}.Handled", baseConcreteType.GetMethod("Handled"));
-                            await (Task)fastInvoker(handler, new object[] { context });
-                        }
-                    }
-                }
-            }
-        }
-
+        /// <summary>
+        /// The CreateOverrideProperties
+        /// </summary>
+        /// <param name="properties">The properties<see cref="IBasicProperties"/></param>
+        /// <param name="headers">The headers<see cref="IDictionary{String, Object}"/></param>
+        /// <returns>The <see cref="IBasicProperties"/></returns>
         private IBasicProperties CreateOverrideProperties(IBasicProperties properties,
     IDictionary<String, Object> headers)
         {
@@ -429,6 +413,78 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return newProperties;
         }
 
+        /// <summary>
+        /// The CreateRetryConsumerChannel
+        /// </summary>
+        /// <param name="queueName">The queueName<see cref="string"/></param>
+        /// <param name="routeKey">The routeKey<see cref="string"/></param>
+        /// <param name="bindConsumer">The bindConsumer<see cref="bool"/></param>
+        /// <returns>The <see cref="IModel"/></returns>
+        private IModel CreateRetryConsumerChannel(string queueName, string routeKey, bool bindConsumer)
+        {
+            var mode = QueueConsumerMode.Retry;
+            if (!_persistentConnection.IsConnected)
+            {
+                _persistentConnection.TryConnect();
+            }
+            IDictionary<String, Object> arguments = new Dictionary<String, Object>();
+            arguments.Add("x-dead-letter-exchange", _exchanges[QueueConsumerMode.Fail].ToString());
+            arguments.Add("x-message-ttl", _messageTTL);
+            arguments.Add("x-dead-letter-routing-key", routeKey);
+            var channel = _persistentConnection.CreateModel();
+            var retryQueueName = $"{queueName}@{mode.ToString()}";
+            channel.ExchangeDeclare(exchange: _exchanges[mode],
+                                 type: "direct");
+            channel.QueueDeclare(retryQueueName, true, false, false, arguments);
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += async (model, ea) =>
+            {
+                var eventName = ea.RoutingKey;
+                await ProcessEvent(eventName, ea.Body, mode, ea.BasicProperties);
+                channel.BasicAck(ea.DeliveryTag, false);
+            };
+            if (bindConsumer)
+            {
+                channel.BasicQos(0, _prefetchCount, false);
+                channel.BasicConsume(queue: retryQueueName,
+                                      autoAck: false,
+                                     consumer: consumer);
+                channel.CallbackException += (sender, ea) =>
+              {
+                  var key = new Tuple<string, QueueConsumerMode>(queueName, mode);
+                  _consumerChannels[key].Dispose();
+                  _consumerChannels[key] = CreateRetryConsumerChannel(queueName, routeKey, bindConsumer);
+              };
+            }
+            else
+                channel.Close();
+
+            return channel;
+        }
+
+        /// <summary>
+        /// The GetHandler
+        /// </summary>
+        /// <param name="key">The key<see cref="string"/></param>
+        /// <param name="method">The method<see cref="MethodInfo"/></param>
+        /// <returns>The <see cref="FastInvokeHandler"/></returns>
+        private FastInvokeHandler GetHandler(string key, MethodInfo method)
+        {
+            var objInstance = ServiceResolver.Current.GetService(null, key);
+            if (objInstance == null)
+            {
+                objInstance = FastInvoke.GetMethodInvoker(method);
+                ServiceResolver.Current.Register(key, objInstance, null);
+            }
+            return objInstance as FastInvokeHandler;
+        }
+
+        /// <summary>
+        /// The GetOrigRoutingKey
+        /// </summary>
+        /// <param name="properties">The properties<see cref="IBasicProperties"/></param>
+        /// <param name="defaultValue">The defaultValue<see cref="String"/></param>
+        /// <returns>The <see cref="String"/></returns>
         private String GetOrigRoutingKey(IBasicProperties properties,
           String defaultValue)
         {
@@ -447,6 +503,11 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return routingKey;
         }
 
+        /// <summary>
+        /// The GetRetryCount
+        /// </summary>
+        /// <param name="properties">The properties<see cref="IBasicProperties"/></param>
+        /// <returns>The <see cref="long"/></returns>
         private long GetRetryCount(IBasicProperties properties)
         {
             long retryCount = 1L;
@@ -454,13 +515,12 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             {
                 if (properties != null)
                 {
-
                     IDictionary<String, Object> headers = properties.Headers;
                     if (headers != null)
                     {
                         if (headers.ContainsKey("x-death"))
                         {
-                            retryCount= GetRetryCount(properties, headers);
+                            retryCount = GetRetryCount(properties, headers);
                         }
                         else
                         {
@@ -475,7 +535,13 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return retryCount;
         }
 
-       private  long GetRetryCount(IBasicProperties properties, IDictionary<String, Object> headers)
+        /// <summary>
+        /// The GetRetryCount
+        /// </summary>
+        /// <param name="properties">The properties<see cref="IBasicProperties"/></param>
+        /// <param name="headers">The headers<see cref="IDictionary{String, Object}"/></param>
+        /// <returns>The <see cref="long"/></returns>
+        private long GetRetryCount(IBasicProperties properties, IDictionary<String, Object> headers)
         {
             var retryCount = 1L;
             if (headers["x-death"] is List<object>)
@@ -501,20 +567,116 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             return retryCount;
         }
 
-        private FastInvokeHandler GetHandler(string key, MethodInfo method)
-        {
-            var objInstance = ServiceResolver.Current.GetService(null, key);
-            if (objInstance == null)
-            {
-                objInstance = FastInvoke.GetMethodInvoker(method);
-                ServiceResolver.Current.Register(key, objInstance, null);
-            }
-            return objInstance as FastInvokeHandler;
-        }
-
+        /// <summary>
+        /// The PersistentConnection_OnEventShutDown
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="reason">The reason<see cref="ShutdownEventArgs"/></param>
         private void PersistentConnection_OnEventShutDown(object sender, ShutdownEventArgs reason)
         {
-            OnShutdown(this,new EventArgs());
+            OnShutdown(this, new EventArgs());
         }
+
+        /// <summary>
+        /// The ProcessEvent
+        /// </summary>
+        /// <param name="eventName">The eventName<see cref="string"/></param>
+        /// <param name="body">The body<see cref="byte[]"/></param>
+        /// <param name="mode">The mode<see cref="QueueConsumerMode"/></param>
+        /// <param name="properties">The properties<see cref="IBasicProperties"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task ProcessEvent(string eventName, byte[] body, QueueConsumerMode mode, IBasicProperties properties)
+        {
+            var message = Encoding.UTF8.GetString(body);
+            if (_subsManager.HasSubscriptionsForEvent(eventName))
+            {
+                var eventType = _subsManager.GetEventTypeByName(eventName);
+                var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
+                var handlers = _subsManager.GetHandlersForEvent(eventName);
+                var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
+                foreach (var handlerfactory in handlers)
+                {
+                    var handler = handlerfactory.DynamicInvoke();
+                    long retryCount = 1;
+                    try
+                    {
+                        var fastInvoker = GetHandler($"{concreteType.FullName}.Handle", concreteType.GetMethod("Handle"));
+                        await (Task)fastInvoker(handler, new object[] { integrationEvent });
+                    }
+                    catch
+                    {
+                        if (!_persistentConnection.IsConnected)
+                        {
+                            _persistentConnection.TryConnect();
+                        }
+                        retryCount = GetRetryCount(properties);
+                        using (var channel = _persistentConnection.CreateModel())
+                        {
+                            if (retryCount > _retryCount)
+                            {
+                                // 重试次数大于3次，则自动加入到死信队列
+                                var rollbackCount = retryCount - _retryCount;
+                                if (rollbackCount < _rollbackCount)
+                                {
+                                    IDictionary<String, Object> headers = new Dictionary<String, Object>();
+                                    if (!headers.ContainsKey("x-orig-routing-key"))
+                                        headers.Add("x-orig-routing-key", GetOrigRoutingKey(properties, eventName));
+                                    retryCount = rollbackCount;
+                                    channel.BasicPublish(_exchanges[QueueConsumerMode.Fail], eventName, CreateOverrideProperties(properties, headers), body);
+                                }
+                            }
+                            else
+                            {
+                                IDictionary<String, Object> headers = properties.Headers;
+                                if (headers == null)
+                                {
+                                    headers = new Dictionary<String, Object>();
+                                }
+                                if (!headers.ContainsKey("x-orig-routing-key"))
+                                    headers.Add("x-orig-routing-key", GetOrigRoutingKey(properties, eventName));
+                                channel.BasicPublish(_exchanges[QueueConsumerMode.Retry], eventName, CreateOverrideProperties(properties, headers), body);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        var baseConcreteType = typeof(BaseIntegrationEventHandler<>).MakeGenericType(eventType);
+                        if (handler.GetType().BaseType == baseConcreteType)
+                        {
+                            var context = new EventContext()
+                            {
+                                Content = integrationEvent,
+                                Count = retryCount,
+                                Type = mode.ToString()
+                            };
+                            var fastInvoker = GetHandler($"{baseConcreteType.FullName}.Handled", baseConcreteType.GetMethod("Handled"));
+                            await (Task)fastInvoker(handler, new object[] { context });
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The SubsManager_OnEventRemoved
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="tuple">The tuple<see cref="ValueTuple{string, string}"/></param>
+        private void SubsManager_OnEventRemoved(object sender, ValueTuple<string, string> tuple)
+        {
+            if (!_persistentConnection.IsConnected)
+            {
+                _persistentConnection.TryConnect();
+            }
+
+            using (var channel = _persistentConnection.CreateModel())
+            {
+                channel.QueueUnbind(queue: tuple.Item1,
+                    exchange: BROKER_NAME,
+                    routingKey: tuple.Item2);
+            }
+        }
+
+        #endregion 方法
     }
 }

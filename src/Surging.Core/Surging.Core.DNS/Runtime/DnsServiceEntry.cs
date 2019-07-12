@@ -4,13 +4,28 @@ using System.Text;
 
 namespace Surging.Core.DNS.Runtime
 {
-   public class DnsServiceEntry
+    /// <summary>
+    /// Defines the <see cref="DnsServiceEntry" />
+    /// </summary>
+    public class DnsServiceEntry
     {
-        public string Path { get; set; }
+        #region 属性
 
-        public Type Type { get; set; }
-
+        /// <summary>
+        /// Gets or sets the Behavior
+        /// </summary>
         public DnsBehavior Behavior { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Path
+        /// </summary>
+        public string Path { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Type
+        /// </summary>
+        public Type Type { get; set; }
+
+        #endregion 属性
     }
 }

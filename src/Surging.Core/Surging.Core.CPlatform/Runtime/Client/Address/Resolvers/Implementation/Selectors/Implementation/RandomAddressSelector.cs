@@ -10,17 +10,24 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
     /// </summary>
     public class RandomAddressSelector : AddressSelectorBase
     {
-        #region Field
-
-        private readonly Func<int, int, int> _generate;
-        private readonly Random _random;
-
-        #endregion Field
-
-        #region Constructor
+        #region 字段
 
         /// <summary>
-        /// 初始化一个以Random生成随机数的随机地址选择器。
+        /// Defines the _generate
+        /// </summary>
+        private readonly Func<int, int, int> _generate;
+
+        /// <summary>
+        /// Defines the _random
+        /// </summary>
+        private readonly Random _random;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RandomAddressSelector"/> class.
         /// </summary>
         public RandomAddressSelector()
         {
@@ -29,7 +36,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         }
 
         /// <summary>
-        /// 初始化一个自定义的随机地址选择器。
+        /// Initializes a new instance of the <see cref="RandomAddressSelector"/> class.
         /// </summary>
         /// <param name="generate">随机数生成委托，第一个参数为最小值，第二个参数为最大值（不可以超过该值）。</param>
         public RandomAddressSelector(Func<int, int, int> generate)
@@ -39,9 +46,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             _generate = generate;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Overrides of AddressSelectorBase
+        #region 方法
 
         /// <summary>
         /// 选择一个地址。
@@ -57,6 +64,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             return new ValueTask<AddressModel>(address[index]);
         }
 
-        #endregion Overrides of AddressSelectorBase
+        #endregion 方法
     }
 }

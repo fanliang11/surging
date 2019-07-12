@@ -7,9 +7,25 @@ using System.Text;
 
 namespace Surging.Core.Codec.ProtoBuffer.Messages
 {
+    /// <summary>
+    /// Defines the <see cref="ProtoBufferTransportMessage" />
+    /// </summary>
     [ProtoContract]
     public class ProtoBufferTransportMessage
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtoBufferTransportMessage"/> class.
+        /// </summary>
+        public ProtoBufferTransportMessage()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtoBufferTransportMessage"/> class.
+        /// </summary>
+        /// <param name="transportMessage">The transportMessage<see cref="TransportMessage"/></param>
         public ProtoBufferTransportMessage(TransportMessage transportMessage)
         {
             Id = transportMessage.Id;
@@ -32,30 +48,36 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
             Content = SerializerUtilitys.Serialize(contentObject);
         }
 
-        public ProtoBufferTransportMessage()
-        {
-        }
-        
-        [ProtoMember(1)]
-        public string Id { get; set; }
-        
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the Content
+        /// </summary>
         [ProtoMember(2)]
         public byte[] Content { get; set; }
 
+        /// <summary>
+        /// Gets or sets the ContentType
+        /// </summary>
         [ProtoMember(3)]
         public string ContentType { get; set; }
 
-    
-        public bool IsInvokeMessage()
-        {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
-        }
+        /// <summary>
+        /// Gets or sets the Id
+        /// </summary>
+        [ProtoMember(1)]
+        public string Id { get; set; }
 
-        public bool IsInvokeResultMessage()
-        {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
-        }
+        #endregion 属性
 
+        #region 方法
+
+        /// <summary>
+        /// The GetTransportMessage
+        /// </summary>
+        /// <returns>The <see cref="TransportMessage"/></returns>
         public TransportMessage GetTransportMessage()
         {
             var message = new TransportMessage
@@ -86,5 +108,25 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
 
             return message;
         }
+
+        /// <summary>
+        /// The IsInvokeMessage
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
+        public bool IsInvokeMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
+        }
+
+        /// <summary>
+        /// The IsInvokeResultMessage
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
+        public bool IsInvokeResultMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
+        }
+
+        #endregion 方法
     }
 }

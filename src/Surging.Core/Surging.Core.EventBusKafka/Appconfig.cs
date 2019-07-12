@@ -7,18 +7,35 @@ using System.Text;
 
 namespace Surging.Core.EventBusKafka
 {
-    public  class AppConfig
+    /// <summary>
+    /// Defines the <see cref="AppConfig" />
+    /// </summary>
+    public class AppConfig
     {
+        #region 字段
 
-        public static IConfigurationRoot Configuration { get; set; }
-
-        public static KafkaOptions  Options { get; internal set; }
-
+        /// <summary>
+        /// Defines the _kafkaConsumerConfig
+        /// </summary>
         private static IEnumerable<KeyValuePair<string, object>> _kafkaConsumerConfig;
 
-
+        /// <summary>
+        /// Defines the _kafkaProducerConfig
+        /// </summary>
         private static IEnumerable<KeyValuePair<string, object>> _kafkaProducerConfig;
 
+        #endregion 字段
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the Configuration
+        /// </summary>
+        public static IConfigurationRoot Configuration { get; set; }
+
+        /// <summary>
+        /// Gets or sets the KafkaConsumerConfig
+        /// </summary>
         public static IEnumerable<KeyValuePair<string, object>> KafkaConsumerConfig
         {
             get
@@ -31,6 +48,9 @@ namespace Surging.Core.EventBusKafka
             }
         }
 
+        /// <summary>
+        /// Gets or sets the KafkaProducerConfig
+        /// </summary>
         public static IEnumerable<KeyValuePair<string, object>> KafkaProducerConfig
         {
             get
@@ -42,5 +62,12 @@ namespace Surging.Core.EventBusKafka
                 _kafkaProducerConfig = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the Options
+        /// </summary>
+        public static KafkaOptions Options { get; internal set; }
+
+        #endregion 属性
     }
 }

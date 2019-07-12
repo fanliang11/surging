@@ -12,8 +12,17 @@ using Surging.Core.DNS.Runtime.Implementation;
 
 namespace Surging.Core.DNS
 {
-   public class DnsProtocolModule : EnginePartModule
+    /// <summary>
+    /// Defines the <see cref="DnsProtocolModule" />
+    /// </summary>
+    public class DnsProtocolModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -49,6 +58,10 @@ namespace Surging.Core.DNS
             }
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
@@ -66,13 +79,15 @@ namespace Surging.Core.DNS
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-
             }).As<IServiceHost>();
         }
 
+        /// <summary>
+        /// The RegisterDnsProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterDnsProtocol(ContainerBuilderWrapper builder)
         {
-
             builder.Register(provider =>
             {
                 return new DotNettyDnsServerMessageListener(provider.Resolve<ILogger<DotNettyDnsServerMessageListener>>(),
@@ -88,8 +103,9 @@ namespace Surging.Core.DNS
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, serviceExecutor);
-
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

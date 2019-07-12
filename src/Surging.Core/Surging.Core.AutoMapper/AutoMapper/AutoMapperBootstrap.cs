@@ -6,12 +6,21 @@ using System.Linq;
 
 namespace Surging.Core.AutoMapper
 {
+    /// <summary>
+    /// Defines the <see cref="AutoMapperBootstrap" />
+    /// </summary>
     public class AutoMapperBootstrap : IAutoMapperBootstrap
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
         public void Initialize()
         {
             var logger = ServiceLocator.GetService<ILogger<AutoMapperBootstrap>>();
-            Mapper.Initialize(config => {
+            Mapper.Initialize(config =>
+            {
                 if (AppConfig.Assemblies.Any())
                 {
                     foreach (var assembly in AppConfig.Assemblies)
@@ -29,9 +38,9 @@ namespace Surging.Core.AutoMapper
                         config.AddProfile(profile);
                     }
                 }
-
             });
         }
 
+        #endregion 方法
     }
 }

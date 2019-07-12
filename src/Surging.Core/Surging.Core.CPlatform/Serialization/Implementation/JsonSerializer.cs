@@ -8,17 +8,7 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
     /// </summary>
     public sealed class JsonSerializer : ISerializer<string>
     {
-        #region Implementation of ISerializer<string>
-
-        /// <summary>
-        /// 序列化。
-        /// </summary>
-        /// <param name="instance">需要序列化的对象。</param>
-        /// <returns>序列化之后的结果。</returns>
-        public string Serialize(object instance)
-        {
-            return JsonConvert.SerializeObject(instance);
-        }
+        #region 方法
 
         /// <summary>
         /// 反序列化。
@@ -31,6 +21,16 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
             return JsonConvert.DeserializeObject(content, type);
         }
 
-        #endregion Implementation of ISerializer<string>
+        /// <summary>
+        /// 序列化。
+        /// </summary>
+        /// <param name="instance">需要序列化的对象。</param>
+        /// <returns>序列化之后的结果。</returns>
+        public string Serialize(object instance)
+        {
+            return JsonConvert.SerializeObject(instance);
+        }
+
+        #endregion 方法
     }
 }

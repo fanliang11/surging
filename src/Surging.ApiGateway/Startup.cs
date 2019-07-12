@@ -10,32 +10,36 @@ using Newtonsoft.Json.Serialization;
 using Surging.Core.ApiGateWay;
 using Surging.Core.ApiGateWay.Configurations;
 using Surging.Core.ApiGateWay.OAuth.Implementation.Configurations;
+using Surging.Core.Caching;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.System.Intercept;
 using Surging.Core.Zookeeper;
-//using Surging.Core.Zookeeper;
-using ZookeeperConfigInfo =  Surging.Core.Zookeeper.Configurations.ConfigInfo;
 using System;
-using ApiGateWayConfig = Surging.Core.ApiGateWay.AppConfig;
-using Surging.Core.Caching;
-using Surging.Core.CPlatform.Cache;
 using System.Linq;
+using ApiGateWayConfig = Surging.Core.ApiGateWay.AppConfig;
+using ZookeeperConfigInfo = Surging.Core.Zookeeper.Configurations.ConfigInfo;
 
 namespace Surging.ApiGateway
 {
+    /// <summary>
+    /// Defines the <see cref="Startup" />
+    /// </summary>
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; }
+        #region 构造函数
 
-        public IContainer ApplicationContainer { get; private set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="env">The env<see cref="IHostingEnvironment"/></param>
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -47,45 +51,30 @@ namespace Surging.ApiGateway
             Configuration = builder.Build();
         }
 
-        public IServiceProvider ConfigureServices(IServiceCollection services)
-        {
-            return RegisterAutofac(services);
-        }
+        #endregion 构造函数
 
-        private IServiceProvider RegisterAutofac(IServiceCollection services)
-        {
-            var registerConfig = ApiGateWayConfig.Register;
-            services.AddMvc(options => {
-                options.Filters.Add(typeof(CustomExceptionFilterAttribute));
-            }).AddJsonOptions(options => {
-                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
-            });
-            services.AddLogging();
-            services.AddCors();
-            var builder = new ContainerBuilder();
-            builder.Populate(services); 
-            builder.AddMicroService(option =>
-            {
-                option.AddClient();
-                option.AddCache();
-                //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
-               if(registerConfig.Provider== RegisterProvider.Consul)
-                option.UseConsulManager(new ConfigInfo(registerConfig.Address,enableChildrenMonitor:false));
-               else if(registerConfig.Provider == RegisterProvider.Zookeeper)
-                    option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address, enableChildrenMonitor: true));
-                option.UseDotNettyTransport();
-                option.AddApiGateWay();
-                option.AddFilter(new ServiceExceptionFilter());
-                //option.UseProtoBufferCodec();
-                option.UseMessagePackCodec();
-                builder.Register(m => new CPlatformContainer(ServiceLocator.Current));
-            });
-            ServiceLocator.Current = builder.Build();
-            return new AutofacServiceProvider(ServiceLocator.Current);
+        #region 属性
 
-        }
-        
+        /// <summary>
+        /// Gets the ApplicationContainer
+        /// </summary>
+        public IContainer ApplicationContainer { get; private set; }
+
+        /// <summary>
+        /// Gets the Configuration
+        /// </summary>
+        public IConfigurationRoot Configuration { get; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Configure
+        /// </summary>
+        /// <param name="app">The app<see cref="IApplicationBuilder"/></param>
+        /// <param name="env">The env<see cref="IHostingEnvironment"/></param>
+        /// <param name="loggerFactory">The loggerFactory<see cref="ILoggerFactory"/></param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole();
@@ -131,5 +120,57 @@ namespace Surging.ApiGateway
                 new { controller = "Services", action = "Path" });
             });
         }
+
+        /// <summary>
+        /// The ConfigureServices
+        /// </summary>
+        /// <param name="services">The services<see cref="IServiceCollection"/></param>
+        /// <returns>The <see cref="IServiceProvider"/></returns>
+        public IServiceProvider ConfigureServices(IServiceCollection services)
+        {
+            return RegisterAutofac(services);
+        }
+
+        /// <summary>
+        /// The RegisterAutofac
+        /// </summary>
+        /// <param name="services">The services<see cref="IServiceCollection"/></param>
+        /// <returns>The <see cref="IServiceProvider"/></returns>
+        private IServiceProvider RegisterAutofac(IServiceCollection services)
+        {
+            var registerConfig = ApiGateWayConfig.Register;
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(typeof(CustomExceptionFilterAttribute));
+            }).AddJsonOptions(options =>
+            {
+                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            });
+            services.AddLogging();
+            services.AddCors();
+            var builder = new ContainerBuilder();
+            builder.Populate(services);
+            builder.AddMicroService(option =>
+            {
+                option.AddClient();
+                option.AddCache();
+                //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
+                if (registerConfig.Provider == RegisterProvider.Consul)
+                    option.UseConsulManager(new ConfigInfo(registerConfig.Address, enableChildrenMonitor: false));
+                else if (registerConfig.Provider == RegisterProvider.Zookeeper)
+                    option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address, enableChildrenMonitor: true));
+                option.UseDotNettyTransport();
+                option.AddApiGateWay();
+                option.AddFilter(new ServiceExceptionFilter());
+                //option.UseProtoBufferCodec();
+                option.UseMessagePackCodec();
+                builder.Register(m => new CPlatformContainer(ServiceLocator.Current));
+            });
+            ServiceLocator.Current = builder.Build();
+            return new AutofacServiceProvider(ServiceLocator.Current);
+        }
+
+        #endregion 方法
     }
 }

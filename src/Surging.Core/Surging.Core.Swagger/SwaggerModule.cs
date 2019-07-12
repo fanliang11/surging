@@ -16,18 +16,31 @@ using System.Text;
 
 namespace Surging.Core.Swagger
 {
-    public class SwaggerModule: KestrelHttpModule
+    /// <summary>
+    /// Defines the <see cref="SwaggerModule" />
+    /// </summary>
+    public class SwaggerModule : KestrelHttpModule
     {
-        private  IServiceSchemaProvider _serviceSchemaProvider; 
-        private  IServiceEntryProvider _serviceEntryProvider;
+        #region 字段
 
-        public override void Initialize(AppModuleContext context)
-        {
-            var serviceProvider = context.ServiceProvoider;
-            _serviceSchemaProvider = serviceProvider.GetInstances<IServiceSchemaProvider>();
-            _serviceEntryProvider = serviceProvider.GetInstances<IServiceEntryProvider>();
-        }
+        /// <summary>
+        /// Defines the _serviceEntryProvider
+        /// </summary>
+        private IServiceEntryProvider _serviceEntryProvider;
 
+        /// <summary>
+        /// Defines the _serviceSchemaProvider
+        /// </summary>
+        private IServiceSchemaProvider _serviceSchemaProvider;
+
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="ApplicationInitializationContext"/></param>
         public override void Initialize(ApplicationInitializationContext context)
         {
             var info = AppConfig.SwaggerConfig.Info == null
@@ -44,6 +57,21 @@ namespace Surging.Core.Swagger
             }
         }
 
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
+        public override void Initialize(AppModuleContext context)
+        {
+            var serviceProvider = context.ServiceProvoider;
+            _serviceSchemaProvider = serviceProvider.GetInstances<IServiceSchemaProvider>();
+            _serviceEntryProvider = serviceProvider.GetInstances<IServiceEntryProvider>();
+        }
+
+        /// <summary>
+        /// The RegisterBuilder
+        /// </summary>
+        /// <param name="context">The context<see cref="ConfigurationContext"/></param>
         public override void RegisterBuilder(ConfigurationContext context)
         {
             var serviceCollection = context.Services;
@@ -54,7 +82,6 @@ namespace Surging.Core.Swagger
             {
                 serviceCollection.AddSwaggerGen(options =>
                 {
-
                     options.SwaggerDoc(info.Version, info);
                     if (swaggerOptions != null && swaggerOptions.IgnoreFullyQualified)
                         options.IgnoreFullyQualified();
@@ -91,7 +118,8 @@ namespace Surging.Core.Swagger
                 AppConfig.SwaggerConfig = section.Get<DocumentConfiguration>();
             }
             builder.RegisterType(typeof(DefaultServiceSchemaProvider)).As(typeof(IServiceSchemaProvider)).SingleInstance();
-
         }
+
+        #endregion 方法
     }
 }

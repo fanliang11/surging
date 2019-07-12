@@ -21,19 +21,50 @@ using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common;
 using System;
 using System.Diagnostics;
-//using Surging.Core.Zookeeper;
-//using Surging.Core.Zookeeper.Configurations;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Services.Client
 {
+    /// <summary>
+    /// Defines the <see cref="Program" />
+    /// </summary>
     public class Program
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _endedConnenctionCount
+        /// </summary>
         private static int _endedConnenctionCount = 0;
+
+        /// <summary>
+        /// Defines the begintime
+        /// </summary>
         private static DateTime begintime;
-        static void Main(string[] args)
+
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The Test
+        /// </summary>
+        /// <param name="userProxy">The userProxy<see cref="IUserService"/></param>
+        /// <param name="connectionCount">The connectionCount<see cref="int"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public static async Task Test(IUserService userProxy, int connectionCount)
+        {
+            var a = await userProxy.GetDictionary();
+            IncreaseSuccessConnection(connectionCount);
+        }
+
+        /// <summary>
+        /// The Main
+        /// </summary>
+        /// <param name="args">The args<see cref="string[]"/></param>
+        internal static void Main(string[] args)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var host = new ServiceHostBuilder()
@@ -67,16 +98,33 @@ namespace Surging.Services.Client
                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
-                /// test Parallel 
+                /// test Parallel
                 //var connectionCount = 300000;
                 //StartRequest(connectionCount);
                 //Console.ReadLine();
             }
         }
 
+        /// <summary>
+        /// The IncreaseSuccessConnection
+        /// </summary>
+        /// <param name="connectionCount">The connectionCount<see cref="int"/></param>
+        private static void IncreaseSuccessConnection(int connectionCount)
+        {
+            Interlocked.Increment(ref _endedConnenctionCount);
+            if (_endedConnenctionCount == 1)
+                begintime = DateTime.Now;
+            if (_endedConnenctionCount >= connectionCount)
+                Console.WriteLine($"结束时间{(DateTime.Now - begintime).TotalMilliseconds}");
+        }
+
+        /// <summary>
+        /// The StartRequest
+        /// </summary>
+        /// <param name="connectionCount">The connectionCount<see cref="int"/></param>
         private static void StartRequest(int connectionCount)
         {
-            // var service = ServiceLocator.GetService<IServiceProxyFactory>(); 
+            // var service = ServiceLocator.GetService<IServiceProxyFactory>();
             var sw = new Stopwatch();
             sw.Start();
             var userProxy = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<IUserService>("User");
@@ -93,19 +141,6 @@ namespace Surging.Services.Client
                });
         }
 
-        public static async Task Test(IUserService userProxy,int connectionCount)
-        {
-            var a =await userProxy.GetDictionary();
-            IncreaseSuccessConnection(connectionCount);
-        }
-        
-        private static void IncreaseSuccessConnection(int connectionCount)
-        {
-            Interlocked.Increment(ref _endedConnenctionCount);
-            if (_endedConnenctionCount == 1)
-                begintime = DateTime.Now;
-            if (_endedConnenctionCount >= connectionCount)
-                Console.WriteLine($"结束时间{(DateTime.Now - begintime).TotalMilliseconds}");
-        }
+        #endregion 方法
     }
 }

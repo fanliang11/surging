@@ -13,14 +13,56 @@ using WebSocketCore;
 
 namespace Surging.Modules.Common.Domain
 {
+    /// <summary>
+    /// Defines the <see cref="ChatService" />
+    /// </summary>
     public class ChatService : WSServiceBase, IChatService
     {
-        private static readonly ConcurrentDictionary<string, string> _users = new ConcurrentDictionary<string, string>();
-        private static readonly ConcurrentDictionary<string, string> _clients = new ConcurrentDictionary<string, string>();
-        private string _name;
-        private string _to;
-       
+        #region 字段
 
+        /// <summary>
+        /// Defines the _clients
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, string> _clients = new ConcurrentDictionary<string, string>();
+
+        /// <summary>
+        /// Defines the _users
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, string> _users = new ConcurrentDictionary<string, string>();
+
+        /// <summary>
+        /// Defines the _name
+        /// </summary>
+        private string _name;
+
+        /// <summary>
+        /// Defines the _to
+        /// </summary>
+        private string _to;
+
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The SendMessage
+        /// </summary>
+        /// <param name="name">The name<see cref="string"/></param>
+        /// <param name="data">The data<see cref="string"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public Task SendMessage(string name, string data)
+        {
+            if (_users.ContainsKey(name))
+            {
+                this.GetClient().SendTo($"hello,{name},{data}", _users[name]);
+            }
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// The OnMessage
+        /// </summary>
+        /// <param name="e">The e<see cref="MessageEventArgs"/></param>
         protected override void OnMessage(MessageEventArgs e)
         {
             if (_clients.ContainsKey(ID))
@@ -30,10 +72,12 @@ namespace Surging.Modules.Common.Domain
                 model.Add("data", e.Data);
                 var result = ServiceLocator.GetService<IServiceProxyProvider>()
                      .Invoke<object>(model, "api/chat/SendMessage").Result;
-
             }
         }
 
+        /// <summary>
+        /// The OnOpen
+        /// </summary>
         protected override void OnOpen()
         {
             _name = Context.QueryString["name"];
@@ -44,13 +88,7 @@ namespace Surging.Modules.Common.Domain
                 _users[_name] = ID;
             }
         }
-        public Task SendMessage(string name, string data)
-        {
-            if (_users.ContainsKey(name))
-            { 
-                this.GetClient().SendTo($"hello,{name},{data}", _users[name]);
-            }
-            return Task.CompletedTask;
-        }
+
+        #endregion 方法
     }
 }

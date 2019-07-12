@@ -6,6 +6,105 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer.Internal
 {
+    /// <summary>
+    /// Defines the <see cref="Enumerator" />
+    /// </summary>
+    public struct Enumerator : IEnumerator<KeyValuePair<string, StringValues>>
+    {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _dictionaryEnumerator
+        /// </summary>
+        private Dictionary<string, StringValues>.Enumerator _dictionaryEnumerator;
+
+        /// <summary>
+        /// Defines the _notEmpty
+        /// </summary>
+        private bool _notEmpty;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref=""/> class.
+        /// </summary>
+        /// <param name="dictionaryEnumerator">The dictionaryEnumerator<see cref="Dictionary{string, StringValues}.Enumerator"/></param>
+        internal Enumerator(Dictionary<string, StringValues>.Enumerator dictionaryEnumerator)
+        {
+            _dictionaryEnumerator = dictionaryEnumerator;
+            _notEmpty = true;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Current
+        /// </summary>
+        public KeyValuePair<string, StringValues> Current
+        {
+            get
+            {
+                if (_notEmpty)
+                {
+                    return _dictionaryEnumerator.Current;
+                }
+                return default(KeyValuePair<string, StringValues>);
+            }
+        }
+
+        /// <summary>
+        /// Gets the Current
+        /// </summary>
+        object IEnumerator.Current
+        {
+            get
+            {
+                return Current;
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+        }
+
+        /// <summary>
+        /// The MoveNext
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
+        public bool MoveNext()
+        {
+            if (_notEmpty)
+            {
+                return _dictionaryEnumerator.MoveNext();
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// The Reset
+        /// </summary>
+        void IEnumerator.Reset()
+        {
+            if (_notEmpty)
+            {
+                ((IEnumerator)_dictionaryEnumerator).Reset();
+            }
+        }
+
+        #endregion 方法
+    }
+
     public class HttpFormCollection : IEnumerable<KeyValuePair<string, StringValues>>, IEnumerable
     {
         public static readonly HttpFormCollection Empty = new HttpFormCollection();
@@ -31,16 +130,12 @@ namespace Surging.Core.KestrelHttpServer.Internal
 
         public HttpFormFileCollection Files
         {
-            get
-            {
-                return _files ?? EmptyFiles;
-            }
+            get { return _files ?? EmptyFiles; }
             private set { _files = value; }
         }
 
         private Dictionary<string, StringValues> Store { get; set; }
 
-      
         public StringValues this[string key]
         {
             get
@@ -59,7 +154,6 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
-        
         public int Count
         {
             get
@@ -80,7 +174,6 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
-      
         public bool ContainsKey(string key)
         {
             if (Store == null)
@@ -89,7 +182,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
             return Store.ContainsKey(key);
         }
-        
+
         public bool TryGetValue(string key, out StringValues value)
         {
             if (Store == null)
@@ -108,7 +201,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
             return new Enumerator(Store.GetEnumerator());
         }
-        
+
         IEnumerator<KeyValuePair<string, StringValues>> IEnumerable<KeyValuePair<string, StringValues>>.GetEnumerator()
         {
             if (Store == null || Store.Count == 0)
@@ -117,7 +210,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
             return Store.GetEnumerator();
         }
-        
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             if (Store == null || Store.Count == 0)
@@ -125,59 +218,6 @@ namespace Surging.Core.KestrelHttpServer.Internal
                 return EmptyIEnumerator;
             }
             return Store.GetEnumerator();
-        }
-    }
-
-    public struct Enumerator : IEnumerator<KeyValuePair<string, StringValues>>
-    {
-        private Dictionary<string, StringValues>.Enumerator _dictionaryEnumerator;
-        private bool _notEmpty;
-
-        internal Enumerator(Dictionary<string, StringValues>.Enumerator dictionaryEnumerator)
-        {
-            _dictionaryEnumerator = dictionaryEnumerator;
-            _notEmpty = true;
-        }
-
-        public bool MoveNext()
-        {
-            if (_notEmpty)
-            {
-                return _dictionaryEnumerator.MoveNext();
-            }
-            return false;
-        }
-
-        public KeyValuePair<string, StringValues> Current
-        {
-            get
-            {
-                if (_notEmpty)
-                {
-                    return _dictionaryEnumerator.Current;
-                }
-                return default(KeyValuePair<string, StringValues>);
-            }
-        }
-
-        public void Dispose()
-        {
-        }
-
-        object IEnumerator.Current
-        {
-            get
-            {
-                return Current;
-            }
-        }
-
-        void IEnumerator.Reset()
-        {
-            if (_notEmpty)
-            {
-                ((IEnumerator)_dictionaryEnumerator).Reset();
-            }
         }
     }
 }

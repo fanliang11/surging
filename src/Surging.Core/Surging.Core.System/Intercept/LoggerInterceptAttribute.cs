@@ -3,38 +3,47 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Surging.Core.System.Intercept
-{ /// <summary>
-  /// 设置判断日志拦截方法的特性类
-  /// </summary>
+{
+    /// <summary>
+    /// 设置判断日志拦截方法的特性类
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Interface)]
     public class LoggerInterceptAttribute : Attribute
     {
         #region 字段
+
+        /// <summary>
+        /// Defines the _message
+        /// </summary>
         private string _message;
-        #endregion
+
+        #endregion 字段
 
         #region 构造函数
+
         /// <summary>
-        /// 初始化一个新的<c>InterceptMethodAttribute</c>类型。
+        /// Initializes a new instance of the <see cref="LoggerInterceptAttribute"/> class.
         /// </summary>
-        /// <param name="method">缓存方式。</param>
+        public LoggerInterceptAttribute()
+            : this(null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoggerInterceptAttribute"/> class.
+        /// </summary>
+        /// <param name="message">The message<see cref="string"/></param>
         public LoggerInterceptAttribute(string message)
         {
             this._message = message;
         }
 
-        /// <summary>
-        ///  初始化一个新的<c>InterceptMethodAttribute</c>类型。
-        /// </summary>
-        public LoggerInterceptAttribute()
-            : this(null)
-        {
+        #endregion 构造函数
 
-        }
-        #endregion
+        #region 属性
 
-        #region 公共属性
         /// <summary>
+        /// Gets or sets the Message
         /// 日志内容
         /// </summary>
         public string Message
@@ -48,6 +57,7 @@ namespace Surging.Core.System.Intercept
                 _message = value;
             }
         }
-        #endregion
+
+        #endregion 属性
     }
 }

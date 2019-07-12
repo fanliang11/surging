@@ -1,12 +1,12 @@
-﻿using Surging.Core.ProxyGenerator;
+﻿using Newtonsoft.Json.Linq;
+using Surging.Core.ApiGateWay.Configurations;
+using Surging.Core.ProxyGenerator;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Concurrent;
-using Newtonsoft.Json.Linq;
-using Surging.Core.ApiGateWay.Configurations;
 
 namespace Surging.Core.ApiGateWay.Aggregation
 {
@@ -15,14 +15,41 @@ namespace Surging.Core.ApiGateWay.Aggregation
     /// </summary>
     public class ServicePartProvider : IServicePartProvider
     {
-        private readonly IServiceProxyProvider _serviceProxyProvider;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _servicePartTypes
+        /// </summary>
         private readonly ConcurrentDictionary<string, ServicePartType> _servicePartTypes =
             new ConcurrentDictionary<string, ServicePartType>();
+
+        /// <summary>
+        /// Defines the _serviceProxyProvider
+        /// </summary>
+        private readonly IServiceProxyProvider _serviceProxyProvider;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServicePartProvider"/> class.
+        /// </summary>
+        /// <param name="serviceProxyProvider">The serviceProxyProvider<see cref="IServiceProxyProvider"/></param>
         public ServicePartProvider(IServiceProxyProvider serviceProxyProvider)
         {
             _serviceProxyProvider = serviceProxyProvider;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The IsPart
+        /// </summary>
+        /// <param name="routhPath">The routhPath<see cref="string"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         public bool IsPart(string routhPath)
         {
             var servicePart = AppConfig.ServicePart;
@@ -39,10 +66,14 @@ namespace Surging.Core.ApiGateWay.Aggregation
                 }
             }
             return partType != ServicePartType.None;
-
-
         }
 
+        /// <summary>
+        /// The Merge
+        /// </summary>
+        /// <param name="routhPath">The routhPath<see cref="string"/></param>
+        /// <param name="param">The param<see cref="Dictionary{string, object}"/></param>
+        /// <returns>The <see cref="Task{object}"/></returns>
         public async Task<object> Merge(string routhPath, Dictionary<string, object> param)
         {
             var partType = _servicePartTypes.GetValueOrDefault(routhPath);
@@ -71,5 +102,7 @@ namespace Surging.Core.ApiGateWay.Aggregation
             }
             return jObject;
         }
+
+        #endregion 方法
     }
 }

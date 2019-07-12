@@ -8,14 +8,39 @@ using Surging.Core.EventBusRabbitMQ.Configurations;
 
 namespace Surging.Services.Server
 {
+    /// <summary>
+    /// Defines the <see cref="Startup" />
+    /// </summary>
     public class Startup
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="config">The config<see cref="IConfigurationBuilder"/></param>
         public Startup(IConfigurationBuilder config)
         {
-          ConfigureEventBus(config);
-          //  ConfigureCache(config);
+            ConfigureEventBus(config);
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The Configure
+        /// </summary>
+        /// <param name="app">The app<see cref="IContainer"/></param>
+        public void Configure(IContainer app)
+        {
+        }
+
+        /// <summary>
+        /// The ConfigureServices
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilder"/></param>
+        /// <returns>The <see cref="IContainer"/></returns>
         public IContainer ConfigureServices(ContainerBuilder builder)
         {
             var services = new ServiceCollection();
@@ -25,21 +50,10 @@ namespace Surging.Services.Server
             return ServiceLocator.Current;
         }
 
-        public void Configure(IContainer app)
-        {
-   
-        }
-
-        #region 私有方法
         /// <summary>
-        /// 配置日志服务
+        /// The ConfigureEventBus
         /// </summary>
-        /// <param name="services"></param>
-        private void ConfigureLogging(IServiceCollection services)
-        {
-           // services.AddLogging();
-        }
-
+        /// <param name="build">The build<see cref="IConfigurationBuilder"/></param>
         private static void ConfigureEventBus(IConfigurationBuilder build)
         {
             build
@@ -49,12 +63,21 @@ namespace Surging.Services.Server
         /// <summary>
         /// 配置缓存服务
         /// </summary>
+        /// <param name="build">The build<see cref="IConfigurationBuilder"/></param>
         private void ConfigureCache(IConfigurationBuilder build)
         {
             build
               .AddCacheFile("cacheSettings.json", optional: false);
         }
-        #endregion
 
+        /// <summary>
+        /// 配置日志服务
+        /// </summary>
+        /// <param name="services"></param>
+        private void ConfigureLogging(IServiceCollection services)
+        {
+        }
+
+        #endregion 方法
     }
 }

@@ -11,13 +11,39 @@ using System.Text;
 
 namespace Surging.Core.Caching
 {
+    /// <summary>
+    /// Defines the <see cref="AppConfig" />
+    /// </summary>
     public class AppConfig
     {
-        private const string CacheSectionName = "CachingProvider";
-        private readonly CachingProvider _cacheWrapperSetting;
-        internal static string Path;
-        internal static IConfigurationRoot Configuration { get; set; }
+        #region 常量
 
+        /// <summary>
+        /// Defines the CacheSectionName
+        /// </summary>
+        private const string CacheSectionName = "CachingProvider";
+
+        #endregion 常量
+
+        #region 字段
+
+        /// <summary>
+        /// Defines the _cacheWrapperSetting
+        /// </summary>
+        private readonly CachingProvider _cacheWrapperSetting;
+
+        /// <summary>
+        /// Defines the Path
+        /// </summary>
+        internal static string Path;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppConfig"/> class.
+        /// </summary>
         public AppConfig()
         {
             ServiceResolver.Current.Register(null, Activator.CreateInstance(typeof(HashAlgorithm), new object[] { }));
@@ -27,6 +53,18 @@ namespace Surging.Core.Caching
             InitSettingMethod();
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the Configuration
+        /// </summary>
+        internal static IConfigurationRoot Configuration { get; set; }
+
+        /// <summary>
+        /// Gets the DefaultInstance
+        /// </summary>
         internal static AppConfig DefaultInstance
         {
             get
@@ -41,12 +79,27 @@ namespace Surging.Core.Caching
             }
         }
 
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The GetContextInstance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The <see cref="T"/></returns>
         public T GetContextInstance<T>() where T : class
         {
             var context = ServiceResolver.Current.GetService<T>(typeof(T));
             return context;
         }
 
+        /// <summary>
+        /// The GetContextInstance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name">The name<see cref="string"/></param>
+        /// <returns>The <see cref="T"/></returns>
         public T GetContextInstance<T>(string name) where T : class
         {
             DebugCheck.NotEmpty(name);
@@ -54,17 +107,64 @@ namespace Surging.Core.Caching
             return context;
         }
 
-        private void RegisterLocalInstance(string typeName)
+        /// <summary>
+        /// The GetTypedPropertyValue
+        /// </summary>
+        /// <param name="obj">The obj<see cref="Property"/></param>
+        /// <returns>The <see cref="object"/></returns>
+        public object GetTypedPropertyValue(Property obj)
         {
-            var types = this.GetType().GetTypeInfo().Assembly.GetTypes().Where(p => p.GetTypeInfo().GetInterface(typeName) != null);
-            foreach (var t in types)
+            var mapCollections = obj.Maps;
+            if (mapCollections != null && mapCollections.Any())
             {
-                var attribute = t.GetTypeInfo().GetCustomAttribute<IdentifyCacheAttribute>();
-                ServiceResolver.Current.Register(attribute.Name.ToString(),
-                    Activator.CreateInstance(t));
+                var results = new List<object>();
+                foreach (var map in mapCollections)
+                {
+                    object items = null;
+                    if (map.Properties != null) items = map.Properties.Select(p => GetTypedPropertyValue(p)).ToArray();
+                    results.Add(new
+                    {
+                        Name = Convert.ChangeType(obj.Name, typeof(string)),
+                        Value = Convert.ChangeType(map.Name, typeof(string)),
+                        Items = items
+                    });
+                }
+                return results;
+            }
+            else if (!string.IsNullOrEmpty(obj.Value))
+            {
+                return new
+                {
+                    Name = Convert.ChangeType(obj.Name ?? "", typeof(string)),
+                    Value = Convert.ChangeType(obj.Value, typeof(string)),
+                };
+            }
+            else if (!string.IsNullOrEmpty(obj.Ref))
+                return Convert.ChangeType(obj.Ref, typeof(string));
+
+            return null;
+        }
+
+        /// <summary>
+        /// The InitSettingMethod
+        /// </summary>
+        private void InitSettingMethod()
+        {
+            var settings =
+                _cacheWrapperSetting.CachingSettings
+                    .Where(p => !string.IsNullOrEmpty(p.InitMethod));
+            foreach (var setting in settings)
+            {
+                var bindingInstance =
+                    ServiceResolver.Current.GetService(Type.GetType(setting.Class, throwOnError: true),
+                        setting.Id);
+                bindingInstance.GetType().GetMethod(setting.InitMethod, System.Reflection.BindingFlags.InvokeMethod).Invoke(bindingInstance, new object[] { });
             }
         }
 
+        /// <summary>
+        /// The RegisterConfigInstance
+        /// </summary>
         private void RegisterConfigInstance()
         {
             var bingingSettings = _cacheWrapperSetting.CachingSettings;
@@ -106,51 +206,21 @@ namespace Surging.Core.Caching
             catch { }
         }
 
-        public object GetTypedPropertyValue(Property obj)
+        /// <summary>
+        /// The RegisterLocalInstance
+        /// </summary>
+        /// <param name="typeName">The typeName<see cref="string"/></param>
+        private void RegisterLocalInstance(string typeName)
         {
-            var mapCollections = obj.Maps;
-            if (mapCollections != null && mapCollections.Any())
+            var types = this.GetType().GetTypeInfo().Assembly.GetTypes().Where(p => p.GetTypeInfo().GetInterface(typeName) != null);
+            foreach (var t in types)
             {
-                var results = new List<object>();
-                foreach (var map in mapCollections)
-                {
-                    object items = null;
-                    if (map.Properties != null) items = map.Properties.Select(p => GetTypedPropertyValue(p)).ToArray();
-                    results.Add(new
-                    {
-                        Name = Convert.ChangeType(obj.Name, typeof(string)),
-                        Value = Convert.ChangeType(map.Name, typeof(string)),
-                        Items = items
-                    });
-                }
-                return results;
+                var attribute = t.GetTypeInfo().GetCustomAttribute<IdentifyCacheAttribute>();
+                ServiceResolver.Current.Register(attribute.Name.ToString(),
+                    Activator.CreateInstance(t));
             }
-            else if (!string.IsNullOrEmpty(obj.Value))
-            {
-                return new
-                {
-                    Name = Convert.ChangeType(obj.Name ?? "", typeof(string)),
-                    Value = Convert.ChangeType(obj.Value, typeof(string)),
-                };
-            }
-            else if (!string.IsNullOrEmpty(obj.Ref))
-                return Convert.ChangeType(obj.Ref, typeof(string));
-
-            return null;
         }
 
-        private void InitSettingMethod()
-        {
-            var settings =
-                _cacheWrapperSetting.CachingSettings
-                    .Where(p => !string.IsNullOrEmpty(p.InitMethod));
-            foreach (var setting in settings)
-            {
-                var bindingInstance =
-                    ServiceResolver.Current.GetService(Type.GetType(setting.Class, throwOnError: true),
-                        setting.Id);
-                bindingInstance.GetType().GetMethod(setting.InitMethod, System.Reflection.BindingFlags.InvokeMethod).Invoke(bindingInstance, new object[] { });
-            }
-        }
+        #endregion 方法
     }
 }

@@ -15,19 +15,49 @@ namespace Surging.Core.CPlatform.Routing.Implementation
     /// </summary>
     public class SharedFileServiceRouteManager : ServiceRouteManagerBase, IDisposable
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _filePath
+        /// </summary>
         private readonly string _filePath;
-        private readonly ISerializer<string> _serializer;
-        private readonly IServiceRouteFactory _serviceRouteFactory;
-        private readonly ILogger<SharedFileServiceRouteManager> _logger;
-        private ServiceRoute[] _routes;
+
+        /// <summary>
+        /// Defines the _fileSystemWatcher
+        /// </summary>
         private readonly FileSystemWatcher _fileSystemWatcher;
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<SharedFileServiceRouteManager> _logger;
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<string> _serializer;
 
+        /// <summary>
+        /// Defines the _serviceRouteFactory
+        /// </summary>
+        private readonly IServiceRouteFactory _serviceRouteFactory;
+
+        /// <summary>
+        /// Defines the _routes
+        /// </summary>
+        private ServiceRoute[] _routes;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SharedFileServiceRouteManager"/> class.
+        /// </summary>
+        /// <param name="filePath">The filePath<see cref="string"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
+        /// <param name="serviceRouteFactory">The serviceRouteFactory<see cref="IServiceRouteFactory"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{SharedFileServiceRouteManager}"/></param>
         public SharedFileServiceRouteManager(string filePath, ISerializer<string> serializer,
             IServiceRouteFactory serviceRouteFactory, ILogger<SharedFileServiceRouteManager> logger) : base(serializer)
         {
@@ -48,35 +78,12 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             _fileSystemWatcher.EnableRaisingEvents = true;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IDisposable
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            _fileSystemWatcher?.Dispose();
-        }
-
-        #endregion Implementation of IDisposable
-
-        #region Overrides of ServiceRouteManagerBase
+        #region 方法
 
         /// <summary>
-        ///     获取所有可用的服务路由信息。
-        /// </summary>
-        /// <returns>服务路由集合。</returns>
-        public override async Task<IEnumerable<ServiceRoute>> GetRoutesAsync()
-        {
-            if (_routes == null)
-                await EntryRoutes(_filePath);
-            return _routes;
-        }
-
-        /// <summary>
-        ///     清空所有的服务路由。
+        /// 清空所有的服务路由。
         /// </summary>
         /// <returns>一个任务。</returns>
         public override Task ClearAsync()
@@ -87,7 +94,41 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         }
 
         /// <summary>
-        ///     设置服务路由。
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            _fileSystemWatcher?.Dispose();
+        }
+
+        /// <summary>
+        /// 获取所有可用的服务路由信息。
+        /// </summary>
+        /// <returns>服务路由集合。</returns>
+        public override async Task<IEnumerable<ServiceRoute>> GetRoutesAsync()
+        {
+            if (_routes == null)
+                await EntryRoutes(_filePath);
+            return _routes;
+        }
+
+        /// <summary>
+        /// The RemveAddressAsync
+        /// </summary>
+        /// <param name="Address">The Address<see cref="IEnumerable{AddressModel}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
+        {
+            var routes = await GetRoutesAsync();
+            foreach (var route in routes)
+            {
+                route.Address = route.Address.Except(Address);
+            }
+            await base.SetRoutesAsync(routes);
+        }
+
+        /// <summary>
+        /// 设置服务路由。
         /// </summary>
         /// <param name="routes">服务路由集合。</param>
         /// <returns>一个任务。</returns>
@@ -103,71 +144,45 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             }
         }
 
-        public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
+        /// <summary>
+        /// The _fileSystemWatcher_Changed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="FileSystemEventArgs"/></param>
+        private async void _fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            var routes = await GetRoutesAsync();
-            foreach (var route in routes)
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation($"文件{_filePath}发生了变更，将重新获取路由信息。");
+
+            if (e.ChangeType == WatcherChangeTypes.Changed)
             {
-                route.Address = route.Address.Except(Address);
-            }
-            await base.SetRoutesAsync(routes);
-        }
-
-        #endregion Overrides of ServiceRouteManagerBase
-
-        #region Private Method
-
-        private async Task<IEnumerable<ServiceRoute>> GetRoutes(string file)
-        {
-            ServiceRoute[] routes;
-            if (File.Exists(file))
-            {
-                if (_logger.IsEnabled(LogLevel.Debug))
-                    _logger.LogDebug($"准备从文件：{file}中获取服务路由。");
                 string content;
-                while (true)
-                {
-                    try
-                    {
-                        using (
-                            var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        {
-                            var reader = new StreamReader(fileStream, Encoding.UTF8);
-                            content = await reader.ReadToEndAsync();
-                        }
-                        break;
-                    }
-                    catch (IOException)
-                    {
-                    }
-                }
                 try
                 {
-                    var serializer = _serializer;
-                    routes =
-                    (await
-                        _serviceRouteFactory.CreateServiceRoutesAsync(
-                            serializer.Deserialize<string, ServiceRouteDescriptor[]>(content))).ToArray();
-                    if (_logger.IsEnabled(LogLevel.Information))
-                        _logger.LogInformation(
-                            $"成功获取到以下路由信息：{string.Join(",", routes.Select(i => i.ServiceDescriptor.Id))}。");
+                    content = File.ReadAllText(_filePath, Encoding.UTF8);
                 }
-                catch (Exception exception)
+                catch (IOException) //还没有操作完，忽略本次修改
                 {
-                    if (_logger.IsEnabled(LogLevel.Error))
-                        _logger.LogError(exception,"获取路由信息时发生了错误。");
-                    routes = new ServiceRoute[0];
+                    return;
+                }
+                if (!string.IsNullOrWhiteSpace(content))
+                {
+                    await EntryRoutes(_filePath);
+                }
+                else
+                {
+                    return;
                 }
             }
-            else
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                    _logger.LogWarning($"无法获取路由信息，因为文件：{file}不存在。");
-                routes = new ServiceRoute[0];
-            }
-            return routes;
+
+            await EntryRoutes(_filePath);
         }
 
+        /// <summary>
+        /// The EntryRoutes
+        /// </summary>
+        /// <param name="file">The file<see cref="string"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task EntryRoutes(string file)
         {
             var oldRoutes = _routes?.ToArray();
@@ -222,35 +237,62 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             }
         }
 
-        private async void _fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
+        /// <summary>
+        /// The GetRoutes
+        /// </summary>
+        /// <param name="file">The file<see cref="string"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceRoute}}"/></returns>
+        private async Task<IEnumerable<ServiceRoute>> GetRoutes(string file)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation($"文件{_filePath}发生了变更，将重新获取路由信息。");
-
-            if (e.ChangeType == WatcherChangeTypes.Changed)
+            ServiceRoute[] routes;
+            if (File.Exists(file))
             {
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug($"准备从文件：{file}中获取服务路由。");
                 string content;
+                while (true)
+                {
+                    try
+                    {
+                        using (
+                            var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            var reader = new StreamReader(fileStream, Encoding.UTF8);
+                            content = await reader.ReadToEndAsync();
+                        }
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                    }
+                }
                 try
                 {
-                    content = File.ReadAllText(_filePath, Encoding.UTF8);
+                    var serializer = _serializer;
+                    routes =
+                    (await
+                        _serviceRouteFactory.CreateServiceRoutesAsync(
+                            serializer.Deserialize<string, ServiceRouteDescriptor[]>(content))).ToArray();
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation(
+                            $"成功获取到以下路由信息：{string.Join(",", routes.Select(i => i.ServiceDescriptor.Id))}。");
                 }
-                catch (IOException) //还没有操作完，忽略本次修改
+                catch (Exception exception)
                 {
-                    return;
-                }
-                if (!string.IsNullOrWhiteSpace(content))
-                {
-                    await EntryRoutes(_filePath);
-                }
-                else
-                {
-                    return;
+                    if (_logger.IsEnabled(LogLevel.Error))
+                        _logger.LogError(exception, "获取路由信息时发生了错误。");
+                    routes = new ServiceRoute[0];
                 }
             }
-
-            await EntryRoutes(_filePath);
+            else
+            {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                    _logger.LogWarning($"无法获取路由信息，因为文件：{file}不存在。");
+                routes = new ServiceRoute[0];
+            }
+            return routes;
         }
 
-        #endregion Private Method
+        #endregion 方法
     }
 }

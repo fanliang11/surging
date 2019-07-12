@@ -7,12 +7,35 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Consul.Internal
 {
-    public  interface IConsulClientProvider
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IConsulClientProvider" />
+    /// </summary>
+    public interface IConsulClientProvider
     {
+        #region 方法
+
+        /// <summary>
+        /// The Check
+        /// </summary>
+        /// <returns>The <see cref="ValueTask"/></returns>
+        ValueTask Check();
+
+        /// <summary>
+        /// The GetClient
+        /// </summary>
+        /// <returns>The <see cref="ValueTask{ConsulClient}"/></returns>
         ValueTask<ConsulClient> GetClient();
 
+        /// <summary>
+        /// The GetClients
+        /// </summary>
+        /// <returns>The <see cref="ValueTask{IEnumerable{ConsulClient}}"/></returns>
         ValueTask<IEnumerable<ConsulClient>> GetClients();
 
-        ValueTask Check();
+        #endregion 方法
     }
+
+    #endregion 接口
 }

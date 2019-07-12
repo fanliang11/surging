@@ -1,4 +1,3 @@
-#region License
 /*
  * ByteOrder.cs
  *
@@ -24,24 +23,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore
 {
-  /// <summary>
-  /// Specifies the byte order.
-  /// </summary>
-  public enum ByteOrder
-  {
+    #region Ã¶¾Ù
+
     /// <summary>
-    /// Specifies Little-endian.
+    /// Specifies the byte order.
     /// </summary>
-    Little,
-    /// <summary>
-    /// Specifies Big-endian.
-    /// </summary>
-    Big
-  }
+    public enum ByteOrder
+    {
+        /// <summary>
+        /// Specifies Little-endian.
+        /// </summary>
+        Little,
+
+        /// <summary>
+        /// Specifies Big-endian.
+        /// </summary>
+        Big
+    }
+
+    #endregion Ã¶¾Ù
 }

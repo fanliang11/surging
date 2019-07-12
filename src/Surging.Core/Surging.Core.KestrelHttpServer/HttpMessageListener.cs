@@ -19,14 +19,38 @@ using System.Web;
 
 namespace Surging.Core.KestrelHttpServer
 {
+    /// <summary>
+    /// Defines the <see cref="HttpMessageListener" />
+    /// </summary>
     public abstract class HttpMessageListener : IMessageListener
     {
-        public  event ReceivedDelegate Received;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<HttpMessageListener> _logger;
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
         private readonly ISerializer<string> _serializer;
-        private  event RequestDelegate Requested;
+
+        /// <summary>
+        /// Defines the _serviceRouteProvider
+        /// </summary>
         private readonly IServiceRouteProvider _serviceRouteProvider;
 
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpMessageListener"/> class.
+        /// </summary>
+        /// <param name="logger">The logger<see cref="ILogger{HttpMessageListener}"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{string}"/></param>
+        /// <param name="serviceRouteProvider">The serviceRouteProvider<see cref="IServiceRouteProvider"/></param>
         public HttpMessageListener(ILogger<HttpMessageListener> logger, ISerializer<string> serializer, IServiceRouteProvider serviceRouteProvider)
         {
             _logger = logger;
@@ -34,18 +58,35 @@ namespace Surging.Core.KestrelHttpServer
             _serviceRouteProvider = serviceRouteProvider;
         }
 
-        public  async Task OnReceived(IMessageSender sender, TransportMessage message)
-        {
-            if (Received == null)
-                return;
-            await Received(sender, message);
-        }
+        #endregion 构造函数
 
+        #region 事件
+
+        /// <summary>
+        /// Defines the Received
+        /// </summary>
+        public event ReceivedDelegate Received;
+
+        /// <summary>
+        /// Defines the Requested
+        /// </summary>
+        private event RequestDelegate Requested;
+
+        #endregion 事件
+
+        #region 方法
+
+        /// <summary>
+        /// The OnReceived
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="context">The context<see cref="HttpContext"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task OnReceived(IMessageSender sender, HttpContext context)
         {
             var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
-            var serviceRoute =await _serviceRouteProvider.GetRouteByPathRegex(path);
-            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key,p => (object)p.Value.ToString());
+            var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key, p => (object)p.Value.ToString());
             parameters.Remove("servicekey", out object serviceKey);
             StreamReader streamReader = new StreamReader(context.Request.Body);
             var data = await streamReader.ReadToEndAsync();
@@ -56,12 +97,12 @@ namespace Surging.Core.KestrelHttpServer
                 var @params = RouteTemplateSegmenter.Segment(serviceRoute.ServiceDescriptor.RoutePath, path);
                 foreach (var param in @params)
                 {
-                    parameters.Add(param.Key,param.Value);
+                    parameters.Add(param.Key, param.Value);
                 }
             }
             if (context.Request.HasFormContentType)
             {
-                var collection =await GetFormCollection(context.Request);
+                var collection = await GetFormCollection(context.Request);
                 parameters.Add("form", collection);
                 await Received(sender, new TransportMessage(new HttpMessage
                 {
@@ -72,7 +113,6 @@ namespace Surging.Core.KestrelHttpServer
             }
             else
             {
-              
                 if (context.Request.Method == "POST")
                 {
                     await Received(sender, new TransportMessage(new HttpMessage
@@ -94,9 +134,27 @@ namespace Surging.Core.KestrelHttpServer
             }
         }
 
+        /// <summary>
+        /// The OnReceived
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public async Task OnReceived(IMessageSender sender, TransportMessage message)
+        {
+            if (Received == null)
+                return;
+            await Received(sender, message);
+        }
+
+        /// <summary>
+        /// The GetFormCollection
+        /// </summary>
+        /// <param name="request">The request<see cref="HttpRequest"/></param>
+        /// <returns>The <see cref="Task{HttpFormCollection}"/></returns>
         private async Task<HttpFormCollection> GetFormCollection(HttpRequest request)
         {
-            var boundary = GetName("boundary=", request.ContentType); 
+            var boundary = GetName("boundary=", request.ContentType);
             var reader = new MultipartReader(boundary, request.Body);
             var collection = await GetMultipartForm(reader);
             var fileCollection = new HttpFormFileCollection();
@@ -112,47 +170,57 @@ namespace Surging.Core.KestrelHttpServer
                 {
                     var itemCollection = item.Value as Dictionary<string, StringValues>;
                     fields = fields.Concat(itemCollection).ToDictionary(k => k.Key, v => v.Value);
-
                 }
             }
-           return new HttpFormCollection(fields, fileCollection);
+            return new HttpFormCollection(fields, fileCollection);
         }
 
-        private async Task<IDictionary<string,object>> GetMultipartForm(MultipartReader reader)
+        /// <summary>
+        /// The GetMultipartForm
+        /// </summary>
+        /// <param name="reader">The reader<see cref="MultipartReader"/></param>
+        /// <returns>The <see cref="Task{IDictionary{string,object}}"/></returns>
+        private async Task<IDictionary<string, object>> GetMultipartForm(MultipartReader reader)
         {
-           var section = await reader.ReadNextSectionAsync();
+            var section = await reader.ReadNextSectionAsync();
             var collection = new Dictionary<string, object>();
             if (section != null)
-            { 
-                var name=GetName("name=",section.ContentDisposition);
-                var fileName = GetName("filename=",section.ContentDisposition);
+            {
+                var name = GetName("name=", section.ContentDisposition);
+                var fileName = GetName("filename=", section.ContentDisposition);
                 var buffer = new MemoryStream();
                 await section.Body.CopyToAsync(buffer);
-                if(string.IsNullOrEmpty(fileName))
+                if (string.IsNullOrEmpty(fileName))
                 {
                     var fields = new Dictionary<string, StringValues>();
                     StreamReader streamReader = new StreamReader(buffer);
-                    fields.Add(name, new StringValues(UTF8Encoding.Default.GetString(buffer.GetBuffer(),0,(int)buffer.Length)));
+                    fields.Add(name, new StringValues(UTF8Encoding.Default.GetString(buffer.GetBuffer(), 0, (int)buffer.Length)));
                     collection.Add(name, fields);
                 }
                 else
                 {
                     var fileCollection = new HttpFormFileCollection();
                     StreamReader streamReader = new StreamReader(buffer);
-                    fileCollection.Add(new HttpFormFile(buffer.Length,name,fileName,buffer.GetBuffer()));
+                    fileCollection.Add(new HttpFormFile(buffer.Length, name, fileName, buffer.GetBuffer()));
                     collection.Add(name, fileCollection);
                 }
-                var formCollection= await GetMultipartForm(reader);
-                foreach(var item in formCollection)
+                var formCollection = await GetMultipartForm(reader);
+                foreach (var item in formCollection)
                 {
                     if (!collection.ContainsKey(item.Key))
-                        collection.Add(item.Key,item.Value);
+                        collection.Add(item.Key, item.Value);
                 }
             }
             return collection;
         }
 
-        private string  GetName(string type,string content)
+        /// <summary>
+        /// The GetName
+        /// </summary>
+        /// <param name="type">The type<see cref="string"/></param>
+        /// <param name="content">The content<see cref="string"/></param>
+        /// <returns>The <see cref="string"/></returns>
+        private string GetName(string type, string content)
         {
             var elements = content.Split(';');
             var element = elements.Where(entry => entry.Trim().StartsWith(type)).FirstOrDefault()?.Trim();
@@ -164,6 +232,11 @@ namespace Surging.Core.KestrelHttpServer
             return name;
         }
 
+        /// <summary>
+        /// The GetRoutePath
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="string"/></returns>
         private string GetRoutePath(string path)
         {
             string routePath = "";
@@ -182,5 +255,7 @@ namespace Surging.Core.KestrelHttpServer
             }
             return routePath;
         }
+
+        #endregion 方法
     }
 }

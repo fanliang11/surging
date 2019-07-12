@@ -19,8 +19,17 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Mqtt
 {
+    /// <summary>
+    /// Defines the <see cref="MqttProtocolModule" />
+    /// </summary>
     public class MqttProtocolModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -72,6 +81,10 @@ namespace Surging.Core.Protocol.Mqtt
             }
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
@@ -83,20 +96,21 @@ namespace Surging.Core.Protocol.Mqtt
             }).SingleInstance();
             builder.Register(provider =>
             {
-                
                 var messageListener = provider.Resolve<DotNettyMqttServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, null);
-
             }).As<IServiceHost>();
         }
 
+        /// <summary>
+        /// The RegisterMqttProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private static void RegisterMqttProtocol(ContainerBuilderWrapper builder)
         {
-
             builder.Register(provider =>
             {
                 return new DotNettyMqttServerMessageListener(provider.Resolve<ILogger<DotNettyMqttServerMessageListener>>(),
@@ -105,15 +119,16 @@ namespace Surging.Core.Protocol.Mqtt
                      );
             }).SingleInstance();
             builder.Register(provider =>
-            { 
+            {
                 var messageListener = provider.Resolve<DotNettyMqttServerMessageListener>();
                 return new MqttServiceHost(async endPoint =>
                 {
                     await messageListener.StartAsync(endPoint);
                     return messageListener;
                 });
-
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

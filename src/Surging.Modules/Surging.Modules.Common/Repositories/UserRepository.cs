@@ -5,7 +5,10 @@ using System.Text;
 
 namespace Surging.Modules.Common.Repositories
 {
-   public class UserRepository: BaseRepository
+    /// <summary>
+    /// Defines the <see cref="UserRepository" />
+    /// </summary>
+    public class UserRepository : BaseRepository
     {
     }
 }

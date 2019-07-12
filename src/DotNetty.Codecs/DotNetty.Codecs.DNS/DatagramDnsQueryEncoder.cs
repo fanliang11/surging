@@ -1,25 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using DotNetty.Transport.Channels;
+﻿using DotNetty.Buffers;
 using DotNetty.Codecs.DNS.Messages;
-using DotNetty.Buffers;
 using DotNetty.Codecs.DNS.Records;
-using System.Net;
+using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using System;
+using System.Collections.Generic;
+using System.Net;
 
 namespace DotNetty.Codecs.DNS
 {
+    /// <summary>
+    /// Defines the <see cref="DatagramDnsQueryEncoder" />
+    /// </summary>
     public class DatagramDnsQueryEncoder : MessageToMessageEncoder<IAddressedEnvelope<IDnsQuery>>
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the recordEncoder
+        /// </summary>
         private readonly IDnsRecordEncoder recordEncoder;
 
-        public DatagramDnsQueryEncoder() : this(new DefaultDnsRecordEncoder()) { }
+        #endregion 字段
 
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatagramDnsQueryEncoder"/> class.
+        /// </summary>
+        public DatagramDnsQueryEncoder() : this(new DefaultDnsRecordEncoder())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatagramDnsQueryEncoder"/> class.
+        /// </summary>
+        /// <param name="recordEncoder">The recordEncoder<see cref="IDnsRecordEncoder"/></param>
         public DatagramDnsQueryEncoder(IDnsRecordEncoder recordEncoder)
         {
             this.recordEncoder = recordEncoder ?? throw new ArgumentNullException(nameof(recordEncoder));
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
+        /// <summary>
+        /// The Encode
+        /// </summary>
+        /// <param name="context">The context<see cref="IChannelHandlerContext"/></param>
+        /// <param name="message">The message<see cref="IAddressedEnvelope{IDnsQuery}"/></param>
+        /// <param name="output">The output<see cref="List{object}"/></param>
         protected override void Encode(IChannelHandlerContext context, IAddressedEnvelope<IDnsQuery> message, List<object> output)
         {
             EndPoint recipient = message.Recipient;
@@ -43,9 +74,20 @@ namespace DotNetty.Codecs.DNS
             output.Add(new DatagramPacket(buffer, recipient, null));
         }
 
-        private IByteBuffer AllocateBuffer(IChannelHandlerContext ctx, 
+        /// <summary>
+        /// The AllocateBuffer
+        /// </summary>
+        /// <param name="ctx">The ctx<see cref="IChannelHandlerContext"/></param>
+        /// <param name="message">The message<see cref="IAddressedEnvelope{IDnsQuery}"/></param>
+        /// <returns>The <see cref="IByteBuffer"/></returns>
+        private IByteBuffer AllocateBuffer(IChannelHandlerContext ctx,
             IAddressedEnvelope<IDnsQuery> message) => ctx.Allocator.Buffer(1024);
 
+        /// <summary>
+        /// The EncodeHeader
+        /// </summary>
+        /// <param name="query">The query<see cref="IDnsQuery"/></param>
+        /// <param name="buffer">The buffer<see cref="IByteBuffer"/></param>
         private void EncodeHeader(IDnsQuery query, IByteBuffer buffer)
         {
             buffer.WriteShort(query.Id);
@@ -61,6 +103,11 @@ namespace DotNetty.Codecs.DNS
             buffer.WriteShort(query.Count(DnsSection.ADDITIONAL));
         }
 
+        /// <summary>
+        /// The EncodeQuestions
+        /// </summary>
+        /// <param name="query">The query<see cref="IDnsQuery"/></param>
+        /// <param name="buffer">The buffer<see cref="IByteBuffer"/></param>
         private void EncodeQuestions(IDnsQuery query, IByteBuffer buffer)
         {
             int count = query.Count(DnsSection.QUESTION);
@@ -70,6 +117,12 @@ namespace DotNetty.Codecs.DNS
             }
         }
 
+        /// <summary>
+        /// The EncodeRecords
+        /// </summary>
+        /// <param name="query">The query<see cref="IDnsQuery"/></param>
+        /// <param name="section">The section<see cref="DnsSection"/></param>
+        /// <param name="buffer">The buffer<see cref="IByteBuffer"/></param>
         private void EncodeRecords(IDnsQuery query, DnsSection section, IByteBuffer buffer)
         {
             int count = query.Count(section);
@@ -78,5 +131,7 @@ namespace DotNetty.Codecs.DNS
                 recordEncoder.EncodeRecord(query.GetRecord<IDnsRecord>(section, i), buffer);
             }
         }
+
+        #endregion 方法
     }
 }

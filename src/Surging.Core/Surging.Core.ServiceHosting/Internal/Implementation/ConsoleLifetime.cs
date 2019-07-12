@@ -11,12 +11,62 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
     /// </summary>
     public class ConsoleLifetime : IHostLifetime
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _shutdownBlock
+        /// </summary>
         private readonly ManualResetEvent _shutdownBlock = new ManualResetEvent(false);
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsoleLifetime"/> class.
+        /// </summary>
+        /// <param name="applicationLifetime">The applicationLifetime<see cref="IApplicationLifetime"/></param>
         public ConsoleLifetime(IApplicationLifetime applicationLifetime)
         {
             ApplicationLifetime = applicationLifetime ?? throw new ArgumentNullException(nameof(applicationLifetime));
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the ApplicationLifetime
+        /// </summary>
+        private IApplicationLifetime ApplicationLifetime { get; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            _shutdownBlock.Set();
+        }
+
+        /// <summary>
+        /// The StopAsync
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// The WaitForStartAsync
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             ApplicationLifetime.ApplicationStarted.Register(() =>
@@ -40,15 +90,6 @@ namespace Surging.Core.ServiceHosting.Internal.Implementation
             return Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        public void Dispose()
-        {
-            _shutdownBlock.Set();
-        }
-        private IApplicationLifetime ApplicationLifetime { get; }
+        #endregion 方法
     }
 }

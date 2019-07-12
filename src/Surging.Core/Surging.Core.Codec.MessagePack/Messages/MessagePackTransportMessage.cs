@@ -6,9 +6,25 @@ using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
+    /// <summary>
+    /// Defines the <see cref="MessagePackTransportMessage" />
+    /// </summary>
     [MessagePackObject]
     public class MessagePackTransportMessage
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessagePackTransportMessage"/> class.
+        /// </summary>
+        public MessagePackTransportMessage()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessagePackTransportMessage"/> class.
+        /// </summary>
+        /// <param name="transportMessage">The transportMessage<see cref="TransportMessage"/></param>
         public MessagePackTransportMessage(TransportMessage transportMessage)
         {
             Id = transportMessage.Id;
@@ -31,31 +47,36 @@ namespace Surging.Core.Codec.MessagePack.Messages
             Content = SerializerUtilitys.Serialize(contentObject);
         }
 
-        public MessagePackTransportMessage()
-        {
-        }
+        #endregion 构造函数
 
-        [Key(0)]
-        public string Id { get; set; }
+        #region 属性
 
+        /// <summary>
+        /// Gets or sets the Content
+        /// </summary>
         [Key(1)]
         public byte[] Content { get; set; }
 
+        /// <summary>
+        /// Gets or sets the ContentType
+        /// </summary>
         [Key(2)]
         public string ContentType { get; set; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsInvokeMessage()
-        {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
-        }
+        /// <summary>
+        /// Gets or sets the Id
+        /// </summary>
+        [Key(0)]
+        public string Id { get; set; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsInvokeResultMessage()
-        {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
-        }
+        #endregion 属性
 
+        #region 方法
+
+        /// <summary>
+        /// The GetTransportMessage
+        /// </summary>
+        /// <returns>The <see cref="TransportMessage"/></returns>
         public TransportMessage GetTransportMessage()
         {
             var message = new TransportMessage
@@ -84,5 +105,27 @@ namespace Surging.Core.Codec.MessagePack.Messages
             message.Content = contentObject;
             return message;
         }
+
+        /// <summary>
+        /// The IsInvokeMessage
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsInvokeMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
+        }
+
+        /// <summary>
+        /// The IsInvokeResultMessage
+        /// </summary>
+        /// <returns>The <see cref="bool"/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsInvokeResultMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
+        }
+
+        #endregion 方法
     }
 }

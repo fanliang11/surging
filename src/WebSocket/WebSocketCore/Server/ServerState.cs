@@ -1,4 +1,3 @@
-#region License
 /*
  * ServerState.cs
  *
@@ -24,17 +23,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore.Server
 {
-  internal enum ServerState
-  {
-    Ready,
-    Start,
-    ShuttingDown,
-    Stop
-  }
+    #region Ã¶¾Ù
+
+    /// <summary>
+    /// Defines the ServerState
+    /// </summary>
+    internal enum ServerState
+    {
+        /// <summary>
+        /// Defines the Ready
+        /// </summary>
+        Ready,
+
+        /// <summary>
+        /// Defines the Start
+        /// </summary>
+        Start,
+
+        /// <summary>
+        /// Defines the ShuttingDown
+        /// </summary>
+        ShuttingDown,
+
+        /// <summary>
+        /// Defines the Stop
+        /// </summary>
+        Stop
+    }
+
+    #endregion Ã¶¾Ù
 }

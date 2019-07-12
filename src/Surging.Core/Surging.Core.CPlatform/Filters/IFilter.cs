@@ -4,9 +4,22 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Filters
 {
-   public interface IFilter
-    {
+    #region 接口
 
-        bool AllowMultiple { get; }  
+    /// <summary>
+    /// Defines the <see cref="IFilter" />
+    /// </summary>
+    public interface IFilter
+    {
+        #region 属性
+
+        /// <summary>
+        /// Gets a value indicating whether AllowMultiple
+        /// </summary>
+        bool AllowMultiple { get; }
+
+        #endregion 属性
     }
+
+    #endregion 接口
 }

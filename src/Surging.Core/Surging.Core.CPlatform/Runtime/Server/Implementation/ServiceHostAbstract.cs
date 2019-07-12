@@ -11,37 +11,50 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
     /// </summary>
     public abstract class ServiceHostAbstract : IServiceHost
     {
-        #region Field
-
-        private readonly IServiceExecutor _serviceExecutor;
-
-        public IServiceExecutor ServiceExecutor { get => _serviceExecutor; }
+        #region 字段
 
         /// <summary>
-        /// 消息监听者。
+        /// Defines the _serviceExecutor
         /// </summary>
-        protected IMessageListener MessageListener { get; } = new MessageListener();
+        private readonly IServiceExecutor _serviceExecutor;
 
-        #endregion Field
+        #endregion 字段
 
-        #region Constructor
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceHostAbstract"/> class.
+        /// </summary>
+        /// <param name="serviceExecutor">The serviceExecutor<see cref="IServiceExecutor"/></param>
         protected ServiceHostAbstract(IServiceExecutor serviceExecutor)
         {
             _serviceExecutor = serviceExecutor;
             MessageListener.Received += MessageListener_Received;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IDisposable
+        #region 属性
 
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        /// <summary>
+        /// Gets the ServiceExecutor
+        /// </summary>
+        public IServiceExecutor ServiceExecutor { get => _serviceExecutor; }
+
+        /// <summary>
+        /// Gets the MessageListener
+        /// 消息监听者。
+        /// </summary>
+        protected IMessageListener MessageListener { get; } = new MessageListener();
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public abstract void Dispose();
-
-        #endregion Implementation of IDisposable
-
-        #region Implementation of IServiceHost
 
         /// <summary>
         /// 启动主机。
@@ -50,17 +63,25 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         /// <returns>一个任务。</returns>
         public abstract Task StartAsync(EndPoint endPoint);
 
-        #endregion Implementation of IServiceHost
+        /// <summary>
+        /// The StartAsync
+        /// </summary>
+        /// <param name="ip">The ip<see cref="string"/></param>
+        /// <param name="port">The port<see cref="int"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public abstract Task StartAsync(string ip, int port);
 
-        #region Private Method
-
+        /// <summary>
+        /// The MessageListener_Received
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
         {
             await _serviceExecutor.ExecuteAsync(sender, message);
         }
 
-        public abstract Task StartAsync(string ip,int port);
-
-        #endregion Private Method
+        #endregion 方法
     }
 }

@@ -4,8 +4,18 @@ using System.Text;
 
 namespace Surging.Core.CPlatform
 {
-   public class RequestData 
+    /// <summary>
+    /// Defines the <see cref="RequestData" />
+    /// </summary>
+    public class RequestData
     {
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the Payload
+        /// </summary>
         public string Payload { get; set; }
+
+        #endregion 属性
     }
 }

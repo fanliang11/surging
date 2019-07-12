@@ -7,10 +7,29 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.ServiceHosting.Internal
 {
-   public interface IServiceHost : IDisposable
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IServiceHost" />
+    /// </summary>
+    public interface IServiceHost : IDisposable
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <returns>The <see cref="IContainer"/></returns>
+        IContainer Initialize();
+
+        /// <summary>
+        /// The Run
+        /// </summary>
+        /// <returns>The <see cref="IDisposable"/></returns>
         IDisposable Run();
 
-        IContainer Initialize();
+        #endregion 方法
     }
+
+    #endregion 接口
 }

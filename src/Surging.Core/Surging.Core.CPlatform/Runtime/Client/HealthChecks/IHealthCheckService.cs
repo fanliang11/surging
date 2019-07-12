@@ -5,18 +5,28 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
 {
+    #region 接口
 
     /// <summary>
     /// 一个抽象的健康检查服务。
     /// </summary>
     public interface IHealthCheckService
     {
+        #region 事件
+
         /// <summary>
-        /// 监控一个地址。
+        /// Defines the Changed
         /// </summary>
-        /// <param name="address">地址模型。</param>
-        /// <returns>一个任务。</returns>
-        void Monitor(AddressModel address);
+        event EventHandler<HealthCheckEventArgs> Changed;
+
+        /// <summary>
+        /// Defines the Removed
+        /// </summary>
+        event EventHandler<HealthCheckEventArgs> Removed;
+
+        #endregion 事件
+
+        #region 方法
 
         /// <summary>
         /// 判断一个地址是否健康。
@@ -32,8 +42,14 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks
         /// <returns>一个任务。</returns>
         Task MarkFailure(AddressModel address);
 
-        event EventHandler<HealthCheckEventArgs> Removed;
+        /// <summary>
+        /// 监控一个地址。
+        /// </summary>
+        /// <param name="address">地址模型。</param>
+        void Monitor(AddressModel address);
 
-        event EventHandler<HealthCheckEventArgs> Changed;
+        #endregion 方法
     }
+
+    #endregion 接口
 }

@@ -6,17 +6,44 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
-    public class FailoverHandoverInvoker: IClusterInvoker
+    /// <summary>
+    /// Defines the <see cref="FailoverHandoverInvoker" />
+    /// </summary>
+    public class FailoverHandoverInvoker : IClusterInvoker
     {
-        #region Field
-        private readonly IRemoteInvokeService _remoteInvokeService;
-        private readonly ITypeConvertibleService _typeConvertibleService;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _breakeRemoteInvokeService
+        /// </summary>
         private readonly IBreakeRemoteInvokeService _breakeRemoteInvokeService;
+
+        /// <summary>
+        /// Defines the _commandProvider
+        /// </summary>
         private readonly IServiceCommandProvider _commandProvider;
-        #endregion Field
 
-        #region Constructor
+        /// <summary>
+        /// Defines the _remoteInvokeService
+        /// </summary>
+        private readonly IRemoteInvokeService _remoteInvokeService;
 
+        /// <summary>
+        /// Defines the _typeConvertibleService
+        /// </summary>
+        private readonly ITypeConvertibleService _typeConvertibleService;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FailoverHandoverInvoker"/> class.
+        /// </summary>
+        /// <param name="remoteInvokeService">The remoteInvokeService<see cref="IRemoteInvokeService"/></param>
+        /// <param name="commandProvider">The commandProvider<see cref="IServiceCommandProvider"/></param>
+        /// <param name="typeConvertibleService">The typeConvertibleService<see cref="ITypeConvertibleService"/></param>
+        /// <param name="breakeRemoteInvokeService">The breakeRemoteInvokeService<see cref="IBreakeRemoteInvokeService"/></param>
         public FailoverHandoverInvoker(IRemoteInvokeService remoteInvokeService, IServiceCommandProvider commandProvider,
             ITypeConvertibleService typeConvertibleService, IBreakeRemoteInvokeService breakeRemoteInvokeService)
         {
@@ -26,8 +53,19 @@ namespace Surging.Core.CPlatform.Support.Implementation
             _commandProvider = commandProvider;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
+        #region 方法
+
+        /// <summary>
+        /// The Invoke
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="parameters">The parameters<see cref="IDictionary{string, object}"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <param name="_serviceKey">The _serviceKey<see cref="string"/></param>
+        /// <param name="decodeJOject">The decodeJOject<see cref="bool"/></param>
+        /// <returns>The <see cref="Task{T}"/></returns>
         public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string _serviceKey, bool decodeJOject)
         {
             var time = 0;
@@ -44,6 +82,14 @@ namespace Surging.Core.CPlatform.Support.Implementation
             return result;
         }
 
+        /// <summary>
+        /// The Invoke
+        /// </summary>
+        /// <param name="parameters">The parameters<see cref="IDictionary{string, object}"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <param name="_serviceKey">The _serviceKey<see cref="string"/></param>
+        /// <param name="decodeJOject">The decodeJOject<see cref="bool"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string _serviceKey, bool decodeJOject)
         {
             var time = 0;
@@ -51,6 +97,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
             var command = vtCommand.IsCompletedSuccessfully ? vtCommand.Result : await vtCommand;
             while (await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject) == null && ++time < command.FailoverCluster) ;
         }
-    }
 
+        #endregion 方法
+    }
 }

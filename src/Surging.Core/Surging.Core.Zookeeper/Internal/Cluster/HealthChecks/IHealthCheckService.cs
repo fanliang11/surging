@@ -6,10 +6,30 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper.Internal.Cluster.HealthChecks
 {
-   public interface IHealthCheckService
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IHealthCheckService" />
+    /// </summary>
+    public interface IHealthCheckService
     {
+        #region 方法
+
+        /// <summary>
+        /// The IsHealth
+        /// </summary>
+        /// <param name="address">The address<see cref="AddressModel"/></param>
+        /// <returns>The <see cref="ValueTask{bool}"/></returns>
+        ValueTask<bool> IsHealth(AddressModel address);
+
+        /// <summary>
+        /// The Monitor
+        /// </summary>
+        /// <param name="address">The address<see cref="AddressModel"/></param>
         void Monitor(AddressModel address);
 
-        ValueTask<bool> IsHealth(AddressModel address);
+        #endregion 方法
     }
+
+    #endregion 接口
 }

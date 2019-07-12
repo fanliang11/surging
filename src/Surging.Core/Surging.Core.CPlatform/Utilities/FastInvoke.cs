@@ -6,18 +6,30 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Utilities
 {
+    /// <summary>
+    /// Defines the <see cref="FastInvoke" />
+    /// </summary>
     public class FastInvoke
     {
+        #region 委托
+
+        /// <summary>
+        /// The FastInvokeHandler
+        /// </summary>
+        /// <param name="target">The target<see cref="object"/></param>
+        /// <param name="paramters">The paramters<see cref="object[]"/></param>
+        /// <returns>The <see cref="object"/></returns>
         public delegate object FastInvokeHandler(object target, object[] paramters);
 
+        #endregion 委托
 
-        static object InvokeMethod(FastInvokeHandler invoke, object target, params object[] paramters)
-        {
+        #region 方法
 
-            return invoke(null, paramters);
-
-        }
-
+        /// <summary>
+        /// The GetMethodInvoker
+        /// </summary>
+        /// <param name="methodInfo">The methodInfo<see cref="MethodInfo"/></param>
+        /// <returns>The <see cref="FastInvokeHandler"/></returns>
         public static FastInvokeHandler GetMethodInvoker(MethodInfo methodInfo)
         {
             DynamicMethod dynamicMethod = new DynamicMethod(string.Empty, typeof(object), new Type[] { typeof(object), typeof(object[]) }, methodInfo.DeclaringType.Module);
@@ -83,6 +95,36 @@ namespace Surging.Core.CPlatform.Utilities
             return invoder;
         }
 
+        /// <summary>
+        /// The InvokeMethod
+        /// </summary>
+        /// <param name="invoke">The invoke<see cref="FastInvokeHandler"/></param>
+        /// <param name="target">The target<see cref="object"/></param>
+        /// <param name="paramters">The paramters<see cref="object[]"/></param>
+        /// <returns>The <see cref="object"/></returns>
+        internal static object InvokeMethod(FastInvokeHandler invoke, object target, params object[] paramters)
+        {
+            return invoke(null, paramters);
+        }
+
+        /// <summary>
+        /// The EmitBoxIfNeeded
+        /// </summary>
+        /// <param name="il">The il<see cref="ILGenerator"/></param>
+        /// <param name="type">The type<see cref="System.Type"/></param>
+        private static void EmitBoxIfNeeded(ILGenerator il, System.Type type)
+        {
+            if (type.IsValueType)
+            {
+                il.Emit(OpCodes.Box, type);
+            }
+        }
+
+        /// <summary>
+        /// The EmitCastToReference
+        /// </summary>
+        /// <param name="il">The il<see cref="ILGenerator"/></param>
+        /// <param name="type">The type<see cref="System.Type"/></param>
         private static void EmitCastToReference(ILGenerator il, System.Type type)
         {
             if (type.IsValueType)
@@ -95,14 +137,11 @@ namespace Surging.Core.CPlatform.Utilities
             }
         }
 
-        private static void EmitBoxIfNeeded(ILGenerator il, System.Type type)
-        {
-            if (type.IsValueType)
-            {
-                il.Emit(OpCodes.Box, type);
-            }
-        }
-
+        /// <summary>
+        /// The EmitFastInt
+        /// </summary>
+        /// <param name="il">The il<see cref="ILGenerator"/></param>
+        /// <param name="value">The value<see cref="int"/></param>
         private static void EmitFastInt(ILGenerator il, int value)
         {
             switch (value)
@@ -110,30 +149,39 @@ namespace Surging.Core.CPlatform.Utilities
                 case -1:
                     il.Emit(OpCodes.Ldc_I4_M1);
                     return;
+
                 case 0:
                     il.Emit(OpCodes.Ldc_I4_0);
                     return;
+
                 case 1:
                     il.Emit(OpCodes.Ldc_I4_1);
                     return;
+
                 case 2:
                     il.Emit(OpCodes.Ldc_I4_2);
                     return;
+
                 case 3:
                     il.Emit(OpCodes.Ldc_I4_3);
                     return;
+
                 case 4:
                     il.Emit(OpCodes.Ldc_I4_4);
                     return;
+
                 case 5:
                     il.Emit(OpCodes.Ldc_I4_5);
                     return;
+
                 case 6:
                     il.Emit(OpCodes.Ldc_I4_6);
                     return;
+
                 case 7:
                     il.Emit(OpCodes.Ldc_I4_7);
                     return;
+
                 case 8:
                     il.Emit(OpCodes.Ldc_I4_8);
                     return;
@@ -148,5 +196,7 @@ namespace Surging.Core.CPlatform.Utilities
                 il.Emit(OpCodes.Ldc_I4, value);
             }
         }
+
+        #endregion 方法
     }
 }

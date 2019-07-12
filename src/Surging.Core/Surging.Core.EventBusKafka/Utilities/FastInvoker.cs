@@ -6,10 +6,27 @@ using System.Text;
 
 namespace Surging.Core.EventBusKafka.Utilities
 {
+    /// <summary>
+    /// Defines the <see cref="FastInvoker{T}" />
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class FastInvoker<T>
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _current
+        /// </summary>
         [ThreadStatic]
-        static FastInvoker<T> _current;
+        internal static FastInvoker<T> _current;
+
+        #endregion 字段
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Current
+        /// </summary>
         public static FastInvoker<T> Current
         {
             get
@@ -20,6 +37,15 @@ namespace Surging.Core.EventBusKafka.Utilities
             }
         }
 
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The FastInvoke
+        /// </summary>
+        /// <param name="target">The target<see cref="T"/></param>
+        /// <param name="expression">The expression<see cref="Expression{Action{T}}"/></param>
         public void FastInvoke(T target, Expression<Action<T>> expression)
         {
             var call = expression.Body as MethodCallExpression;
@@ -29,6 +55,12 @@ namespace Surging.Core.EventBusKafka.Utilities
             invoker(target);
         }
 
+        /// <summary>
+        /// The FastInvoke
+        /// </summary>
+        /// <param name="target">The target<see cref="T"/></param>
+        /// <param name="genericTypes">The genericTypes<see cref="Type[]"/></param>
+        /// <param name="expression">The expression<see cref="Expression{Action{T}}"/></param>
         public void FastInvoke(T target, Type[] genericTypes, Expression<Action<T>> expression)
         {
             var call = expression.Body as MethodCallExpression;
@@ -45,7 +77,13 @@ namespace Surging.Core.EventBusKafka.Utilities
             invoker(target);
         }
 
-        MethodInfo GetGenericMethodFromTypes(MethodInfo method, Type[] genericTypes)
+        /// <summary>
+        /// The GetGenericMethodFromTypes
+        /// </summary>
+        /// <param name="method">The method<see cref="MethodInfo"/></param>
+        /// <param name="genericTypes">The genericTypes<see cref="Type[]"/></param>
+        /// <returns>The <see cref="MethodInfo"/></returns>
+        internal MethodInfo GetGenericMethodFromTypes(MethodInfo method, Type[] genericTypes)
         {
             if (!method.IsGenericMethod)
                 throw new ArgumentException("不能为非泛型方法指定泛型类型。: " + method.Name);
@@ -59,7 +97,12 @@ namespace Surging.Core.EventBusKafka.Utilities
             return method;
         }
 
-        Action<T> GetInvoker(Func<MethodInfo> getMethodInfo)
+        /// <summary>
+        /// The GetInvoker
+        /// </summary>
+        /// <param name="getMethodInfo">The getMethodInfo<see cref="Func{MethodInfo}"/></param>
+        /// <returns>The <see cref="Action{T}"/></returns>
+        internal Action<T> GetInvoker(Func<MethodInfo> getMethodInfo)
         {
             MethodInfo method = getMethodInfo();
 
@@ -68,8 +111,8 @@ namespace Surging.Core.EventBusKafka.Utilities
             MethodCallExpression call = Expression.Call(instanceParameter, method);
 
             return Expression.Lambda<Action<T>>(call, new[] { instanceParameter }).Compile();
-
         }
+
+        #endregion 方法
     }
 }
- 

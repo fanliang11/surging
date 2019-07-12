@@ -8,8 +8,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public class ServiceMetadataAttribute : ServiceDescriptorAttribute
     {
+        #region 构造函数
+
         /// <summary>
-        /// 初始化构造函数。
+        /// Initializes a new instance of the <see cref="ServiceMetadataAttribute"/> class.
         /// </summary>
         /// <param name="name">名称。</param>
         /// <param name="data">数据。</param>
@@ -19,17 +21,25 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             Data = data;
         }
 
-        /// <summary>
-        /// 名称。
-        /// </summary>
-        public string Name { get; }
+        #endregion 构造函数
+
+        #region 属性
 
         /// <summary>
+        /// Gets the Data
         /// 数据。
         /// </summary>
         public object Data { get; }
 
-        #region Overrides of ServiceDescriptorAttribute
+        /// <summary>
+        /// Gets the Name
+        /// 名称。
+        /// </summary>
+        public string Name { get; }
+
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 应用标记。
@@ -40,6 +50,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             descriptor.Metadatas[Name] = Data;
         }
 
-        #endregion Overrides of RpcServiceDescriptorAttribute
+        #endregion 方法
     }
 }

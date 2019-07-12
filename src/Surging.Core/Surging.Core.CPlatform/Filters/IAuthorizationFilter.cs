@@ -8,8 +8,24 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Filters
 {
-    public interface IAuthorizationFilter: IFilter
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IAuthorizationFilter" />
+    /// </summary>
+    public interface IAuthorizationFilter : IFilter
     {
-        void ExecuteAuthorizationFilterAsync(ServiceRouteContext serviceRouteContext,CancellationToken cancellationToken);
+        #region 方法
+
+        /// <summary>
+        /// The ExecuteAuthorizationFilterAsync
+        /// </summary>
+        /// <param name="serviceRouteContext">The serviceRouteContext<see cref="ServiceRouteContext"/></param>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        void ExecuteAuthorizationFilterAsync(ServiceRouteContext serviceRouteContext, CancellationToken cancellationToken);
+
+        #endregion 方法
     }
+
+    #endregion 接口
 }

@@ -8,13 +8,19 @@ namespace Surging.Core.ApiGateWay.Utilities
     /// 自定义错误结果对象
     /// </summary>
     /// <typeparam name="T">需要返回的类型</typeparam>
-
     public class ServiceResult<T> : ServiceResult
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the Entity
         /// 数据集
         /// </summary>
         public T Entity { get; set; }
+
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 生成自定义服务数据集
@@ -47,19 +53,51 @@ namespace Surging.Core.ApiGateWay.Utilities
                 Entity = entity
             };
         }
+
+        #endregion 方法
     }
 
+    /// <summary>
+    /// Defines the <see cref="ServiceResult" />
+    /// </summary>
     public class ServiceResult
     {
+        #region 构造函数
+
         /// <summary>
-        /// 生成错误信息
+        /// Initializes a new instance of the <see cref="ServiceResult"/> class.
         /// </summary>
-        /// <param name="message">返回客户端的消息</param>
-        /// <returns>返回服务数据集</returns>
-        public static ServiceResult Error(string message)
+        public ServiceResult()
         {
-            return new ServiceResult() { Message = message, IsSucceed = false };
+            IsSucceed = false;
+            Message = string.Empty;
         }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the ErrorCode
+        /// 错误码
+        /// </summary>
+        public int ErrorCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether IsSucceed
+        /// 状态值
+        /// </summary>
+        public bool IsSucceed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Message
+        /// 返回客户端的消息
+        /// </summary>
+        public string Message { get; set; }
+
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 生成服务器数据集
@@ -74,28 +112,15 @@ namespace Surging.Core.ApiGateWay.Utilities
         }
 
         /// <summary>
-        /// 构造服务数据集
+        /// 生成错误信息
         /// </summary>
-        public ServiceResult()
+        /// <param name="message">返回客户端的消息</param>
+        /// <returns>返回服务数据集</returns>
+        public static ServiceResult Error(string message)
         {
-            IsSucceed = false;
-            Message = string.Empty;
+            return new ServiceResult() { Message = message, IsSucceed = false };
         }
 
-        /// <summary>
-        /// 状态值
-        /// </summary>
-
-        public bool IsSucceed { get; set; }
-
-        /// <summary>
-        ///返回客户端的消息
-        /// </summary>
-        public string Message { get; set; }
-
-        /// <summary>
-        /// 错误码
-        /// </summary>
-        public int ErrorCode { get; set; }
+        #endregion 方法
     }
 }

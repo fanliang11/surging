@@ -1,61 +1,41 @@
-﻿using System.Text;
-using DotNetty.Buffers;
+﻿using DotNetty.Buffers;
 using DotNetty.Codecs.DNS.Records;
+using System.Text;
 
 namespace DotNetty.Codecs.DNS
 {
+    /// <summary>
+    /// Defines the <see cref="DefaultDnsRecordDecoder" />
+    /// </summary>
     public class DefaultDnsRecordDecoder : IDnsRecordDecoder
     {
+        #region 常量
+
+        /// <summary>
+        /// Defines the ROOT
+        /// </summary>
         private const string ROOT = ".";
 
-        internal DefaultDnsRecordDecoder() { }
+        #endregion 常量
 
-        public IDnsQuestion DecodeQuestion(IByteBuffer inputBuffer)
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultDnsRecordDecoder"/> class.
+        /// </summary>
+        internal DefaultDnsRecordDecoder()
         {
-            string name = DecodeName(inputBuffer);
-            DnsRecordType type = DnsRecordType.From(inputBuffer.ReadUnsignedShort());
-            var recordClass = (DnsRecordClass)inputBuffer.ReadUnsignedShort();
-            return new DefaultDnsQuestion(name, type, recordClass);
         }
 
-        public IDnsRecord DecodeRecord(IByteBuffer inputBuffer) 
-        {
-            int startOffset = inputBuffer.ReaderIndex;
-            string name = DecodeName(inputBuffer);
+        #endregion 构造函数
 
-            int endOffset = inputBuffer.WriterIndex;
-            if (endOffset - startOffset < 10)
-            {
-                inputBuffer.SetReaderIndex(startOffset);
-                return null;
-            }
+        #region 方法
 
-            DnsRecordType type = DnsRecordType.From(inputBuffer.ReadUnsignedShort());
-            var recordClass = (DnsRecordClass)inputBuffer.ReadUnsignedShort();
-            long ttl = inputBuffer.ReadUnsignedInt();
-            int length = inputBuffer.ReadUnsignedShort();
-            int offset = inputBuffer.ReaderIndex;
-
-            if (endOffset - offset < length)
-            {
-                inputBuffer.SetReaderIndex(startOffset);
-                return null;
-            }
-
-            IDnsRecord record = DecodeRecord(name, type, recordClass, ttl, inputBuffer, offset, length);
-            inputBuffer.SetReaderIndex(offset + length);
-            return record;
-        }
-
-        protected IDnsRecord DecodeRecord(string name, DnsRecordType type, DnsRecordClass dnsClass, long timeToLive,
-            IByteBuffer inputBuffer, int offset, int length)
-        {
-            if (type == DnsRecordType.PTR)
-                return new DefaultDnsPtrRecord(name, dnsClass, timeToLive, DecodeName(inputBuffer.SetIndex(offset, offset + length)));
-
-            return new DefaultDnsRawRecord(name, type, dnsClass, timeToLive, inputBuffer.SetIndex(offset, offset + length));
-        }
-
+        /// <summary>
+        /// The DecodeName
+        /// </summary>
+        /// <param name="inputBuffer">The inputBuffer<see cref="IByteBuffer"/></param>
+        /// <returns>The <see cref="string"/></returns>
         public static string DecodeName(IByteBuffer inputBuffer)
         {
             int position = -1;
@@ -69,7 +49,7 @@ namespace DotNetty.Codecs.DNS
             var name = new StringBuilder(readable << 1);
             while (inputBuffer.IsReadable())
             {
-                int len = inputBuffer.ReadByte() & 0xff; 
+                int len = inputBuffer.ReadByte() & 0xff;
                 bool pointer = (len & 0xc0) == 0xc0;
 
                 if (pointer)
@@ -116,5 +96,74 @@ namespace DotNetty.Codecs.DNS
 
             return name.ToString();
         }
+
+        /// <summary>
+        /// The DecodeQuestion
+        /// </summary>
+        /// <param name="inputBuffer">The inputBuffer<see cref="IByteBuffer"/></param>
+        /// <returns>The <see cref="IDnsQuestion"/></returns>
+        public IDnsQuestion DecodeQuestion(IByteBuffer inputBuffer)
+        {
+            string name = DecodeName(inputBuffer);
+            DnsRecordType type = DnsRecordType.From(inputBuffer.ReadUnsignedShort());
+            var recordClass = (DnsRecordClass)inputBuffer.ReadUnsignedShort();
+            return new DefaultDnsQuestion(name, type, recordClass);
+        }
+
+        /// <summary>
+        /// The DecodeRecord
+        /// </summary>
+        /// <param name="inputBuffer">The inputBuffer<see cref="IByteBuffer"/></param>
+        /// <returns>The <see cref="IDnsRecord"/></returns>
+        public IDnsRecord DecodeRecord(IByteBuffer inputBuffer)
+        {
+            int startOffset = inputBuffer.ReaderIndex;
+            string name = DecodeName(inputBuffer);
+
+            int endOffset = inputBuffer.WriterIndex;
+            if (endOffset - startOffset < 10)
+            {
+                inputBuffer.SetReaderIndex(startOffset);
+                return null;
+            }
+
+            DnsRecordType type = DnsRecordType.From(inputBuffer.ReadUnsignedShort());
+            var recordClass = (DnsRecordClass)inputBuffer.ReadUnsignedShort();
+            long ttl = inputBuffer.ReadUnsignedInt();
+            int length = inputBuffer.ReadUnsignedShort();
+            int offset = inputBuffer.ReaderIndex;
+
+            if (endOffset - offset < length)
+            {
+                inputBuffer.SetReaderIndex(startOffset);
+                return null;
+            }
+
+            IDnsRecord record = DecodeRecord(name, type, recordClass, ttl, inputBuffer, offset, length);
+            inputBuffer.SetReaderIndex(offset + length);
+            return record;
+        }
+
+        /// <summary>
+        /// The DecodeRecord
+        /// </summary>
+        /// <param name="name">The name<see cref="string"/></param>
+        /// <param name="type">The type<see cref="DnsRecordType"/></param>
+        /// <param name="dnsClass">The dnsClass<see cref="DnsRecordClass"/></param>
+        /// <param name="timeToLive">The timeToLive<see cref="long"/></param>
+        /// <param name="inputBuffer">The inputBuffer<see cref="IByteBuffer"/></param>
+        /// <param name="offset">The offset<see cref="int"/></param>
+        /// <param name="length">The length<see cref="int"/></param>
+        /// <returns>The <see cref="IDnsRecord"/></returns>
+        protected IDnsRecord DecodeRecord(string name, DnsRecordType type, DnsRecordClass dnsClass, long timeToLive,
+            IByteBuffer inputBuffer, int offset, int length)
+        {
+            if (type == DnsRecordType.PTR)
+                return new DefaultDnsPtrRecord(name, dnsClass, timeToLive, DecodeName(inputBuffer.SetIndex(offset, offset + length)));
+
+            return new DefaultDnsRawRecord(name, type, dnsClass, timeToLive, inputBuffer.SetIndex(offset, offset + length));
+        }
+
+        #endregion 方法
     }
 }

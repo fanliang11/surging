@@ -5,9 +5,18 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Mqtt.Internal.Runtime
 {
-    public class MqttRemoteInvokeContext: RemoteInvokeContext
+    /// <summary>
+    /// Defines the <see cref="MqttRemoteInvokeContext" />
+    /// </summary>
+    public class MqttRemoteInvokeContext : RemoteInvokeContext
     {
-         public string topic { get; set; }
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the topic
+        /// </summary>
+        public string topic { get; set; }
+
+        #endregion 属性
     }
 }
- 

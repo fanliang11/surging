@@ -3,18 +3,41 @@ using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack
 {
+    /// <summary>
+    /// Defines the <see cref="MessagePackTransportMessageCodecFactory" />
+    /// </summary>
     public sealed class MessagePackTransportMessageCodecFactory : ITransportMessageCodecFactory
     {
-        #region Field
-        private readonly ITransportMessageEncoder _transportMessageEncoder = new MessagePackTransportMessageEncoder();
-        private readonly ITransportMessageDecoder _transportMessageDecoder = new MessagePackTransportMessageDecoder();
-        #endregion Field
+        #region 字段
 
-        #region Implementation of ITransportMessageCodecFactory
+        /// <summary>
+        /// Defines the _transportMessageDecoder
+        /// </summary>
+        private readonly ITransportMessageDecoder _transportMessageDecoder = new MessagePackTransportMessageDecoder();
+
+        /// <summary>
+        /// Defines the _transportMessageEncoder
+        /// </summary>
+        private readonly ITransportMessageEncoder _transportMessageEncoder = new MessagePackTransportMessageEncoder();
+
+        #endregion 字段
+
+        #region 方法
 
         /// <inheritdoc />
         /// <summary>
-        /// 获取编码器 
+        /// 获取解码器
+        /// </summary>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ITransportMessageDecoder GetDecoder()
+        {
+            return _transportMessageDecoder;
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// 获取编码器
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -23,16 +46,6 @@ namespace Surging.Core.Codec.MessagePack
             return _transportMessageEncoder;
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        /// 获取解码器 
-        /// </summary>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ITransportMessageDecoder GetDecoder()
-        {
-            return _transportMessageDecoder;
-        }
-        #endregion Implementation of ITransportMessageCodecFactory
+        #endregion 方法
     }
 }

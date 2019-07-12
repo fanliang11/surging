@@ -13,9 +13,25 @@ using CPlatformAppConfig = Surging.Core.CPlatform.AppConfig;
 
 namespace Surging.Core.AutoMapper
 {
+    /// <summary>
+    /// Defines the <see cref="AppConfig" />
+    /// </summary>
     public class AppConfig
     {
+        #region 字段
 
+        /// <summary>
+        /// Defines the _referenceAssembly
+        /// </summary>
+        private static List<Assembly> _referenceAssembly = new List<Assembly>();
+
+        #endregion 字段
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Assemblies
+        /// </summary>
         public static IEnumerable<Assembly> Assemblies
         {
             get
@@ -30,6 +46,14 @@ namespace Surging.Core.AutoMapper
             }
         }
 
+        /// <summary>
+        /// Gets or sets the AssembliesStrings
+        /// </summary>
+        public static IEnumerable<string> AssembliesStrings { get; internal set; }
+
+        /// <summary>
+        /// Gets the Profiles
+        /// </summary>
         public static IEnumerable<Profile> Profiles
         {
             get
@@ -54,7 +78,6 @@ namespace Surging.Core.AutoMapper
                                 if (logger.IsEnabled(LogLevel.Warning))
                                     logger.LogWarning($"构建profile失败,profile类型为{profileType.FullName}");
                             }
-
                         }
                     }
                 }
@@ -62,6 +85,41 @@ namespace Surging.Core.AutoMapper
             }
         }
 
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The GetAllAssemblyFiles
+        /// </summary>
+        /// <param name="parentDir">The parentDir<see cref="string"/></param>
+        /// <returns>The <see cref="List{string}"/></returns>
+        private static List<string> GetAllAssemblyFiles(string parentDir)
+        {
+            var notRelatedFile = CPlatformAppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var relatedFile = CPlatformAppConfig.ServerOptions.RelatedAssemblyFiles;
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac.\\w*{0}",
+               string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
+            Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            if (!string.IsNullOrEmpty(relatedFile))
+            {
+                return
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a) && relatedRegex.IsMatch(a)).ToList();
+            }
+            else
+            {
+                return
+                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
+                        a => !notRelatedRegex.IsMatch(a)).ToList();
+            }
+        }
+
+        /// <summary>
+        /// The GetAllReferenceAssemblies
+        /// </summary>
+        /// <returns>The <see cref="IEnumerable{Assembly}"/></returns>
         private static IEnumerable<Assembly> GetAllReferenceAssemblies()
         {
             var serviceEngine = ServiceLocator.GetService<IServiceEngine>() as VirtualPathProviderServiceEngine;
@@ -77,10 +135,39 @@ namespace Surging.Core.AutoMapper
             return referenceAssemblies;
         }
 
-        private static List<Assembly> _referenceAssembly = new List<Assembly>();
+        /// <summary>
+        /// The GetPaths
+        /// </summary>
+        /// <param name="virtualPaths">The virtualPaths<see cref="string[]"/></param>
+        /// <returns>The <see cref="string[]"/></returns>
+        private static string[] GetPaths(params string[] virtualPaths)
+        {
+            var directories = new List<string>(virtualPaths.Where(p => !string.IsNullOrEmpty(p)));
+            string rootPath = string.IsNullOrEmpty(CPlatformAppConfig.ServerOptions.RootPath) ?
+                AppContext.BaseDirectory : CPlatformAppConfig.ServerOptions.RootPath;
+            var virPaths = virtualPaths;
+            foreach (var virtualPath in virtualPaths)
+            {
+                var path = Path.Combine(rootPath, virtualPath);
+                if (Directory.Exists(path))
+                {
+                    var dirs = Directory.GetDirectories(path);
+                    directories.AddRange(dirs.Select(dir => Path.Combine(virtualPath, new DirectoryInfo(dir).Name)));
+                }
+                else
+                {
+                    directories.Remove(virtualPath);
+                    virPaths = null;
+                }
+            }
+            return directories.Any() ? directories.Distinct().ToArray() : virPaths;
+        }
 
-        public static IEnumerable<string> AssembliesStrings { get; internal set; }
-
+        /// <summary>
+        /// The GetReferenceAssembly
+        /// </summary>
+        /// <param name="virtualPaths">The virtualPaths<see cref="string[]"/></param>
+        /// <returns>The <see cref="List{Assembly}"/></returns>
         private static List<Assembly> GetReferenceAssembly(params string[] virtualPaths)
         {
             var refAssemblies = new List<Assembly>();//Assembly 通过此类能够载入操纵一个程序集，并获取程序集内部信息
@@ -110,50 +197,6 @@ namespace Surging.Core.AutoMapper
             return result;
         }
 
-        private static List<string> GetAllAssemblyFiles(string parentDir)
-        {
-            var notRelatedFile = CPlatformAppConfig.ServerOptions.NotRelatedAssemblyFiles;
-            var relatedFile = CPlatformAppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac.\\w*{0}",
-               string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
-            Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            if (!string.IsNullOrEmpty(relatedFile))
-            {
-                return
-                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
-                        a => !notRelatedRegex.IsMatch(a) && relatedRegex.IsMatch(a)).ToList();
-            }
-            else
-            {
-                return
-                    Directory.GetFiles(parentDir, "*.dll").Select(Path.GetFullPath).Where(
-                        a => !notRelatedRegex.IsMatch(a)).ToList();
-            }
-        }
-
-        private static string[] GetPaths(params string[] virtualPaths)
-        {
-            var directories = new List<string>(virtualPaths.Where(p => !string.IsNullOrEmpty(p)));
-            string rootPath = string.IsNullOrEmpty(CPlatformAppConfig.ServerOptions.RootPath) ?
-                AppContext.BaseDirectory : CPlatformAppConfig.ServerOptions.RootPath;
-            var virPaths = virtualPaths;
-            foreach (var virtualPath in virtualPaths)
-            {
-                var path = Path.Combine(rootPath, virtualPath);
-                if (Directory.Exists(path))
-                {
-                    var dirs = Directory.GetDirectories(path);
-                    directories.AddRange(dirs.Select(dir => Path.Combine(virtualPath, new DirectoryInfo(dir).Name)));
-                }
-                else
-                {
-                    directories.Remove(virtualPath);
-                    virPaths = null;
-                }
-            }
-            return directories.Any() ? directories.Distinct().ToArray() : virPaths;
-        }
-
+        #endregion 方法
     }
 }

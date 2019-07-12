@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Runtime.Client;
 using System.Collections.Generic;
@@ -9,20 +11,65 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Microsoft.Extensions.DependencyInjection;
-
-#if !NET
-
-using Microsoft.Extensions.DependencyModel;
 
 #endif
 
 namespace Surging.Core.ProxyGenerator.Utilitys
 {
+    /// <summary>
+    /// Defines the <see cref="CompilationUtilitys" />
+    /// </summary>
     public static class CompilationUtilitys
     {
-        #region Public Method
+        #region 方法
 
+        /// <summary>
+        /// The Compile
+        /// </summary>
+        /// <param name="assemblyInfo">The assemblyInfo<see cref="AssemblyInfo"/></param>
+        /// <param name="trees">The trees<see cref="IEnumerable{SyntaxTree}"/></param>
+        /// <param name="references">The references<see cref="IEnumerable{MetadataReference}"/></param>
+        /// <param name="logger">The logger<see cref="ILogger"/></param>
+        /// <returns>The <see cref="MemoryStream"/></returns>
+        public static MemoryStream Compile(AssemblyInfo assemblyInfo, IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references, ILogger logger = null)
+        {
+            return Compile(assemblyInfo.Title, assemblyInfo, trees, references, logger);
+        }
+
+        /// <summary>
+        /// The Compile
+        /// </summary>
+        /// <param name="assemblyName">The assemblyName<see cref="string"/></param>
+        /// <param name="assemblyInfo">The assemblyInfo<see cref="AssemblyInfo"/></param>
+        /// <param name="trees">The trees<see cref="IEnumerable{SyntaxTree}"/></param>
+        /// <param name="references">The references<see cref="IEnumerable{MetadataReference}"/></param>
+        /// <param name="logger">The logger<see cref="ILogger"/></param>
+        /// <returns>The <see cref="MemoryStream"/></returns>
+        public static MemoryStream Compile(string assemblyName, AssemblyInfo assemblyInfo, IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references, ILogger logger = null)
+        {
+            trees = trees.Concat(new[] { GetAssemblyInfo(assemblyInfo) });
+            var compilation = CSharpCompilation.Create(assemblyName, trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            var stream = new MemoryStream();
+            var result = compilation.Emit(stream);
+            if (!result.Success && logger != null)
+            {
+                foreach (var message in result.Diagnostics.Select(i => i.ToString()))
+                {
+                    logger.LogError(message);
+                }
+                return null;
+            }
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
+
+        /// <summary>
+        /// The CompileClientProxy
+        /// </summary>
+        /// <param name="trees">The trees<see cref="IEnumerable{SyntaxTree}"/></param>
+        /// <param name="references">The references<see cref="IEnumerable{MetadataReference}"/></param>
+        /// <param name="logger">The logger<see cref="ILogger"/></param>
+        /// <returns>The <see cref="MemoryStream"/></returns>
         public static MemoryStream CompileClientProxy(IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references, ILogger logger = null)
         {
 #if !NET
@@ -45,33 +92,11 @@ namespace Surging.Core.ProxyGenerator.Utilitys
             return Compile(AssemblyInfo.Create("Surging.Cores.ClientProxys"), trees, references, logger);
         }
 
-        public static MemoryStream Compile(AssemblyInfo assemblyInfo, IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references, ILogger logger = null)
-        {
-            return Compile(assemblyInfo.Title, assemblyInfo, trees, references, logger);
-        }
-
-        public static MemoryStream Compile(string assemblyName, AssemblyInfo assemblyInfo, IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references, ILogger logger = null)
-        {
-            trees = trees.Concat(new[] { GetAssemblyInfo(assemblyInfo) });
-            var compilation = CSharpCompilation.Create(assemblyName, trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-            var stream = new MemoryStream();
-            var result = compilation.Emit(stream);
-            if (!result.Success && logger != null)
-            {
-                foreach (var message in result.Diagnostics.Select(i => i.ToString()))
-                {
-                    logger.LogError(message);
-                }
-                return null;
-            }
-            stream.Seek(0, SeekOrigin.Begin);
-            return stream;
-        }
-
-        #endregion Public Method
-
-        #region Private Method
-
+        /// <summary>
+        /// The GetAssemblyInfo
+        /// </summary>
+        /// <param name="info">The info<see cref="AssemblyInfo"/></param>
+        /// <returns>The <see cref="SyntaxTree"/></returns>
         private static SyntaxTree GetAssemblyInfo(AssemblyInfo info)
         {
             return CompilationUnit()
@@ -226,20 +251,61 @@ namespace Surging.Core.ProxyGenerator.Utilitys
                 .SyntaxTree;
         }
 
-        #endregion Private Method
+        #endregion 方法
 
-        #region Help Class
-
+        /// <summary>
+        /// Defines the <see cref="AssemblyInfo" />
+        /// </summary>
         public class AssemblyInfo
         {
-            public string Title { get; set; }
-            public string Product { get; set; }
-            public string Copyright { get; set; }
-            public string Guid { get; set; }
-            public string Version { get; set; }
-            public string FileVersion { get; set; }
+            #region 属性
+
+            /// <summary>
+            /// Gets or sets a value indicating whether ComVisible
+            /// </summary>
             public bool ComVisible { get; set; }
 
+            /// <summary>
+            /// Gets or sets the Copyright
+            /// </summary>
+            public string Copyright { get; set; }
+
+            /// <summary>
+            /// Gets or sets the FileVersion
+            /// </summary>
+            public string FileVersion { get; set; }
+
+            /// <summary>
+            /// Gets or sets the Guid
+            /// </summary>
+            public string Guid { get; set; }
+
+            /// <summary>
+            /// Gets or sets the Product
+            /// </summary>
+            public string Product { get; set; }
+
+            /// <summary>
+            /// Gets or sets the Title
+            /// </summary>
+            public string Title { get; set; }
+
+            /// <summary>
+            /// Gets or sets the Version
+            /// </summary>
+            public string Version { get; set; }
+
+            #endregion 属性
+
+            #region 方法
+
+            /// <summary>
+            /// The Create
+            /// </summary>
+            /// <param name="name">The name<see cref="string"/></param>
+            /// <param name="copyright">The copyright<see cref="string"/></param>
+            /// <param name="version">The version<see cref="string"/></param>
+            /// <returns>The <see cref="AssemblyInfo"/></returns>
             public static AssemblyInfo Create(string name, string copyright = "Copyright ©  Surging", string version = "0.0.0.1")
             {
                 return new AssemblyInfo
@@ -253,8 +319,8 @@ namespace Surging.Core.ProxyGenerator.Utilitys
                     FileVersion = version
                 };
             }
-        }
 
-        #endregion Help Class
+            #endregion 方法
+        }
     }
 }

@@ -1,4 +1,3 @@
-#region License
 /*
  * Chunk.cs
  *
@@ -28,64 +27,87 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Gonzalo Paniagua Javier <gonzalo@ximian.com>
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore.Net
 {
-  internal class Chunk
-  {
-    #region Private Fields
-
-    private byte[] _data;
-    private int    _offset;
-
-    #endregion
-
-    #region Public Constructors
-
-    public Chunk (byte[] data)
+    /// <summary>
+    /// Defines the <see cref="Chunk" />
+    /// </summary>
+    internal class Chunk
     {
-      _data = data;
+        #region 字段
+
+        /// <summary>
+        /// Defines the _data
+        /// </summary>
+        private byte[] _data;
+
+        /// <summary>
+        /// Defines the _offset
+        /// </summary>
+        private int _offset;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Chunk"/> class.
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        public Chunk(byte[] data)
+        {
+            _data = data;
+        }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the ReadLeft
+        /// </summary>
+        public int ReadLeft
+        {
+            get
+            {
+                return _data.Length - _offset;
+            }
+        }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Read
+        /// </summary>
+        /// <param name="buffer">The buffer<see cref="byte[]"/></param>
+        /// <param name="offset">The offset<see cref="int"/></param>
+        /// <param name="count">The count<see cref="int"/></param>
+        /// <returns>The <see cref="int"/></returns>
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            var left = _data.Length - _offset;
+            if (left == 0)
+                return left;
+
+            if (count > left)
+                count = left;
+
+            Buffer.BlockCopy(_data, _offset, buffer, offset, count);
+            _offset += count;
+
+            return count;
+        }
+
+        #endregion 方法
     }
-
-    #endregion
-
-    #region Public Properties
-
-    public int ReadLeft {
-      get {
-        return _data.Length - _offset;
-      }
-    }
-
-    #endregion
-
-    #region Public Methods
-
-    public int Read (byte[] buffer, int offset, int count)
-    {
-      var left = _data.Length - _offset;
-      if (left == 0)
-        return left;
-
-      if (count > left)
-        count = left;
-
-      Buffer.BlockCopy (_data, _offset, buffer, offset, count);
-      _offset += count;
-
-      return count;
-    }
-
-    #endregion
-  }
 }

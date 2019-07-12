@@ -11,15 +11,33 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.KestrelHttpServer
 {
-   public class HttpServiceHost : ServiceHostAbstract
+    /// <summary>
+    /// Defines the <see cref="HttpServiceHost" />
+    /// </summary>
+    public class HttpServiceHost : ServiceHostAbstract
     {
-        #region Field
+        #region 字段
 
+        /// <summary>
+        /// Defines the _messageListenerFactory
+        /// </summary>
         private readonly Func<EndPoint, Task<IMessageListener>> _messageListenerFactory;
+
+        /// <summary>
+        /// Defines the _serverMessageListener
+        /// </summary>
         private IMessageListener _serverMessageListener;
 
-        #endregion Field
+        #endregion 字段
 
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpServiceHost"/> class.
+        /// </summary>
+        /// <param name="messageListenerFactory">The messageListenerFactory<see cref="Func{EndPoint, Task{IMessageListener}}"/></param>
+        /// <param name="serviceExecutor">The serviceExecutor<see cref="IServiceExecutor"/></param>
+        /// <param name="httpMessageListener">The httpMessageListener<see cref="HttpMessageListener"/></param>
         public HttpServiceHost(Func<EndPoint, Task<IMessageListener>> messageListenerFactory, IServiceExecutor serviceExecutor, HttpMessageListener httpMessageListener) : base(serviceExecutor)
         {
             _messageListenerFactory = messageListenerFactory;
@@ -33,9 +51,13 @@ namespace Surging.Core.KestrelHttpServer
             };
         }
 
-        #region Overrides of ServiceHostAbstract
+        #endregion 构造函数
 
+        #region 方法
 
+        /// <summary>
+        /// The Dispose
+        /// </summary>
         public override void Dispose()
         {
             (_serverMessageListener as IDisposable)?.Dispose();
@@ -48,19 +70,31 @@ namespace Surging.Core.KestrelHttpServer
         /// <returns>一个任务。</returns>
         public override async Task StartAsync(EndPoint endPoint)
         {
-             await _messageListenerFactory(endPoint); 
+            await _messageListenerFactory(endPoint);
         }
 
+        /// <summary>
+        /// The StartAsync
+        /// </summary>
+        /// <param name="ip">The ip<see cref="string"/></param>
+        /// <param name="port">The port<see cref="int"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public override async Task StartAsync(string ip, int port)
         {
-            await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort??0));
+            await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort ?? 0));
         }
 
-        #endregion Overrides of ServiceHostAbstract
-
+        /// <summary>
+        /// The MessageListener_Received
+        /// </summary>
+        /// <param name="sender">The sender<see cref="IMessageSender"/></param>
+        /// <param name="message">The message<see cref="TransportMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
         {
             await ServiceExecutor.ExecuteAsync(sender, message);
         }
+
+        #endregion 方法
     }
-} 
+}

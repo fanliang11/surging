@@ -8,9 +8,26 @@ using System.Text;
 
 namespace Surging.Core.Nlog
 {
+    /// <summary>
+    /// Defines the <see cref="NLogModule" />
+    /// </summary>
     public class NLogModule : EnginePartModule
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the nlogConfigFile
+        /// </summary>
         private string nlogConfigFile = "${LogPath}|NLog.config";
+
+        #endregion 字段
+
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             var serviceProvider = context.ServiceProvoider;
@@ -28,7 +45,8 @@ namespace Surging.Core.Nlog
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-           
         }
+
+        #endregion 方法
     }
 }

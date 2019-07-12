@@ -7,19 +7,35 @@ using System.Text;
 
 namespace Surging.Core.ProxyGenerator
 {
-    public static class  RegistrationExtensions
+    /// <summary>
+    /// Defines the <see cref="RegistrationExtensions" />
+    /// </summary>
+    public static class RegistrationExtensions
     {
-        public static void AddClientIntercepted(this ContainerBuilderWrapper builder,  Type interceptorServiceType)
-        { 
+        #region 方法
+
+        /// <summary>
+        /// The AddClientIntercepted
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        /// <param name="interceptorServiceType">The interceptorServiceType<see cref="Type"/></param>
+        public static void AddClientIntercepted(this ContainerBuilderWrapper builder, Type interceptorServiceType)
+        {
             builder.RegisterType(interceptorServiceType).As<IInterceptor>().SingleInstance();
             builder.RegisterType<InterceptorProvider>().As<IInterceptorProvider>().SingleInstance();
         }
 
+        /// <summary>
+        /// The AddClientIntercepted
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
+        /// <param name="interceptorServiceTypes">The interceptorServiceTypes<see cref="Type[]"/></param>
         public static void AddClientIntercepted(this ContainerBuilderWrapper builder, params Type[] interceptorServiceTypes)
-        { 
+        {
             builder.RegisterTypes(interceptorServiceTypes).As<IInterceptor>().SingleInstance();
             builder.RegisterType<InterceptorProvider>().As<IInterceptorProvider>().SingleInstance();
-     
         }
+
+        #endregion 方法
     }
 }

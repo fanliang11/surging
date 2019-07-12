@@ -8,15 +8,25 @@ using System.Reflection;
 
 namespace Surging.Core.Codec.ProtoBuffer.Messages
 {
+    /// <summary>
+    /// Defines the <see cref="DynamicItem" />
+    /// </summary>
     [ProtoContract]
     public class DynamicItem
     {
-        #region Constructor
+        #region 构造函数
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicItem"/> class.
+        /// </summary>
         public DynamicItem()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DynamicItem"/> class.
+        /// </summary>
+        /// <param name="value">The value<see cref="object"/></param>
         public DynamicItem(object value)
         {
             if (value == null)
@@ -35,17 +45,30 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
                 Content = SerializerUtilitys.Serialize(value);
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Property
+        #region 属性
 
-        [ProtoMember(1)]
-        public string TypeName { get; set; }
+        /// <summary>
+        /// Gets or sets the Content
+        /// </summary>
         [ProtoMember(2)]
         public byte[] Content { get; set; }
-        #endregion Property
 
-        #region Public Method
+        /// <summary>
+        /// Gets or sets the TypeName
+        /// </summary>
+        [ProtoMember(1)]
+        public string TypeName { get; set; }
+
+        #endregion 属性
+
+        #region 方法
+
+        /// <summary>
+        /// The Get
+        /// </summary>
+        /// <returns>The <see cref="object"/></returns>
         public object Get()
         {
             if (Content == null || TypeName == null)
@@ -60,8 +83,8 @@ namespace Surging.Core.Codec.ProtoBuffer.Messages
             {
                 return SerializerUtilitys.Deserialize(Content, typeName);
             }
-            
         }
-        #endregion Public Method
+
+        #endregion 方法
     }
 }

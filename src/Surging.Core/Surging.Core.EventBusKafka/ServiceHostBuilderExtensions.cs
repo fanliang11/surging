@@ -7,8 +7,18 @@ using System.Text;
 
 namespace Surging.Core.EventBusKafka
 {
-   public static  class ServiceHostBuilderExtensions
+    /// <summary>
+    /// Defines the <see cref="ServiceHostBuilderExtensions" />
+    /// </summary>
+    public static class ServiceHostBuilderExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The SubscribeAt
+        /// </summary>
+        /// <param name="hostBuilder">The hostBuilder<see cref="IServiceHostBuilder"/></param>
+        /// <returns>The <see cref="IServiceHostBuilder"/></returns>
         public static IServiceHostBuilder SubscribeAt(this IServiceHostBuilder hostBuilder)
         {
             return hostBuilder.MapServices(mapper =>
@@ -16,5 +26,7 @@ namespace Surging.Core.EventBusKafka
                 mapper.Resolve<ISubscriptionAdapt>().SubscribeAt();
             });
         }
+
+        #endregion 方法
     }
 }

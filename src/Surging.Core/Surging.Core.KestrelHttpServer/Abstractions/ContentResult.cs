@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer
 {
-    class ContentResult
+    /// <summary>
+    /// Defines the <see cref="ContentResult" />
+    /// </summary>
+    internal class ContentResult
     {
     }
 }

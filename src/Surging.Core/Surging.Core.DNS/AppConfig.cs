@@ -6,10 +6,23 @@ using System.Text;
 
 namespace Surging.Core.DNS
 {
-    public static  class AppConfig
+    /// <summary>
+    /// Defines the <see cref="AppConfig" />
+    /// </summary>
+    public static class AppConfig
     {
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the Configuration
+        /// </summary>
         public static IConfigurationRoot Configuration { get; set; }
 
+        /// <summary>
+        /// Gets or sets the DnsOption
+        /// </summary>
         public static DnsOption DnsOption { get; set; }
+
+        #endregion 属性
     }
 }

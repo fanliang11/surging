@@ -15,21 +15,50 @@ using WebSocketCore.Server;
 
 namespace Surging.Core.Protocol.WS.Runtime.Implementation
 {
+    /// <summary>
+    /// Defines the <see cref="DefaultWSServiceEntryProvider" />
+    /// </summary>
     public class DefaultWSServiceEntryProvider : IWSServiceEntryProvider
     {
-        #region Field
+        #region 字段
 
-        private readonly IEnumerable<Type> _types;
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
         private readonly ILogger<DefaultWSServiceEntryProvider> _logger;
+
+        /// <summary>
+        /// Defines the _serviceProvider
+        /// </summary>
         private readonly CPlatformContainer _serviceProvider;
-        private List<WSServiceEntry> _wSServiceEntries;
+
+        /// <summary>
+        /// Defines the _types
+        /// </summary>
+        private readonly IEnumerable<Type> _types;
+
+        /// <summary>
+        /// Defines the _options
+        /// </summary>
         private WebSocketOptions _options;
 
-        #endregion Field
+        /// <summary>
+        /// Defines the _wSServiceEntries
+        /// </summary>
+        private List<WSServiceEntry> _wSServiceEntries;
 
-        #region Constructor
+        #endregion 字段
 
-        public DefaultWSServiceEntryProvider(IServiceEntryProvider  serviceEntryProvider,
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultWSServiceEntryProvider"/> class.
+        /// </summary>
+        /// <param name="serviceEntryProvider">The serviceEntryProvider<see cref="IServiceEntryProvider"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{DefaultWSServiceEntryProvider}"/></param>
+        /// <param name="serviceProvider">The serviceProvider<see cref="CPlatformContainer"/></param>
+        /// <param name="options">The options<see cref="WebSocketOptions"/></param>
+        public DefaultWSServiceEntryProvider(IServiceEntryProvider serviceEntryProvider,
             ILogger<DefaultWSServiceEntryProvider> logger,
             CPlatformContainer serviceProvider,
             WebSocketOptions options)
@@ -40,9 +69,38 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
             _options = options;
         }
 
-        #endregion Constructor
+        #endregion 构造函数
 
-        #region Implementation of IServiceEntryProvider
+        #region 方法
+
+        /// <summary>
+        /// The CreateServiceEntry
+        /// </summary>
+        /// <param name="service">The service<see cref="Type"/></param>
+        /// <returns>The <see cref="WSServiceEntry"/></returns>
+        public WSServiceEntry CreateServiceEntry(Type service)
+        {
+            WSServiceEntry result = null;
+            var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>();
+            var behaviorContract = service.GetCustomAttribute<BehaviorContractAttribute>();
+            var objInstance = _serviceProvider.GetInstances(service);
+            var behavior = objInstance as WebSocketBehavior;
+            var path = RoutePatternParser.Parse(routeTemplate.RouteTemplate, service.Name);
+            if (path.Length > 0 && path[0] != '/')
+                path = $"/{path}";
+            if (behavior != null)
+                result = new WSServiceEntry
+                {
+                    Behavior = behavior,
+                    Type = behavior.GetType(),
+                    Path = path,
+                    FuncBehavior = () =>
+                    {
+                        return GetWebSocketBehavior(service, _options?.Behavior, behaviorContract);
+                    }
+                };
+            return result;
+        }
 
         /// <summary>
         /// 获取服务条目集合。
@@ -69,33 +127,15 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
             }
             return _wSServiceEntries;
         }
-        #endregion
 
-        public WSServiceEntry CreateServiceEntry(Type service)
-        {
-            WSServiceEntry result = null;
-            var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>();
-            var behaviorContract = service.GetCustomAttribute<BehaviorContractAttribute>();
-            var objInstance = _serviceProvider.GetInstances(service);
-            var behavior = objInstance as WebSocketBehavior;
-            var path = RoutePatternParser.Parse(routeTemplate.RouteTemplate, service.Name);
-            if (path.Length>0 && path[0] != '/')
-                path = $"/{path}";
-            if (behavior != null)
-                result = new WSServiceEntry
-                {
-                    Behavior = behavior,
-                    Type = behavior.GetType(),
-                    Path = path,
-                    FuncBehavior = () =>
-                    {
-                        return GetWebSocketBehavior(service, _options?.Behavior, behaviorContract);
-                    }
-                };
-            return result;
-        }
-
-        private WebSocketBehavior GetWebSocketBehavior(Type service,BehaviorOption option, BehaviorContractAttribute contractAttribute)
+        /// <summary>
+        /// The GetWebSocketBehavior
+        /// </summary>
+        /// <param name="service">The service<see cref="Type"/></param>
+        /// <param name="option">The option<see cref="BehaviorOption"/></param>
+        /// <param name="contractAttribute">The contractAttribute<see cref="BehaviorContractAttribute"/></param>
+        /// <returns>The <see cref="WebSocketBehavior"/></returns>
+        private WebSocketBehavior GetWebSocketBehavior(Type service, BehaviorOption option, BehaviorContractAttribute contractAttribute)
         {
             var wsBehavior = _serviceProvider.GetInstances(service) as WebSocketBehavior;
             if (option != null)
@@ -109,8 +149,10 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
                 wsBehavior.IgnoreExtensions = contractAttribute.IgnoreExtensions;
                 wsBehavior.Protocol = contractAttribute.Protocol;
                 wsBehavior.EmitOnPing = contractAttribute.EmitOnPing;
-            } 
+            }
             return wsBehavior;
         }
+
+        #endregion 方法
     }
 }

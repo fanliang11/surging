@@ -7,8 +7,31 @@ using System.Text;
 
 namespace Surging.Core.ProxyGenerator.Utilitys
 {
-    class AttributeFactory
+    /// <summary>
+    /// Defines the <see cref="AttributeFactory" />
+    /// </summary>
+    internal class AttributeFactory
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the m_attributeCreator
+        /// </summary>
+        private Func<object> m_attributeCreator;
+
+        /// <summary>
+        /// Defines the m_propertySetters
+        /// </summary>
+        private List<Action<object>> m_propertySetters;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AttributeFactory"/> class.
+        /// </summary>
+        /// <param name="data">The data<see cref="CustomAttributeData"/></param>
         public AttributeFactory(CustomAttributeData data)
         {
             this.Data = data;
@@ -27,11 +50,23 @@ namespace Surging.Core.ProxyGenerator.Utilitys
             }
         }
 
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the Data
+        /// </summary>
         public CustomAttributeData Data { get; private set; }
 
-        private Func<object> m_attributeCreator;
-        private List<Action<object>> m_propertySetters;
+        #endregion 属性
 
+        #region 方法
+
+        /// <summary>
+        /// The Create
+        /// </summary>
+        /// <returns>The <see cref="Attribute"/></returns>
         public Attribute Create()
         {
             var attribute = this.m_attributeCreator();
@@ -43,5 +78,7 @@ namespace Surging.Core.ProxyGenerator.Utilitys
 
             return (Attribute)attribute;
         }
+
+        #endregion 方法
     }
 }

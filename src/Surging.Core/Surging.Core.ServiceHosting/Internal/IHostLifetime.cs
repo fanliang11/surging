@@ -6,11 +6,31 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.ServiceHosting.Internal
 {
-   public interface IHostLifetime
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IHostLifetime" />
+    /// </summary>
+    public interface IHostLifetime
     {
-         
-        Task WaitForStartAsync(CancellationToken cancellationToken);
- 
+        #region 方法
+
+        /// <summary>
+        /// The StopAsync
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         Task StopAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// The WaitForStartAsync
+        /// </summary>
+        /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        Task WaitForStartAsync(CancellationToken cancellationToken);
+
+        #endregion 方法
     }
+
+    #endregion 接口
 }

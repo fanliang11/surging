@@ -1,13 +1,24 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Surging.Core.Swagger;
 using Surging.Core.SwaggerGen;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+    /// <summary>
+    /// Defines the <see cref="SwaggerGenServiceCollectionExtensions" />
+    /// </summary>
     public static class SwaggerGenServiceCollectionExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The AddSwaggerGen
+        /// </summary>
+        /// <param name="services">The services<see cref="IServiceCollection"/></param>
+        /// <param name="setupAction">The setupAction<see cref="Action{SwaggerGenOptions}"/></param>
+        /// <returns>The <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddSwaggerGen(
             this IServiceCollection services,
             Action<SwaggerGenOptions> setupAction = null)
@@ -30,11 +41,18 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        /// <summary>
+        /// The ConfigureSwaggerGen
+        /// </summary>
+        /// <param name="services">The services<see cref="IServiceCollection"/></param>
+        /// <param name="setupAction">The setupAction<see cref="Action{SwaggerGenOptions}"/></param>
         public static void ConfigureSwaggerGen(
             this IServiceCollection services,
             Action<SwaggerGenOptions> setupAction)
         {
             services.Configure(setupAction);
         }
+
+        #endregion 方法
     }
 }

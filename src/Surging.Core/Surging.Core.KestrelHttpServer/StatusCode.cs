@@ -4,10 +4,28 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer
 {
-   public  enum StatusCode
+    #region 枚举
+
+    /// <summary>
+    /// Defines the StatusCode
+    /// </summary>
+    public enum StatusCode
     {
+        /// <summary>
+        /// Defines the Success
+        /// </summary>
         Success = 200,
+
+        /// <summary>
+        /// Defines the RequestError
+        /// </summary>
         RequestError = 400,
+
+        /// <summary>
+        /// Defines the AuthorizationFailed
+        /// </summary>
         AuthorizationFailed = 401,
     }
+
+    #endregion 枚举
 }

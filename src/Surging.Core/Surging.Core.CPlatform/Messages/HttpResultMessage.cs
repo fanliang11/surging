@@ -4,12 +4,23 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Messages
 {
+    /// <summary>
+    /// Defines the <see cref="HttpResultMessage{T}" />
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class HttpResultMessage<T> : HttpResultMessage
     {
+        #region 属性
+
         /// <summary>
+        /// Gets or sets the Entity
         /// 数据集
         /// </summary>
         public T Entity { get; set; }
+
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 生成自定义服务数据集
@@ -42,19 +53,51 @@ namespace Surging.Core.CPlatform.Messages
                 Entity = entity
             };
         }
+
+        #endregion 方法
     }
 
+    /// <summary>
+    /// Defines the <see cref="HttpResultMessage" />
+    /// </summary>
     public class HttpResultMessage
     {
+        #region 构造函数
+
         /// <summary>
-        /// 生成错误信息
+        /// Initializes a new instance of the <see cref="HttpResultMessage"/> class.
         /// </summary>
-        /// <param name="message">返回客户端的消息</param>
-        /// <returns>返回服务数据集</returns>
-        public static HttpResultMessage Error(string message)
+        public HttpResultMessage()
         {
-            return new HttpResultMessage() { Message = message, IsSucceed = false };
+            IsSucceed = false;
+            Message = string.Empty;
         }
+
+        #endregion 构造函数
+
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets a value indicating whether IsSucceed
+        /// 状态值
+        /// </summary>
+        public bool IsSucceed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Message
+        /// 返回客户端的消息
+        /// </summary>
+        public string Message { get; set; }
+
+        /// <summary>
+        /// Gets or sets the StatusCode
+        /// 状态码
+        /// </summary>
+        public int StatusCode { get; set; }
+
+        #endregion 属性
+
+        #region 方法
 
         /// <summary>
         /// 生成服务器数据集
@@ -69,29 +112,15 @@ namespace Surging.Core.CPlatform.Messages
         }
 
         /// <summary>
-        /// 构造服务数据集
+        /// 生成错误信息
         /// </summary>
-        public HttpResultMessage()
+        /// <param name="message">返回客户端的消息</param>
+        /// <returns>返回服务数据集</returns>
+        public static HttpResultMessage Error(string message)
         {
-            IsSucceed = false;
-            Message = string.Empty;
+            return new HttpResultMessage() { Message = message, IsSucceed = false };
         }
 
-        /// <summary>
-        /// 状态值
-        /// </summary>
-
-        public bool IsSucceed { get; set; }
-
-        /// <summary>
-        ///返回客户端的消息
-        /// </summary>
-        public string Message { get; set; }
-
-        /// <summary>
-        /// 状态码
-        /// </summary>
-        public int StatusCode { get; set; }
+        #endregion 方法
     }
 }
- 

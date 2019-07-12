@@ -4,9 +4,23 @@ using System.Text;
 
 namespace Surging.Core.EventBusKafka.Implementation
 {
-   public enum KafkaConnectionType
+    #region 枚举
+
+    /// <summary>
+    /// Defines the KafkaConnectionType
+    /// </summary>
+    public enum KafkaConnectionType
     {
+        /// <summary>
+        /// Defines the Producer
+        /// </summary>
         Producer,
+
+        /// <summary>
+        /// Defines the Consumer
+        /// </summary>
         Consumer
     }
+
+    #endregion 枚举
 }

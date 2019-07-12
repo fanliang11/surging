@@ -8,128 +8,178 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Surging.Core.CPlatform {
+namespace Surging.Core.CPlatform
+{
     using System;
-    
-    
+
     /// <summary>
-    ///   一个强类型的资源类，用于查找本地化的字符串等。
+    /// 一个强类型的资源类，用于查找本地化的字符串等。
     /// </summary>
-    // 此类是由 StronglyTypedResourceBuilder
-    // 类通过类似于 ResGen 或 Visual Studio 的工具自动生成的。
-    // 若要添加或移除成员，请编辑 .ResX 文件，然后重新运行 ResGen
-    // (以 /str 作为命令选项)，或重新生成 VS 项目。
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class CPlatformResource {
-        
-        private static global::System.Resources.ResourceManager resourceMan;
-        
-        private static global::System.Globalization.CultureInfo resourceCulture;
-        
-        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal CPlatformResource() {
-        }
-        
+    internal class CPlatformResource
+    {
+        #region 字段
+
         /// <summary>
-        ///   返回此类使用的缓存的 ResourceManager 实例。
+        /// Defines the resourceCulture
+        /// </summary>
+        private static global::System.Globalization.CultureInfo resourceCulture;
+
+        /// <summary>
+        /// Defines the resourceMan
+        /// </summary>
+        private static global::System.Resources.ResourceManager resourceMan;
+
+        #endregion
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CPlatformResource"/> class.
+        /// </summary>
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        internal CPlatformResource()
+        {
+        }
+
+        #endregion
+
+        #region 属性
+
+        /// <summary>
+        /// Gets the ArgumentIsNullOrWhitespace
+        /// 查找类似 &quot;{0}&quot;参数不能为空 的本地化字符串。
+        /// </summary>
+        internal static string ArgumentIsNullOrWhitespace
+        {
+            get
+            {
+                return ResourceManager.GetString("ArgumentIsNullOrWhitespace", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the Culture
+        /// 使用此强类型资源类，为所有资源查找
+        ///   重写当前线程的 CurrentUICulture 属性。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
+                return resourceCulture;
+            }
+            set
+            {
+                resourceCulture = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the HttpException
+        /// 查找类似 调用远程配置终结点发生错误： {0} - {1} 的本地化字符串。
+        /// </summary>
+        internal static string HttpException
+        {
+            get
+            {
+                return ResourceManager.GetString("HttpException", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets the InvalidEndCharacter
+        /// 查找类似 {0} 不能以&apos;{1}&apos;结束 的本地化字符串。
+        /// </summary>
+        internal static string InvalidEndCharacter
+        {
+            get
+            {
+                return ResourceManager.GetString("InvalidEndCharacter", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets the InvalidStartCharacter
+        /// 查找类似 {0} 不能以&apos;{1}&apos;开始 的本地化字符串。
+        /// </summary>
+        internal static string InvalidStartCharacter
+        {
+            get
+            {
+                return ResourceManager.GetString("InvalidStartCharacter", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets the JSONParseException
+        /// 查找类似 不能解析JSON文本，行号 &apos;{0}&apos;: &apos;{1}&apos;. 的本地化字符串。
+        /// </summary>
+        internal static string JSONParseException
+        {
+            get
+            {
+                return ResourceManager.GetString("JSONParseException", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        /// Gets the ResourceManager
+        /// 返回此类使用的缓存的 ResourceManager 实例。
+        /// </summary>
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Surging.Core.CPlatform.CPlatformResource", typeof(CPlatformResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
-        ///   使用此强类型资源类，为所有资源查找
-        ///   重写当前线程的 CurrentUICulture 属性。
+        /// Gets the TemplateRoute_InvalidRouteTemplate
+        /// 查找类似 路由模板不能以&apos;/&apos;或&apos;〜&apos;字符开头。 的本地化字符串。
         /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
-                return resourceCulture;
-            }
-            set {
-                resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 &quot;{0}&quot;参数不能为空 的本地化字符串。
-        /// </summary>
-        internal static string ArgumentIsNullOrWhitespace {
-            get {
-                return ResourceManager.GetString("ArgumentIsNullOrWhitespace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 调用远程配置终结点发生错误： {0} - {1} 的本地化字符串。
-        /// </summary>
-        internal static string HttpException {
-            get {
-                return ResourceManager.GetString("HttpException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 {0} 不能以&apos;{1}&apos;结束 的本地化字符串。
-        /// </summary>
-        internal static string InvalidEndCharacter {
-            get {
-                return ResourceManager.GetString("InvalidEndCharacter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 {0} 不能以&apos;{1}&apos;开始 的本地化字符串。
-        /// </summary>
-        internal static string InvalidStartCharacter {
-            get {
-                return ResourceManager.GetString("InvalidStartCharacter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 不能解析JSON文本，行号 &apos;{0}&apos;: &apos;{1}&apos;. 的本地化字符串。
-        /// </summary>
-        internal static string JSONParseException {
-            get {
-                return ResourceManager.GetString("JSONParseException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 路由模板不能以&apos;/&apos;或&apos;〜&apos;字符开头。 的本地化字符串。
-        /// </summary>
-        internal static string TemplateRoute_InvalidRouteTemplate {
-            get {
+        internal static string TemplateRoute_InvalidRouteTemplate
+        {
+            get
+            {
                 return ResourceManager.GetString("TemplateRoute_InvalidRouteTemplate", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   查找类似 路由模板中有一个不完整的参数。 检查每个“{”字符是否具有匹配的&apos;}&apos;字符。 的本地化字符串。
+        /// Gets the TemplateRoute_MismatchedParameter
+        /// 查找类似 路由模板中有一个不完整的参数。 检查每个“{”字符是否具有匹配的&apos;}&apos;字符。 的本地化字符串。
         /// </summary>
-        internal static string TemplateRoute_MismatchedParameter {
-            get {
+        internal static string TemplateRoute_MismatchedParameter
+        {
+            get
+            {
                 return ResourceManager.GetString("TemplateRoute_MismatchedParameter", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   查找类似 此&apos;{0}&apos; JSON 令牌不支持，路径&apos;{1}&apos;,行&apos;{2}&apos;,位置&apos;{3}&apos; 的本地化字符串。
+        /// Gets the UnsupportedJSONToken
+        /// 查找类似 此&apos;{0}&apos; JSON 令牌不支持，路径&apos;{1}&apos;,行&apos;{2}&apos;,位置&apos;{3}&apos; 的本地化字符串。
         /// </summary>
-        internal static string UnsupportedJSONToken {
-            get {
+        internal static string UnsupportedJSONToken
+        {
+            get
+            {
                 return ResourceManager.GetString("UnsupportedJSONToken", resourceCulture);
             }
         }
+
+        #endregion
     }
 }

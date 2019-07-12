@@ -12,8 +12,16 @@ namespace Surging.Core.System.Intercept
         AllowMultiple = false)]
     public class CacheKeyAttribute : KeyAttribute
     {
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CacheKeyAttribute"/> class.
+        /// </summary>
+        /// <param name="sortIndex">The sortIndex<see cref="int"/></param>
         public CacheKeyAttribute(int sortIndex) : base(sortIndex)
         {
         }
+
+        #endregion 构造函数
     }
 }

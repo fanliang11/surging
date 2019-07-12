@@ -5,17 +5,26 @@ using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Client;
+using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.ProxyGenerator.Implementation;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using Surging.Core.CPlatform.Runtime.Server;
+using System.Text;
 
 namespace Surging.Core.ProxyGenerator
 {
-   public class ServiceProxyModule: EnginePartModule
+    /// <summary>
+    /// Defines the <see cref="ServiceProxyModule" />
+    /// </summary>
+    public class ServiceProxyModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             var serviceProvider = context.ServiceProvoider;
@@ -31,8 +40,8 @@ namespace Surging.Core.ProxyGenerator
                             {
                                 builder.Update(serviceProvider.Current.ComponentRegistry);
                                 serviceProvider.GetInstances<IServiceEntryManager>().UpdateEntries(serviceProvider.GetInstances<IEnumerable<IServiceEntryProvider>>());
-                            //  serviceProvider.GetInstances<IServiceProxyFactory>().RegisterProxType(result.Value.Item2.ToArray(), result.Value.Item1.ToArray());
-                            serviceProvider.GetInstances<IServiceRouteProvider>().RegisterRoutes(0);
+                                //  serviceProvider.GetInstances<IServiceProxyFactory>().RegisterProxType(result.Value.Item2.ToArray(), result.Value.Item1.ToArray());
+                                serviceProvider.GetInstances<IServiceRouteProvider>().RegisterRoutes(0);
                                 serviceProvider.GetInstances<IServiceProxyFactory>();
                             }
                         });
@@ -46,8 +55,8 @@ namespace Surging.Core.ProxyGenerator
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-
         }
-        
+
+        #endregion 方法
     }
 }

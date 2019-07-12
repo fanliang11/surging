@@ -8,8 +8,20 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Client
 {
-   public interface IServiceSubscribeManager
+    #region 接口
+
+    /// <summary>
+    /// Defines the <see cref="IServiceSubscribeManager" />
+    /// </summary>
+    public interface IServiceSubscribeManager
     {
+        #region 方法
+
+        /// <summary>
+        /// 清空所有的服务订阅者。
+        /// </summary>
+        /// <returns>一个任务。</returns>
+        Task ClearAsync();
 
         /// <summary>
         /// 获取所有可用的服务订阅者信息。
@@ -20,37 +32,27 @@ namespace Surging.Core.CPlatform.Runtime.Client
         /// <summary>
         /// 设置服务订阅者。
         /// </summary>
-        /// <param name="routes">服务路由集合。</param>
+        /// <param name="subscibers">The subscibers<see cref="IEnumerable{ServiceSubscriber}"/></param>
         /// <returns>一个任务。</returns>
         Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscibers);
 
-
-        /// <summary>
-        /// 清空所有的服务订阅者。
-        /// </summary>
-        /// <returns>一个任务。</returns>
-        Task ClearAsync();
+        #endregion 方法
     }
+
+    #endregion 接口
 
     /// <summary>
     /// 服务路由管理者扩展方法。
     /// </summary>
     public static class ServiceRouteManagerExtensions
     {
-        /// <summary>
-        /// 根据服务Id获取一个服务订阅者。
-        /// </summary>
-        /// <param name="serviceRouteManager">服务订阅管理者。</param>
-        /// <param name="serviceId">服务Id。</param>
-        /// <returns>服务路由。</returns>
-        public static async Task<ServiceSubscriber> GetAsync(this IServiceSubscribeManager  serviceSubscribeManager, string serviceId)
-        {
-            return (await serviceSubscribeManager.GetSubscribersAsync()).SingleOrDefault(i => i.ServiceDescriptor.Id == serviceId);
-        }
+        #region 方法
 
         /// <summary>
         /// 获取地址
         /// </summary>
+        /// <param name="serviceSubscribeManager">The serviceSubscribeManager<see cref="IServiceSubscribeManager"/></param>
+        /// <param name="condition">The condition<see cref="string"/></param>
         /// <returns></returns>
         public static async Task<IEnumerable<AddressModel>> GetAddressAsync(this IServiceSubscribeManager serviceSubscribeManager, string condition = null)
         {
@@ -81,6 +83,24 @@ namespace Surging.Core.CPlatform.Runtime.Client
             return result.Values;
         }
 
+        /// <summary>
+        /// 根据服务Id获取一个服务订阅者。
+        /// </summary>
+        /// <param name="serviceSubscribeManager">The serviceSubscribeManager<see cref="IServiceSubscribeManager"/></param>
+        /// <param name="serviceId">服务Id。</param>
+        /// <returns>服务路由。</returns>
+        public static async Task<ServiceSubscriber> GetAsync(this IServiceSubscribeManager serviceSubscribeManager, string serviceId)
+        {
+            return (await serviceSubscribeManager.GetSubscribersAsync()).SingleOrDefault(i => i.ServiceDescriptor.Id == serviceId);
+        }
+
+        /// <summary>
+        /// The GetServiceDescriptorAsync
+        /// </summary>
+        /// <param name="serviceSubscribeManager">The serviceSubscribeManager<see cref="IServiceSubscribeManager"/></param>
+        /// <param name="address">The address<see cref="string"/></param>
+        /// <param name="serviceId">The serviceId<see cref="string"/></param>
+        /// <returns>The <see cref="Task{IEnumerable{ServiceDescriptor}}"/></returns>
         public static async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(this IServiceSubscribeManager serviceSubscribeManager, string address, string serviceId = null)
         {
             var subscribers = await serviceSubscribeManager.GetSubscribersAsync();
@@ -95,5 +115,7 @@ namespace Surging.Core.CPlatform.Runtime.Client
                .Select(p => p.ServiceDescriptor);
             }
         }
+
+        #endregion 方法
     }
 }

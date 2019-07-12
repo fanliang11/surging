@@ -6,33 +6,55 @@ using System.Threading;
 
 namespace Surging.Core.Caching
 {
+    /// <summary>
+    /// Defines the <see cref="ObjectPool{T}" />
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ObjectPool<T>
     {
-        #region 
-        private int isTaked = 0;
-        private Queue<T> queue = new Queue<T>();
-        private Func<T> func = null;
-        private int currentResource = 0;
-        private int tryNewObject = 0;
-        private readonly int minSize = 1;
-        private readonly int maxSize = 50;
-        #endregion
-
-        #region private methods
-        private void Enter()
-        {
-            while (Interlocked.Exchange(ref isTaked, 1) != 0)
-            {
-            }
-        }
-        private void Leave()
-        {
-            Interlocked.Exchange(ref isTaked, 0);
-        }
-        #endregion
+        #region 字段
 
         /// <summary>
-        /// 构造一个对象池
+        /// Defines the maxSize
+        /// </summary>
+        private readonly int maxSize = 50;
+
+        /// <summary>
+        /// Defines the minSize
+        /// </summary>
+        private readonly int minSize = 1;
+
+        /// <summary>
+        /// Defines the currentResource
+        /// </summary>
+        private int currentResource = 0;
+
+        /// <summary>
+        /// Defines the func
+        /// </summary>
+        private Func<T> func = null;
+
+        /// <summary>
+        /// Defines the isTaked
+        /// </summary>
+        private int isTaked = 0;
+
+        /// <summary>
+        /// Defines the queue
+        /// </summary>
+        private Queue<T> queue = new Queue<T>();
+
+        /// <summary>
+        /// Defines the tryNewObject
+        /// </summary>
+        private int tryNewObject = 0;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectPool{T}"/> class.
         /// </summary>
         /// <param name="func">用来初始化对象的函数</param>
         /// <param name="minSize">对象池下限</param>
@@ -55,9 +77,14 @@ namespace Surging.Core.Caching
             this.func = func;
         }
 
+        #endregion 构造函数
+
+        #region 方法
+
         /// <summary>
         /// 从对象池中取一个对象出来, 执行完成以后会自动将对象放回池中
         /// </summary>
+        /// <returns>The <see cref="T"/></returns>
         public T GetObject()
         {
             var t = default(T);
@@ -87,5 +114,24 @@ namespace Surging.Core.Caching
             }
         }
 
+        /// <summary>
+        /// The Enter
+        /// </summary>
+        private void Enter()
+        {
+            while (Interlocked.Exchange(ref isTaked, 1) != 0)
+            {
+            }
+        }
+
+        /// <summary>
+        /// The Leave
+        /// </summary>
+        private void Leave()
+        {
+            Interlocked.Exchange(ref isTaked, 0);
+        }
+
+        #endregion 方法
     }
 }

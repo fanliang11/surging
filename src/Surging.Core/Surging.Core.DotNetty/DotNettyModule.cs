@@ -10,8 +10,17 @@ using Surging.Core.CPlatform.Transport.Codec;
 
 namespace Surging.Core.DotNetty
 {
+    /// <summary>
+    /// Defines the <see cref="DotNettyModule" />
+    /// </summary>
     public class DotNettyModule : EnginePartModule
     {
+        #region 方法
+
+        /// <summary>
+        /// The Initialize
+        /// </summary>
+        /// <param name="context">The context<see cref="AppModuleContext"/></param>
         public override void Initialize(AppModuleContext context)
         {
             base.Initialize(context);
@@ -41,6 +50,10 @@ namespace Surging.Core.DotNetty
             }
         }
 
+        /// <summary>
+        /// The RegisterDefaultProtocol
+        /// </summary>
+        /// <param name="builder">The builder<see cref="ContainerBuilderWrapper"/></param>
         private void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
         {
             builder.Register(provider =>
@@ -59,5 +72,7 @@ namespace Surging.Core.DotNetty
                 }, serviceExecutor);
             }).As<IServiceHost>();
         }
+
+        #endregion 方法
     }
 }

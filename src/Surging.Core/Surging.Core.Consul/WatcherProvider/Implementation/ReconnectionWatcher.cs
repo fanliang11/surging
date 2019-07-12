@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Surging.Core.Consul.WatcherProvider
 {
-     public class ReconnectionWatcher
+    /// <summary>
+    /// Defines the <see cref="ReconnectionWatcher" />
+    /// </summary>
+    public class ReconnectionWatcher
     {
     }
 }

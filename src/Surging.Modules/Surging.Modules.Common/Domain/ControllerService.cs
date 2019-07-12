@@ -13,22 +13,44 @@ using System.Threading.Tasks;
 
 namespace Surging.Modules.Common.Domain
 {
+    /// <summary>
+    /// Defines the <see cref="ControllerService" />
+    /// </summary>
     public class ControllerService : MqttBehavior, IControllerService
     {
+        #region 方法
+
+        /// <summary>
+        /// The Authorized
+        /// </summary>
+        /// <param name="username">The username<see cref="string"/></param>
+        /// <param name="password">The password<see cref="string"/></param>
+        /// <returns>The <see cref="Task{bool}"/></returns>
         public override async Task<bool> Authorized(string username, string password)
         {
             bool result = false;
             if (username == "admin" && password == "123456")
-                result= true;
+                result = true;
             return await Task.FromResult(result);
         }
 
-       public async Task<bool> IsOnline(string deviceId)
+        /// <summary>
+        /// The IsOnline
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <returns>The <see cref="Task{bool}"/></returns>
+        public async Task<bool> IsOnline(string deviceId)
         {
             var text = await GetService<IManagerService>().SayHello("fanly");
-            return  await base.GetDeviceIsOnine(deviceId);
+            return await base.GetDeviceIsOnine(deviceId);
         }
 
+        /// <summary>
+        /// The Publish
+        /// </summary>
+        /// <param name="deviceId">The deviceId<see cref="string"/></param>
+        /// <param name="message">The message<see cref="WillMessage"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task Publish(string deviceId, WillMessage message)
         {
             var willMessage = new MqttWillMessage
@@ -41,5 +63,7 @@ namespace Surging.Modules.Common.Domain
             await Publish(deviceId, willMessage);
             await RemotePublish(deviceId, willMessage);
         }
+
+        #endregion 方法
     }
 }

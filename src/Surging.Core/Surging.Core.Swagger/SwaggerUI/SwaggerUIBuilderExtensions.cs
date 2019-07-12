@@ -3,8 +3,19 @@ using System;
 
 namespace Surging.Core.Swagger.SwaggerUI
 {
-    public static  class SwaggerUIBuilderExtensions
+    /// <summary>
+    /// Defines the <see cref="SwaggerUIBuilderExtensions" />
+    /// </summary>
+    public static class SwaggerUIBuilderExtensions
     {
+        #region 方法
+
+        /// <summary>
+        /// The UseSwaggerUI
+        /// </summary>
+        /// <param name="app">The app<see cref="IApplicationBuilder"/></param>
+        /// <param name="setupAction">The setupAction<see cref="Action{SwaggerUIOptions}"/></param>
+        /// <returns>The <see cref="IApplicationBuilder"/></returns>
         public static IApplicationBuilder UseSwaggerUI(
            this IApplicationBuilder app,
            Action<SwaggerUIOptions> setupAction = null)
@@ -25,5 +36,7 @@ namespace Surging.Core.Swagger.SwaggerUI
 
             return app;
         }
+
+        #endregion 方法
     }
 }

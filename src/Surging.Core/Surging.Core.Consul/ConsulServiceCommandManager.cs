@@ -1,38 +1,94 @@
-﻿using Surging.Core.CPlatform;
-using Surging.Core.CPlatform.Support.Implementation;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Surging.Core.CPlatform.Support;
-using System.Threading.Tasks;
-using Surging.Core.CPlatform.Serialization;
+﻿using Consul;
 using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.Consul.Configurations;
-using Consul;
-using System.Linq;
-using Surging.Core.Consul.WatcherProvider;
+using Surging.Core.Consul.Internal;
 using Surging.Core.Consul.Utilitys;
+using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.WatcherProvider.Implementation;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
-using Surging.Core.Consul.Internal;
+using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Serialization;
+using Surging.Core.CPlatform.Support;
+using Surging.Core.CPlatform.Support.Implementation;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Consul
 {
+    /// <summary>
+    /// Defines the <see cref="ConsulServiceCommandManager" />
+    /// </summary>
     public class ConsulServiceCommandManager : ServiceCommandManagerBase, IDisposable
     {
+        #region 字段
+
+        /// <summary>
+        /// Defines the _configInfo
+        /// </summary>
         private readonly ConfigInfo _configInfo;
-        private readonly ISerializer<byte[]> _serializer;
-        private readonly ILogger<ConsulServiceCommandManager> _logger;
-        private readonly IClientWatchManager _manager;
-        private ServiceCommandDescriptor[] _serviceCommands;
-        private readonly ISerializer<string> _stringSerializer;
-        private readonly IServiceRouteManager _serviceRouteManager;
-        private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
+
+        /// <summary>
+        /// Defines the _consulClientFactory
+        /// </summary>
         private readonly IConsulClientProvider _consulClientFactory;
 
+        /// <summary>
+        /// Defines the _logger
+        /// </summary>
+        private readonly ILogger<ConsulServiceCommandManager> _logger;
+
+        /// <summary>
+        /// Defines the _manager
+        /// </summary>
+        private readonly IClientWatchManager _manager;
+
+        /// <summary>
+        /// Defines the _serializer
+        /// </summary>
+        private readonly ISerializer<byte[]> _serializer;
+
+        /// <summary>
+        /// Defines the _serviceHeartbeatManager
+        /// </summary>
+        private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
+
+        /// <summary>
+        /// Defines the _serviceRouteManager
+        /// </summary>
+        private readonly IServiceRouteManager _serviceRouteManager;
+
+        /// <summary>
+        /// Defines the _stringSerializer
+        /// </summary>
+        private readonly ISerializer<string> _stringSerializer;
+
+        /// <summary>
+        /// Defines the _serviceCommands
+        /// </summary>
+        private ServiceCommandDescriptor[] _serviceCommands;
+
+        #endregion 字段
+
+        #region 构造函数
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsulServiceCommandManager"/> class.
+        /// </summary>
+        /// <param name="configInfo">The configInfo<see cref="ConfigInfo"/></param>
+        /// <param name="serializer">The serializer<see cref="ISerializer{byte[]}"/></param>
+        /// <param name="stringSerializer">The stringSerializer<see cref="ISerializer{string}"/></param>
+        /// <param name="serviceRouteManager">The serviceRouteManager<see cref="IServiceRouteManager"/></param>
+        /// <param name="manager">The manager<see cref="IClientWatchManager"/></param>
+        /// <param name="serviceEntryManager">The serviceEntryManager<see cref="IServiceEntryManager"/></param>
+        /// <param name="logger">The logger<see cref="ILogger{ConsulServiceCommandManager}"/></param>
+        /// <param name="serviceHeartbeatManager">The serviceHeartbeatManager<see cref="IServiceHeartbeatManager"/></param>
+        /// <param name="consulClientFactory">The consulClientFactory<see cref="IConsulClientProvider"/></param>
         public ConsulServiceCommandManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
         ISerializer<string> stringSerializer, IServiceRouteManager serviceRouteManager, IClientWatchManager manager, IServiceEntryManager serviceEntryManager,
             ILogger<ConsulServiceCommandManager> logger,
@@ -50,265 +106,16 @@ namespace Surging.Core.Consul
             _serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
-        public override async Task ClearAsync()
-        {
-            var clients = await _consulClientFactory.GetClients();
-            foreach (var client in clients)
-            {
-                //根据前缀获取consul结果
-                var queryResult = await client.KV.List(_configInfo.CommandPath);
-                var response = queryResult.Response;
-                if (response != null)
-                {
-                    //删除操作
-                    foreach (var result in response)
-                    {
-                        await client.KV.DeleteCAS(result);
-                    }
-                }
-            }
-        }
+        #endregion 构造函数
 
-        public void Dispose()
-        {
-        }
+        #region 方法
 
         /// <summary>
-        /// 获取所有可用的服务命令信息。
+        /// The ChildrenChange
         /// </summary>
-        /// <returns>服务命令集合。</returns>
-        public override async Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync()
-        {
-            await EnterServiceCommands();
-            return _serviceCommands;
-        }
-
-        public void NodeChange(byte[] oldData, byte[] newData)
-        {
-            if (DataEquals(oldData, newData))
-                return;
-
-            var newCommand = GetServiceCommand(newData);
-            //得到旧的服务命令。
-            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
-
-            lock (_serviceCommands)
-            {
-                //删除旧服务命令，并添加上新的服务命令。
-                _serviceCommands =
-                    _serviceCommands
-                        .Where(i => i.ServiceId != newCommand.ServiceId)
-                        .Concat(new[] { newCommand }).ToArray();
-            }
-
-            if (newCommand == null)
-                //触发删除事件。
-                OnRemoved(new ServiceCommandEventArgs(oldCommand));
-
-            else if (oldCommand == null)
-                OnCreated(new ServiceCommandEventArgs(newCommand));
-            else
-                //触发服务命令变更事件。
-                OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
-        }
-
-        public void NodeChange(ServiceCommandDescriptor newCommand)
-        {
-            //得到旧的服务命令。
-            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
-
-            lock (_serviceCommands)
-            {
-                //删除旧服务命令，并添加上新的服务命令。
-                _serviceCommands =
-                    _serviceCommands
-                        .Where(i => i.ServiceId != newCommand.ServiceId)
-                        .Concat(new[] { newCommand }).ToArray();
-            }
-            //触发服务命令变更事件。
-            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
-        }
-
-        public override async Task SetServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
-        {
-            var clients = await _consulClientFactory.GetClients();
-            foreach (var client in clients)
-            {
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
-                    _logger.LogInformation("准备添加服务命令。");
-                foreach (var serviceCommand in serviceCommands)
-                {
-                    var nodeData = _serializer.Serialize(serviceCommand);
-                    var keyValuePair = new KVPair($"{_configInfo.CommandPath}{serviceCommand.ServiceId}") { Value = nodeData };
-                    var isSuccess = await client.KV.Put(keyValuePair);
-                    if (isSuccess.Response)
-                        NodeChange(serviceCommand);
-                }
-            }
-        }
-
-        protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
-        {
-            var commands = await GetServiceCommands(serviceCommands.Select(p => $"{ _configInfo.CommandPath}{ p.ServiceId}"));
-            if (commands.Count() == 0 || _configInfo.ReloadOnChange)
-            {
-                await SetServiceCommandsAsync(serviceCommands);
-            }
-        }
-
-        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
-        {
-            var clients = _consulClientFactory.GetClients().Result;
-            foreach (var client in clients)
-            {
-                client.KV.Delete($"{_configInfo.CommandPath}{e.Route.ServiceDescriptor.Id}").Wait();
-            }
-        }
-
-
-
-        private ServiceCommandDescriptor GetServiceCommand(byte[] data)
-        {
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                _logger.LogDebug($"准备转换服务命令，配置内容：{Encoding.UTF8.GetString(data)}。");
-
-            if (data == null)
-                return null;
-
-            var descriptor = _serializer.Deserialize<byte[], ServiceCommandDescriptor>(data);
-            return descriptor;
-        }
-
-        private ServiceCommandDescriptor[] GetServiceCommandDatas(string[] commands)
-        {
-            List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>();
-            foreach (var command in commands)
-            {
-                var serviceCommand = GetServiceCommandData(command);
-                serviceCommands.Add(serviceCommand);
-            }
-            return serviceCommands.ToArray();
-        }
-
-        private ServiceCommandDescriptor GetServiceCommandData(string data)
-        {
-            if (data == null)
-                return null;
-
-            var serviceCommand = _stringSerializer.Deserialize(data, typeof(ServiceCommandDescriptor)) as ServiceCommandDescriptor;
-            return serviceCommand;
-        }
-
-        private async Task<ServiceCommandDescriptor> GetServiceCommand(string path)
-        {
-            ServiceCommandDescriptor result = null;
-            var client = await GetConsulClient();
-            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
-              (oldData, newData) => NodeChange(oldData, newData), tmpPath =>
-              {
-                  var index = tmpPath.LastIndexOf("/");
-                  return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
-              });
-            var queryResult = await client.KV.Keys(path);
-            if (queryResult.Response != null)
-            {
-                var data = (await client.GetDataAsync(path));
-                if (data != null)
-                {
-                    watcher.SetCurrentData(data);
-                    result = GetServiceCommand(data);
-                }
-            }
-            return result;
-        }
-
-        private async Task<ServiceCommandDescriptor[]> GetServiceCommands(IEnumerable<string> childrens)
-        {
-            var rootPath = _configInfo.CommandPath;
-            if (!rootPath.EndsWith("/"))
-                rootPath += "/";
-
-            childrens = childrens.ToArray();
-            var serviceCommands = new List<ServiceCommandDescriptor>(childrens.Count());
-
-            foreach (var children in childrens)
-            {
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                    _logger.LogDebug($"准备从节点：{children}中获取服务命令信息。");
-
-                var serviceCommand = await GetServiceCommand(children);
-                if (serviceCommand != null)
-                    serviceCommands.Add(serviceCommand);
-            }
-            return serviceCommands.ToArray();
-        }
-        private async ValueTask<ConsulClient> GetConsulClient()
-        {
-            var client = await _consulClientFactory.GetClient();
-            return client;
-        }
-
-        private async Task EnterServiceCommands()
-        {
-            if (_serviceCommands != null)
-                return;
-            Action<string[]> action = null;
-            var client = await GetConsulClient();
-            if (_configInfo.EnableChildrenMonitor)
-            {
-                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CommandPath,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
-                       (result) => ConvertPaths(result));
-                action = currentData => watcher.SetCurrentData(currentData);
-            }
-            if (client.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
-            {
-                var result = await client.GetChildrenAsync(_configInfo.CommandPath);
-                var keys = await client.KV.Keys(_configInfo.CommandPath);
-                var childrens = result;
-                action?.Invoke(ConvertPaths(childrens).Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
-                _serviceCommands = await GetServiceCommands(keys.Response);
-            }
-            else
-            {
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
-                    _logger.LogWarning($"无法获取服务命令信息，因为节点：{_configInfo.CommandPath}，不存在。");
-                _serviceCommands = new ServiceCommandDescriptor[0];
-            }
-        }
-
-        /// <summary>
-        /// 转化路径集合
-        /// </summary>
-        /// <param name="datas">信息数据集合</param>
-        /// <returns>返回路径集合</returns>
-        private string[] ConvertPaths(string[] datas)
-        {
-            List<string> paths = new List<string>();
-            foreach (var data in datas)
-            {
-                var result = GetServiceCommandData(data);
-                var serviceId = result?.ServiceId;
-                if (!string.IsNullOrEmpty(serviceId))
-                    paths.Add(serviceId);
-            }
-            return paths.ToArray();
-        }
-
-        private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
-        {
-            if (data1.Count != data2.Count)
-                return false;
-            for (var i = 0; i < data1.Count; i++)
-            {
-                var b1 = data1[i];
-                var b2 = data2[i];
-                if (b1 != b2)
-                    return false;
-            }
-            return true;
-        }
-
+        /// <param name="oldChildrens">The oldChildrens<see cref="string[]"/></param>
+        /// <param name="newChildrens">The newChildrens<see cref="string[]"/></param>
+        /// <returns>The <see cref="Task"/></returns>
         public async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
@@ -351,5 +158,334 @@ namespace Surging.Core.Consul
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
                 _logger.LogInformation("服务命令数据更新成功。");
         }
+
+        /// <summary>
+        /// The ClearAsync
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task ClearAsync()
+        {
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
+            {
+                //根据前缀获取consul结果
+                var queryResult = await client.KV.List(_configInfo.CommandPath);
+                var response = queryResult.Response;
+                if (response != null)
+                {
+                    //删除操作
+                    foreach (var result in response)
+                    {
+                        await client.KV.DeleteCAS(result);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The Dispose
+        /// </summary>
+        public void Dispose()
+        {
+        }
+
+        /// <summary>
+        /// 获取所有可用的服务命令信息。
+        /// </summary>
+        /// <returns>服务命令集合。</returns>
+        public override async Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync()
+        {
+            await EnterServiceCommands();
+            return _serviceCommands;
+        }
+
+        /// <summary>
+        /// The NodeChange
+        /// </summary>
+        /// <param name="oldData">The oldData<see cref="byte[]"/></param>
+        /// <param name="newData">The newData<see cref="byte[]"/></param>
+        public void NodeChange(byte[] oldData, byte[] newData)
+        {
+            if (DataEquals(oldData, newData))
+                return;
+
+            var newCommand = GetServiceCommand(newData);
+            //得到旧的服务命令。
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+
+            if (newCommand == null)
+                //触发删除事件。
+                OnRemoved(new ServiceCommandEventArgs(oldCommand));
+            else if (oldCommand == null)
+                OnCreated(new ServiceCommandEventArgs(newCommand));
+            else
+                //触发服务命令变更事件。
+                OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+
+        /// <summary>
+        /// The NodeChange
+        /// </summary>
+        /// <param name="newCommand">The newCommand<see cref="ServiceCommandDescriptor"/></param>
+        public void NodeChange(ServiceCommandDescriptor newCommand)
+        {
+            //得到旧的服务命令。
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+            //触发服务命令变更事件。
+            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+
+        /// <summary>
+        /// The SetServiceCommandsAsync
+        /// </summary>
+        /// <param name="serviceCommands">The serviceCommands<see cref="IEnumerable{ServiceCommandDescriptor}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        public override async Task SetServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
+        {
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                    _logger.LogInformation("准备添加服务命令。");
+                foreach (var serviceCommand in serviceCommands)
+                {
+                    var nodeData = _serializer.Serialize(serviceCommand);
+                    var keyValuePair = new KVPair($"{_configInfo.CommandPath}{serviceCommand.ServiceId}") { Value = nodeData };
+                    var isSuccess = await client.KV.Put(keyValuePair);
+                    if (isSuccess.Response)
+                        NodeChange(serviceCommand);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The InitServiceCommandsAsync
+        /// </summary>
+        /// <param name="serviceCommands">The serviceCommands<see cref="IEnumerable{ServiceCommandDescriptor}"/></param>
+        /// <returns>The <see cref="Task"/></returns>
+        protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
+        {
+            var commands = await GetServiceCommands(serviceCommands.Select(p => $"{ _configInfo.CommandPath}{ p.ServiceId}"));
+            if (commands.Count() == 0 || _configInfo.ReloadOnChange)
+            {
+                await SetServiceCommandsAsync(serviceCommands);
+            }
+        }
+
+        /// <summary>
+        /// The DataEquals
+        /// </summary>
+        /// <param name="data1">The data1<see cref="IReadOnlyList{byte}"/></param>
+        /// <param name="data2">The data2<see cref="IReadOnlyList{byte}"/></param>
+        /// <returns>The <see cref="bool"/></returns>
+        private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
+        {
+            if (data1.Count != data2.Count)
+                return false;
+            for (var i = 0; i < data1.Count; i++)
+            {
+                var b1 = data1[i];
+                var b2 = data2[i];
+                if (b1 != b2)
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 转化路径集合
+        /// </summary>
+        /// <param name="datas">信息数据集合</param>
+        /// <returns>返回路径集合</returns>
+        private string[] ConvertPaths(string[] datas)
+        {
+            List<string> paths = new List<string>();
+            foreach (var data in datas)
+            {
+                var result = GetServiceCommandData(data);
+                var serviceId = result?.ServiceId;
+                if (!string.IsNullOrEmpty(serviceId))
+                    paths.Add(serviceId);
+            }
+            return paths.ToArray();
+        }
+
+        /// <summary>
+        /// The EnterServiceCommands
+        /// </summary>
+        /// <returns>The <see cref="Task"/></returns>
+        private async Task EnterServiceCommands()
+        {
+            if (_serviceCommands != null)
+                return;
+            Action<string[]> action = null;
+            var client = await GetConsulClient();
+            if (_configInfo.EnableChildrenMonitor)
+            {
+                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CommandPath,
+                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
+                       (result) => ConvertPaths(result));
+                action = currentData => watcher.SetCurrentData(currentData);
+            }
+            if (client.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
+            {
+                var result = await client.GetChildrenAsync(_configInfo.CommandPath);
+                var keys = await client.KV.Keys(_configInfo.CommandPath);
+                var childrens = result;
+                action?.Invoke(ConvertPaths(childrens).Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
+                _serviceCommands = await GetServiceCommands(keys.Response);
+            }
+            else
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
+                    _logger.LogWarning($"无法获取服务命令信息，因为节点：{_configInfo.CommandPath}，不存在。");
+                _serviceCommands = new ServiceCommandDescriptor[0];
+            }
+        }
+
+        /// <summary>
+        /// The GetConsulClient
+        /// </summary>
+        /// <returns>The <see cref="ValueTask{ConsulClient}"/></returns>
+        private async ValueTask<ConsulClient> GetConsulClient()
+        {
+            var client = await _consulClientFactory.GetClient();
+            return client;
+        }
+
+        /// <summary>
+        /// The GetServiceCommand
+        /// </summary>
+        /// <param name="data">The data<see cref="byte[]"/></param>
+        /// <returns>The <see cref="ServiceCommandDescriptor"/></returns>
+        private ServiceCommandDescriptor GetServiceCommand(byte[] data)
+        {
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"准备转换服务命令，配置内容：{Encoding.UTF8.GetString(data)}。");
+
+            if (data == null)
+                return null;
+
+            var descriptor = _serializer.Deserialize<byte[], ServiceCommandDescriptor>(data);
+            return descriptor;
+        }
+
+        /// <summary>
+        /// The GetServiceCommand
+        /// </summary>
+        /// <param name="path">The path<see cref="string"/></param>
+        /// <returns>The <see cref="Task{ServiceCommandDescriptor}"/></returns>
+        private async Task<ServiceCommandDescriptor> GetServiceCommand(string path)
+        {
+            ServiceCommandDescriptor result = null;
+            var client = await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+              (oldData, newData) => NodeChange(oldData, newData), tmpPath =>
+              {
+                  var index = tmpPath.LastIndexOf("/");
+                  return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+              });
+            var queryResult = await client.KV.Keys(path);
+            if (queryResult.Response != null)
+            {
+                var data = (await client.GetDataAsync(path));
+                if (data != null)
+                {
+                    watcher.SetCurrentData(data);
+                    result = GetServiceCommand(data);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// The GetServiceCommandData
+        /// </summary>
+        /// <param name="data">The data<see cref="string"/></param>
+        /// <returns>The <see cref="ServiceCommandDescriptor"/></returns>
+        private ServiceCommandDescriptor GetServiceCommandData(string data)
+        {
+            if (data == null)
+                return null;
+
+            var serviceCommand = _stringSerializer.Deserialize(data, typeof(ServiceCommandDescriptor)) as ServiceCommandDescriptor;
+            return serviceCommand;
+        }
+
+        /// <summary>
+        /// The GetServiceCommandDatas
+        /// </summary>
+        /// <param name="commands">The commands<see cref="string[]"/></param>
+        /// <returns>The <see cref="ServiceCommandDescriptor[]"/></returns>
+        private ServiceCommandDescriptor[] GetServiceCommandDatas(string[] commands)
+        {
+            List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>();
+            foreach (var command in commands)
+            {
+                var serviceCommand = GetServiceCommandData(command);
+                serviceCommands.Add(serviceCommand);
+            }
+            return serviceCommands.ToArray();
+        }
+
+        /// <summary>
+        /// The GetServiceCommands
+        /// </summary>
+        /// <param name="childrens">The childrens<see cref="IEnumerable{string}"/></param>
+        /// <returns>The <see cref="Task{ServiceCommandDescriptor[]}"/></returns>
+        private async Task<ServiceCommandDescriptor[]> GetServiceCommands(IEnumerable<string> childrens)
+        {
+            var rootPath = _configInfo.CommandPath;
+            if (!rootPath.EndsWith("/"))
+                rootPath += "/";
+
+            childrens = childrens.ToArray();
+            var serviceCommands = new List<ServiceCommandDescriptor>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取服务命令信息。");
+
+                var serviceCommand = await GetServiceCommand(children);
+                if (serviceCommand != null)
+                    serviceCommands.Add(serviceCommand);
+            }
+            return serviceCommands.ToArray();
+        }
+
+        /// <summary>
+        /// The ServiceRouteManager_Removed
+        /// </summary>
+        /// <param name="sender">The sender<see cref="object"/></param>
+        /// <param name="e">The e<see cref="ServiceRouteEventArgs"/></param>
+        private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
+        {
+            var clients = _consulClientFactory.GetClients().Result;
+            foreach (var client in clients)
+            {
+                client.KV.Delete($"{_configInfo.CommandPath}{e.Route.ServiceDescriptor.Id}").Wait();
+            }
+        }
+
+        #endregion 方法
     }
 }

@@ -5,8 +5,18 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Filters.Implementation
 {
-   public  class AuthorizationAttribute : AuthorizationFilterAttribute
+    /// <summary>
+    /// Defines the <see cref="AuthorizationAttribute" />
+    /// </summary>
+    public class AuthorizationAttribute : AuthorizationFilterAttribute
     {
+        #region 属性
+
+        /// <summary>
+        /// Gets or sets the AuthType
+        /// </summary>
         public AuthorizationType AuthType { get; set; }
+
+        #endregion 属性
     }
 }

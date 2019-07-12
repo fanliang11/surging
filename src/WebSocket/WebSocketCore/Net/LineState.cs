@@ -1,4 +1,3 @@
-#region License
 /*
  * LineState.cs
  *
@@ -28,23 +27,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#endregion
 
-#region Authors
 /*
  * Authors:
  * - Gonzalo Paniagua Javier <gonzalo@novell.com>
  */
-#endregion
 
 using System;
 
 namespace WebSocketCore.Net
 {
-  internal enum LineState
-  {
-    None,
-    Cr,
-    Lf
-  }
+    #region Ã¶¾Ù
+
+    /// <summary>
+    /// Defines the LineState
+    /// </summary>
+    internal enum LineState
+    {
+        /// <summary>
+        /// Defines the None
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Defines the Cr
+        /// </summary>
+        Cr,
+
+        /// <summary>
+        /// Defines the Lf
+        /// </summary>
+        Lf
+    }
+
+    #endregion Ã¶¾Ù
 }

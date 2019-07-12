@@ -7,16 +7,24 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Stage
 {
+    /// <summary>
+    /// Defines the <see cref="AuthorizationFilterAttribute" />
+    /// </summary>
     public class AuthorizationFilterAttribute : IAuthorizationFilter
     {
+        #region 方法
+
+        /// <summary>
+        /// The OnAuthorization
+        /// </summary>
+        /// <param name="filterContext">The filterContext<see cref="AuthorizationFilterContext"/></param>
         public void OnAuthorization(AuthorizationFilterContext filterContext)
         {
-            if(filterContext.Route.ServiceDescriptor.AuthType() == AuthorizationType.JWT.ToString())
+            if (filterContext.Route.ServiceDescriptor.AuthType() == AuthorizationType.JWT.ToString())
             {
-
             }
-
         }
+
+        #endregion 方法
     }
 }
- 

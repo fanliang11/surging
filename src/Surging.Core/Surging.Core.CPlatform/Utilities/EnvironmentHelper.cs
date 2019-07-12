@@ -6,8 +6,18 @@ using System.Text.RegularExpressions;
 
 namespace Surging.Core.CPlatform.Utilities
 {
+    /// <summary>
+    /// Defines the <see cref="EnvironmentHelper" />
+    /// </summary>
     public class EnvironmentHelper
     {
+        #region 方法
+
+        /// <summary>
+        /// The GetEnvironmentVariable
+        /// </summary>
+        /// <param name="value">The value<see cref="string"/></param>
+        /// <returns>The <see cref="string"/></returns>
         public static string GetEnvironmentVariable(string value)
         {
             var result = value;
@@ -25,6 +35,12 @@ namespace Surging.Core.CPlatform.Utilities
             return result;
         }
 
+        /// <summary>
+        /// The GetEnvironmentVariableAsBool
+        /// </summary>
+        /// <param name="name">The name<see cref="string"/></param>
+        /// <param name="defaultValue">The defaultValue<see cref="bool"/></param>
+        /// <returns>The <see cref="bool"/></returns>
         public static bool GetEnvironmentVariableAsBool(string name, bool defaultValue = false)
         {
             var str = Environment.GetEnvironmentVariable(name);
@@ -39,15 +55,22 @@ namespace Surging.Core.CPlatform.Utilities
                 case "1":
                 case "yes":
                     return true;
+
                 case "false":
                 case "0":
                 case "no":
                     return false;
+
                 default:
                     return defaultValue;
             }
         }
 
+        /// <summary>
+        /// The GetParameters
+        /// </summary>
+        /// <param name="text">The text<see cref="string"/></param>
+        /// <returns>The <see cref="List{string}"/></returns>
         private static List<string> GetParameters(string text)
         {
             var matchVale = new List<string>();
@@ -59,5 +82,7 @@ namespace Surging.Core.CPlatform.Utilities
             }
             return matchVale;
         }
+
+        #endregion 方法
     }
 }
