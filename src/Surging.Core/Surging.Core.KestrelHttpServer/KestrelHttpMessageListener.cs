@@ -21,6 +21,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Surging.Core.KestrelHttpServer.Filters;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -100,8 +101,7 @@ namespace Surging.Core.KestrelHttpServer
                 _moduleProvider.Modules,
                 _moduleProvider.VirtualPaths,
                 AppConfig.Configuration));
-            builder.Populate(services);
-          
+            builder.Populate(services); 
             builder.Update(_container.Current.ComponentRegistry);
         }
 
@@ -114,8 +114,11 @@ namespace Surging.Core.KestrelHttpServer
                 AppConfig.Configuration));
             app.Run(async (context) =>
             {
+                var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
                 var sender = new HttpServerMessageSender(_serializer, context);
-                await OnReceived(sender, context);
+                await OnAuthorization(context, sender, filters);
+                var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
+                await OnReceived(sender, context, actionFilters);
             });
         }
 

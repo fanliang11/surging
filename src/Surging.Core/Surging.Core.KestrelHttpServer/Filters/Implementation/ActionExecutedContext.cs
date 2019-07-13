@@ -1,18 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Surging.Core.CPlatform.Messages;
-using Surging.Core.CPlatform.Routing;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Surging.Core.KestrelHttpServer.Filters.Implementation
 {
-   public class AuthorizationFilterContext
+   public class ActionExecutedContext
     {
-        public ServiceRoute Route { get; internal set; }
-
-        public HttpResultMessage<object>  Result { get;  set; }
-
+        public HttpMessage Message { get; internal set; }
         public HttpContext Context { get; internal set; }
     }
 }

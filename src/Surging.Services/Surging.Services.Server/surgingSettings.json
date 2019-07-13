@@ -26,7 +26,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -41,7 +41,19 @@
     "EnableHttps": true, // 不设置ports，默认httpsPort:443
     "CertificateFileName": "${CertificateFileName}|",
     "CertificateLocation": "${CertificateLocation}|pfxs",
-    "CertificatePassword": "${CertificatePassword}|"
+    "CertificatePassword": "${CertificatePassword}|",
+    "ApiGetWay": {
+      "AccessTokenExpireTimeSpan": "30",
+      "AuthorizationRoutePath": "api/user/authentication",
+      "AuthorizationServiceKey": "User",
+      "TokenEndpointPath": "api/oauth2/token",
+      "CacheMode": "MemoryCache" //MemoryCache or  gateway.Redis save token
+    },
+    "AccessPolicy": {
+      "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
+      "AllowAnyHeader": true,
+      "AllowAnyMethod": true
+    }
     //"HttpsPort": "${StageHttpsPorts}|449,446",
     //"HttpPorts": "${StageHttpPorts}|281,282,283"
   },

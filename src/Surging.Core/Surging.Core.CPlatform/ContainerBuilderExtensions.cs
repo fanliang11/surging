@@ -384,8 +384,8 @@ namespace Surging.Core.CPlatform
             }
             else if (typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
             {
-                var exceptionFilter = filter as IAuthorizationFilter;
-                services.Register(p => exceptionFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
+                var authorizationFilter = filter as IAuthorizationFilter;
+                services.Register(p => authorizationFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
             }
             return builder;
         }
