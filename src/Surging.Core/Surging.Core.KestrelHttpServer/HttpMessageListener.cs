@@ -49,10 +49,6 @@ namespace Surging.Core.KestrelHttpServer
             var serviceRoute =await _serviceRouteProvider.GetRouteByPathRegex(path);
             IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key,p => (object)p.Value.ToString());
             parameters.Remove("servicekey", out object serviceKey);
-            StreamReader streamReader = new StreamReader(context.Request.Body);
-            var data = await streamReader.ReadToEndAsync();
-            if (data.Length > 0)
-                parameters = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
            
             if (String.Compare(serviceRoute.ServiceDescriptor.RoutePath, path, true) != 0)
             {
@@ -68,28 +64,34 @@ namespace Surging.Core.KestrelHttpServer
                 RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
                 ServiceKey = serviceKey?.ToString()
             };
-            await OnActionExecuting(context, httpMessage, sender, actionFilters);
+            
             if (context.Request.HasFormContentType)
             {
-                var collection =await GetFormCollection(context.Request);
-                parameters.Add("form", collection);
+                var collection = await GetFormCollection(context.Request);
+                httpMessage.Parameters.Add("form", collection);
+                if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
                 await Received(sender, new TransportMessage(httpMessage));
             }
             else
             {
+                StreamReader streamReader = new StreamReader(context.Request.Body);
+                var data = await streamReader.ReadToEndAsync();
                 if (context.Request.Method == "POST")
                 {
+                    httpMessage.Parameters = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
+                    if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
                     await Received(sender, new TransportMessage(httpMessage));
                 }
                 else
                 {
+                    if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
                     await Received(sender, new TransportMessage(httpMessage));
                 }
             }
             await OnActionExecuted(context, httpMessage, actionFilters);
         }
 
-        public async Task OnActionExecuting(HttpContext context, HttpMessage message, IMessageSender sender, IEnumerable<IActionFilter> filters)
+        public async Task<bool> OnActionExecuting(HttpContext context, HttpMessage message, IMessageSender sender, IEnumerable<IActionFilter> filters)
         {
             foreach (var fiter in filters)
             {
@@ -98,13 +100,14 @@ namespace Surging.Core.KestrelHttpServer
                     Context = context,
                     Message = message
                 };
-                await fiter.OnActionExecuting(filterContext);
+                await fiter.OnActionExecuting(filterContext); 
                 if (filterContext.Result != null)
                 {
                     await sender.SendAndFlushAsync(new TransportMessage(filterContext.Result));
-                    break;
+                    return false;
                 }
             }
+            return true;
         }
 
         public async Task OnActionExecuted(HttpContext context, HttpMessage message, IEnumerable<IActionFilter> filters)
@@ -121,7 +124,7 @@ namespace Surging.Core.KestrelHttpServer
             }
         }
 
-        public async Task OnAuthorization(HttpContext context, HttpServerMessageSender sender, IEnumerable<IAuthorizationFilter> filters)
+        public async Task<bool> OnAuthorization(HttpContext context, HttpServerMessageSender sender, IEnumerable<IAuthorizationFilter> filters)
         {
             foreach (var filter in filters)
             {
@@ -136,9 +139,10 @@ namespace Surging.Core.KestrelHttpServer
                 if (filterContext.Result != null)
                 {
                     await sender.SendAndFlushAsync(new TransportMessage(filterContext.Result));
-                    break;
+                    return false;
                 }
-            } 
+            }
+            return true;
         }
 
         private async Task<HttpFormCollection> GetFormCollection(HttpRequest request)
