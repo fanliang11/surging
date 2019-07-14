@@ -19,6 +19,8 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         private readonly ConcurrentDictionary<string, ServiceRoute> _concurrent =
        new ConcurrentDictionary<string, ServiceRoute>();
 
+        private readonly List<ServiceRoute> _localRoutes = new List<ServiceRoute>();
+
         private readonly ConcurrentDictionary<string, ServiceRoute> _serviceRoute =
        new ConcurrentDictionary<string, ServiceRoute>();
 
@@ -56,7 +58,34 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
+        public  ValueTask<ServiceRoute> GetLocalRouteByPathRegex(string path)
+        {
+            var addess = NetUtils.GetHostAddress();
 
+            if (_localRoutes.Count == 0)
+            {
+                _localRoutes.AddRange( _serviceEntryManager.GetEntries().Select(i =>
+                {
+                    i.Descriptor.Token = _serviceTokenGenerator.GetToken();
+                    return new ServiceRoute
+                    {
+                        Address = new[] { addess },
+                        ServiceDescriptor = i.Descriptor
+                    };
+                }).ToList());
+            }
+
+            path = path.ToLower();
+            _serviceRoute.TryGetValue(path, out ServiceRoute route);
+            if (route == null)
+            {
+                return new ValueTask<ServiceRoute>(GetRouteByPathRegexAsync(_localRoutes, path));
+            }
+            else
+            {
+                return new ValueTask<ServiceRoute>(route);
+            }
+        }
 
         public ValueTask<ServiceRoute> GetRouteByPath(string path)
         {
@@ -71,17 +100,18 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             }
         }
 
-        public ValueTask<ServiceRoute> GetRouteByPathRegex(string path)
+        public async ValueTask<ServiceRoute> GetRouteByPathRegex(string path)
         {
             path = path.ToLower();
             _serviceRoute.TryGetValue(path, out ServiceRoute route);
             if (route == null)
             {
-                return new ValueTask<ServiceRoute>(GetRouteByPathRegexAsync(path));
+                var routes = await _serviceRouteManager.GetRoutesAsync();
+                return await GetRouteByPathRegexAsync(routes,path);
             }
             else
             {
-                return new ValueTask<ServiceRoute>(route);
+                return route;
             }
         }
 
@@ -91,8 +121,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
         }
 
         public async Task RegisterRoutes(decimal processorTime)
-        { 
-            var ports = AppConfig.ServerOptions.Ports;
+        {  
             var addess = NetUtils.GetHostAddress();
             addess.ProcessorTime = processorTime;
             RpcContext.GetContext().SetAttachment("Host", addess);
@@ -157,9 +186,8 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
-        private async Task<ServiceRoute> GetRouteByPathRegexAsync(string path)
-        {
-            var routes = await _serviceRouteManager.GetRoutesAsync();
+        private async Task<ServiceRoute> GetRouteByPathRegexAsync(IEnumerable<ServiceRoute> routes, string path)
+        { 
             var pattern = "/{.*?}";
 
            var route = routes.FirstOrDefault(i =>

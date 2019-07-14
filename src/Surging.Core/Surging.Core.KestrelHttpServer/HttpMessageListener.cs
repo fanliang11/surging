@@ -45,8 +45,12 @@ namespace Surging.Core.KestrelHttpServer
 
         public async Task OnReceived(IMessageSender sender, HttpContext context,IEnumerable<IActionFilter> actionFilters)
         {
+            var serviceRoute = context.Items["route"] as ServiceRoute;
             var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
-            var serviceRoute =await _serviceRouteProvider.GetRouteByPathRegex(path);
+            if (serviceRoute == null)
+            {
+                serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+            }
             IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key,p => (object)p.Value.ToString());
             parameters.Remove("servicekey", out object serviceKey);
            
@@ -122,7 +126,6 @@ namespace Surging.Core.KestrelHttpServer
                     Message = message
                 };
                 await fiter.OnActionExecuted(filterContext);
-            
             }
         }
 
@@ -132,7 +135,9 @@ namespace Surging.Core.KestrelHttpServer
             {
                 var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
                 var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
-                var filterContext = new AuthorizationFilterContext
+                if (serviceRoute == null) serviceRoute =await _serviceRouteProvider.GetLocalRouteByPathRegex(path);
+                context.Items.Add("route", serviceRoute);
+                 var filterContext = new AuthorizationFilterContext
                 {
                     Context = context,
                     Route = serviceRoute
@@ -205,7 +210,7 @@ namespace Surging.Core.KestrelHttpServer
             return collection;
         }
 
-        private string  GetName(string type,string content)
+        private string GetName(string type,string content)
         {
             var elements = content.Split(';');
             var element = elements.Where(entry => entry.Trim().StartsWith(type)).FirstOrDefault()?.Trim();
