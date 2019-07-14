@@ -27,8 +27,8 @@ namespace Surging.Core.Stage.Filters
 
         public async Task OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var gateWayAppConfig = AppConfig.Options.ApiGetWay;
-            if (filterContext.Message.RoutePath == gateWayAppConfig.AuthorizationRoutePath)
+            var gatewayAppConfig = AppConfig.Options.ApiGetWay;
+            if (filterContext.Message.RoutePath == gatewayAppConfig.AuthorizationRoutePath)
             {
                 var token = await _authorizationServerProvider.GenerateTokenCredential(new Dictionary<string, object>(filterContext.Message.Parameters));
                 if (token != null)
