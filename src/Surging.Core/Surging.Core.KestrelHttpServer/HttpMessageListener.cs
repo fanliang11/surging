@@ -78,7 +78,9 @@ namespace Surging.Core.KestrelHttpServer
                 var data = await streamReader.ReadToEndAsync();
                 if (context.Request.Method == "POST")
                 {
-                    httpMessage.Parameters = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
+                    var bodyParams = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
+                   foreach(var param in bodyParams)
+                    httpMessage.Parameters.Add(param.Key,param.Value);
                     if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
                     await Received(sender, new TransportMessage(httpMessage));
                 }

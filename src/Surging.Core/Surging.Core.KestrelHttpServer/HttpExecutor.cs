@@ -29,6 +29,7 @@ namespace Surging.Core.KestrelHttpServer
         private readonly IAuthorizationFilter _authorizationFilter;
         private readonly CPlatformContainer _serviceProvider;
         private readonly ITypeConvertibleService _typeConvertibleService;
+        private readonly IServiceProxyProvider _serviceProxyProvider;
         private readonly ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>> _concurrent =
         new ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>>();
         #endregion Field
@@ -37,7 +38,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public HttpExecutor(IServiceEntryLocate serviceEntryLocate, IServiceRouteProvider serviceRouteProvider,
             IAuthorizationFilter authorizationFilter,
-            ILogger<HttpExecutor> logger, CPlatformContainer serviceProvider, ITypeConvertibleService typeConvertibleService)
+            ILogger<HttpExecutor> logger, CPlatformContainer serviceProvider, IServiceProxyProvider serviceProxyProvider, ITypeConvertibleService typeConvertibleService)
         {
             _serviceEntryLocate = serviceEntryLocate;
             _logger = logger;
@@ -45,6 +46,7 @@ namespace Surging.Core.KestrelHttpServer
             _typeConvertibleService = typeConvertibleService;
             _serviceRouteProvider = serviceRouteProvider;
             _authorizationFilter = authorizationFilter;
+            _serviceProxyProvider = serviceProxyProvider;
         }
         #endregion Constructor
 
@@ -98,39 +100,9 @@ namespace Surging.Core.KestrelHttpServer
         private async Task<HttpResultMessage<object>> RemoteExecuteAsync(ServiceEntry entry, HttpMessage httpMessage)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
-            var provider = _concurrent.GetValueOrDefault(httpMessage.RoutePath);
-            var list = new List<object>();
-            if (provider.Item1 == null)
-            {
-                provider.Item2 = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(httpMessage.ServiceKey, entry.Type);
-                provider.Item3 = provider.Item2.GetType().GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault(); 
-                provider.Item1 = FastInvoke.GetMethodInvoker(provider.Item3);
-                _concurrent.GetOrAdd(httpMessage.RoutePath, ValueTuple.Create<FastInvokeHandler, object, MethodInfo>(provider.Item1, provider.Item2, provider.Item3));
-            }
-            foreach (var parameterInfo in provider.Item3.GetParameters())
-            {
-                var value = httpMessage.Parameters[parameterInfo.Name];
-                var parameterType = parameterInfo.ParameterType;
-                var parameter = _typeConvertibleService.Convert(value, parameterType);
-                list.Add(parameter);
-            }
-            try
-            {
-                var methodResult = provider.Item1(provider.Item2, list.ToArray());
-
-                var task = methodResult as Task;
-                if (task == null)
-                {
-                    resultMessage.Entity = methodResult;
-                }
-                else
-                {
-                    await task;
-                    var taskType = task.GetType().GetTypeInfo();
-                    if (taskType.IsGenericType)
-                        resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
-                }
-                resultMessage.IsSucceed = resultMessage.Entity != null;
+            try {
+                resultMessage.Entity=await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
+                resultMessage.IsSucceed = resultMessage.Entity != default;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
             }
             catch (Exception ex)

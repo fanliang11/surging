@@ -59,6 +59,7 @@ namespace Surging.Core.KestrelHttpServer
                   .UseContentRoot(Directory.GetCurrentDirectory())
                   .UseKestrel((context,options) =>
                   {
+                      options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(30);
                       if (port!=null  && port >0)
                           options.Listen(address,port.Value);
                       ConfigureHost(context, options, address);
@@ -114,14 +115,17 @@ namespace Surging.Core.KestrelHttpServer
                 AppConfig.Configuration));
             app.Run(async (context) =>
             {
-                var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
-                var sender = new HttpServerMessageSender(_serializer, context);
-                var isSuccess= await OnAuthorization(context, sender, filters);
-                if (isSuccess)
+               await Task.Run(async () =>
                 {
-                    var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
-                    await OnReceived(sender, context, actionFilters);
-                }
+                    var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
+                    var sender = new HttpServerMessageSender(_serializer, context);
+                    var isSuccess = await OnAuthorization(context, sender, filters);
+                    if (isSuccess)
+                    {
+                        var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
+                        await OnReceived(sender, context, actionFilters);
+                    }
+                });
             });
         }
 

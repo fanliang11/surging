@@ -18,7 +18,6 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.ProxyGenerator;
-using Surging.Core.System.Intercept;
 using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper;
 using ZookeeperConfigInfo =  Surging.Core.Zookeeper.Configurations.ConfigInfo;
