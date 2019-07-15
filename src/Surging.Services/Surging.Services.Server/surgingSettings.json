@@ -42,6 +42,7 @@
     "CertificateFileName": "${CertificateFileName}|",
     "CertificateLocation": "${CertificateLocation}|pfxs",
     "CertificatePassword": "${CertificatePassword}|",
+    "IsCamelCaseResolver": "${IsCamelCaseResolver}|true",
     "ApiGetWay": {
       "AccessTokenExpireTimeSpan": "30",
       "AuthorizationRoutePath": "api/user/authentication",

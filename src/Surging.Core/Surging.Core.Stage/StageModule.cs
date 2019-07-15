@@ -62,6 +62,17 @@ namespace Surging.Core.Stage
                 ApiGateWay.AppConfig.AuthorizationRoutePath = apiConfig.AuthorizationRoutePath;
                 ApiGateWay.AppConfig.TokenEndpointPath = apiConfig.TokenEndpointPath;
             }
+            context.Services.AddMvc().AddJsonOptions(options => {
+                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                if (AppConfig.Options.IsCamelCaseResolver)
+                {
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                }
+                else
+                {
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                }
+            });
             context.Services.AddFilters(typeof(AuthorizationFilterAttribute));
             context.Services.AddFilters(typeof(ActionFilterAttribute));
         }
