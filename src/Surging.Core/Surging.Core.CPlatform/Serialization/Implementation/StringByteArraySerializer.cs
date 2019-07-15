@@ -30,7 +30,7 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
         /// </summary>
         /// <param name="instance">需要序列化的对象。</param>
         /// <returns>序列化之后的结果。</returns>
-        public byte[] Serialize(object instance)
+        public byte[] Serialize(object instance, bool camelCase = true, bool indented = false)
         {
             return Encoding.UTF8.GetBytes(_serializer.Serialize(instance));
         }
@@ -41,7 +41,7 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
         /// <param name="content">序列化的内容。</param>
         /// <param name="type">对象类型。</param>
         /// <returns>一个对象实例。</returns>
-        public object Deserialize(byte[] content, Type type)
+        public object Deserialize(byte[] content, Type type, bool camelCase = true, bool indented = false)
         {
             return _serializer.Deserialize(Encoding.UTF8.GetString(content), type);
         }

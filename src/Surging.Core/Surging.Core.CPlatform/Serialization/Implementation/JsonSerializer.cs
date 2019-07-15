@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 
 namespace Surging.Core.CPlatform.Serialization.Implementation
@@ -15,9 +16,25 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
         /// </summary>
         /// <param name="instance">需要序列化的对象。</param>
         /// <returns>序列化之后的结果。</returns>
-        public string Serialize(object instance)
+        public string Serialize(object instance, bool camelCase = false, bool indented = false)
         {
-            return JsonConvert.SerializeObject(instance);
+            var settings = new JsonSerializerSettings();
+
+            if (camelCase)
+            {
+                settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            }
+            else
+            {
+                settings.ContractResolver = new DefaultContractResolver();
+            }
+
+            if (indented)
+            {
+                settings.Formatting = Formatting.Indented;
+            }
+
+            return JsonConvert.SerializeObject(instance, settings);
         }
 
         /// <summary>
@@ -26,9 +43,25 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
         /// <param name="content">序列化的内容。</param>
         /// <param name="type">对象类型。</param>
         /// <returns>一个对象实例。</returns>
-        public object Deserialize(string content, Type type)
+        public object Deserialize(string content, Type type, bool camelCase = false, bool indented = false)
         {
-            return JsonConvert.DeserializeObject(content, type);
+            var settings = new JsonSerializerSettings();
+
+            if (camelCase)
+            {
+                settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            }
+            else
+            {
+                settings.ContractResolver = new DefaultContractResolver();
+            }
+
+            if (indented)
+            {
+                settings.Formatting = Formatting.Indented;
+            }
+
+            return JsonConvert.DeserializeObject(content, type, settings);
         }
 
         #endregion Implementation of ISerializer<string>

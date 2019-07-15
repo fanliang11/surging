@@ -29,9 +29,9 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
         /// </summary>
         /// <param name="instance">需要序列化的对象。</param>
         /// <returns>序列化之后的结果。</returns>
-        public object Serialize(object instance)
+        public object Serialize(object instance, bool camelCase = false, bool indented = false)
         {
-            return _serializer.Serialize(instance);
+            return _serializer.Serialize(instance, camelCase, indented);
         }
 
         /// <summary>
@@ -40,9 +40,9 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
         /// <param name="content">序列化的内容。</param>
         /// <param name="type">对象类型。</param>
         /// <returns>一个对象实例。</returns>
-        public object Deserialize(object content, Type type)
+        public object Deserialize(object content, Type type, bool camelCase = false, bool indented = false)
         {
-            return _serializer.Deserialize(content.ToString(), type);
+            return _serializer.Deserialize(content.ToString(), type, camelCase, indented);
         }
 
         #endregion Implementation of ISerializer<object>
