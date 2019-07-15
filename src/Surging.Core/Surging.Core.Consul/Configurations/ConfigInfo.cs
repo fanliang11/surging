@@ -13,7 +13,7 @@ namespace Surging.Core.Consul.Configurations
         #region 构造函数
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigInfo"/> class.
+        /// 初始化会话超时为20秒的consul配置信息。<see cref="ConfigInfo"/>
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
         /// <param name="sessionTimeout">会话超时时间。</param>
@@ -66,7 +66,7 @@ namespace Surging.Core.Consul.Configurations
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigInfo"/> class.
+        /// 初始化consul配置信息 <see cref="ConfigInfo"/>
         /// </summary>
         /// <param name="connectionString">连接字符串。</param>
         /// <param name="routePath">路由路径配置路径</param>
@@ -113,7 +113,7 @@ namespace Surging.Core.Consul.Configurations
         #region 属性
 
         /// <summary>
-        /// Gets or sets the Addresses
+        ///地址
         /// </summary>
         public IEnumerable<AddressModel> Addresses { get; set; }
 

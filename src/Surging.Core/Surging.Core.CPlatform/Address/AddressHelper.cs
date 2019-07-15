@@ -7,17 +7,19 @@ using System.Text.RegularExpressions;
 namespace Surging.Core.CPlatform.Address
 {
     /// <summary>
-    /// Defines the <see cref="AddressHelper" />
+    /// 地址操作者 <see cref="AddressHelper" />
     /// </summary>
     public class AddressHelper
     {
         #region 方法
 
         /// <summary>
-        /// The GetIpFromAddress
+        /// 根据地址获取IP
         /// </summary>
-        /// <param name="address">The address<see cref="string"/></param>
-        /// <returns>The <see cref="string"/></returns>
+        /// <param name="address">地址</param>
+        /// <returns></returns>
+        /// <exception cref="System.Net.Sockets.SocketException"></exception>
+        /// <exception cref="RegexMatchTimeoutException"></exception>
         public static string GetIpFromAddress(string address)
         {
             if (IsValidIp(address))
@@ -25,14 +27,24 @@ namespace Surging.Core.CPlatform.Address
                 return address;
             }
             var ips = Dns.GetHostAddresses(address);
-            return ips[0].ToString();
+            var ipRes = ips[0].ToString();
+            foreach (var itemIP in ips)
+            {
+                if (IsValidIp(itemIP.ToString()))
+                {
+                    ipRes = itemIP.ToString();
+                    break;
+                }
+            }
+            return ipRes;
         }
 
         /// <summary>
-        /// The IsValidIp
+        /// 判断地址是不是IP
         /// </summary>
-        /// <param name="address">The address<see cref="string"/></param>
-        /// <returns>The <see cref="bool"/></returns>
+        /// <param name="address">地址</param>
+        /// <returns></returns>
+        /// <exception cref="RegexMatchTimeoutException"></exception>
         public static bool IsValidIp(string address)
         {
             if (Regex.IsMatch(address, "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"))

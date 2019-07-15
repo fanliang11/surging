@@ -9,21 +9,22 @@ using System.Text;
 namespace Surging.Core.Consul.Configurations
 {
     /// <summary>
-    /// Defines the <see cref="ConsulConfigurationExtensions" />
+    /// Consul配置扩展 <see cref="ConsulConfigurationExtensions" />
     /// </summary>
     public static class ConsulConfigurationExtensions
     {
         #region 方法
 
         /// <summary>
-        /// The AddConsulFile
+        /// 加Consul配置文件
         /// </summary>
-        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
+        /// <param name="builder">构建配置对象建造器<see cref="IConfigurationBuilder"/></param>
         /// <param name="provider">The provider<see cref="IFileProvider"/></param>
-        /// <param name="path">The path<see cref="string"/></param>
-        /// <param name="optional">The optional<see cref="bool"/></param>
-        /// <param name="reloadOnChange">The reloadOnChange<see cref="bool"/></param>
-        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        /// <param name="path">文件相对路径<see cref="string"/></param>
+        /// <param name="optional">是否可选<see cref="bool"/></param>
+        /// <param name="reloadOnChange">当改变时是不是重新加载<see cref="bool"/></param>
+        /// <returns>构建配置对象建造器 <see cref="IConfigurationBuilder"/></returns>
+        /// <exception cref="PathTooLongException">路径太长</exception>
         public static IConfigurationBuilder AddConsulFile(this IConfigurationBuilder builder, IFileProvider provider, string path, bool optional, bool reloadOnChange)
         {
             Check.NotNull(builder, "builder");
@@ -47,36 +48,39 @@ namespace Surging.Core.Consul.Configurations
         }
 
         /// <summary>
-        /// The AddConsulFile
+        /// 加Consul配置文件
         /// </summary>
-        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
-        /// <param name="path">The path<see cref="string"/></param>
-        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        /// <param name="builder">构建配置对象建造器<see cref="IConfigurationBuilder"/></param>
+        /// <param name="path">文件相对路径<see cref="string"/></param>
+        /// <returns>构建配置对象建造器 <see cref="IConfigurationBuilder"/></returns>
+        /// <exception cref="PathTooLongException">路径太长</exception>
         public static IConfigurationBuilder AddConsulFile(this IConfigurationBuilder builder, string path)
         {
             return AddConsulFile(builder, provider: null, path: path, optional: false, reloadOnChange: false);
         }
 
         /// <summary>
-        /// The AddConsulFile
+        /// 加Consul配置文件
         /// </summary>
-        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
-        /// <param name="path">The path<see cref="string"/></param>
-        /// <param name="optional">The optional<see cref="bool"/></param>
-        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        /// <param name="builder">构建配置对象建造器<see cref="IConfigurationBuilder"/></param>
+        /// <param name="path">文件相对路径<see cref="string"/></param>
+        /// <param name="optional">是否可选<see cref="bool"/></param>
+        /// <returns>构建配置对象建造器 <see cref="IConfigurationBuilder"/></returns>
+        /// <exception cref="PathTooLongException">路径太长</exception>
         public static IConfigurationBuilder AddConsulFile(this IConfigurationBuilder builder, string path, bool optional)
         {
             return AddConsulFile(builder, provider: null, path: path, optional: optional, reloadOnChange: false);
         }
 
         /// <summary>
-        /// The AddConsulFile
+        /// 加Consul配置文件
         /// </summary>
-        /// <param name="builder">The builder<see cref="IConfigurationBuilder"/></param>
-        /// <param name="path">The path<see cref="string"/></param>
-        /// <param name="optional">The optional<see cref="bool"/></param>
-        /// <param name="reloadOnChange">The reloadOnChange<see cref="bool"/></param>
-        /// <returns>The <see cref="IConfigurationBuilder"/></returns>
+        /// <param name="builder">构建配置对象建造器<see cref="IConfigurationBuilder"/></param>
+        /// <param name="path">文件相对路径<see cref="string"/></param>
+        /// <param name="optional">是否可选<see cref="bool"/></param>
+        /// <param name="reloadOnChange">当改变时是不是重新加载<see cref="bool"/></param>
+        /// <returns>构建配置对象建造器 <see cref="IConfigurationBuilder"/></returns>
+        /// <exception cref="PathTooLongException">路径太长</exception>
         public static IConfigurationBuilder AddConsulFile(this IConfigurationBuilder builder, string path, bool optional, bool reloadOnChange)
         {
             return AddConsulFile(builder, provider: null, path: path, optional: optional, reloadOnChange: reloadOnChange);

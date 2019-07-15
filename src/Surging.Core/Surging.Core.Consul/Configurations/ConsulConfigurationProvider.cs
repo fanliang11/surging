@@ -8,7 +8,7 @@ using System.Text;
 namespace Surging.Core.Consul.Configurations
 {
     /// <summary>
-    /// Defines the <see cref="ConsulConfigurationProvider" />
+    /// Consul配置提供者 <see cref="ConsulConfigurationProvider" />
     /// </summary>
     public class ConsulConfigurationProvider : FileConfigurationProvider
     {
