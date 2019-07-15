@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.KestrelHttpServer;
@@ -66,10 +67,24 @@ namespace Surging.Core.Stage
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 if (AppConfig.Options.IsCamelCaseResolver)
                 {
+                    JsonConvert.DefaultSettings= new Func<JsonSerializerSettings>(() =>
+                    {
+                       JsonSerializerSettings setting = new Newtonsoft.Json.JsonSerializerSettings();
+                        setting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                        setting.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                        return setting;
+                    });
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 }
                 else
                 {
+                    JsonConvert.DefaultSettings = new Func<JsonSerializerSettings>(() =>
+                    {
+                        JsonSerializerSettings setting = new JsonSerializerSettings();
+                        setting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                        setting.ContractResolver= new DefaultContractResolver();
+                        return setting;
+                    });
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 }
             });
