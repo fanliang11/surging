@@ -2,7 +2,7 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|981",
+    "Port": "${Surging_Server_Port}|98",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
@@ -18,9 +18,9 @@
     "IsModulePerLifetimeScope": false,
     "ReloadOnChange": false,
     "Ports": {
-      "HttpPort": "${HttpPort}|281",
-      "WSPort": "${WSPort}|961",
-      "MQTTPort": "${MQTTPort}|971"
+      "HttpPort": "${HttpPort}|280",
+      "WSPort": "${WSPort}|96",
+      "MQTTPort": "${MQTTPort}|97"
     },
     "RequestCacheEnabled": false,
     "Packages": [
@@ -54,9 +54,9 @@
       "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
       "AllowAnyHeader": true,
       "AllowAnyMethod": true
-    }
-    //"HttpsPort": "${StageHttpsPorts}|449,446",
-    //"HttpPorts": "${StageHttpPorts}|281,282,283"
+    },
+    "HttpsPort": "${StageHttpsPorts}|449,446",
+    "HttpPorts": "${StageHttpPorts}|285,282,283"
   },
   "Dns": {
     "RootDnsAddress": "192.168.1.1",

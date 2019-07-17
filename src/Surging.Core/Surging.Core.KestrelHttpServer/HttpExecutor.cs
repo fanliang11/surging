@@ -70,24 +70,17 @@ namespace Surging.Core.KestrelHttpServer
                 return;
             }
             var entry = _serviceEntryLocate.Locate(httpMessage);
-            if (entry == null)
-            {
-                if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError($"根据服务routePath：{httpMessage.RoutePath}，找不到服务条目。");
-                return;
-            }
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("准备执行本地逻辑。");
+
             HttpResultMessage<object> httpResultMessage = new HttpResultMessage<object>() { };
 
-            if (_serviceProvider.IsRegisteredWithKey(httpMessage.ServiceKey, entry.Type))
+            if (entry!=null && _serviceProvider.IsRegisteredWithKey(httpMessage.ServiceKey, entry.Type))
             {
                 //执行本地代码。
                 httpResultMessage = await LocalExecuteAsync(entry, httpMessage);
             }
             else
             {
-                httpResultMessage = await RemoteExecuteAsync(entry, httpMessage);
+                httpResultMessage = await RemoteExecuteAsync(httpMessage);
             }
             await SendRemoteInvokeResult(sender, httpResultMessage);
         }
@@ -97,7 +90,7 @@ namespace Surging.Core.KestrelHttpServer
 
         #region Private Method
 
-        private async Task<HttpResultMessage<object>> RemoteExecuteAsync(ServiceEntry entry, HttpMessage httpMessage)
+        private async Task<HttpResultMessage<object>> RemoteExecuteAsync(HttpMessage httpMessage)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
             try {

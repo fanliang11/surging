@@ -11,6 +11,7 @@ using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using System.Threading.Tasks;
 using Autofac;
+using System;
 
 namespace Surging.Core.Stage.Filters
 {
@@ -23,7 +24,7 @@ namespace Surging.Core.Stage.Filters
         }
         public void OnAuthorization(AuthorizationFilterContext filterContext)
         {
-            if (filterContext.Route.ServiceDescriptor.EnableAuthorization())
+            if (filterContext.Route!=null && filterContext.Route.ServiceDescriptor.EnableAuthorization())
             {
                 if (filterContext.Route.ServiceDescriptor.AuthType() == AuthorizationType.JWT.ToString())
                 {
@@ -44,6 +45,9 @@ namespace Surging.Core.Stage.Filters
 
                 }
             }
+            var gatewayAppConfig = AppConfig.Options.ApiGetWay;
+            if (String.Compare(filterContext.Path.ToLower(), gatewayAppConfig.TokenEndpointPath, true) == 0)
+                filterContext.Context.Items.Add("path", gatewayAppConfig.AuthorizationRoutePath);
 
         }
     }

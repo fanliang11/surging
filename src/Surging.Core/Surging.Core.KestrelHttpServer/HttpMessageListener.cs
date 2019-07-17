@@ -23,11 +23,12 @@ namespace Surging.Core.KestrelHttpServer
 {
     public abstract class HttpMessageListener : IMessageListener
     {
-        public  event ReceivedDelegate Received;
+        public event ReceivedDelegate Received;
         private readonly ILogger<HttpMessageListener> _logger;
         private readonly ISerializer<string> _serializer;
-        private  event RequestDelegate Requested;
+        private event RequestDelegate Requested;
         private readonly IServiceRouteProvider _serviceRouteProvider;
+        private readonly string[] _serviceKeys = {  "serviceKey", "servicekey"};
 
         public HttpMessageListener(ILogger<HttpMessageListener> logger, ISerializer<string> serializer, IServiceRouteProvider serviceRouteProvider)
         {
@@ -36,23 +37,31 @@ namespace Surging.Core.KestrelHttpServer
             _serviceRouteProvider = serviceRouteProvider;
         }
 
-        public  async Task OnReceived(IMessageSender sender, TransportMessage message)
+        public async Task OnReceived(IMessageSender sender, TransportMessage message)
         {
             if (Received == null)
                 return;
             await Received(sender, message);
         }
 
-        public async Task OnReceived(IMessageSender sender, HttpContext context,IEnumerable<IActionFilter> actionFilters)
+        public async Task OnReceived(IMessageSender sender, HttpContext context, IEnumerable<IActionFilter> actionFilters)
         {
             var serviceRoute = context.Items["route"] as ServiceRoute;
-            var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
+         
+            var path = (context.Items["path"]
+                ?? HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()))) as string;
             if (serviceRoute == null)
             {
                 serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
             }
-            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key,p => (object)p.Value.ToString());
-            parameters.Remove("servicekey", out object serviceKey);
+            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key, p => (object)p.Value.ToString());
+            object serviceKey = null;
+            foreach (var key in _serviceKeys)
+            { 
+                parameters.Remove(key,out object value);
+                serviceKey = value;
+                break;
+            }
            
             if (String.Compare(serviceRoute.ServiceDescriptor.RoutePath, path, true) != 0)
             {
@@ -65,7 +74,7 @@ namespace Surging.Core.KestrelHttpServer
             var httpMessage = new HttpMessage
             {
                 Parameters = parameters,
-                RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
+                RoutePath =  serviceRoute.ServiceDescriptor.RoutePath,
                 ServiceKey = serviceKey?.ToString()
             };
             
@@ -139,6 +148,7 @@ namespace Surging.Core.KestrelHttpServer
                 context.Items.Add("route", serviceRoute);
                  var filterContext = new AuthorizationFilterContext
                 {
+                     Path=path,
                     Context = context,
                     Route = serviceRoute
                 };

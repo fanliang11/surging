@@ -49,10 +49,11 @@ namespace Surging.ApiGateway.Controllers
             {
                 model[n] = this.Request.Query[n].ToString();
             }
-            ServiceResult<object> result = ServiceResult<object>.Create(false, null);
-            var route = await _serviceRouteProvider.GetRouteByPathRegex(path);
-            path = String.Compare(route.ServiceDescriptor.RoutePath, GateWayAppConfig.TokenEndpointPath, true) == 0 ?
+            ServiceResult<object> result = ServiceResult<object>.Create(false, null); 
+          
+            path = String.Compare(path.ToLower(), GateWayAppConfig.TokenEndpointPath, true) == 0 ?
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
+            var route = await _serviceRouteProvider.GetRouteByPathRegex(path);
             if (!GetAllowRequest(route)) return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
             if (servicePartProvider.IsPart(path))
             {
