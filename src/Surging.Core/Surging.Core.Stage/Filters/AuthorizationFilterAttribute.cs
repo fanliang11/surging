@@ -22,7 +22,7 @@ namespace Surging.Core.Stage.Filters
         {
             _authorizationServerProvider = ServiceLocator.Current.Resolve<IAuthorizationServerProvider>();
         }
-        public void OnAuthorization(AuthorizationFilterContext filterContext)
+        public async Task OnAuthorization(AuthorizationFilterContext filterContext)
         {
             if (filterContext.Route!=null && filterContext.Route.ServiceDescriptor.EnableAuthorization())
             {
@@ -31,7 +31,7 @@ namespace Surging.Core.Stage.Filters
                     var author = filterContext.Context.Request.Headers["Authorization"];
                     if (author.Count > 0)
                     {
-                        var isSuccess = _authorizationServerProvider.ValidateClientAuthentication(author).Result;
+                        var isSuccess =await _authorizationServerProvider.ValidateClientAuthentication(author);
                         if (!isSuccess)
                         {
                             filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };

@@ -6,6 +6,6 @@ namespace Surging.Core.KestrelHttpServer.Filters
 {
     public interface IAuthorizationFilter : IFilter
     {
-        void OnAuthorization(AuthorizationFilterContext serviceRouteContext);
+        Task OnAuthorization(AuthorizationFilterContext serviceRouteContext);
     }
 }

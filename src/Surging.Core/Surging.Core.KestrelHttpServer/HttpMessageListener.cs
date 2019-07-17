@@ -152,7 +152,7 @@ namespace Surging.Core.KestrelHttpServer
                     Context = context,
                     Route = serviceRoute
                 };
-                filter.OnAuthorization(filterContext);
+               await filter.OnAuthorization(filterContext);
                 if (filterContext.Result != null)
                 {
                     await sender.SendAndFlushAsync(new TransportMessage(filterContext.Result));
