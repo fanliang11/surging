@@ -8,7 +8,7 @@
 
  surging 是微服务引擎,提供了轻量级，高性能，模块化的RPC请求管道，服务引擎支持http、TCP、WS、Mqtt、UDP、DNS协议，采用了Zookeeper、Consul作为注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，内置了服务治理用来保证可靠性RPC通信
                  
-基于.NET Core的分微服务引擎提供了高性能的RPC通信。使用surging你可以：
+使用surging你可以：
 
    * 构建Web应用程序，微服务和api网关
    * 微服务可以部署在docker。可以使用k8s、rancher服务编排弹性扩容
