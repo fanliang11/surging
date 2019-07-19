@@ -42,6 +42,8 @@ namespace Surging.Core.Stage.Filters
                             RpcContext.GetContext().SetAttachment("payload", payload);
                         }
                     }
+                    else
+                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
 
                 }
             }

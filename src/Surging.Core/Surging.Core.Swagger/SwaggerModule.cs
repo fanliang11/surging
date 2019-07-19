@@ -7,6 +7,7 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.Swagger.Builder;
 using Surging.Core.Swagger.Internal;
+using Surging.Core.Swagger.Swagger.Filters;
 using Surging.Core.Swagger.SwaggerUI;
 using System;
 using System.Collections.Generic;
@@ -54,7 +55,7 @@ namespace Surging.Core.Swagger
             {
                 serviceCollection.AddSwaggerGen(options =>
                 {
-
+                    options.OperationFilter<AddAuthorizationOperationFilter>();
                     options.SwaggerDoc(info.Version, info);
                     if (swaggerOptions != null && swaggerOptions.IgnoreFullyQualified)
                         options.IgnoreFullyQualified();
