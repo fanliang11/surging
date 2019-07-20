@@ -107,7 +107,7 @@ namespace Surging.Core.KestrelHttpServer
         }
 
         private void AppResolve(IApplicationBuilder app)
-        { 
+        {
             app.UseStaticFiles();
             app.UseMvc();
             _moduleProvider.Initialize(new ApplicationInitializationContext(app, _moduleProvider.Modules,
@@ -115,16 +115,14 @@ namespace Surging.Core.KestrelHttpServer
                 AppConfig.Configuration));
             app.Run(async (context) =>
             {
-               
-                    var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
-                    var sender = new HttpServerMessageSender(_serializer, context);
-                    var isSuccess = await OnAuthorization(context, sender, filters);
-                    if (isSuccess)
-                    {
-                        var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
-                        await OnReceived(sender, context, actionFilters);
-                    }
-                 
+                var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
+                var sender = new HttpServerMessageSender(_serializer, context);
+                var isSuccess = await OnAuthorization(context, sender, filters);
+                if (isSuccess)
+                {
+                    var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
+                    await OnReceived(sender, context, actionFilters);
+                }
             });
         }
 

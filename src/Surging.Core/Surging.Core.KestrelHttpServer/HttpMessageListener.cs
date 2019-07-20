@@ -59,8 +59,11 @@ namespace Surging.Core.KestrelHttpServer
             foreach (var key in _serviceKeys)
             { 
                 parameters.Remove(key,out object value);
-                serviceKey = value;
-                break;
+                if (value != null)
+                {
+                    serviceKey = value;
+                    break;
+                }
             }
            
             if (String.Compare(serviceRoute.ServiceDescriptor.RoutePath, path, true) != 0)
