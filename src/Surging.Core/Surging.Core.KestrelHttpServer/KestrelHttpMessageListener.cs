@@ -95,7 +95,7 @@ namespace Surging.Core.KestrelHttpServer
         }
 
         public void ConfigureServices(IServiceCollection services)
-        {
+        { 
             var builder = new ContainerBuilder();
             services.AddMvc();
             _moduleProvider.ConfigureServices(new ConfigurationContext(services,
@@ -107,7 +107,7 @@ namespace Surging.Core.KestrelHttpServer
         }
 
         private void AppResolve(IApplicationBuilder app)
-        {
+        { 
             app.UseStaticFiles();
             app.UseMvc();
             _moduleProvider.Initialize(new ApplicationInitializationContext(app, _moduleProvider.Modules,

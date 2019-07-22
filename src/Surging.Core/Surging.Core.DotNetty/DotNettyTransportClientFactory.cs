@@ -37,7 +37,7 @@ namespace Surging.Core.DotNetty
         private readonly ILogger<DotNettyTransportClientFactory> _logger;
         private readonly IServiceExecutor _serviceExecutor;
         private readonly IHealthCheckService _healthCheckService;
-        private readonly ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>> _clients = new ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>>();
+        private readonly ConcurrentDictionary<EndPoint, Task<ITransportClient>> _clients = new ConcurrentDictionary<EndPoint, Task<ITransportClient>>();
         private readonly Bootstrap _bootstrap;
 
         private static readonly AttributeKey<IMessageSender> messageSenderKey = AttributeKey<IMessageSender>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageSender));
@@ -88,7 +88,7 @@ namespace Surging.Core.DotNetty
             try
             {
                 return await _clients.GetOrAdd(key
-                    , k => new Lazy<Task<ITransportClient>>(async () =>
+                    , async k =>
                         {
                             //客户端对象
                             var bootstrap = _bootstrap;
@@ -105,8 +105,7 @@ namespace Surging.Core.DotNetty
                             //创建客户端
                             var client = new TransportClient(messageSender, messageListener, _logger, _serviceExecutor);
                             return client;
-                        }
-                    )).Value;//返回实例
+                        });//返回实例
             }
             catch
             {
@@ -127,9 +126,9 @@ namespace Surging.Core.DotNetty
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public void Dispose()
         {
-            foreach (var client in _clients.Values.Where(i => i.IsValueCreated))
+            foreach (var client in _clients.Values)
             {
-                (client.Value as IDisposable)?.Dispose();
+                (client as IDisposable)?.Dispose();
             }
         }
 

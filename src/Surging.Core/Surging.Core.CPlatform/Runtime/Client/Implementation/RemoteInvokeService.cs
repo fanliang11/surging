@@ -75,7 +75,8 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
                 var endPoint = address.CreateEndPoint();
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
-                var client =await _transportClientFactory.CreateClientAsync(endPoint);
+                var task = _transportClientFactory.CreateClientAsync(endPoint);
+                var client= task.IsCompletedSuccessfully ? task.Result : await task;
                 using (var cts = new CancellationTokenSource())
                 {
                     return await client.SendAsync(invokeMessage, cts.Token).WithCancellation(cts, requestTimeout);
