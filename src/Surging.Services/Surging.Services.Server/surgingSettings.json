@@ -54,7 +54,18 @@
       "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
       "AllowAnyHeader": true,
       "AllowAnyMethod": true
-    },
+    }, 
+    "AccessSetting": [
+      {
+        "Whitelist": "${whitelist}|127.0.0.1", 
+        "Enable": false
+      },
+      {
+        "Whitelist": "${whitelist}|192.168.10.50,192.168.43.0/24",
+        "RoutePath": true,
+        "Enable": true
+      }
+    ],
     "HttpsPort": "${StageHttpsPorts}|449,446",
     "HttpPorts": "${StageHttpPorts}|285,282,283"
   },

@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.AspNetCore.Http;
 using Surging.Core.ApiGateWay;
 using Surging.Core.ApiGateWay.OAuth;
 using Surging.Core.CPlatform.Messages;
@@ -15,8 +16,10 @@ namespace Surging.Core.Stage.Filters
     public class ActionFilterAttribute : IActionFilter
     {
         private readonly IAuthorizationServerProvider _authorizationServerProvider;
-        public ActionFilterAttribute()
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public ActionFilterAttribute(IHttpContextAccessor httpContextAccessor)
         {
+            _httpContextAccessor = httpContextAccessor;
             _authorizationServerProvider = ServiceLocator.Current.Resolve<IAuthorizationServerProvider>();
         }
 
@@ -27,6 +30,7 @@ namespace Surging.Core.Stage.Filters
 
         public async Task OnActionExecuting(ActionExecutingContext filterContext)
         {
+            var address= _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
             var gatewayAppConfig = AppConfig.Options.ApiGetWay;
             if (filterContext.Message.RoutePath == gatewayAppConfig.AuthorizationRoutePath)
             {

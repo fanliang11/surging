@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -88,6 +89,7 @@ namespace Surging.Core.Stage
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 }
             });
+            context.Services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
             context.Services.AddFilters(typeof(AuthorizationFilterAttribute));
             context.Services.AddFilters(typeof(ActionFilterAttribute));
         }

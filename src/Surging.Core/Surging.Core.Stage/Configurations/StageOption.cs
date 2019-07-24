@@ -22,6 +22,8 @@ namespace Surging.Core.Stage.Configurations
 
         public AccessPolicyOption Policy { get; set; }
 
+        public List<AccessSettingOption> AccessSetting { get; set; }
+
         public string HttpPorts { get;  set; }
     }
 }
