@@ -12,34 +12,37 @@ namespace Surging.Core.CPlatform.Routing.Template
         {
             StringBuilder result = new StringBuilder();
             var parameters = routeTemplet.Split(@"/");
-            bool isAppendMethod=false;
+            bool isAppendMethod = false;
             foreach (var parameter in parameters)
             {
                 var param = GetParameters(parameter).FirstOrDefault();
                 if (param == null)
                 {
-                    result.Append(parameter);
+                    result.Append(parameter.ToLower());
                 }
-                else if (service.EndsWith(param))
+                else if (service.EndsWith(param, StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Append(service.Substring(1, service.Length - param.Length - 1));
+                    result.Append(service.Substring(1, service.Length - param.Length - 1).ToLower());
                 }
-                else if (param == "Method")
+                else if ("Method".Equals(param, StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Append(method);
+                    result.Append(method.ToLower());
                     isAppendMethod = true;
                 }
                 else
                 {
-                    if (!isAppendMethod) result.AppendFormat("{0}/", method);
+                    if (!isAppendMethod)
+                    {
+                        result.AppendFormat("{0}/", method.ToLower());
+                    }
                     result.Append(parameter);
                     isAppendMethod = true;
                 }
                 result.Append("/");
             }
             result.Length = result.Length - 1;
-            if (!isAppendMethod) result.AppendFormat("/{0}", method);
-            return result.ToString().ToLower();
+            if (!isAppendMethod) result.AppendFormat("/{0}", method.ToLower());
+            return result.ToString(); 
         }
 
         public static string Parse(string routeTemplet, string service)
