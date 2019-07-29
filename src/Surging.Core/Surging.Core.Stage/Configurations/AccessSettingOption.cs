@@ -6,7 +6,9 @@ namespace Surging.Core.Stage.Configurations
 {
     public class AccessSettingOption
     {
-        public string Whitelist { get; set; }
+        public string WhiteList { get; set; }
+
+        public string BlackList { get; set; }
 
         public string RoutePath { get; set; }
 

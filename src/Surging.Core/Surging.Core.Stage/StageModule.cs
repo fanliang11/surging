@@ -92,6 +92,7 @@ namespace Surging.Core.Stage
             context.Services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
             context.Services.AddFilters(typeof(AuthorizationFilterAttribute));
             context.Services.AddFilters(typeof(ActionFilterAttribute));
+            context.Services.AddFilters(typeof(IPFilterAttribute));
         }
 
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)

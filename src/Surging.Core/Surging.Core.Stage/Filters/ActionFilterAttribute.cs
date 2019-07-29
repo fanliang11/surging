@@ -9,6 +9,7 @@ using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Stage.Filters
@@ -16,10 +17,8 @@ namespace Surging.Core.Stage.Filters
     public class ActionFilterAttribute : IActionFilter
     {
         private readonly IAuthorizationServerProvider _authorizationServerProvider;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public ActionFilterAttribute(IHttpContextAccessor httpContextAccessor)
+        public ActionFilterAttribute()
         {
-            _httpContextAccessor = httpContextAccessor;
             _authorizationServerProvider = ServiceLocator.Current.Resolve<IAuthorizationServerProvider>();
         }
 
@@ -30,7 +29,6 @@ namespace Surging.Core.Stage.Filters
 
         public async Task OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var address= _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
             var gatewayAppConfig = AppConfig.Options.ApiGetWay;
             if (filterContext.Message.RoutePath == gatewayAppConfig.AuthorizationRoutePath)
             {

@@ -37,7 +37,7 @@ namespace Surging.Core.DotNetty
         private readonly ILogger<DotNettyTransportClientFactory> _logger;
         private readonly IServiceExecutor _serviceExecutor;
         private readonly IHealthCheckService _healthCheckService;
-        private readonly ConcurrentDictionary<EndPoint, Task<ITransportClient>> _clients = new ConcurrentDictionary<EndPoint, Task<ITransportClient>>();
+        private readonly ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>> _clients = new ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>>();
         private readonly Bootstrap _bootstrap;
 
         private static readonly AttributeKey<IMessageSender> messageSenderKey = AttributeKey<IMessageSender>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageSender));
@@ -88,24 +88,25 @@ namespace Surging.Core.DotNetty
             try
             {
                 return await _clients.GetOrAdd(key
-                    , async k =>
-                        {
-                            //客户端对象
-                            var bootstrap = _bootstrap;
-                            //异步连接返回channel
-                            var channel = await bootstrap.ConnectAsync(k);
-                            var messageListener = new MessageListener();
-                            //设置监听
-                            channel.GetAttribute(messageListenerKey).Set(messageListener);
-                            //实例化发送者
-                            var messageSender = new DotNettyMessageClientSender(_transportMessageEncoder, channel);
-                            //设置channel属性
-                            channel.GetAttribute(messageSenderKey).Set(messageSender);
-                            channel.GetAttribute(origEndPointKey).Set(k);
-                            //创建客户端
-                            var client = new TransportClient(messageSender, messageListener, _logger, _serviceExecutor);
-                            return client;
-                        });//返回实例
+                    , k => new Lazy<Task<ITransportClient>>(async () =>
+                    {
+                        //客户端对象
+                        var bootstrap = _bootstrap;
+                        //异步连接返回channel
+                        var channel = await bootstrap.ConnectAsync(k);
+                        var messageListener = new MessageListener();
+                        //设置监听
+                        channel.GetAttribute(messageListenerKey).Set(messageListener);
+                        //实例化发送者
+                        var messageSender = new DotNettyMessageClientSender(_transportMessageEncoder, channel);
+                        //设置channel属性
+                        channel.GetAttribute(messageSenderKey).Set(messageSender);
+                        channel.GetAttribute(origEndPointKey).Set(k);
+                        //创建客户端
+                        var client = new TransportClient(messageSender, messageListener, _logger, _serviceExecutor);
+                        return client;
+                    }
+                    )).Value;//返回实例
             }
             catch
             {
