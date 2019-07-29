@@ -90,6 +90,7 @@ namespace Surging.Core.Stage
                 }
             });
             context.Services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
+            context.Services.AddSingleton<IIPChecker,IPAddressChecker>();
             context.Services.AddFilters(typeof(AuthorizationFilterAttribute));
             context.Services.AddFilters(typeof(ActionFilterAttribute));
             context.Services.AddFilters(typeof(IPFilterAttribute));
@@ -103,6 +104,7 @@ namespace Surging.Core.Stage
             {
                 AppConfig.Options = section.Get<StageOption>();
             }
+            
             builder.RegisterType<WebServerListener>().As<IWebServerListener>().SingleInstance(); 
         }
     }
