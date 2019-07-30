@@ -48,7 +48,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
                         && await mqttBehavior.Authorized(packet.Username, packet.Password))
                 {
                     var mqttChannel = _channelService.GetMqttChannel(deviceId);
-                    if (mqttChannel == null || !mqttChannel.IsOnine())
+                    if (mqttChannel == null || !await mqttChannel.IsOnine())
                     {
                         byte[] bytes = null;
                         if (packet.WillMessage != null)

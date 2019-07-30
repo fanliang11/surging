@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
 {
+    /// <summary>
+    /// 默认健康检查服务(每10秒会检查一次服务状态，在构造函数中添加服务管理事件) 
+    /// </summary>
     public class DefaultHealthCheckService : IHealthCheckService, IDisposable
     {
         private readonly ConcurrentDictionary<ValueTuple<string, int>, MonitorEntry> _dictionary =
@@ -34,14 +37,21 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             remove { _changed -= value; }
         }
 
+        /// <summary>
+        /// 默认心跳检查服务(每10秒会检查一次服务状态，在构造函数中添加服务管理事件) 
+        /// </summary>
+        /// <param name="serviceRouteManager"></param>
         public DefaultHealthCheckService(IServiceRouteManager serviceRouteManager)
         {
             var timeSpan = TimeSpan.FromSeconds(10);
 
             _serviceRouteManager = serviceRouteManager;
+            //建立计时器
             _timer = new Timer(async s =>
             {
+                //检查服务是否可用
                 await Check(_dictionary.ToArray().Select(i => i.Value), _timeout);
+                //移除不可用的服务地址
                 RemoveUnhealthyAddress(_dictionary.ToArray().Select(i => i.Value).Where(m => m.UnhealthyTimes >= 6));
             }, null, timeSpan, timeSpan);
 

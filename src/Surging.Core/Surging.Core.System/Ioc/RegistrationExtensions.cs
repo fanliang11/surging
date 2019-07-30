@@ -17,9 +17,9 @@ using Surging.Core.CPlatform.EventBus.Events;
 
 namespace Surging.Core.System.Ioc
 {
-
-
-
+    /// <summary>
+    /// 注册扩展程序
+    /// </summary>
     [Obsolete]
     public static class RegistrationExtensions
     {

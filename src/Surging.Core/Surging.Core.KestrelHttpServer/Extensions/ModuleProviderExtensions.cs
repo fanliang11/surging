@@ -47,5 +47,24 @@ namespace Surging.Core.KestrelHttpServer.Extensions
                 }
             });
         }
+
+        public static void ConfigureHost(this IModuleProvider moduleProvider, WebHostContext context)
+        {
+            moduleProvider.Modules.ForEach(p =>
+            {
+                try
+                {
+                    if (p.Enable)
+                    {
+                        var module = p as KestrelHttpModule;
+                        module?.RegisterBuilder(context);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            });
+        }
     }
 }

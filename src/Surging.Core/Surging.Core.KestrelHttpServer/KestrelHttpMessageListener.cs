@@ -20,6 +20,8 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.Routing;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Surging.Core.KestrelHttpServer.Filters;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -49,16 +51,18 @@ namespace Surging.Core.KestrelHttpServer
             _serviceRouteProvider = serviceRouteProvider;
         }
 
-        public async Task StartAsync(EndPoint endPoint)
-        {
-            var ipEndPoint = endPoint as IPEndPoint;
+        public async Task StartAsync(IPAddress address,int? port)
+        { 
             try
             {
                 var hostBuilder = new WebHostBuilder()
                   .UseContentRoot(Directory.GetCurrentDirectory())
-                  .UseKestrel(options =>
+                  .UseKestrel((context,options) =>
                   {
-                      options.Listen(ipEndPoint);
+                      options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(30);
+                      if (port!=null  && port >0)
+                          options.Listen(address,port.Value);
+                      ConfigureHost(context, options, address);
 
                   })
                   .ConfigureServices(ConfigureServices)
@@ -80,21 +84,25 @@ namespace Surging.Core.KestrelHttpServer
             }
             catch
             {
-                _logger.LogError($"http服务主机启动失败，监听地址：{endPoint}。 ");
+                _logger.LogError($"http服务主机启动失败，监听地址：{address}:{port}。 ");
             }
 
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureHost(WebHostBuilderContext context, KestrelServerOptions options,IPAddress ipAddress)
         {
+            _moduleProvider.ConfigureHost(new WebHostContext(context, options, ipAddress));
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        { 
             var builder = new ContainerBuilder();
             services.AddMvc();
             _moduleProvider.ConfigureServices(new ConfigurationContext(services,
                 _moduleProvider.Modules,
                 _moduleProvider.VirtualPaths,
                 AppConfig.Configuration));
-            builder.Populate(services);
-          
+            builder.Populate(services); 
             builder.Update(_container.Current.ComponentRegistry);
         }
 
@@ -107,8 +115,14 @@ namespace Surging.Core.KestrelHttpServer
                 AppConfig.Configuration));
             app.Run(async (context) =>
             {
+                var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
                 var sender = new HttpServerMessageSender(_serializer, context);
-                await OnReceived(sender, context);
+                var isSuccess = await OnAuthorization(context, sender, filters);
+                if (isSuccess)
+                {
+                    var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
+                    await OnReceived(sender, context, actionFilters);
+                }
             });
         }
 

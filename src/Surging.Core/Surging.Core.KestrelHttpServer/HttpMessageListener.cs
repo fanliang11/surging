@@ -8,6 +8,8 @@ using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
+using Surging.Core.KestrelHttpServer.Filters;
+using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using Surging.Core.KestrelHttpServer.Internal;
 using System;
 using System.Collections.Generic;
@@ -21,11 +23,12 @@ namespace Surging.Core.KestrelHttpServer
 {
     public abstract class HttpMessageListener : IMessageListener
     {
-        public  event ReceivedDelegate Received;
+        public event ReceivedDelegate Received;
         private readonly ILogger<HttpMessageListener> _logger;
         private readonly ISerializer<string> _serializer;
-        private  event RequestDelegate Requested;
+        private event RequestDelegate Requested;
         private readonly IServiceRouteProvider _serviceRouteProvider;
+        private readonly string[] _serviceKeys = {  "serviceKey", "servicekey"};
 
         public HttpMessageListener(ILogger<HttpMessageListener> logger, ISerializer<string> serializer, IServiceRouteProvider serviceRouteProvider)
         {
@@ -34,23 +37,35 @@ namespace Surging.Core.KestrelHttpServer
             _serviceRouteProvider = serviceRouteProvider;
         }
 
-        public  async Task OnReceived(IMessageSender sender, TransportMessage message)
+        public async Task OnReceived(IMessageSender sender, TransportMessage message)
         {
             if (Received == null)
                 return;
             await Received(sender, message);
         }
 
-        public async Task OnReceived(IMessageSender sender, HttpContext context)
+        public async Task OnReceived(IMessageSender sender, HttpContext context, IEnumerable<IActionFilter> actionFilters)
         {
-            var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
-            var serviceRoute =await _serviceRouteProvider.GetRouteByPathRegex(path);
-            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key,p => (object)p.Value.ToString());
-            parameters.Remove("servicekey", out object serviceKey);
-            StreamReader streamReader = new StreamReader(context.Request.Body);
-            var data = await streamReader.ReadToEndAsync();
-            if (data.Length > 0)
-                parameters = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
+            var serviceRoute = context.Items["route"] as ServiceRoute;
+         
+            var path = (context.Items["path"]
+                ?? HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()))) as string;
+            if (serviceRoute == null)
+            {
+                serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+            }
+            IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key, p => (object)p.Value.ToString());
+            object serviceKey = null;
+            foreach (var key in _serviceKeys)
+            { 
+                parameters.Remove(key,out object value);
+                if (value != null)
+                {
+                    serviceKey = value;
+                    break;
+                }
+            }
+           
             if (String.Compare(serviceRoute.ServiceDescriptor.RoutePath, path, true) != 0)
             {
                 var @params = RouteTemplateSegmenter.Segment(serviceRoute.ServiceDescriptor.RoutePath, path);
@@ -59,39 +74,95 @@ namespace Surging.Core.KestrelHttpServer
                     parameters.Add(param.Key,param.Value);
                 }
             }
+            var httpMessage = new HttpMessage
+            {
+                Parameters = parameters,
+                RoutePath =  serviceRoute.ServiceDescriptor.RoutePath,
+                ServiceKey = serviceKey?.ToString()
+            };
+            
             if (context.Request.HasFormContentType)
             {
-                var collection =await GetFormCollection(context.Request);
-                parameters.Add("form", collection);
-                await Received(sender, new TransportMessage(new HttpMessage
-                {
-                    Parameters = parameters,
-                    RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
-                    ServiceKey = serviceKey?.ToString()
-                }));
+                var collection = await GetFormCollection(context.Request);
+                httpMessage.Parameters.Add("form", collection);
+                if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
+                await Received(sender, new TransportMessage(httpMessage));
             }
             else
             {
-              
+                StreamReader streamReader = new StreamReader(context.Request.Body);
+                var data = await streamReader.ReadToEndAsync();
                 if (context.Request.Method == "POST")
                 {
-                    await Received(sender, new TransportMessage(new HttpMessage
-                    {
-                        Parameters = parameters,
-                        RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
-                        ServiceKey = serviceKey?.ToString()
-                    }));
+                    var bodyParams = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
+                   foreach(var param in bodyParams)
+                    httpMessage.Parameters.Add(param.Key,param.Value);
+                    if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
+                    await Received(sender, new TransportMessage(httpMessage));
                 }
                 else
                 {
-                    await Received(sender, new TransportMessage(new HttpMessage
-                    {
-                        Parameters = parameters,
-                        RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
-                        ServiceKey = serviceKey?.ToString()
-                    }));
+                    if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
+                    await Received(sender, new TransportMessage(httpMessage));
                 }
             }
+            await OnActionExecuted(context, httpMessage, actionFilters);
+        }
+
+        public async Task<bool> OnActionExecuting(HttpContext context, HttpMessage message, IMessageSender sender, IEnumerable<IActionFilter> filters)
+        {
+            foreach (var fiter in filters)
+            {
+                var filterContext = new ActionExecutingContext()
+                {
+                    Context = context,
+                    Message = message
+                };
+                await fiter.OnActionExecuting(filterContext); 
+                if (filterContext.Result != null)
+                {
+                    await sender.SendAndFlushAsync(new TransportMessage(filterContext.Result));
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public async Task OnActionExecuted(HttpContext context, HttpMessage message, IEnumerable<IActionFilter> filters)
+        {
+            foreach (var fiter in filters)
+            {
+                var filterContext = new ActionExecutedContext()
+                {
+                    Context = context,
+                    Message = message
+                };
+                await fiter.OnActionExecuted(filterContext);
+            }
+        }
+
+        public async Task<bool> OnAuthorization(HttpContext context, HttpServerMessageSender sender, IEnumerable<IAuthorizationFilter> filters)
+        {
+            foreach (var filter in filters)
+            {
+                var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
+                var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
+                if (serviceRoute == null) serviceRoute =await _serviceRouteProvider.GetLocalRouteByPathRegex(path);
+                context.Items.Add("route", serviceRoute);
+                 var filterContext = new AuthorizationFilterContext
+                {
+                     Path=path,
+                    Context = context,
+                    Route = serviceRoute
+                };
+               await filter.OnAuthorization(filterContext);
+                if (filterContext.Result != null)
+                {
+                    await sender.SendAndFlushAsync(new TransportMessage(filterContext.Result));
+                    return false;
+                }
+            }
+            return true;
         }
 
         private async Task<HttpFormCollection> GetFormCollection(HttpRequest request)
@@ -152,7 +223,7 @@ namespace Surging.Core.KestrelHttpServer
             return collection;
         }
 
-        private string  GetName(string type,string content)
+        private string GetName(string type,string content)
         {
             var elements = content.Split(';');
             var element = elements.Where(entry => entry.Trim().StartsWith(type)).FirstOrDefault()?.Trim();
@@ -169,10 +240,17 @@ namespace Surging.Core.KestrelHttpServer
             string routePath = "";
             var urlSpan = path.AsSpan();
             var len = urlSpan.IndexOf("?");
-            if (len == -1)
-                routePath = urlSpan.TrimStart("/").ToString().ToLower();
+            if (urlSpan.LastIndexOf("/") == 0)
+            {
+                routePath = path;
+            }
             else
-                routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
+            {
+                if (len == -1)
+                    routePath = urlSpan.TrimStart("/").ToString().ToLower();
+                else
+                    routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
+            }
             return routePath;
         }
     }

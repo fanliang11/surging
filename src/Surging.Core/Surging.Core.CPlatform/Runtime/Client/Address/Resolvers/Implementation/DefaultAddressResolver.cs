@@ -60,6 +60,15 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         /// <param name="serviceId">服务Id。</param>
         /// <returns>服务地址模型。</returns>
+        /// 1.从字典中拿到serviceroute对象
+        /// 2.从字典中拿到服务描述符集合
+        /// 3.获取或添加serviceroute
+        /// 4.添加服务id到白名单
+        /// 5.根据服务描述符得到地址并判断地址是否是可用的（地址应该是多个）
+        /// 6.添加到集合中
+        /// 7.拿到服务命今
+        /// 8.根据负载分流策略拿到一个选择器
+        /// 9.返回addressmodel
         public async ValueTask<AddressModel> Resolver(string serviceId, string item)
         {
             if (_logger.IsEnabled(LogLevel.Debug))

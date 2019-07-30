@@ -18,7 +18,6 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.ProxyGenerator;
-using Surging.Core.System.Intercept;
 using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper;
 using ZookeeperConfigInfo =  Surging.Core.Zookeeper.Configurations.ConfigInfo;
@@ -69,7 +68,6 @@ namespace Surging.ApiGateway
             {
                 option.AddClient();
                 option.AddCache();
-                option.AddClientIntercepted(typeof(CacheProviderInterceptor));
                 //option.UseZooKeeperManager(new ConfigInfo("127.0.0.1:2181"));
                if(registerConfig.Provider== RegisterProvider.Consul)
                 option.UseConsulManager(new ConfigInfo(registerConfig.Address,enableChildrenMonitor:false));
