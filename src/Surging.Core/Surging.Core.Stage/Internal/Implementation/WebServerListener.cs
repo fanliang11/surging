@@ -20,14 +20,13 @@ namespace Surging.Core.Stage.Internal.Implementation
         void IWebServerListener.Listen(WebHostContext context)
         {
 
-            var httpsPorts = AppConfig.Options.HttpsPort?.Split(",") ?? new string[] { "443" };
+            var httpsPorts = AppConfig.Options.HttpsPort?.Split(",");
             var httpPorts = AppConfig.Options.HttpPorts?.Split(",");
             if (AppConfig.Options.EnableHttps)
             { 
                 foreach (var httpsPort in httpsPorts)
                 {
                     int.TryParse(httpsPort, out int port);
-                    if (string.IsNullOrEmpty(AppConfig.Options.HttpsPort)) port = 443;
                     if (port > 0)
                     {
                         context.KestrelOptions.Listen(context.Address, port, listOptions =>
