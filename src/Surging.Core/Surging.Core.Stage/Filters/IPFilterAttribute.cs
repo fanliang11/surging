@@ -29,7 +29,7 @@ namespace Surging.Core.Stage.Filters
         public  Task OnActionExecuting(ActionExecutingContext filterContext)
         {
             var address = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
-            if(_ipChecker.IsBlackIp(address))
+            if(_ipChecker.IsBlackIp(address,filterContext.Message.RoutePath))
             {
                 filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Your IP address is not allowed" };
             }

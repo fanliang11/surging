@@ -54,14 +54,14 @@
       "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
       "AllowAnyHeader": true,
       "AllowAnyMethod": true
-    }, 
+    },
     "AccessSetting": [
       {
-        "Whitelist": "${whitelist}|127.0.0.1", 
+        "BlackList": "${whitelist}|127.0.0.1",
         "Enable": false
       },
       {
-        "Whitelist": "${whitelist}|192.168.10.50,192.168.43.0/24",
+        "WhiteList": "${whitelist}|192.168.10.50,192.168.43.0/24",
         "BlackList": "${blacklist}|192.168.2.50,192.168.1.0/16",
         "RoutePath": "/api/user/exists",
         "Enable": true
