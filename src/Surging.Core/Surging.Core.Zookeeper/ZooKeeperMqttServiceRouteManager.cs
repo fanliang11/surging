@@ -109,8 +109,6 @@ namespace Surging.Core.Zookeeper
                 await CreateSubdirectory(zooKeeper, _configInfo.MqttRoutePath);
 
                 var path = _configInfo.MqttRoutePath;
-                if (!path.EndsWith("/"))
-                    path += "/";
 
                 routes = routes.ToArray();
 
@@ -191,8 +189,6 @@ namespace Surging.Core.Zookeeper
         private async Task RemoveExceptRoutesAsync(IEnumerable<MqttServiceRoute> routes, AddressModel hostAddr)
         {
             var path = _configInfo.MqttRoutePath;
-            if (!path.EndsWith("/"))
-                path += "/";
             routes = routes.ToArray();
             var zooKeepers = await _zookeeperClientProvider.GetZooKeepers();
             foreach (var zooKeeper in zooKeepers)
@@ -268,9 +264,7 @@ namespace Surging.Core.Zookeeper
 
         private async Task<MqttServiceRoute[]> GetRoutes(IEnumerable<string> childrens)
         {
-            var rootPath = _configInfo.MqttRoutePath;
-            if (!rootPath.EndsWith("/"))
-                rootPath += "/";
+            var rootPath = _configInfo.MqttRoutePath; 
 
             childrens = childrens.ToArray();
             var routes = new List<MqttServiceRoute>(childrens.Count());

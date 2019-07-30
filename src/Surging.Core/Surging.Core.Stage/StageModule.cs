@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -88,8 +89,11 @@ namespace Surging.Core.Stage
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 }
             });
+            context.Services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
+            context.Services.AddSingleton<IIPChecker,IPAddressChecker>();
             context.Services.AddFilters(typeof(AuthorizationFilterAttribute));
             context.Services.AddFilters(typeof(ActionFilterAttribute));
+            context.Services.AddFilters(typeof(IPFilterAttribute));
         }
 
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
@@ -100,6 +104,7 @@ namespace Surging.Core.Stage
             {
                 AppConfig.Options = section.Get<StageOption>();
             }
+            
             builder.RegisterType<WebServerListener>().As<IWebServerListener>().SingleInstance(); 
         }
     }

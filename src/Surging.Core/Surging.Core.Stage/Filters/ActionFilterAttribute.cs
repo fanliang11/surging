@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.AspNetCore.Http;
 using Surging.Core.ApiGateWay;
 using Surging.Core.ApiGateWay.OAuth;
 using Surging.Core.CPlatform.Messages;
@@ -8,6 +9,7 @@ using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Stage.Filters
