@@ -13,7 +13,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         {
         }
 
-        public HttpDeleteAttribute(string template, bool isRegisterMetadata)
+        public HttpDeleteAttribute(bool isRegisterMetadata)
             : base(_supportedMethods,isRegisterMetadata)
         {
           

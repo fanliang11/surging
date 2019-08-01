@@ -13,7 +13,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         {
         }
 
-        public HttpGetAttribute(string template, bool isRegisterMetadata)
+        public HttpGetAttribute(bool isRegisterMetadata)
             : base(_supportedMethods,  isRegisterMetadata)
         {
         }
