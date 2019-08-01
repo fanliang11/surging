@@ -44,7 +44,8 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-       // [ServiceBundle("api/{Service}/{id}", false)]
+        [HttpPost(),HttpPut(), HttpDelete(), HttpGet()]
+        // [ServiceBundle("api/{Service}/{id}", false)]
         Task<bool> Exists(int id);
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="requestData">请求参数</param>
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
-       
+        [HttpPost(true),HttpPut(true)]
         Task<IdentityUser> Save(IdentityUser requestData);
 
         /// <summary>

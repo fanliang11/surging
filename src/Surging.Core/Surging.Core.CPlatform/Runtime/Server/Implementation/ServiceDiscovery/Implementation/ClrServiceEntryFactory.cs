@@ -75,6 +75,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
+            var httpMethodAttributes = attributes.Where(p => p is HttpMethodAttribute).Select(p => p as HttpMethodAttribute).ToList();
+            var httpMethods = new List<string>();
+            foreach (var attribute in httpMethodAttributes)
+            {
+                if (attribute.IsRegisterMetadata)
+                    httpMethods.AddRange(attribute.HttpMethods);
+            }
+            serviceDescriptor.HttpMethod(string.Join(',', httpMethods));
             var authorization = attributes.Where(p => p is AuthorizationFilterAttribute).FirstOrDefault();
             if (authorization != null)
                 serviceDescriptor.EnableAuthorization(true);

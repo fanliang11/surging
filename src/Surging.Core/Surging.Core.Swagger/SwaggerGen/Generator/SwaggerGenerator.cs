@@ -18,6 +18,7 @@ using Autofac;
 using Microsoft.Extensions.Primitives;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 
 namespace Surging.Core.SwaggerGen
 {
@@ -169,12 +170,49 @@ namespace Surging.Core.SwaggerGen
             {
                 var methodInfo = entry.Type.GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault();
                 var parameterInfo = methodInfo.GetParameters();
-                if (parameterInfo != null && parameterInfo.Any(p =>
-              !UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(p.ParameterType)))
-                    pathItem.Post = CreateOperation(entry, methodInfo,schemaRegistry);
-                else
-                    pathItem.Get = CreateOperation(entry, methodInfo, schemaRegistry);
+                var httpMethods=  entry.Attributes.OfType<HttpMethodAttribute>().ToList();
 
+                if (httpMethods.Count ==0)
+                {
+                    if (parameterInfo != null && parameterInfo.Any(p =>
+                  !UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(p.ParameterType)))
+                        pathItem.Post = CreateOperation(entry, methodInfo, schemaRegistry);
+                    else
+                        pathItem.Get = CreateOperation(entry, methodInfo, schemaRegistry);
+                }
+                else
+                {
+                    httpMethods.ForEach(p =>
+                    {
+                        foreach (var httpMethod in p.HttpMethods)
+                        {
+                            switch (httpMethod)
+                            {
+                                case "GET":
+                                    pathItem.Get = CreateOperation(entry, methodInfo, schemaRegistry);
+                                    break;
+                                case "PUT":
+                                    pathItem.Put = CreateOperation(entry, methodInfo, schemaRegistry);
+                                    break;
+                                case "POST":
+                                    pathItem.Post = CreateOperation(entry, methodInfo, schemaRegistry);
+                                    break;
+                                case "DELETE":
+                                    pathItem.Delete = CreateOperation(entry, methodInfo, schemaRegistry);
+                                    break;
+                                case "OPTIONS":
+                                    pathItem.Options = CreateOperation(entry, methodInfo, schemaRegistry);
+                                    break;
+                                case "HEAD":
+                                    pathItem.Head = CreateOperation(entry, methodInfo, schemaRegistry);
+                                    break;
+                                case "PATCH":
+                                    pathItem.Patch = CreateOperation(entry, methodInfo, schemaRegistry);
+                                    break;
+                            }
+                        }
+                    });
+                }
             }
             return pathItem;
         }

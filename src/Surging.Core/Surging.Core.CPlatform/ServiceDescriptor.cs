@@ -80,6 +80,17 @@ namespace Surging.Core.CPlatform
             return descriptor.GetMetadata("EnableAuthorization", false);
         }
 
+        public static ServiceDescriptor HttpMethod(this ServiceDescriptor descriptor, string httpMethod)
+        {
+            descriptor.Metadatas["HttpMethod"] = httpMethod;
+            return descriptor;
+        }
+         
+        public static string HttpMethod(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata("httpMethod", "");
+        }
+
         /// <summary>
         /// 设置是否禁用外网访问
         /// </summary>
