@@ -169,10 +169,9 @@ namespace Surging.Core.SwaggerGen
             foreach (var entry in serviceEntries)
             {
                 var methodInfo = entry.Type.GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault();
-                var parameterInfo = methodInfo.GetParameters();
-                var httpMethods=  entry.Attributes.OfType<HttpMethodAttribute>().ToList();
+                var parameterInfo = methodInfo.GetParameters(); 
 
-                if (httpMethods.Count ==0)
+                if (entry.Methods.Count() ==0)
                 {
                     if (parameterInfo != null && parameterInfo.Any(p =>
                   !UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(p.ParameterType)))
@@ -182,36 +181,33 @@ namespace Surging.Core.SwaggerGen
                 }
                 else
                 {
-                    httpMethods.ForEach(p =>
+                    foreach (var httpMethod in entry.Methods)
                     {
-                        foreach (var httpMethod in p.HttpMethods)
+                        switch (httpMethod)
                         {
-                            switch (httpMethod)
-                            {
-                                case "GET":
-                                    pathItem.Get = CreateOperation(entry, methodInfo, schemaRegistry);
-                                    break;
-                                case "PUT":
-                                    pathItem.Put = CreateOperation(entry, methodInfo, schemaRegistry);
-                                    break;
-                                case "POST":
-                                    pathItem.Post = CreateOperation(entry, methodInfo, schemaRegistry);
-                                    break;
-                                case "DELETE":
-                                    pathItem.Delete = CreateOperation(entry, methodInfo, schemaRegistry);
-                                    break;
-                                case "OPTIONS":
-                                    pathItem.Options = CreateOperation(entry, methodInfo, schemaRegistry);
-                                    break;
-                                case "HEAD":
-                                    pathItem.Head = CreateOperation(entry, methodInfo, schemaRegistry);
-                                    break;
-                                case "PATCH":
-                                    pathItem.Patch = CreateOperation(entry, methodInfo, schemaRegistry);
-                                    break;
-                            }
+                            case "GET":
+                                pathItem.Get = CreateOperation(entry, methodInfo, schemaRegistry);
+                                break;
+                            case "PUT":
+                                pathItem.Put = CreateOperation(entry, methodInfo, schemaRegistry);
+                                break;
+                            case "POST":
+                                pathItem.Post = CreateOperation(entry, methodInfo, schemaRegistry);
+                                break;
+                            case "DELETE":
+                                pathItem.Delete = CreateOperation(entry, methodInfo, schemaRegistry);
+                                break;
+                            case "OPTIONS":
+                                pathItem.Options = CreateOperation(entry, methodInfo, schemaRegistry);
+                                break;
+                            case "HEAD":
+                                pathItem.Head = CreateOperation(entry, methodInfo, schemaRegistry);
+                                break;
+                            case "PATCH":
+                                pathItem.Patch = CreateOperation(entry, methodInfo, schemaRegistry);
+                                break;
                         }
-                    });
+                    }
                 }
             }
             return pathItem;

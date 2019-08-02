@@ -205,7 +205,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             }
             else
               if(!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))  _serviceRoute.GetOrAdd(path, route);
-            return route;
+            return await Task.FromResult(route);
         }
 
         #endregion

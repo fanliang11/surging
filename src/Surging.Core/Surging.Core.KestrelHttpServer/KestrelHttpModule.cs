@@ -8,7 +8,9 @@ using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
+using Surging.Core.KestrelHttpServer.Extensions;
 using Surging.Core.KestrelHttpServer.Filters;
+using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using System.Net;
 
 namespace Surging.Core.KestrelHttpServer
@@ -30,6 +32,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public virtual void RegisterBuilder(ConfigurationContext context)
         {
+            context.Services.AddFilters(typeof(HttpRequestFilterAttribute));
         }
 
         /// <summary>

@@ -54,6 +54,10 @@ namespace Surging.ApiGateway.Controllers
             path = String.Compare(path.ToLower(), GateWayAppConfig.TokenEndpointPath, true) == 0 ?
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
             var route = await _serviceRouteProvider.GetRouteByPathRegex(path);
+            var httpMethods = route.ServiceDescriptor.HttpMethod();
+            if (!string.IsNullOrEmpty(httpMethods) &&
+                !httpMethods.Contains(Request.Method))
+                return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.Http405Endpoint, Message = "405 HTTP Method Not Supported" };
             if (!GetAllowRequest(route)) return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
             if (servicePartProvider.IsPart(path))
             {
