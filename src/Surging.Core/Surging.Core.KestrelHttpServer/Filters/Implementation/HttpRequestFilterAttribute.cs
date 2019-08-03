@@ -35,7 +35,7 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
             if (serviceEntry != null)
             {
                 var httpMethods = serviceEntry.Methods;
-                if (!httpMethods.Any(p => String.Compare(p, filterContext.Context.Request.Method, true) == 0))
+                if (httpMethods.Count()>0 && !httpMethods.Any(p => String.Compare(p, filterContext.Context.Request.Method, true) == 0))
                 {
                     filterContext.Result = new HttpResultMessage<object>
                     {
