@@ -35,7 +35,7 @@ namespace Surging.Core.Stage
 
         public override void Initialize(ApplicationInitializationContext context)
         {
-            var policy = AppConfig.Options.Policy;
+            var policy = AppConfig.Options.AccessPolicy;
             if (policy != null)
             {
                 context.Builder.UseCors(builder =>
