@@ -20,7 +20,7 @@ namespace Surging.Core.Stage.Configurations
 
         public ApiGetwayOption ApiGetWay { get; set; }
 
-        public AccessPolicyOption Policy { get; set; }
+        public AccessPolicyOption AccessPolicy { get; set; }
 
         public List<AccessSettingOption> AccessSetting { get; set; }
 
