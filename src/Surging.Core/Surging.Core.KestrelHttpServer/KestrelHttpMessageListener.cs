@@ -59,9 +59,12 @@ namespace Surging.Core.KestrelHttpServer
                   .UseContentRoot(Directory.GetCurrentDirectory())
                   .UseKestrel((context,options) =>
                   {
+                      options.Limits.MinRequestBodyDataRate = null;
+                      options.Limits.MinResponseDataRate = null;
+                      options.Limits.MaxRequestBodySize = null;
                       options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(30);
-                      if (port!=null  && port >0)
-                          options.Listen(address,port.Value);
+                      if (port != null && port > 0)
+                          options.Listen(address, port.Value);
                       ConfigureHost(context, options, address);
 
                   })
