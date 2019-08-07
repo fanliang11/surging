@@ -43,6 +43,7 @@
     "CertificateLocation": "${CertificateLocation}|pfxs",
     "CertificatePassword": "${CertificatePassword}|",
     "IsCamelCaseResolver": "${IsCamelCaseResolver}|true",
+    "Protocols": "Http2",
     "ApiGetWay": {
       "AccessTokenExpireTimeSpan": "30",
       "AuthorizationRoutePath": "api/user/authentication",

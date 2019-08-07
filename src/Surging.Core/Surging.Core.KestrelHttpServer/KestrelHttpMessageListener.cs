@@ -64,7 +64,10 @@ namespace Surging.Core.KestrelHttpServer
                       options.Limits.MaxRequestBodySize = null;
                       options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(30);
                       if (port != null && port > 0)
-                          options.Listen(address, port.Value);
+                          options.Listen(address, port.Value, listenOptions =>
+                          {
+                              listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                          });
                       ConfigureHost(context, options, address);
 
                   })

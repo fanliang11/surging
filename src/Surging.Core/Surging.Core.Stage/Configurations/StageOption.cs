@@ -21,6 +21,8 @@ namespace Surging.Core.Stage.Configurations
 
         public ApiGetwayOption ApiGetWay { get; set; }
 
+        public HttpProtocols Protocols { get; set; } = HttpProtocols.Http1AndHttp2;
+
         public DataRateOption MinRequestBodyDataRate { get; set; }
 
         public DataRateOption MinResponseDataRate { get; set; }
