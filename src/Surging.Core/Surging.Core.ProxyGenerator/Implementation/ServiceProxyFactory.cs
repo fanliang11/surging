@@ -104,6 +104,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             var serviceTypes = proxyGenerater.GenerateProxys(types, namespaces).ToArray();
             _serviceTypes= _serviceTypes.Except(serviceTypes).Concat(serviceTypes).ToArray();
             proxyGenerater.Dispose();
+            GC.Collect();
         }
 
         #endregion Implementation of IServiceProxyFactory

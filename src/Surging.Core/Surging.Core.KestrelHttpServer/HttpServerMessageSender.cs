@@ -28,7 +28,7 @@ namespace Surging.Core.KestrelHttpServer
                 var text = _serializer.Serialize(message.Content);
                 var data = Encoding.UTF8.GetBytes(text);
                 var contentLength = data.Length;
-                _context.Response.Headers.Add("Content-Type", "application/json");
+                _context.Response.Headers.Add("Content-Type", "application/json;charset=utf-8");
                 _context.Response.Headers.Add("Content-Length", contentLength.ToString());
                 await _context.Response.WriteAsync(text);
             }
@@ -50,7 +50,7 @@ namespace Surging.Core.KestrelHttpServer
                 var text = _serializer.Serialize(message);
                 var data = Encoding.UTF8.GetBytes(_serializer.Serialize(text));
                 var contentLength = data.Length;
-                _context.Response.Headers.Add("Content-type", "application/json");
+                _context.Response.Headers.Add("Content-type", "application/json;charset=utf-8");
                 _context.Response.Headers.Add("Content-Length", contentLength.ToString());
                 await _context.Response.WriteAsync(text);
             }
