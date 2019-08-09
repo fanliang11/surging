@@ -24,27 +24,32 @@ namespace Surging.Core.Stage.Filters
         }
         public async Task OnAuthorization(AuthorizationFilterContext filterContext)
         {
-            if (filterContext.Route!=null && filterContext.Route.ServiceDescriptor.EnableAuthorization())
+            if (filterContext.Route.ServiceDescriptor.DisableNetwork())
+                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+            else
             {
-                if (filterContext.Route.ServiceDescriptor.AuthType() == AuthorizationType.JWT.ToString())
+                if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.EnableAuthorization())
                 {
-                    var author = filterContext.Context.Request.Headers["Authorization"];
-                    if (author.Count > 0)
+                    if (filterContext.Route.ServiceDescriptor.AuthType() == AuthorizationType.JWT.ToString())
                     {
-                        var isSuccess =await _authorizationServerProvider.ValidateClientAuthentication(author);
-                        if (!isSuccess)
+                        var author = filterContext.Context.Request.Headers["Authorization"];
+                        if (author.Count > 0)
                         {
-                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                            var isSuccess = await _authorizationServerProvider.ValidateClientAuthentication(author);
+                            if (!isSuccess)
+                            {
+                                filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                            }
+                            else
+                            {
+                                var payload = _authorizationServerProvider.GetPayloadString(author);
+                                RpcContext.GetContext().SetAttachment("payload", payload);
+                            }
                         }
                         else
-                        {
-                            var payload = _authorizationServerProvider.GetPayloadString(author);
-                            RpcContext.GetContext().SetAttachment("payload", payload);
-                        }
-                    }
-                    else
-                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                            filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
 
+                    }
                 }
             }
             var gatewayAppConfig = AppConfig.Options.ApiGetWay;

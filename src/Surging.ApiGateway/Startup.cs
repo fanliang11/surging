@@ -90,6 +90,7 @@ namespace Surging.ApiGateway
             loggerFactory.AddConsole();
             var serviceCacheProvider = ServiceLocator.Current.Resolve<ICacheNodeProvider>();
             var addressDescriptors = serviceCacheProvider.GetServiceCaches().ToList();
+            ServiceLocator.Current.Resolve<IServiceProxyFactory>();
             ServiceLocator.Current.Resolve<IServiceCacheManager>().SetCachesAsync(addressDescriptors);
             ServiceLocator.Current.Resolve<IConfigurationWatchProvider>();
 

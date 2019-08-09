@@ -2,7 +2,7 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|981",
+    "Port": "${Surging_Server_Port}|98",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
@@ -18,9 +18,9 @@
     "IsModulePerLifetimeScope": false,
     "ReloadOnChange": false,
     "Ports": {
-      "HttpPort": "${HttpPort}|281",
-      "WSPort": "${WSPort}|961",
-      "MQTTPort": "${MQTTPort}|971"
+      "HttpPort": "${HttpPort}|280",
+      "WSPort": "${WSPort}|96",
+      "MQTTPort": "${MQTTPort}|97"
     },
     "RequestCacheEnabled": false,
     "Packages": [

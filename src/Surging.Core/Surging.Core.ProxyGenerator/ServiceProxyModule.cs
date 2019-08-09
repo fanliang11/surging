@@ -19,7 +19,7 @@ namespace Surging.Core.ProxyGenerator
         public override void Initialize(AppModuleContext context)
         {
             var serviceProvider = context.ServiceProvoider;
-            context.ServiceProvoider.GetInstances<IServiceProxyFactory>();
+            serviceProvider.GetInstances<IServiceProxyFactory>();
             if (AppConfig.ServerOptions.ReloadOnChange)
             {
                 new ServiceRouteWatch(serviceProvider,
