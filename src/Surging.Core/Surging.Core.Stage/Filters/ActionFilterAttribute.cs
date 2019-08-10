@@ -62,11 +62,9 @@ namespace Surging.Core.Stage.Filters
         {
             bool isSuccess = true;
             DateTime time;
-           var D= DateTimeConverter.DateTimeToUnixTimestamp(DateTime.Now);
             result = HttpResultMessage<object>.Create(true,null);
             var author = filterContext.Context.Request.Headers["Authorization"];
             var model = filterContext.Message.Parameters;
-            
             var route = filterContext.Route;
             if (model.ContainsKey("timeStamp") && author.Count > 0)
             {
@@ -112,8 +110,7 @@ namespace Surging.Core.Stage.Filters
                 foreach (byte b in bs)
                 {
                     sb.Append(b.ToString("X2"));
-                }
-                //所有字符转为大写
+                } 
                 return sb.ToString().ToLower();
             }
             catch (Exception e)

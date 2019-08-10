@@ -12,12 +12,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="skyapm.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="skyapm.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
     <PackageReference Include="Volo.Abp.EventBus" Version="0.18.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Surging.Apm\Surging.Apm.Skywalking\Surging.Apm.Skywalking.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Abp\Surging.Core.Abp.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ApiGateWay\Surging.Core.ApiGateWay.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Caching\Surging.Core.Caching.csproj" />
@@ -37,7 +48,6 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WS\Surging.Core.Protocol.WS.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
-    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Stage\Surging.Core.Stage.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Swagger\Surging.Core.Swagger.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.System\Surging.Core.System.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Zookeeper\Surging.Core.Zookeeper.csproj" />
