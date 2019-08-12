@@ -1,6 +1,6 @@
 ﻿using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
-using Surging.Core.System;
+using Surging.Core.CPlatform.Utilities; 
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,10 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
-    public class ServiceRegisterProvider : ServiceBase, IServiceRegisterProvider
+    /// <summary>
+    /// 服务注册
+    /// </summary>
+    public class ServiceRegisterProvider : IServiceRegisterProvider
     {
         public async  Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null)
         {
@@ -25,7 +28,7 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
                     result.Add(new ServiceAddressModel
                     {
                         Address = addr,
-                        IsHealth = await GetService<IHealthCheckService>().IsHealth(addr)
+                        IsHealth = await ServiceLocator.GetService<IHealthCheckService>().IsHealth(addr)
                     });
 
                 }
@@ -40,7 +43,7 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
                     result.Add(new ServiceAddressModel
                     {
                         Address = ipAddress,
-                        IsHealth = await GetService<IHealthCheckService>().IsHealth(ipAddress)
+                        IsHealth = await ServiceLocator.GetService<IHealthCheckService>().IsHealth(ipAddress)
                     });
                 }
             }

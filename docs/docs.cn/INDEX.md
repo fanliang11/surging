@@ -1,3 +1,40 @@
-surging is a high-performance microservice framework based on the .NET core language,It was created by an individual and designed for use in the cloud,
-Then add to dotnetcore
+# surging的介绍 　　　　　　　　　　　　　
 
+```
+                                                                                           作者：fanly 校对：fanly
+```
+
+什么是Surging
+
+ surging 是微服务引擎,提供了轻量级，高性能，模块化的RPC请求管道，服务引擎支持http、TCP、WS、Mqtt、UDP、DNS协议，采用了Zookeeper、Consul作为注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，内置了服务治理用来保证可靠性RPC通信
+                 
+使用surging你可以：
+
+   * 构建Web应用程序，微服务和api网关
+   * 微服务可以部署在docker。可以使用k8s、rancher服务编排弹性扩容
+   * 提供了多协议支持
+   * 支持负载平衡分流压力
+   * 基于.NET Core的跨平台可以在Windows，macOS和Linux上运行;也可以移植到其他操作系统。
+   * 简化的服务调用，通过服务规则的指定，就可以做到服务之间的远程调用，无需其它方式的侵入
+   * 服务自动注册与发现，不需要配置服务提供方地址，注册中心基于ServiceId 或者RoutePath查询服务提供者的地址和元数据，并且能够平滑添加或删除服务提供者。
+   * 软负载均衡及容错机制，通过surging内部负载算法和容错规则的设定，从而达到内部调用的负载和容错
+   * 分布式缓存中间件：通过哈希一致性算法来实现负载，并且有健康检查能够平滑的把不健康的服务从列表中删除
+   * 事件总线：通过对于事件总线的适配可以实现发布订阅交互模式
+   * 容器化持续集成与持续交付 ：通过构建一体化Devops平台,实现项目的自动化构建、部署、测试和发布，从而提高生产环境的可靠性、稳定性、弹性和安全性。
+   * 业务模块化驱动引擎，通过加载指定业务模块，能够更加灵活、高效的部署不同版本的业务功能模块
+
+基于surging微服务的开发人员提供以下好处：
+
+   * 统一构建微服务。
+   * 内置依赖注入，您可以自由组合依赖组件。
+   * 内置服务注册中心。
+   * 内置网关可以统一外部访问和管理。
+   * 轻量级，高性能，模块化的RPC请求管道。
+   * 能够在您自己的进程中托管IIS或自托管。
+   * 可以在.NET Core上运行，能够在Windows，macOS和Linux上构建和运行
+   * 简化繁琐的维护。
+   * 基于github平台的开源。
+   * 支持负载平衡分流压力。
+   * 支持多协议服务主机。
+   * 内置服务化治理。
+   * 支持引用、Nuget Install Package、扫描三种方式来加载组件和业务模块

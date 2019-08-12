@@ -2,35 +2,50 @@
 using Surging.Core.CPlatform.Engines;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Surging.Core.CPlatform.Module
 {
     public class ModuleProvider: IModuleProvider
     {
         private readonly List<AbstractModule> _modules;
+        private readonly string[] _virtualPaths;
         private readonly CPlatformContainer _serviceProvoider;
         private readonly ILogger<ModuleProvider> _logger;
 
+        /// <summary>
+        /// 模块提供器 
+        /// </summary>
+        /// <param name="modules"></param>
+        /// <param name="logger"></param>
+        /// <param name="serviceProvoider"></param>
         public ModuleProvider(List<AbstractModule> modules,
+            string[] virtualPaths,
             ILogger<ModuleProvider> logger,
             CPlatformContainer serviceProvoider)
         {
             _modules = modules;
+            _virtualPaths = virtualPaths;
             _serviceProvoider = serviceProvoider;
             _logger = logger;
         }
 
         public List<AbstractModule> Modules { get => _modules; }
 
-        public void Initialize()
+        public string[] VirtualPaths { get => _virtualPaths; }
+
+        public virtual void Initialize()
         {
             _modules.ForEach(p =>
             {
                 try
                 {
+                    Type[] types = { typeof(SystemModule), typeof(BusinessModule), typeof(EnginePartModule), typeof(AbstractModule) }; 
                     if (p.Enable)
-                        p.Initialize(_serviceProvoider);
+                            p.Initialize(new AppModuleContext(_modules, _virtualPaths, _serviceProvoider));
+                    var type = p.GetType().BaseType;
+                    if (types.Any(ty => ty == type))
+                        p.Dispose();
                 }
                 catch(Exception ex)
                 {

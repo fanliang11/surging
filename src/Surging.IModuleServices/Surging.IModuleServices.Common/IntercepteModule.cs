@@ -10,9 +10,9 @@ namespace Surging.IModuleServices.Common
 {
     public class IntercepteModule : SystemModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>
@@ -22,7 +22,8 @@ namespace Surging.IModuleServices.Common
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
-            builder.AddClientIntercepted(typeof(CacheProviderInterceptor));
+            //builder.AddClientIntercepted(typeof(CacheProviderInterceptor));
+            //builder.AddClientIntercepted(typeof(LogProviderInterceptor));
         }
     }
 }

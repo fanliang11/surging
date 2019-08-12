@@ -53,10 +53,12 @@ namespace Surging.Core.Consul
             var clients = await _consulClientFactory.GetClients();
             foreach (var client in clients)
             {
+                //根据前缀获取consul结果
                 var queryResult = await client.KV.List(_configInfo.MqttRoutePath);
                 var response = queryResult.Response;
                 if (response != null)
                 {
+                    //删除操作
                     foreach (var result in response)
                     {
                         await client.KV.DeleteCAS(result);

@@ -118,7 +118,7 @@ namespace Surging.Core.DNS
             public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
             {
                 _readAction = readAction;
-                _logger = logger;
+                _logger = logger; 
             }
 
             protected override void ChannelRead0(IChannelHandlerContext ctx, DatagramDnsQuery query)

@@ -17,10 +17,10 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
 
         public void SaveMessage(string deviceId, SessionMessage sessionMessage)
         {
-             _clientsessionMessages.TryGetValue(deviceId, out ConcurrentQueue<SessionMessage> sessionMessages);
+            _clientsessionMessages.TryGetValue(deviceId, out ConcurrentQueue<SessionMessage> sessionMessages);
             _clientsessionMessages.AddOrUpdate(deviceId, sessionMessages, (id, message) =>
             {
-                sessionMessages.Enqueue(sessionMessage);
+                message.Enqueue(sessionMessage);
                 return sessionMessages;
             });
         }

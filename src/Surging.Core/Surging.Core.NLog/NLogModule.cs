@@ -11,9 +11,10 @@ namespace Surging.Core.Nlog
     public class NLogModule : EnginePartModule
     {
         private string nlogConfigFile = "${LogPath}|NLog.config";
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            var serviceProvider = context.ServiceProvoider;
+            base.Initialize(context);
             var section = AppConfig.GetSection("Logging");
             nlogConfigFile = EnvironmentHelper.GetEnvironmentVariable(nlogConfigFile);
             NLog.LogManager.LoadConfiguration(nlogConfigFile);

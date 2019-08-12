@@ -19,7 +19,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         public SubscribeStatus SubscribeStatus { get; set; }
         public List<string> Topics { get; set; }
         public SessionStatus SessionStatus { get; set; }
-
+        public int KeepAliveInSeconds { get; set; }
         public DateTime PingReqTime { get; set; } = DateTime.Now;
 
         public bool CleanSession { get; set; }
@@ -61,9 +61,16 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
                 await Channel.CloseAsync();
         }
 
-        public bool IsOnine()
+       
+        public async Task<bool> IsOnine()
         {
-            return (DateTime.Now - PingReqTime).TotalSeconds <= AppConfig.ServerOptions.DisconnTimeInterval && SessionStatus== SessionStatus.OPEN;
+            //如果保持连接的值非零，并且服务端在2倍的保持连接时间内没有收到客户端的报文，需要断开客户端的连接
+            bool isOnline= (DateTime.Now - PingReqTime).TotalSeconds <= (this.KeepAliveInSeconds*2) && SessionStatus== SessionStatus.OPEN;
+            if(!isOnline)
+            {
+               await Close();
+            }
+            return isOnline;
         }
 
         public bool IsActive()

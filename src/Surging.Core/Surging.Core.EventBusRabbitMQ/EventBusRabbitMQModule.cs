@@ -18,9 +18,10 @@ namespace Surging.Core.EventBusRabbitMQ
 {
     public class EventBusRabbitMQModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            var serviceProvider = context.ServiceProvoider;
+            base.Initialize(context);
             new ServiceRouteWatch(serviceProvider.GetInstances<CPlatformContainer>(), () =>
             {
                 var subscriptionAdapt = serviceProvider.GetInstances<ISubscriptionAdapt>();

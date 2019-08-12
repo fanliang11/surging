@@ -16,6 +16,12 @@ namespace Surging.Core.ApiGateWay
 {
    public static  class ContainerBuilderExtensions
     {
+        /// <summary>
+        /// 添加网关中间件
+        /// </summary>
+        /// <param name="builder">服务构建者</param>
+        /// <param name="config"></param>
+        /// <returns>服务构建者</returns>
         public static IServiceBuilder AddApiGateWay(this IServiceBuilder builder, ConfigInfo config=null)
         {
             var services = builder.Services;
@@ -37,7 +43,7 @@ namespace Surging.Core.ApiGateWay
                 var serviceProxyProvider = provider.Resolve<IServiceProxyProvider>();
                 var serviceRouteProvider = provider.Resolve<IServiceRouteProvider>();
                 var serviceProvider = provider.Resolve<CPlatformContainer>();
-                return new AuthorizationServerProvider(config, serviceProxyProvider, serviceRouteProvider, serviceProvider);
+                return new AuthorizationServerProvider(serviceProxyProvider, serviceRouteProvider, serviceProvider);
             }).As<IAuthorizationServerProvider>().SingleInstance();
             return builder;
         }

@@ -84,7 +84,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
 
         public abstract Task Close(string deviceId, bool isDisconnect);
 
-        public abstract bool Connect(string deviceId, MqttChannel build);
+        public abstract Task<bool> Connect(string deviceId, MqttChannel build);
 
         public bool RemoveChannel(string topic, MqttChannel mqttChannel)
         {
@@ -146,7 +146,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         {
             if (Topics.ContainsKey(topic))
             {
-                if (Topics["topic"].Count() == 0)
+                if (Topics[topic].Count() == 0)
                     await _mqttBrokerEntryManger.CancellationReg(topic, NetUtils.GetHostAddress());
             }
             else
@@ -189,15 +189,15 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
 
         public abstract Task Publish(string deviceId, MqttWillMessage willMessage);
 
-        public ValueTask<bool> GetDeviceIsOnine(string deviceId)
+        public async ValueTask<bool> GetDeviceIsOnine(string deviceId)
         {
             bool result = false;
             if (!string.IsNullOrEmpty(deviceId))
             {
                 MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel);
-                result = mqttChannel==null?false: mqttChannel.IsOnine();
+                result = mqttChannel==null?false: await mqttChannel.IsOnine();
             }
-            return new ValueTask<bool>(result);
+            return result;
         }
     }
 }

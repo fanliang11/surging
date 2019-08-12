@@ -279,6 +279,11 @@ namespace Surging.Core.CPlatform
 
         #region Configuration Watch
 
+        /// <summary>
+        /// Configuration Watch
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns>服务构建者</returns>
         public static IServiceBuilder AddConfigurationWatch(this IServiceBuilder builder)
         {
             var services = builder.Services;
@@ -379,8 +384,8 @@ namespace Surging.Core.CPlatform
             }
             else if (typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
             {
-                var exceptionFilter = filter as IAuthorizationFilter;
-                services.Register(p => exceptionFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
+                var authorizationFilter = filter as IAuthorizationFilter;
+                services.Register(p => authorizationFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
             }
             return builder;
         }
@@ -404,7 +409,7 @@ namespace Surging.Core.CPlatform
             builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor))
                 .Named<IServiceExecutor>(CommunicationProtocol.Tcp.ToString()).SingleInstance();
 
-            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().AddRuntime();
+            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().RegisterInstanceByConstraint().AddRuntime();
         }
 
         /// <summary>
@@ -429,22 +434,51 @@ namespace Surging.Core.CPlatform
         public static IServiceBuilder AddCoreService(this ContainerBuilder services)
         {
             Check.NotNull(services, "services");
+            //注册服务ID生成实例 
             services.RegisterType<DefaultServiceIdGenerator>().As<IServiceIdGenerator>().SingleInstance();
             services.Register(p => new CPlatformContainer(p));
+            //注册默认的类型转换 
             services.RegisterType(typeof(DefaultTypeConvertibleProvider)).As(typeof(ITypeConvertibleProvider)).SingleInstance();
+            //注册默认的类型转换服务 
             services.RegisterType(typeof(DefaultTypeConvertibleService)).As(typeof(ITypeConvertibleService)).SingleInstance();
+            //注册权限过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IAuthorizationFilter)).SingleInstance();
+            //注册基本过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IFilter)).SingleInstance();
+            //注册服务器路由接口 
             services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
+            //注册服务路由工厂 
             services.RegisterType(typeof(DefaultServiceRouteFactory)).As(typeof(IServiceRouteFactory)).SingleInstance();
+            //注册服务订阅工厂 
             services.RegisterType(typeof(DefaultServiceSubscriberFactory)).As(typeof(IServiceSubscriberFactory)).SingleInstance();
+            //注册服务token生成接口 
             services.RegisterType(typeof(ServiceTokenGenerator)).As(typeof(IServiceTokenGenerator)).SingleInstance();
+            //注册哈希一致性算法 
             services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
+            //注册组件生命周期接口 
             services.RegisterType(typeof(ServiceEngineLifetime)).As(typeof(IServiceEngineLifetime)).SingleInstance();
+            //注册服务心跳管理 
             services.RegisterType(typeof(DefaultServiceHeartbeatManager)).As(typeof(IServiceHeartbeatManager)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
+
+        }
+
+        public static IServiceBuilder RegisterInstanceByConstraint(this IServiceBuilder builder, params string[] virtualPaths)
+        {
+            var services = builder.Services;
+            var referenceAssemblies = GetReferenceAssembly(virtualPaths);
+
+            foreach (var assembly in referenceAssemblies)
+            {
+                services.RegisterAssemblyTypes(assembly)
+                 .Where(t => typeof(ISingletonDependency).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().AsSelf().SingleInstance();
+
+                services.RegisterAssemblyTypes(assembly)
+                .Where(t => typeof(ITransientDependency).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().AsSelf().InstancePerDependency();
+            }
+            return builder;
 
         }
 
@@ -472,6 +506,11 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
+       /// <summary>
+       /// 添加微服务
+       /// </summary>
+       /// <param name="builder"></param>
+       /// <param name="option"></param>
         public static void AddMicroService(this ContainerBuilder builder, Action<IServiceBuilder> option)
         {
             option.Invoke(builder.AddCoreService());
@@ -491,15 +530,18 @@ namespace Surging.Core.CPlatform
                 foreach (var assembly in referenceAssemblies)
                 {
                     services.RegisterAssemblyTypes(assembly)
+                        //注入继承IServiceKey接口的所有接口
                        .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface)
                        .AsImplementedInterfaces();
                     services.RegisterAssemblyTypes(assembly)
+                 //注入实现IServiceBehavior接口并ModuleName为空的类，作为接口实现类
                  .Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
 
                     var types = assembly.GetTypes().Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
                     foreach (var type in types)
                     {
                         var module = type.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>();
+                        //对ModuleName不为空的对象，找到第一个继承IServiceKey的接口并注入接口及实现
                         var interfaceObj = type.GetInterfaces()
                             .FirstOrDefault(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t));
                         if (interfaceObj != null)
@@ -524,6 +566,12 @@ namespace Surging.Core.CPlatform
             }
         }
 
+        /// <summary>
+        /// 依赖注入事件总线模块程序集 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="virtualPaths"></param>
+        /// <returns>返回注册模块信息</returns>
         public static IServiceBuilder RegisterServiceBus
             (this IServiceBuilder builder, params string[] virtualPaths)
         {
@@ -535,18 +583,18 @@ namespace Surging.Core.CPlatform
                 services.RegisterAssemblyTypes(assembly)
                  .Where(t => typeof(IIntegrationEventHandler).GetTypeInfo().IsAssignableFrom(t)).AsImplementedInterfaces().SingleInstance();
                 services.RegisterAssemblyTypes(assembly)
-             .Where(t => typeof(IIntegrationEventHandler).IsAssignableFrom(t)).SingleInstance();
+                 .Where(t => typeof(IIntegrationEventHandler).IsAssignableFrom(t)).SingleInstance();
             }
             return builder;
         }
 
-        /// <summary>
-        ///依赖注入仓储模块程序集
-        /// </summary>
-        /// <param name="builder">IOC容器</param>
+        ///  <summary>
+        /// 依赖注入仓储模块程序集
+        ///  </summary>
+        ///  <param name="builder">IOC容器</param>
+        /// <param name="virtualPaths">虚拟路径</param>
         /// <returns>返回注册模块信息</returns>
-        public static IServiceBuilder RegisterRepositories
-         (this IServiceBuilder builder, params string[] virtualPaths)
+        public static IServiceBuilder RegisterRepositories(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
             var referenceAssemblies = GetAssemblies(virtualPaths);
@@ -559,12 +607,18 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
-        public static IServiceBuilder RegisterModules(
-      this IServiceBuilder builder, params string[] virtualPaths)
+		/// <summary>
+        /// 依赖注入组件模块程序集
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="virtualPaths"></param>
+        /// <returns>返回注册模块信息</returns>
+        public static IServiceBuilder RegisterModules(this IServiceBuilder builder, params string[] virtualPaths)
         {
             var services = builder.Services;
             var referenceAssemblies = GetAssemblies(virtualPaths);
             if (builder == null) throw new ArgumentNullException("builder");
+            //从surgingSettings.json取到packages
             var packages = ConvertDictionary(AppConfig.ServerOptions.Packages);
             foreach (var moduleAssembly in referenceAssemblies)
             {
@@ -583,7 +637,7 @@ namespace Surging.Core.CPlatform
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(
-               _modules, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
+               _modules, virtualPaths, provider.Resolve<ILogger<ModuleProvider>>(), provider.Resolve<CPlatformContainer>()
                 )).As<IModuleProvider>().SingleInstance();
             return builder;
         }
@@ -688,6 +742,11 @@ namespace Surging.Core.CPlatform
             return referenceAssemblies;
         }
 
+        /// <summary>
+        /// 获取抽象模块（查找继承AbstractModule类的对象并创建实例）
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
         private static List<AbstractModule> GetAbstractModules(Assembly assembly)
         {
             var abstractModules = new List<AbstractModule>();
@@ -704,7 +763,7 @@ namespace Surging.Core.CPlatform
 
         private static string[] GetFilterAssemblies(string[] assemblyNames)
         {
-                var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
+            var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
             var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
@@ -721,7 +780,7 @@ namespace Surging.Core.CPlatform
                 return
                     assemblyNames.Where(
                         name => !notRelatedRegex.IsMatch(name)).ToArray();
-}
+            }
         }
 
         private static List<string> GetAllAssemblyFiles(string parentDir)

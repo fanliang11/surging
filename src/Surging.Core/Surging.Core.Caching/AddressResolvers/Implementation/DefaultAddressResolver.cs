@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.AddressResolvers.Implementation
 {
+    /// <summary>
+    /// 默认地址解析程序
+    /// </summary>
     public class DefaultAddressResolver : IAddressResolver
     {
 

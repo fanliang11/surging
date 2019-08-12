@@ -11,6 +11,11 @@ namespace Surging.Core.ProxyGenerator
 {
     public static class ContainerBuilderExtensions
     {
+        /// <summary>
+        /// 添加客户端代理
+        /// </summary>
+        /// <param name="builder">服务构建者</param>
+        /// <returns>服务构建者。</returns>
         public static IServiceBuilder AddClientProxy(this IServiceBuilder builder)
         {
             var services = builder.Services;
@@ -34,6 +39,12 @@ namespace Surging.Core.ProxyGenerator
             return builder;
         }
 
+        /// <summary>
+        /// 添加客户端拦截
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="interceptorServiceType"></param>
+        /// <returns>服务构建者</returns>
         public static IServiceBuilder AddClientIntercepted(this IServiceBuilder builder, Type interceptorServiceType)
         {
             var services = builder.Services;
@@ -50,11 +61,21 @@ namespace Surging.Core.ProxyGenerator
                 .AddClientProxy();
         }
 
-       public  static IServiceBuilder AddRelateService(this IServiceBuilder builder)
+        /// <summary>
+        /// 添加关联服务
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns>服务构建者</returns>
+        public static IServiceBuilder AddRelateService(this IServiceBuilder builder)
         {
             return builder.AddRelateServiceRuntime().AddClientProxy();
         }
-        
+
+        /// <summary>
+        /// 添加客户端属性注入
+        /// </summary>
+        /// <param name="builder">服务构建者</param>
+        /// <returns>服务构建者</returns>
         public static IServiceBuilder AddClient(this IServiceBuilder builder)
         {
             return builder
@@ -62,6 +83,7 @@ namespace Surging.Core.ProxyGenerator
                 .RegisterRepositories()
                 .RegisterServiceBus()
                 .RegisterModules()
+                .RegisterInstanceByConstraint()
                 .AddClientRuntime()
                 .AddClientProxy();
         }

@@ -18,9 +18,9 @@ namespace Surging.Core.Protocol.WS
 {
     public class WSProtocolModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>

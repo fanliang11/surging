@@ -15,8 +15,8 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Consul
 {
-  public  class ConsulServiceSubscribeManager: ServiceSubscribeManagerBase, IDisposable
-{
+    public class ConsulServiceSubscribeManager : ServiceSubscribeManagerBase, IDisposable
+    {
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly IServiceSubscriberFactory _serviceSubscriberFactory;
@@ -28,7 +28,7 @@ namespace Surging.Core.Consul
 
         public ConsulServiceSubscribeManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
             ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceSubscriberFactory serviceSubscriberFactory,
-            ILogger<ConsulServiceSubscribeManager> logger, IConsulClientProvider consulClientFactory) :base(stringSerializer)
+            ILogger<ConsulServiceSubscribeManager> logger, IConsulClientProvider consulClientFactory) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
@@ -55,10 +55,12 @@ namespace Surging.Core.Consul
             var clients = await _consulClientFactory.GetClients();
             foreach (var client in clients)
             {
+                //根据前缀获取consul结果
                 var queryResult = await client.KV.List(_configInfo.SubscriberPath);
                 var response = queryResult.Response;
                 if (response != null)
                 {
+                    //删除操作
                     foreach (var result in response)
                     {
                         await client.KV.DeleteCAS(result);
@@ -66,7 +68,7 @@ namespace Surging.Core.Consul
                 }
             }
         }
-        
+
         public void Dispose()
         {
         }
@@ -98,7 +100,7 @@ namespace Surging.Core.Consul
 
         public override async Task SetSubscribersAsync(IEnumerable<ServiceSubscriber> subscribers)
         {
-            var serviceSubscribers = await GetSubscribers(subscribers.Select(p =>$"{ _configInfo.SubscriberPath }{ p.ServiceDescriptor.Id}"));
+            var serviceSubscribers = await GetSubscribers(subscribers.Select(p => $"{ _configInfo.SubscriberPath }{ p.ServiceDescriptor.Id}"));
             if (serviceSubscribers.Count() > 0)
             {
                 foreach (var subscriber in subscribers)
@@ -127,10 +129,10 @@ namespace Surging.Core.Consul
         }
 
         private async Task EnterSubscribers()
-        { 
+        {
             if (_subscribers != null)
                 return;
-            var client=await _consulClientFactory.GetClient();
+            var client = await _consulClientFactory.GetClient();
             if (client.KV.Keys(_configInfo.SubscriberPath).Result.Response?.Count() > 0)
             {
                 var result = await client.GetChildrenAsync(_configInfo.SubscriberPath);
@@ -169,7 +171,7 @@ namespace Surging.Core.Consul
             {
                 if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
                     _logger.LogDebug($"准备从节点：{children}中获取订阅者信息。");
-                
+
                 var subscriber = await GetSubscriber(children);
                 if (subscriber != null)
                     subscribers.Add(subscriber);

@@ -18,7 +18,7 @@ namespace Surging.Core.DNS
 {
     class DotNettyDnsServerMessageSender : DotNettyMessageSender, IMessageSender
     {
-        private readonly IChannelHandlerContext _context; 
+        private readonly IChannelHandlerContext _context;
 
         public DotNettyDnsServerMessageSender(ITransportMessageEncoder transportMessageEncoder, IChannelHandlerContext context) : base(transportMessageEncoder)
         {

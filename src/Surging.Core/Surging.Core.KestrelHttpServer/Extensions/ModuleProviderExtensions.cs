@@ -9,7 +9,27 @@ namespace Surging.Core.KestrelHttpServer.Extensions
 {
    public static  class ModuleProviderExtensions
     {
-        public static void Initialize(this IModuleProvider  moduleProvider, IApplicationBuilder builder)
+        public static void Initialize(this IModuleProvider moduleProvider, ApplicationInitializationContext builder)
+        {
+            moduleProvider.Modules.ForEach(p =>
+            {
+                try
+                {
+                    using (var abstractModule = p)
+                        if (abstractModule.Enable)
+                        {
+                            var module = abstractModule as KestrelHttpModule;
+                            module?.Initialize(builder);
+                        }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            });
+        }
+
+        public static void ConfigureServices(this IModuleProvider moduleProvider, ConfigurationContext context)
         {
             moduleProvider.Modules.ForEach(p =>
             {
@@ -18,7 +38,7 @@ namespace Surging.Core.KestrelHttpServer.Extensions
                     if (p.Enable)
                     {
                         var module = p as KestrelHttpModule;
-                        module?.Initialize(builder);
+                        module?.RegisterBuilder(context);
                     }
                 }
                 catch (Exception ex)
@@ -28,7 +48,7 @@ namespace Surging.Core.KestrelHttpServer.Extensions
             });
         }
 
-        public static void ConfigureServices(this IModuleProvider moduleProvider, IServiceCollection services)
+        public static void ConfigureHost(this IModuleProvider moduleProvider, WebHostContext context)
         {
             moduleProvider.Modules.ForEach(p =>
             {
@@ -37,7 +57,7 @@ namespace Surging.Core.KestrelHttpServer.Extensions
                     if (p.Enable)
                     {
                         var module = p as KestrelHttpModule;
-                        module?.RegisterBuilder(services);
+                        module?.RegisterBuilder(context);
                     }
                 }
                 catch (Exception ex)

@@ -31,7 +31,6 @@ namespace Surging.Core.CPlatform
         public static ServiceDescriptor GroupName(this ServiceDescriptor descriptor, string groupName)
         {
             descriptor.Metadatas["GroupName"] = groupName;
-
             return descriptor;
         }
 
@@ -79,6 +78,17 @@ namespace Surging.Core.CPlatform
         public static bool EnableAuthorization(this ServiceDescriptor descriptor)
         {
             return descriptor.GetMetadata("EnableAuthorization", false);
+        }
+
+        public static ServiceDescriptor HttpMethod(this ServiceDescriptor descriptor, string httpMethod)
+        {
+            descriptor.Metadatas["HttpMethod"] = httpMethod;
+            return descriptor;
+        }
+         
+        public static string HttpMethod(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata("httpMethod", "");
         }
 
         /// <summary>
@@ -197,7 +207,6 @@ namespace Surging.Core.CPlatform
         /// 路由
         /// </summary>
         public string RoutePath { get; set; }
-
 
         /// <summary>
         /// 元数据。
