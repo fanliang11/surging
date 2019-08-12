@@ -16,10 +16,5 @@ namespace Surging.Modules.Common.Domain
             await this.GetService<IMediaService>().Push(bytes);
             return await Task.FromResult(true);
         }
-
-        public override Task<bool> Dispatch(object message)
-        {
-            return Task.FromResult(true);
-        }
     }
 }

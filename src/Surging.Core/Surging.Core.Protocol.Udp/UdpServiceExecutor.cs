@@ -64,8 +64,7 @@ namespace Surging.Core.Protocol.Udp
             }
             if (udpMessage != null)
                 await LocalExecuteAsync(entry, udpMessage);
-            else
-                await LocalExecuteAsync(entry, message.GetContent<object>());
+           
             await SendRemoteInvokeResult(sender, udpMessage);
         }
 
