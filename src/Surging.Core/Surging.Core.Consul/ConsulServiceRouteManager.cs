@@ -182,16 +182,26 @@ namespace Surging.Core.Consul
             var clients = await _consulClientProvider.GetClients();
             foreach (var client in clients)
             {
-                var distributedLock = await client.AcquireLock(new LockOptions($"lock_{_configInfo.RoutePath}")
+                var key = $"lock_{_configInfo.RoutePath}";
+                var writeResult = await client.KV.Get(key);
+                if (writeResult.Response != null)
                 {
-                    SessionTTL = TimeSpan.FromSeconds(_configInfo.LockDelay),
-                    LockTryOnce = true,
-                    LockWaitTime = TimeSpan.FromSeconds(_configInfo.LockDelay)
-                }, _configInfo.LockDelay == 0 ?
-                    default :
-                     new CancellationTokenSource(TimeSpan.FromSeconds(_configInfo.LockDelay)).Token);
+                    var distributedLock = await client.AcquireLock(key);
+                    result.Add(distributedLock);
+                }
+                else
+                {
+                    var distributedLock = await client.AcquireLock(new LockOptions($"lock_{_configInfo.RoutePath}")
+                    {
+                        SessionTTL = TimeSpan.FromSeconds(_configInfo.LockDelay),
+                        LockTryOnce = true,
+                        LockWaitTime = TimeSpan.FromSeconds(_configInfo.LockDelay)
+                    }, _configInfo.LockDelay == 0 ?
+                        default :
+                         new CancellationTokenSource(TimeSpan.FromSeconds(_configInfo.LockDelay)).Token);
+                    result.Add(distributedLock);
+                }
 
-                result.Add(distributedLock);
             }
             return result;
         }
