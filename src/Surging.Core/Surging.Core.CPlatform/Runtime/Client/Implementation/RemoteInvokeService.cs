@@ -6,6 +6,7 @@ using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform.Transport;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Threading;
@@ -50,6 +51,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
                 var client =await _transportClientFactory.CreateClientAsync(endPoint);
+                RpcContext.GetContext().SetAttachment("RemoteAddress", address.ToString());
                 return await client.SendAsync(invokeMessage,cancellationToken).WithCancellation(cancellationToken);
             }
             catch (CommunicationException)
@@ -77,6 +79,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
                 var task = _transportClientFactory.CreateClientAsync(endPoint);
                 var client= task.IsCompletedSuccessfully ? task.Result : await task;
+                RpcContext.GetContext().SetAttachment("RemoteAddress", address.ToString());
                 using (var cts = new CancellationTokenSource())
                 {
                     return await client.SendAsync(invokeMessage, cts.Token).WithCancellation(cts, requestTimeout);

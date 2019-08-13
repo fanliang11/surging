@@ -120,7 +120,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务描述符。</returns>
         public static string AuthType(this ServiceDescriptor descriptor)
         {
-            return descriptor.GetMetadata("AuthType", AuthorizationType.AppSecret.ToString());
+            return descriptor.GetMetadata("AuthType", "");
         }
         
 

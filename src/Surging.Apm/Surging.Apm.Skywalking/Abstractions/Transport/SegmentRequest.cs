@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using Surging.Apm.Skywalking.Abstractions.Common;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Apm.Skywalking.Abstractions.Transport
 {

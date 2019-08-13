@@ -16,7 +16,8 @@
  *
  */
 
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
+
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Apm.Skywalking.Abstractions.Tracing
 {

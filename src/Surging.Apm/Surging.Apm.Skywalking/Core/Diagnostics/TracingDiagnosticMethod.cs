@@ -22,6 +22,7 @@ using System.Reflection;
 using AspectCore.Extensions.Reflection;
 using Surging.Apm.Skywalking.Abstractions;
 using Surging.Apm.Skywalking.Core.Diagnostics;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Apm.Skywalking.Core.Diagnostics
 {

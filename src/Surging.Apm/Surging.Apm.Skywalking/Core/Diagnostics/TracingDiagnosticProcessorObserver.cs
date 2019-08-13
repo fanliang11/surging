@@ -22,6 +22,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Surging.Apm.Skywalking.Abstractions;
 using Surging.Apm.Skywalking.Core.Common;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Apm.Skywalking.Core.Diagnostics
 {

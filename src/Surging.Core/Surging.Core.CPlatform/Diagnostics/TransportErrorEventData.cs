@@ -13,6 +13,7 @@ namespace Surging.Core.CPlatform.Diagnostics
             Exception = ex;
         }
 
+
         public Exception Exception { get; set; }
 
         public TracingHeaders Headers { get; set; }

@@ -18,8 +18,8 @@
 
 using Microsoft.Extensions.Logging;
 using Surging.Apm.Skywalking.Abstractions.Config;
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
 using Surging.Apm.Skywalking.Abstractions.Transport;
+using Surging.Core.CPlatform.Diagnostics;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;

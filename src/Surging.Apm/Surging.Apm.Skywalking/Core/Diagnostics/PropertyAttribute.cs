@@ -17,6 +17,7 @@
  */
 
 using AspectCore.Extensions.Reflection;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Apm.Skywalking.Core.Diagnostics
 {

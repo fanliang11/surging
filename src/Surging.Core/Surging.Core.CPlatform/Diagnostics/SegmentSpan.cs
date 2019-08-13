@@ -1,8 +1,8 @@
 ﻿/*
- * Licensed to the Surging.Apm.Skywalking.Abstractions under one or more
+ * Licensed to the SkyAPM under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The Surging.Apm.Skywalking.Abstractions licenses this file to You under the Apache License, Version 2.0
+ * The SkyAPM licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
@@ -16,15 +16,15 @@
  *
  */
 
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Surging.Apm.Skywalking.Abstractions.Common;
 
-namespace Surging.Apm.Skywalking.Abstractions.Tracing.Segments
+namespace Surging.Core.CPlatform.Diagnostics
 {
-    public class SegmentSpan
+   public class SegmentSpan
     {
         public int SpanId { get; } = 0;
 
@@ -138,7 +138,7 @@ namespace Surging.Apm.Skywalking.Abstractions.Tracing.Segments
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _logs.GetEnumerator();
-        }
+        } 
     }
 
     public class SpanLog

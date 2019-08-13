@@ -16,17 +16,11 @@
  *
  */
 
-using System;
 
-namespace Surging.Apm.Skywalking.Core.Diagnostics
+namespace Surging.Core.CPlatform.Diagnostics
 {
-    public class DiagnosticName :Attribute
+    public interface IEntrySegmentContextAccessor
     {
-        public string Name { get; }
-
-        public DiagnosticName(string name)
-        {
-            Name = name;
-        }
+        SegmentContext Context { get; set; }
     }
 }

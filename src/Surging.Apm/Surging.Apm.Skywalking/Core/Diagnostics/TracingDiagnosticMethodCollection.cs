@@ -18,6 +18,7 @@
 
 using Surging.Apm.Skywalking.Abstractions;
 using Surging.Apm.Skywalking.Core.Diagnostics;
+using Surging.Core.CPlatform.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;

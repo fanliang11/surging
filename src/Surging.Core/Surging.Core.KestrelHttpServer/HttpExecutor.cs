@@ -17,6 +17,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
+using System.Diagnostics;
+using Surging.Core.CPlatform.Diagnostics;
+using Surging.Core.CPlatform.Transport.Implementation;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -69,6 +72,12 @@ namespace Surging.Core.KestrelHttpServer
                 _logger.LogError(exception, "将接收到的消息反序列化成 TransportMessage<httpMessage> 时发送了错误。");
                 return;
             }
+            if (httpMessage.Attachments != null)
+            {
+                foreach (var attachment in httpMessage.Attachments)
+                    RpcContext.GetContext().SetAttachment(attachment.Key, attachment.Value);
+            }
+            WirteDiagnosticBefore(message);
             var entry = _serviceEntryLocate.Locate(httpMessage);
 
             HttpResultMessage<object> httpResultMessage = new HttpResultMessage<object>() { };
@@ -82,7 +91,7 @@ namespace Surging.Core.KestrelHttpServer
             {
                 httpResultMessage = await RemoteExecuteAsync(httpMessage);
             }
-            await SendRemoteInvokeResult(sender, httpResultMessage);
+            await SendRemoteInvokeResult(sender,message.Id, httpResultMessage);
         }
         
 
@@ -139,14 +148,14 @@ namespace Surging.Core.KestrelHttpServer
             return resultMessage;
         }
 
-        private async Task SendRemoteInvokeResult(IMessageSender sender, HttpResultMessage resultMessage)
+        private async Task SendRemoteInvokeResult(IMessageSender sender,string messageId, HttpResultMessage resultMessage)
         {
             try
             {
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug("准备发送响应消息。");
 
-                await sender.SendAndFlushAsync(new TransportMessage(resultMessage));
+                await sender.SendAndFlushAsync(new TransportMessage(messageId,resultMessage));
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug("响应消息发送成功。");
             }
@@ -168,6 +177,19 @@ namespace Surging.Core.KestrelHttpServer
                 message += "|InnerException:" + GetExceptionMessage(exception.InnerException);
             }
             return message;
+        }
+
+        private void WirteDiagnosticBefore(TransportMessage message)
+        {
+            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+            var remoteInvokeMessage = message.GetContent<HttpMessage>();
+            diagnosticListener.WriteTransportBefore(TransportType.Rest, new TransportEventData(new DiagnosticMessage
+            {
+                Content = message.Content,
+                ContentType = message.ContentType,
+                Id = message.Id,
+                MessageName = remoteInvokeMessage.RoutePath
+            }, TransportType.Rest.ToString(), RpcContext.GetContext().GetAttachment("RemoteIpAddress")?.ToString()));
         }
 
         #endregion Private Method

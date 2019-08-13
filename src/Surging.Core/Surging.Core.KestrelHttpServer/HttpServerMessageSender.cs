@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
+using Surging.Core.CPlatform.Transport.Implementation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +24,7 @@ namespace Surging.Core.KestrelHttpServer
         
         public async Task SendAndFlushAsync(TransportMessage message)
         {
+            WirteDiagnosticAfter(message);
             var httpMessage = message.GetContent<HttpResultMessage<Object>>();
             var actionResult= httpMessage.Entity as IActionResult;
             if (actionResult == null)
@@ -44,6 +48,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public async Task SendAsync(TransportMessage message)
         {
+            WirteDiagnosticAfter(message);
             var actionResult = message.GetContent<IActionResult>();
             if (actionResult == null)
             {
@@ -63,6 +68,18 @@ namespace Surging.Core.KestrelHttpServer
                 });
             }
         }
-        
+
+        private void WirteDiagnosticAfter(TransportMessage message)
+        {
+            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+            var remoteInvokeResultMessage = message.GetContent<HttpResultMessage>();
+            diagnosticListener.WriteTransportAfter(TransportType.Rest, new ReceiveEventData(new DiagnosticMessage
+            {
+                Content = message.Content,
+                ContentType = message.ContentType,
+                Id = message.Id
+            }));
+        }
+
     }
 }

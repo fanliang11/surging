@@ -15,28 +15,16 @@
  * limitations under the License.
  *
  */
-
-namespace Surging.Apm.Skywalking.Abstractions.Common
+  
+namespace Surging.Core.CPlatform.Diagnostics
 {
-    public static class Tags
+    public static class Components
     {
-        public static readonly string URL = "url";
-        
-        public static readonly string PATH = "path";
+        public static readonly StringOrIntValue RpcTransport = new StringOrIntValue("RPCTransport");
 
+        public static readonly StringOrIntValue CacheIntercept = new StringOrIntValue("CacheIntercept");
 
-        public static readonly string HTTP_METHOD = "http.method";
-
-        public static readonly string STATUS_CODE = "status_code";
-
-        public static readonly string DB_TYPE = "db.type";
-
-        public static readonly string DB_INSTANCE = "db.instance";
-        
-        public static readonly string DB_STATEMENT = "db.statement";
-        
-        public static readonly string DB_BIND_VARIABLES = "db.bind_vars";
-
-        public static readonly string MQ_TOPIC = "mq.topic";
+        public static readonly StringOrIntValue Intercept = new StringOrIntValue("Intercept");
     }
+        
 }

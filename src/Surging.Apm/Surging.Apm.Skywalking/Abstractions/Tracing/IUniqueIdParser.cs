@@ -16,6 +16,8 @@
  *
  */
 
+using Surging.Core.CPlatform.Diagnostics;
+
 namespace Surging.Apm.Skywalking.Abstractions.Tracing
 {
     public interface IUniqueIdParser

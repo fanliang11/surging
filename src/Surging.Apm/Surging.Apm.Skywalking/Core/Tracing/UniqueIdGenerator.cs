@@ -17,6 +17,7 @@
  */
 
 using Surging.Apm.Skywalking.Abstractions.Tracing;
+using Surging.Core.CPlatform.Diagnostics;
 using System;
 using System.Threading;
 

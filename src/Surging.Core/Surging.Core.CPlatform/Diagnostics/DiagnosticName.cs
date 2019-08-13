@@ -1,8 +1,8 @@
-/*
- * Licensed to the Surging.Apm.Skywalking.Abstractions under one or more
+﻿/*
+ * Licensed to the SkyAPM under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The Surging.Apm.Skywalking.Abstractions licenses this file to You under the Apache License, Version 2.0
+ * The SkyAPM licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
@@ -16,12 +16,23 @@
  *
  */
 
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
+using System;
 
-namespace Surging.Apm.Skywalking.Abstractions.Tracing
+
+namespace Surging.Core.CPlatform.Diagnostics
 {
-    public interface IEntrySegmentContextAccessor
+    public class DiagnosticName : Attribute
     {
-        SegmentContext Context { get; set; }
+        public string Name { get; }
+
+        public DiagnosticName(string name)
+        {
+            Name = name;
+        }
+
+        public DiagnosticName(string name,TransportType type)
+        {
+            Name = string.Format(name,type);
+        }
     }
 }

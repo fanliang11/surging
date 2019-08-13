@@ -16,10 +16,10 @@ using Surging.Apm.Skywalking.Abstractions.Config;
 using Surging.Apm.Skywalking.Configuration;
 using Surging.Apm.Skywalking.Core.Common;
 using System.Collections.Generic;
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
 using System;
 using Surging.Apm.Skywalking.Transport.Grpc.V5;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Apm.Skywalking
 {

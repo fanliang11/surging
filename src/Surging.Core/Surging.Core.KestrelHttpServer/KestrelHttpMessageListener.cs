@@ -22,6 +22,9 @@ using System.Threading.Tasks;
 using Surging.Core.CPlatform.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Surging.Core.KestrelHttpServer.Filters;
+using Surging.Core.CPlatform.Messages;
+using System.Diagnostics;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -121,15 +124,37 @@ namespace Surging.Core.KestrelHttpServer
                 AppConfig.Configuration));
             app.Run(async (context) =>
             {
-                var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
+                var messageId = Guid.NewGuid().ToString("N");
                 var sender = new HttpServerMessageSender(_serializer, context);
-                var isSuccess = await OnAuthorization(context, sender, filters);
-                if (isSuccess)
+                try
                 {
-                    var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
-                    await OnReceived(sender, context, actionFilters);
+
+                    var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
+
+                    var isSuccess = await OnAuthorization(context, sender, messageId, filters);
+                    if (isSuccess)
+                    {
+                        var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
+                        await OnReceived(sender, messageId, context, actionFilters);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var filters = app.ApplicationServices.GetServices<IExceptionFilter>();
+                    WirteDiagnosticError(messageId, ex);
+                    await OnException(context, sender, messageId, ex, filters);
                 }
             });
+        }
+
+        private void WirteDiagnosticError(string messageId,Exception ex)
+        {
+            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+          
+            diagnosticListener.WriteTransportError(CPlatform.Diagnostics.TransportType.Rpc, new TransportErrorEventData(new DiagnosticMessage
+            {
+                Id = messageId
+            }, ex));
         }
 
         public void Dispose()

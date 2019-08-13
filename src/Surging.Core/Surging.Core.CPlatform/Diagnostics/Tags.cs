@@ -16,19 +16,23 @@
  *
  */
 
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
-
-namespace Surging.Apm.Skywalking.Abstractions.Tracing
+namespace Surging.Core.CPlatform.Diagnostics
 {
-    public interface ITracingContext
+    public static class Tags
     {
-        SegmentContext CreateEntrySegmentContext(string operationName, ICarrierHeaderCollection carrierHeader);
+        public static readonly string URL = "url";
+        
+        public static readonly string PATH = "path";
 
-        SegmentContext CreateLocalSegmentContext(string operationName);
 
-        SegmentContext CreateExitSegmentContext(string operationName, string networkAddress,
-            ICarrierHeaderCollection carrierHeader = default(ICarrierHeaderCollection));
+        public static readonly string RPC_METHOD = "rpc.method";
 
-        void Release(SegmentContext segmentContext);
+
+        public static readonly string RPC_PARAMETERS = "rpc.Parameters";
+
+        public static readonly string REST_METHOD = "rest.method";
+
+
+        public static readonly string REST_PARAMETERS = "rest.Parameters";
     }
 }

@@ -16,9 +16,9 @@
  *
  */
 
+using Surging.Core.CPlatform.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
 
 namespace Surging.Apm.Skywalking.Abstractions.Transport
 {

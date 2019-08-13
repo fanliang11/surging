@@ -16,10 +16,17 @@
  *
  */
 
-namespace Surging.Apm.Skywalking.Core.Diagnostics
+namespace Surging.Core.CPlatform.Diagnostics
 {
-    public interface IParameterResolver
+   public interface ITracingContext
     {
-        object Resolve(object value);
+        SegmentContext CreateEntrySegmentContext(string operationName, ICarrierHeaderCollection carrierHeader);
+
+        SegmentContext CreateLocalSegmentContext(string operationName);
+
+        SegmentContext CreateExitSegmentContext(string operationName, string networkAddress,
+            ICarrierHeaderCollection carrierHeader = default(ICarrierHeaderCollection));
+
+        void Release(SegmentContext segmentContext);
     }
 }

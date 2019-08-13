@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Surging.Apm.Skywalking.Abstractions.Common.Tracing;
 using Surging.Apm.Skywalking.Abstractions.Tracing;
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
@@ -83,14 +83,8 @@ namespace Surging.Services.Client
                 RpcContext.GetContext().SetAttachment("xid",124);
 
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                var context = tracingContext.CreateEntrySegmentContext("SetSexTestAsync", new TextCarrierHeaderCollection(new Dictionary<string, string>()));
                 var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
-                context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
-                tracingContext.Release(context);
-                 context = tracingContext.CreateEntrySegmentContext("GetUserIdTestAsync", new TextCarrierHeaderCollection(new Dictionary<string, string>()));
                 var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
-                context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
-                tracingContext.Release(context);
                 var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
                 userProxy.Try().GetAwaiter().GetResult();
                 var v1 = userProxy.GetUserLastSignInTime(1).Result;

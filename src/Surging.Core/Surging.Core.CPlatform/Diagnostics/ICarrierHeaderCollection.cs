@@ -16,12 +16,13 @@
  *
  */
 
-using System;
+using System.Collections.Generic;
 
-namespace Surging.Apm.Skywalking.Core.Diagnostics
+
+namespace Surging.Core.CPlatform.Diagnostics
 {
-    public abstract class ParameterBinder : Attribute, IParameterResolver
+    public interface ICarrierHeaderCollection : IEnumerable<KeyValuePair<string, string>>
     {
-        public abstract object Resolve(object value);
+        void Add(string key, string value);
     }
 }

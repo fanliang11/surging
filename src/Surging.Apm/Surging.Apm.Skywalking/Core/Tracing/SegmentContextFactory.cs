@@ -21,7 +21,7 @@ using System.Linq;
 using Surging.Apm.Skywalking.Abstractions;
 using Surging.Apm.Skywalking.Abstractions.Common;
 using Surging.Apm.Skywalking.Abstractions.Tracing;
-using Surging.Apm.Skywalking.Abstractions.Tracing.Segments;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Apm.Skywalking.Core.Tracing
 {

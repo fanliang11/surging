@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Surging.Core.ApiGateWay;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using Surging.Core.Stage.Internal;
@@ -21,19 +22,20 @@ namespace Surging.Core.Stage.Filters
             _httpContextAccessor = httpContextAccessor;
             _ipChecker = ipChecker;
         }
-        public Task OnActionExecuted(ActionExecutedContext filterContext)
+        public  Task OnActionExecuted(ActionExecutedContext filterContext)
         {
             return Task.CompletedTask;
         }
 
-        public  Task OnActionExecuting(ActionExecutingContext filterContext)
+        public    Task OnActionExecuting(ActionExecutingContext filterContext)
         {
             var address = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
-            if(_ipChecker.IsBlackIp(address,filterContext.Message.RoutePath))
+            RpcContext.GetContext().SetAttachment("RemoteIpAddress", address.ToString());
+            if (_ipChecker.IsBlackIp(address,filterContext.Message.RoutePath))
             {
                 filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Your IP address is not allowed" };
             }
-            return Task.CompletedTask;
+             return Task.CompletedTask;
         }
     }
 }
