@@ -23,10 +23,10 @@ namespace Surging.Core.KestrelHttpServer
         }
         
         public async Task SendAndFlushAsync(TransportMessage message)
-        {
-            WirteDiagnosticAfter(message);
+        { 
             var httpMessage = message.GetContent<HttpResultMessage<Object>>();
             var actionResult= httpMessage.Entity as IActionResult;
+            WirteDiagnostic(message);
             if (actionResult == null)
             {
                 var text = _serializer.Serialize(message.Content);
@@ -48,38 +48,32 @@ namespace Surging.Core.KestrelHttpServer
 
         public async Task SendAsync(TransportMessage message)
         {
-            WirteDiagnosticAfter(message);
-            var actionResult = message.GetContent<IActionResult>();
-            if (actionResult == null)
+           await this.SendAndFlushAsync(message);
+        }
+
+        private void WirteDiagnostic(TransportMessage message)
+        {
+            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+            var remoteInvokeResultMessage = message.GetContent<HttpResultMessage>(); 
+            if (remoteInvokeResultMessage.IsSucceed)
             {
-                var text = _serializer.Serialize(message);
-                var data = Encoding.UTF8.GetBytes(_serializer.Serialize(text));
-                var contentLength = data.Length;
-                _context.Response.Headers.Add("Content-type", "application/json;charset=utf-8");
-                _context.Response.Headers.Add("Content-Length", contentLength.ToString());
-                await _context.Response.WriteAsync(text);
+                diagnosticListener.WriteTransportAfter(TransportType.Rest, new ReceiveEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id
+                }));
             }
             else
             {
-                await actionResult.ExecuteResultAsync(new ActionContext
+                diagnosticListener.WriteTransportError(TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
                 {
-                    HttpContext = _context,
-                    Message = message
-                });
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id
+                }, new Exception(remoteInvokeResultMessage.Message)));
             }
         }
-
-        private void WirteDiagnosticAfter(TransportMessage message)
-        {
-            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-            var remoteInvokeResultMessage = message.GetContent<HttpResultMessage>();
-            diagnosticListener.WriteTransportAfter(TransportType.Rest, new ReceiveEventData(new DiagnosticMessage
-            {
-                Content = message.Content,
-                ContentType = message.ContentType,
-                Id = message.Id
-            }));
-        }
-
+          
     }
 }
