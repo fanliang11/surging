@@ -2,6 +2,7 @@
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Serialization;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
 using SurgingEvents = Surging.Core.CPlatform.Diagnostics.DiagnosticListenerExtensions;
@@ -57,6 +58,7 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
             _resultDictionary.TryAdd(eventData.OperationId.ToString(), context);
             context.Span.AddTag(Tags.RPC_METHOD, eventData.Method.ToString());
             context.Span.AddTag(Tags.RPC_PARAMETERS, _serializer.Serialize(message.Parameters));
+            context.Span.AddTag(Tags.RPC_LOCAL_ADDRESS, NetUtils.GetHostAddress().ToString());
         }
 
         [DiagnosticName(SurgingEvents.SurgingAfterTransport, TransportType.Rpc)]

@@ -20,19 +20,11 @@ namespace Surging.Core.CPlatform.Diagnostics
 {
     public static class Tags
     {
-        public static readonly string URL = "url";
-        
-        public static readonly string PATH = "path";
-
-
-        public static readonly string RPC_METHOD = "rpc.method";
-
-
-        public static readonly string RPC_PARAMETERS = "rpc.Parameters";
-
+        public static readonly string RPC_METHOD = "rpc.method"; 
+        public static readonly string RPC_PARAMETERS = "rpc.parameters";
+        public static readonly string RPC_LOCAL_ADDRESS = "rpc.local.address";
         public static readonly string REST_METHOD = "rest.method";
-
-
-        public static readonly string REST_PARAMETERS = "rest.Parameters";
+        public static readonly string REST_PARAMETERS = "rpc.parameters";
+        public static readonly string REST_LOCAL_ADDRESS = "rest.local.address";
     }
 }
