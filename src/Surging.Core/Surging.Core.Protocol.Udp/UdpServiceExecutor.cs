@@ -87,22 +87,6 @@ namespace Surging.Core.Protocol.Udp
             } 
         }
 
-
-        private async Task LocalExecuteAsync(UdpServiceEntry entry, object message)
-        {
-            HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
-            try
-            {
-                await entry.Behavior.Dispatch(message);
-            }
-            catch (Exception exception)
-            {
-                if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
-            }
-        }
-
-
         private async Task SendRemoteInvokeResult(IMessageSender sender, byte[] resultMessage)
         {
             try

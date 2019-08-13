@@ -14,7 +14,7 @@ namespace Surging.Core.DotNettyWSServer
 {
     public class DotNettyWSModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext serviceProvider)
         {
             base.Initialize(serviceProvider);
         }
