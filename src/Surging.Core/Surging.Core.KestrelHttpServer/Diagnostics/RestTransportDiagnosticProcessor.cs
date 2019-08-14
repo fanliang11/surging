@@ -50,7 +50,7 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
             var message = eventData.Message.GetContent<HttpMessage>();
             var operationName = TransportOperationNameResolver(eventData);
             var context = _tracingContext.CreateEntrySegmentContext(operationName,
-                new RestRequestCarrierHeaderCollection(eventData.Headers));
+                new RestTransportCarrierHeaderCollection(eventData.Headers));
             context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
             context.Span.SpanLayer = SpanLayer.HTTP;
             context.Span.Peer = new StringOrIntValue(eventData.RemoteAddress);

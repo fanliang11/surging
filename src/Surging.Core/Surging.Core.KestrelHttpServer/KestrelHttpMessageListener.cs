@@ -128,9 +128,7 @@ namespace Surging.Core.KestrelHttpServer
                 var sender = new HttpServerMessageSender(_serializer, context);
                 try
                 {
-
                     var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
-
                     var isSuccess = await OnAuthorization(context, sender, messageId, filters);
                     if (isSuccess)
                     {
@@ -150,8 +148,7 @@ namespace Surging.Core.KestrelHttpServer
         private void WirteDiagnosticError(string messageId,Exception ex)
         {
             var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-          
-            diagnosticListener.WriteTransportError(CPlatform.Diagnostics.TransportType.Rpc, new TransportErrorEventData(new DiagnosticMessage
+            diagnosticListener.WriteTransportError(CPlatform.Diagnostics.TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
             {
                 Id = messageId
             }, ex));

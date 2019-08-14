@@ -6,11 +6,11 @@ using System.Text;
 
 namespace Surging.Core.ProxyGenerator.Diagnostics
 {
-   public class RpcRequestCarrierHeaderCollection : ICarrierHeaderCollection
+   public class RpcTransportCarrierHeaderCollection : ICarrierHeaderCollection
     {
         private readonly TracingHeaders _tracingHeaders;
 
-        public RpcRequestCarrierHeaderCollection(TracingHeaders tracingHeaders)
+        public RpcTransportCarrierHeaderCollection(TracingHeaders tracingHeaders)
         {
             _tracingHeaders = tracingHeaders;
         }

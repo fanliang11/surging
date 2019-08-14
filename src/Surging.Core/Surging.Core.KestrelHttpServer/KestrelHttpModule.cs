@@ -107,7 +107,7 @@ namespace Surging.Core.KestrelHttpServer
                 return new HttpServiceHost(async endPoint =>
                 {
                     var address = endPoint as IPEndPoint;
-                    await messageListener.StartAsync(address?.Address,address?.Port);
+                    await messageListener.StartAsync(address?.Address, address?.Port);
                     return messageListener;
                 }, executor, messageListener);
 

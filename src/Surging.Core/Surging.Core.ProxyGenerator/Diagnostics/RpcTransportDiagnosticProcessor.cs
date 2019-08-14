@@ -51,7 +51,7 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
             var message = eventData.Message.GetContent<RemoteInvokeMessage>();
             var operationName = TransportOperationNameResolver(eventData);
             var context = _tracingContext.CreateEntrySegmentContext(operationName,
-                new RpcRequestCarrierHeaderCollection(eventData.Headers));
+                new RpcTransportCarrierHeaderCollection(eventData.Headers));
             context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
             context.Span.SpanLayer = SpanLayer.RPC_FRAMEWORK;
             context.Span.Peer = new StringOrIntValue(eventData.RemoteAddress);

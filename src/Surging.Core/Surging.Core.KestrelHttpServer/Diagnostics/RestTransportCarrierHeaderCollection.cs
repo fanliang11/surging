@@ -6,11 +6,11 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer.Diagnostics
 {
-   public class RestRequestCarrierHeaderCollection : ICarrierHeaderCollection
+   public class RestTransportCarrierHeaderCollection : ICarrierHeaderCollection
     {
         private readonly TracingHeaders _tracingHeaders;
 
-        public RestRequestCarrierHeaderCollection(TracingHeaders tracingHeaders)
+        public RestTransportCarrierHeaderCollection(TracingHeaders tracingHeaders)
         {
             _tracingHeaders = tracingHeaders;
         }
