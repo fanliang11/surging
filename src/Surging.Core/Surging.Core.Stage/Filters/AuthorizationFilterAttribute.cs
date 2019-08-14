@@ -24,7 +24,7 @@ namespace Surging.Core.Stage.Filters
         }
         public async Task OnAuthorization(AuthorizationFilterContext filterContext)
         {
-            if (filterContext.Route.ServiceDescriptor.DisableNetwork())
+            if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.DisableNetwork())
                 filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
             else
             {

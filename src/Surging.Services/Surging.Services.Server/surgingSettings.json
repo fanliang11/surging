@@ -91,7 +91,13 @@
       }
     },
     "Options": {
-      "IgnoreFullyQualified": false
+      "IgnoreFullyQualified": false,
+      "MapRoutePaths": [
+        {
+          "SourceRoutePath": "api/user/authentication",
+          "TargetRoutePath": "api/oauth2/token"
+        }
+      ]
       // "IngressName": "Notice"
     }
   },

@@ -57,10 +57,21 @@ namespace Surging.Core.SwaggerGen
                 throw new UnknownSwaggerDocument(documentName);
 
 
-
-            var entry = _serviceEntryProvider.GetALLEntries();
-
-             entry = entry
+            var mapRoutePaths = Swagger.AppConfig.SwaggerConfig.Options?.MapRoutePaths;
+            var entries = _serviceEntryProvider.GetALLEntries();
+            if (mapRoutePaths != null)
+            {
+                foreach (var path in mapRoutePaths)
+                {
+                    var entry = entries.Where(p => p.RoutePath == path.SourceRoutePath).FirstOrDefault();
+                    if (entry != null)
+                    {
+                        entry.RoutePath = path.TargetRoutePath;
+                        entry.Descriptor.RoutePath = path.TargetRoutePath;
+                    }
+                }
+            }
+            entries = entries
        .Where(apiDesc => _options.DocInclusionPredicateV2(documentName, apiDesc));
 
             var schemaRegistry = _schemaRegistryFactory.Create();
@@ -71,7 +82,7 @@ namespace Surging.Core.SwaggerGen
                 Host = host,
                 BasePath = basePath,
                 Schemes = schemes,
-                Paths = CreatePathItems(entry, schemaRegistry),
+                Paths = CreatePathItems(entries, schemaRegistry),
                 Definitions = schemaRegistry.Definitions,
                 SecurityDefinitions = _options.SecurityDefinitions.Any() ? _options.SecurityDefinitions : null,
                 Security = _options.SecurityRequirements.Any() ? _options.SecurityRequirements : null

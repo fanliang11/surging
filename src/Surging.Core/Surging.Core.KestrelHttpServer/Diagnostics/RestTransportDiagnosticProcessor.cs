@@ -31,16 +31,10 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
         }
 
         private readonly ITracingContext _tracingContext;
-        private readonly IEntrySegmentContextAccessor _entrySegmentContextAccessor;
-        private readonly IExitSegmentContextAccessor _exitSegmentContextAccessor;
 
-        public RestTransportDiagnosticProcessor(ITracingContext tracingContext,
-            IEntrySegmentContextAccessor entrySegmentContextAccessor,
-            IExitSegmentContextAccessor exitSegmentContextAccessor, ISerializer<string> serializer)
+        public RestTransportDiagnosticProcessor(ITracingContext tracingContext,ISerializer<string> serializer)
         {
             _tracingContext = tracingContext;
-            _exitSegmentContextAccessor = exitSegmentContextAccessor;
-            _entrySegmentContextAccessor = entrySegmentContextAccessor;
             _serializer = serializer;
         }
 

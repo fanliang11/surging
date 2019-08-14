@@ -59,8 +59,16 @@ namespace Surging.Core.Swagger
         public bool IgnoreFullyQualified { get; set; }
 
         public string IngressName { get; set; }
+
+        public IEnumerable<MapRoutePath> MapRoutePaths { get; set; }
     }
 
+    public class MapRoutePath
+    {
+        public string SourceRoutePath { get; set; }
+
+        public string TargetRoutePath { get; set; }
+    }
 
     public class Info
     {
