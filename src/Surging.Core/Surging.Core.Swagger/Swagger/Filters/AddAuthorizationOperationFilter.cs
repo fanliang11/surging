@@ -38,6 +38,29 @@ namespace Surging.Core.Swagger.Swagger.Filters
                     }
                 });
             }
+            else if( attribute != null && attribute.AuthType == AuthorizationType.AppSecret)
+            {
+                operation.Parameters.Add(new BodyParameter
+                {
+                    Name = "Authorization",
+                    In = "header",
+                    Required = false,
+                    Schema = new Schema
+                    {
+                        Type = "string"
+                    }
+                });
+                operation.Parameters.Add(new BodyParameter
+                {
+                    Name = "timeStamp",
+                    In = "query",
+                    Required = false,
+                    Schema = new Schema
+                    {
+                        Type = "string"
+                    }
+                });
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
@@ -75,6 +76,17 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
+            var httpMethodAttributes = attributes.Where(p => p is HttpMethodAttribute).Select(p => p as HttpMethodAttribute).ToList();
+            var httpMethods = new List<string>();
+            StringBuilder httpMethod = new StringBuilder();
+            foreach (var attribute in httpMethodAttributes)
+            {
+                httpMethods.AddRange(attribute.HttpMethods);
+                if (attribute.IsRegisterMetadata)
+                    httpMethod.AppendJoin(',',attribute.HttpMethods).Append(",");
+            }
+            if(httpMethod.Length >0) httpMethod.Length = httpMethod.Length - 1;
+            serviceDescriptor.HttpMethod(httpMethod.ToString());
             var authorization = attributes.Where(p => p is AuthorizationFilterAttribute).FirstOrDefault();
             if (authorization != null)
                 serviceDescriptor.EnableAuthorization(true);
@@ -88,6 +100,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 Descriptor = serviceDescriptor,
                 RoutePath = serviceDescriptor.RoutePath,
+                Methods=httpMethods,
                 MethodName = method.Name,
                 Type = method.DeclaringType,
                 Attributes = attributes,

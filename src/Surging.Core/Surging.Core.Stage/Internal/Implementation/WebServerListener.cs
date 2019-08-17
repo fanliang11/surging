@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Surging.Core.KestrelHttpServer;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace Surging.Core.Stage.Internal.Implementation
 {
@@ -23,7 +24,7 @@ namespace Surging.Core.Stage.Internal.Implementation
             var httpsPorts = AppConfig.Options.HttpsPort?.Split(",") ?? new string[] { "443" };
             var httpPorts = AppConfig.Options.HttpPorts?.Split(",");
             if (AppConfig.Options.EnableHttps)
-            { 
+            {
                 foreach (var httpsPort in httpsPorts)
                 {
                     int.TryParse(httpsPort, out int port);
@@ -33,6 +34,7 @@ namespace Surging.Core.Stage.Internal.Implementation
                         context.KestrelOptions.Listen(context.Address, port, listOptions =>
                     {
                         X509Certificate2 certificate2 = null;
+                        listOptions.Protocols = AppConfig.Options.Protocols;
                         var fileName = AppConfig.Options.CertificateFileName;
                         var password = AppConfig.Options.CertificatePassword;
                         if (fileName != null && password != null)
@@ -67,7 +69,7 @@ namespace Surging.Core.Stage.Internal.Implementation
                         context.KestrelOptions.Listen(context.Address, port);
                 }
             }
-
+            SetKestrelOptions(context);
         }
 
         private string[] GetPaths(params string[] virtualPaths)
@@ -92,6 +94,22 @@ namespace Surging.Core.Stage.Internal.Implementation
                 }
             }
             return result.ToArray();
+        }
+
+        private void SetKestrelOptions(WebHostContext context)
+        {
+            var requestBodyDataRate = AppConfig.Options.MinRequestBodyDataRate;
+            var responseBodyDataRate = AppConfig.Options.MinResponseDataRate;
+            context.KestrelOptions.Limits.MinRequestBodyDataRate = requestBodyDataRate == null ? null : new MinDataRate(requestBodyDataRate.BytesPerSecond, requestBodyDataRate.GracePeriod);
+            context.KestrelOptions.Limits.MinResponseDataRate = responseBodyDataRate == null ? null : new MinDataRate(responseBodyDataRate.BytesPerSecond, responseBodyDataRate.GracePeriod);
+            context.KestrelOptions.Limits.MaxConcurrentConnections = AppConfig.Options.MaxConcurrentConnections;
+            context.KestrelOptions.Limits.MaxConcurrentUpgradedConnections = AppConfig.Options.MaxConcurrentUpgradedConnections;
+            context.KestrelOptions.Limits.MaxRequestBodySize = AppConfig.Options.MaxRequestBodySize;
+            context.KestrelOptions.Limits.MaxRequestBufferSize = AppConfig.Options.MaxRequestBufferSize;
+            context.KestrelOptions.Limits.MaxRequestHeaderCount = AppConfig.Options.MaxRequestHeaderCount;
+            context.KestrelOptions.Limits.MaxRequestHeadersTotalSize = AppConfig.Options.MaxRequestHeadersTotalSize;
+            context.KestrelOptions.Limits.MaxRequestLineSize = AppConfig.Options.MaxRequestLineSize;
+            context.KestrelOptions.Limits.MaxResponseBufferSize = AppConfig.Options.MaxResponseBufferSize;
         }
     }
 }

@@ -8,6 +8,7 @@ using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using Surging.Core.KestrelHttpServer.Internal;
@@ -44,10 +45,10 @@ namespace Surging.Core.KestrelHttpServer
             await Received(sender, message);
         }
 
-        public async Task OnReceived(IMessageSender sender, HttpContext context, IEnumerable<IActionFilter> actionFilters)
+        public async Task OnReceived(IMessageSender sender,string messageId, HttpContext context, IEnumerable<IActionFilter> actionFilters)
         {
             var serviceRoute = context.Items["route"] as ServiceRoute;
-         
+
             var path = (context.Items["path"]
                 ?? HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()))) as string;
             if (serviceRoute == null)
@@ -57,36 +58,38 @@ namespace Surging.Core.KestrelHttpServer
             IDictionary<string, object> parameters = context.Request.Query.ToDictionary(p => p.Key, p => (object)p.Value.ToString());
             object serviceKey = null;
             foreach (var key in _serviceKeys)
-            { 
-                parameters.Remove(key,out object value);
+            {
+                parameters.Remove(key, out object value);
                 if (value != null)
                 {
                     serviceKey = value;
                     break;
                 }
             }
-           
+
             if (String.Compare(serviceRoute.ServiceDescriptor.RoutePath, path, true) != 0)
             {
                 var @params = RouteTemplateSegmenter.Segment(serviceRoute.ServiceDescriptor.RoutePath, path);
                 foreach (var param in @params)
                 {
-                    parameters.Add(param.Key,param.Value);
+                    parameters.Add(param.Key, param.Value);
                 }
             }
             var httpMessage = new HttpMessage
             {
                 Parameters = parameters,
-                RoutePath =  serviceRoute.ServiceDescriptor.RoutePath,
+                RoutePath = serviceRoute.ServiceDescriptor.RoutePath,
                 ServiceKey = serviceKey?.ToString()
             };
-            
+
             if (context.Request.HasFormContentType)
             {
                 var collection = await GetFormCollection(context.Request);
                 httpMessage.Parameters.Add("form", collection);
-                if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
-                await Received(sender, new TransportMessage(httpMessage));
+                if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage }, 
+                    sender, messageId, actionFilters)) return;
+                httpMessage.Attachments = RpcContext.GetContext().GetContextParameters();
+                await Received(sender, new TransportMessage(messageId,httpMessage));
             }
             else
             {
@@ -95,33 +98,33 @@ namespace Surging.Core.KestrelHttpServer
                 if (context.Request.Method == "POST")
                 {
                     var bodyParams = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
-                   foreach(var param in bodyParams)
-                    httpMessage.Parameters.Add(param.Key,param.Value);
-                    if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
-                    await Received(sender, new TransportMessage(httpMessage));
+                    foreach (var param in bodyParams)
+                        httpMessage.Parameters.Add(param.Key, param.Value);
+                    if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage },
+                       sender,  messageId, actionFilters)) return;
+                    httpMessage.Attachments = RpcContext.GetContext().GetContextParameters();
+                    await Received(sender, new TransportMessage(messageId,httpMessage));
                 }
                 else
                 {
-                    if (!await OnActionExecuting(context, httpMessage, sender, actionFilters)) return;
-                    await Received(sender, new TransportMessage(httpMessage));
+                    if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage }, 
+                        sender, messageId, actionFilters)) return;
+                    httpMessage.Attachments = RpcContext.GetContext().GetContextParameters();
+                    await Received(sender, new TransportMessage(messageId,httpMessage));
                 }
             }
+          
             await OnActionExecuted(context, httpMessage, actionFilters);
         }
 
-        public async Task<bool> OnActionExecuting(HttpContext context, HttpMessage message, IMessageSender sender, IEnumerable<IActionFilter> filters)
+        public async Task<bool> OnActionExecuting(ActionExecutingContext filterContext, IMessageSender sender, string messageId, IEnumerable<IActionFilter> filters)
         {
             foreach (var fiter in filters)
-            {
-                var filterContext = new ActionExecutingContext()
-                {
-                    Context = context,
-                    Message = message
-                };
+            { 
                 await fiter.OnActionExecuting(filterContext); 
                 if (filterContext.Result != null)
                 {
-                    await sender.SendAndFlushAsync(new TransportMessage(filterContext.Result));
+                    await sender.SendAndFlushAsync(new TransportMessage(messageId,filterContext.Result));
                     return false;
                 }
             }
@@ -141,24 +144,45 @@ namespace Surging.Core.KestrelHttpServer
             }
         }
 
-        public async Task<bool> OnAuthorization(HttpContext context, HttpServerMessageSender sender, IEnumerable<IAuthorizationFilter> filters)
+        public async Task<bool> OnAuthorization(HttpContext context, HttpServerMessageSender sender,string messageId, IEnumerable<IAuthorizationFilter> filters)
         {
             foreach (var filter in filters)
             {
                 var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
                 var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
-                if (serviceRoute == null) serviceRoute =await _serviceRouteProvider.GetLocalRouteByPathRegex(path);
+                if (serviceRoute == null) serviceRoute = await _serviceRouteProvider.GetLocalRouteByPathRegex(path);
                 context.Items.Add("route", serviceRoute);
-                 var filterContext = new AuthorizationFilterContext
+                var filterContext = new AuthorizationFilterContext
                 {
-                     Path=path,
+                    Path = path,
                     Context = context,
                     Route = serviceRoute
                 };
-               await filter.OnAuthorization(filterContext);
+                await filter.OnAuthorization(filterContext);
                 if (filterContext.Result != null)
                 {
-                    await sender.SendAndFlushAsync(new TransportMessage(filterContext.Result));
+                    await sender.SendAndFlushAsync(new TransportMessage(messageId,filterContext.Result));
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public async Task<bool> OnException(HttpContext context, HttpServerMessageSender sender, string messageId, Exception exception, IEnumerable<IExceptionFilter> filters)
+        {
+            foreach (var filter in filters)
+            {
+                var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
+                var filterContext = new ExceptionContext
+                {
+                    RoutePath = path,
+                    Context = context,
+                    Exception = exception
+                };
+                await filter.OnException(filterContext);
+                if (filterContext.Result != null)
+                {
+                    await sender.SendAndFlushAsync(new TransportMessage(messageId, filterContext.Result));
                     return false;
                 }
             }

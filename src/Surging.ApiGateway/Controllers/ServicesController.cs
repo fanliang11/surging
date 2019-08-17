@@ -54,6 +54,10 @@ namespace Surging.ApiGateway.Controllers
             path = String.Compare(path.ToLower(), GateWayAppConfig.TokenEndpointPath, true) == 0 ?
                 GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
             var route = await _serviceRouteProvider.GetRouteByPathRegex(path);
+            var httpMethods = route.ServiceDescriptor.HttpMethod();
+            if (!string.IsNullOrEmpty(httpMethods) &&
+                !httpMethods.Contains(Request.Method))
+                return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.Http405Endpoint, Message = "405 HTTP Method Not Supported" };
             if (!GetAllowRequest(route)) return new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
             if (servicePartProvider.IsPart(path))
             {
@@ -173,21 +177,16 @@ namespace Surging.ApiGateway.Controllers
             bool isSuccess = true;
             DateTime time;
             var author = HttpContext.Request.Headers["Authorization"];
-            
-                if ( model.ContainsKey("timeStamp") && author.Count>0)
+
+            if (model.ContainsKey("timeStamp") && author.Count > 0)
+            {
+                if (long.TryParse(model["timeStamp"].ToString(), out long timeStamp))
                 {
-                    if (DateTime.TryParse(model["timeStamp"].ToString(), out time))
+                    time = DateTimeConverter.UnixTimestampToDateTime(timeStamp);
+                    var seconds = (DateTime.Now - time).TotalSeconds;
+                    if (seconds <= 3560 && seconds >= 0)
                     {
-                        var seconds = (DateTime.Now - time).TotalSeconds;
-                        if (seconds <= 3560 && seconds >= 0)
-                        {
-                            if (GetMD5($"{route.ServiceDescriptor.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") != author.ToString())
-                            {
-                                result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
-                                isSuccess = false;
-                            }
-                        }
-                        else
+                        if (GetMD5($"{route.ServiceDescriptor.Token}{time.ToString("yyyy-MM-dd hh:mm:ss") }") != author.ToString())
                         {
                             result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
                             isSuccess = false;
@@ -201,9 +200,15 @@ namespace Surging.ApiGateway.Controllers
                 }
                 else
                 {
-                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
                     isSuccess = false;
-                } 
+                }
+            }
+            else
+            {
+                result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+                isSuccess = false;
+            }
             return isSuccess;
         }
 

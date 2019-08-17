@@ -11,8 +11,10 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
     {
         public HttpMessage Message { get; internal set; }
 
-        public HttpResultMessage<object> Result { get; set; }
+        public ServiceRoute Route { get; internal set; }
 
+        public HttpResultMessage<object> Result { get; set; }
+          
         public HttpContext Context { get; internal set; }
     }
 }

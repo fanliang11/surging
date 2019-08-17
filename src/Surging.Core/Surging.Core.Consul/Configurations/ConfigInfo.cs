@@ -93,7 +93,7 @@ namespace Surging.Core.Consul.Configurations
         /// </summary>
         public int WatchInterval { get; set; } = 60;
 
-        public int LockDelay { get; set; }
+        public int LockDelay { get; set; } = 600;
 
         public bool EnableChildrenMonitor { get; set; }
         /// <summary>

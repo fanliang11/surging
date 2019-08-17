@@ -18,6 +18,10 @@ namespace Surging.Core.KestrelHttpServer.Extensions
             {
                 serviceCollection.AddSingleton(typeof(IActionFilter), filter);
             }
+            else if (typeof(IExceptionFilter).IsAssignableFrom(filter))
+            {
+                serviceCollection.AddSingleton(typeof(IExceptionFilter), filter);
+            }
         }
     }
 }

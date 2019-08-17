@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -29,13 +30,13 @@ namespace Surging.Core.Stage
         }
 
         public override void RegisterBuilder(WebHostContext context)
-        {
+        {  
             _listener.Listen(context);
         }
 
         public override void Initialize(ApplicationInitializationContext context)
         {
-            var policy = AppConfig.Options.Policy;
+            var policy = AppConfig.Options.AccessPolicy;
             if (policy != null)
             {
                 context.Builder.UseCors(builder =>

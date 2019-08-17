@@ -44,7 +44,8 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-       // [ServiceBundle("api/{Service}/{id}", false)]
+        [HttpPost(),HttpPut(), HttpDelete(), HttpGet()]
+        // [ServiceBundle("api/{Service}/{id}", false)]
         Task<bool> Exists(int id);
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="requestData">请求参数</param>
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
-       
+        [HttpPost(true),HttpPut(true)]
         Task<IdentityUser> Save(IdentityUser requestData);
 
         /// <summary>
@@ -112,6 +113,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// 测试无参数调用
         /// </summary>
         /// <returns>返回是否成功</returns>
+        [Authorization(AuthType = AuthorizationType.AppSecret)]
         [Command(Strategy = StrategyType.Injection,ShuntStrategy = AddressSelectorMode.Polling, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return false;",FallBackName = "GetDictionaryMethodBreaker", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
         Task<bool> GetDictionary();
