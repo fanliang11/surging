@@ -6,13 +6,16 @@ namespace Surging.Core.CPlatform.Diagnostics
 {
     public class TransportEventData : EventData
     {
-        public TransportEventData(DiagnosticMessage message, string  method, string address)
+        public TransportEventData(DiagnosticMessage message, string  method, string traceId, string address)
             : base(Guid.Parse(message.Id))
         {
             Message = message;
             RemoteAddress = address;
             Method = method;
+            TraceId = traceId;
         }
+
+        public string TraceId { get; set; }
 
         public string Method { get; set; }
 

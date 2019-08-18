@@ -53,25 +53,28 @@ namespace Surging.Core.KestrelHttpServer
 
         private void WirteDiagnostic(TransportMessage message)
         {
-            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-            var remoteInvokeResultMessage = message.GetContent<HttpResultMessage>(); 
-            if (remoteInvokeResultMessage.IsSucceed)
+            if (!CPlatform.AppConfig.ServerOptions.DisableDiagnostic)
             {
-                diagnosticListener.WriteTransportAfter(TransportType.Rest, new ReceiveEventData(new DiagnosticMessage
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeResultMessage = message.GetContent<HttpResultMessage>();
+                if (remoteInvokeResultMessage.IsSucceed)
                 {
-                    Content = message.Content,
-                    ContentType = message.ContentType,
-                    Id = message.Id
-                }));
-            }
-            else
-            {
-                diagnosticListener.WriteTransportError(TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
+                    diagnosticListener.WriteTransportAfter(TransportType.Rest, new ReceiveEventData(new DiagnosticMessage
+                    {
+                        Content = message.Content,
+                        ContentType = message.ContentType,
+                        Id = message.Id
+                    }));
+                }
+                else
                 {
-                    Content = message.Content,
-                    ContentType = message.ContentType,
-                    Id = message.Id
-                }, new Exception(remoteInvokeResultMessage.Message)));
+                    diagnosticListener.WriteTransportError(TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
+                    {
+                        Content = message.Content,
+                        ContentType = message.ContentType,
+                        Id = message.Id
+                    }, new Exception(remoteInvokeResultMessage.Message)));
+                }
             }
         }
           

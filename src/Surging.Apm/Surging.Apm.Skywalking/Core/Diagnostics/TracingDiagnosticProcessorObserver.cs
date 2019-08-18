@@ -51,7 +51,7 @@ namespace Surging.Apm.Skywalking.Core.Diagnostics
 
         public void OnNext(DiagnosticListener listener)
         {
-            foreach (var diagnosticProcessor in _tracingDiagnosticProcessors.Distinct(x => x.ListenerName))
+            foreach (var diagnosticProcessor in _tracingDiagnosticProcessors)
             {
                 if (listener.Name == diagnosticProcessor.ListenerName)
                 {

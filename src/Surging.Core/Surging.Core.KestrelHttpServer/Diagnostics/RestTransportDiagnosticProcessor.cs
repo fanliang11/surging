@@ -4,6 +4,7 @@ using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
+using System.Text;
 using SurgingEvents = Surging.Core.CPlatform.Diagnostics.DiagnosticListenerExtensions;
 
 namespace Surging.Core.KestrelHttpServer.Diagnostics
@@ -18,6 +19,7 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
             new ConcurrentDictionary<string, SegmentContext>();
 
         private readonly ISerializer<string> _serializer;
+        private readonly ITracingContext _tracingContext;
 
         public Func<TransportEventData, string> TransportOperationNameResolver
         {
@@ -29,8 +31,6 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
             set => _transportOperationNameResolver =
                 value ?? throw new ArgumentNullException(nameof(TransportOperationNameResolver));
         }
-
-        private readonly ITracingContext _tracingContext;
 
         public RestTransportDiagnosticProcessor(ITracingContext tracingContext,ISerializer<string> serializer)
         {
@@ -45,6 +45,7 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
             var operationName = TransportOperationNameResolver(eventData);
             var context = _tracingContext.CreateEntrySegmentContext(operationName,
                 new RestTransportCarrierHeaderCollection(eventData.Headers));
+            context.TraceId = new UniqueId(BitConverter.ToInt64(Encoding.Default.GetBytes(eventData.TraceId), 0), 0, 0);
             context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
             context.Span.SpanLayer = SpanLayer.HTTP;
             context.Span.Peer = new StringOrIntValue(eventData.RemoteAddress);
@@ -65,7 +66,7 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
         }
 
         [DiagnosticName(SurgingEvents.SurgingErrorTransport, TransportType.Rest)]
-        public void TransportErrorPublish([Object] TransportErrorEventData eventData)
+        public void TransportError([Object] TransportErrorEventData eventData)
         {
             _resultDictionary.TryRemove(eventData.OperationId.ToString(), out SegmentContext context);
             if (context != null)

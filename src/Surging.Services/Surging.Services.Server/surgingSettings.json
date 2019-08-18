@@ -38,24 +38,7 @@
     "EnableChildrenMonitor": false
   },
   "Stage": {
-    "EnableHttps": true, // 不设置ports，默认httpsPort:443
-    "CertificateFileName": "${CertificateFileName}|",
-    "CertificateLocation": "${CertificateLocation}|pfxs",
-    "CertificatePassword": "${CertificatePassword}|",
-    "IsCamelCaseResolver": "${IsCamelCaseResolver}|true",
-    "Protocols": "Http1AndHttp2",
-    "ApiGetWay": {
-      "AccessTokenExpireTimeSpan": "30",
-      "AuthorizationRoutePath": "api/user/authentication",
-      "AuthorizationServiceKey": "User",
-      "TokenEndpointPath": "api/oauth2/token",
-      "CacheMode": "MemoryCache" //MemoryCache or  gateway.Redis save token
-    },
-    "AccessPolicy": {
-      "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
-      "AllowAnyHeader": true,
-      "AllowAnyMethod": true
-    },
+    
     "AccessSetting": [
       {
         "BlackList": "${blacklist}|127.0.0.1",
@@ -67,9 +50,7 @@
         "RoutePath": "api/user/exists",
         "Enable": true
       }
-    ],
-    "HttpsPort": "${StageHttpsPorts}|449,446",
-    "HttpPorts": "${StageHttpPorts}|285,282,283"
+    ]
   },
   "Dns": {
     "RootDnsAddress": "192.168.1.1",

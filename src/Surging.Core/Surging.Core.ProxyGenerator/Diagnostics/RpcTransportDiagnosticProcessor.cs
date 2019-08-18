@@ -5,6 +5,7 @@ using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
+using System.Text;
 using SurgingEvents = Surging.Core.CPlatform.Diagnostics.DiagnosticListenerExtensions;
 
 namespace Surging.Core.ProxyGenerator.Diagnostics
@@ -19,6 +20,7 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
             new ConcurrentDictionary<string, SegmentContext>();
 
         private readonly ISerializer<string> _serializer;
+        private readonly ITracingContext _tracingContext;
 
         public Func<TransportEventData, string> TransportOperationNameResolver
         {
@@ -31,17 +33,9 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
                 value ?? throw new ArgumentNullException(nameof(TransportOperationNameResolver));
         }
 
-        private readonly ITracingContext _tracingContext;
-        private readonly IEntrySegmentContextAccessor _entrySegmentContextAccessor;
-        private readonly IExitSegmentContextAccessor _exitSegmentContextAccessor;
-
-        public RpcTransportDiagnosticProcessor(ITracingContext tracingContext,
-            IEntrySegmentContextAccessor entrySegmentContextAccessor,
-            IExitSegmentContextAccessor exitSegmentContextAccessor, ISerializer<string> serializer)
+        public RpcTransportDiagnosticProcessor(ITracingContext tracingContext, ISerializer<string> serializer)
         {
             _tracingContext = tracingContext;
-            _exitSegmentContextAccessor = exitSegmentContextAccessor;
-            _entrySegmentContextAccessor = entrySegmentContextAccessor;
             _serializer = serializer;
         }
 
@@ -52,6 +46,8 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
             var operationName = TransportOperationNameResolver(eventData);
             var context = _tracingContext.CreateEntrySegmentContext(operationName,
                 new RpcTransportCarrierHeaderCollection(eventData.Headers));
+            if (!string.IsNullOrEmpty(eventData.TraceId))
+                context.TraceId = new UniqueId(BitConverter.ToInt64(Encoding.Default.GetBytes(eventData.TraceId), 0), 0, 0);
             context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
             context.Span.SpanLayer = SpanLayer.RPC_FRAMEWORK;
             context.Span.Peer = new StringOrIntValue(eventData.RemoteAddress);
@@ -72,7 +68,7 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
         }
 
         [DiagnosticName(SurgingEvents.SurgingErrorTransport, TransportType.Rpc)]
-        public void TransportErrorPublish([Object] TransportErrorEventData eventData)
+        public void TransportError([Object] TransportErrorEventData eventData)
         {
               _resultDictionary.TryRemove(eventData.OperationId.ToString(),out SegmentContext context);
             if (context != null)
