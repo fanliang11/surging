@@ -3,6 +3,7 @@
   "AuthorizationRoutePath": "api/user/authentication",
   "AuthorizationServiceKey": "User",
   "TokenEndpointPath": "api/oauth2/token",
+  "RefreshTokenPath": "api/oauth2/refreshToken",
   "CacheMode": "MemoryCache", //MemoryCache or  gateway.Redis save token
   "AccessPolicy": {
     "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],

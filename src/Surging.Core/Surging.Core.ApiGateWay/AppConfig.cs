@@ -81,6 +81,23 @@ namespace Surging.Core.ApiGateWay
             }
         }
 
+
+        private static string _refreshTokenPath = "oauth2/refreshToken";
+
+        public static string RefreshTokenPath
+        {
+            get
+            {
+                if (Configuration == null)
+                    return _tokenEndpointPath;
+                return Configuration["RefreshTokenPath"] ?? _tokenEndpointPath;
+            }
+            set
+            {
+                _tokenEndpointPath = value;
+            }
+        }
+
         public static Register Register
         {
             get

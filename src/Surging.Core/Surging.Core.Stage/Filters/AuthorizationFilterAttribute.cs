@@ -24,8 +24,29 @@ namespace Surging.Core.Stage.Filters
         }
         public async Task OnAuthorization(AuthorizationFilterContext filterContext)
         {
+            var gatewayAppConfig = AppConfig.Options.ApiGetWay;
             if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.DisableNetwork())
                 filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
+
+            else if (String.Compare(filterContext.Path.ToLower(), gatewayAppConfig.RefreshTokenPath, true) == 0)
+            {
+                var token = filterContext.Context.Request.Headers["Authorization"];
+                if (token.Count > 0)
+                {
+                    var isSuccess = await _authorizationServerProvider.RefreshToken(token);
+                    if (isSuccess)
+                    {
+                        filterContext.Result = HttpResultMessage<object>.Create(true, token);
+                        filterContext.Result.StatusCode = (int)ServiceStatusCode.Success;
+                    }
+                    else
+                    {
+                        filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+                    }
+                }
+                else
+                    filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
+            }
             else
             {
                 if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.EnableAuthorization())
@@ -52,7 +73,7 @@ namespace Surging.Core.Stage.Filters
                     }
                 }
             }
-            var gatewayAppConfig = AppConfig.Options.ApiGetWay;
+          
             if (String.Compare(filterContext.Path.ToLower(), gatewayAppConfig.TokenEndpointPath, true) == 0)
                 filterContext.Context.Items.Add("path", gatewayAppConfig.AuthorizationRoutePath);
 

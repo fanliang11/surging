@@ -14,6 +14,7 @@ namespace Surging.Core.Stage.Configurations
 
         public int AccessTokenExpireTimeSpan { get; set; } = 30;
          
+        public string RefreshTokenPath { get; set; }
 
         public string TokenEndpointPath{ get; set; }
     }

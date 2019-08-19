@@ -47,6 +47,7 @@
     "ApiGetWay": {
       "AccessTokenExpireTimeSpan": "30",
       "AuthorizationRoutePath": "api/user/authentication",
+      "RefreshTokenPath": "api/oauth2/refreshToken",
       "AuthorizationServiceKey": "User",
       "TokenEndpointPath": "api/oauth2/token",
       "CacheMode": "MemoryCache" //MemoryCache or  gateway.Redis save token

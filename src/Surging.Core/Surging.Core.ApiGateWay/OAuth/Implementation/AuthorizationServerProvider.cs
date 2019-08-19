@@ -73,6 +73,22 @@ namespace Surging.Core.ApiGateWay.OAuth
             return isSuccess;
         }
 
+        public async Task<bool> RefreshToken(string token)
+        {
+            bool isSuccess = false;
+            var jwtToken = token.Split('.');
+            if (jwtToken.Length == 3)
+            {
+                var  value = await _cacheProvider.GetAsync<string>(jwtToken[1]);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _cacheProvider.Add(jwtToken[1], value, AppConfig.AccessTokenExpireTimeSpan);
+                    isSuccess = true;
+                }
+            }
+            return isSuccess;
+        }
+
         private string ConverBase64String(string str)
         {
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(str));
