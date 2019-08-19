@@ -13,8 +13,6 @@ namespace Surging.Core.Stage.Configurations
         public string AuthorizationRoutePath { get; set; }
 
         public int AccessTokenExpireTimeSpan { get; set; } = 30;
-         
-        public string RefreshTokenPath { get; set; }
 
         public string TokenEndpointPath{ get; set; }
     }

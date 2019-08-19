@@ -50,8 +50,6 @@ namespace Surging.ApiGateway.Controllers
                 model[n] = this.Request.Query[n].ToString();
             }
             ServiceResult<object> result = ServiceResult<object>.Create(false, null);
-            if (String.Compare(path, GateWayAppConfig.RefreshTokenPath, true) == 0)
-                return await RefreshToken();
             path = String.Compare(path.ToLower(), GateWayAppConfig.TokenEndpointPath, true) == 0 ?
               GateWayAppConfig.AuthorizationRoutePath : path.ToLower();
             var route = await _serviceRouteProvider.GetRouteByPathRegex(path);
@@ -175,27 +173,6 @@ namespace Surging.ApiGateway.Controllers
             return  (isSuccess,result);
         }
 
-        private async Task<ServiceResult<object>> RefreshToken()
-        {
-            var result = ServiceResult<object>.Create(false, null);
-            var token = HttpContext.Request.Headers["Authorization"];
-            if (token.Count > 0)
-            {
-                var isSuccess = await _authorizationServerProvider.RefreshToken(token);
-                if (isSuccess)
-                {
-                    result = ServiceResult<object>.Create(true, token);
-                    result.StatusCode = (int)ServiceStatusCode.Success;
-                }
-                else
-                {
-                    result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
-                }
-            }
-            else
-                result = new ServiceResult<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Invalid authentication credentials" };
-            return result;
-        }
 
         private bool ValidateAppSecretAuthentication(ServiceRoute route,
             Dictionary<string, object> model, ref ServiceResult<object> result)

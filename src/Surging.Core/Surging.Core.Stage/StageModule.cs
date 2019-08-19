@@ -64,7 +64,6 @@ namespace Surging.Core.Stage
                 ApiGateWay.AppConfig.AccessTokenExpireTimeSpan =TimeSpan.FromMinutes(apiConfig.AccessTokenExpireTimeSpan);
                 ApiGateWay.AppConfig.AuthorizationRoutePath = apiConfig.AuthorizationRoutePath;
                 ApiGateWay.AppConfig.TokenEndpointPath = apiConfig.TokenEndpointPath;
-                ApiGateWay.AppConfig.RefreshTokenPath = apiConfig.RefreshTokenPath;
             }
             context.Services.AddMvc().AddJsonOptions(options => {
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
