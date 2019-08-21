@@ -48,6 +48,10 @@ nuget:Install-Package surging -Version  版本号
 
 <img src="https://github.com/dotnetcore/surging/blob/master/docs/Architecture.png" alt="架构图" />
 
+### 调用链
+
+<img src="https://github.com/dotnetcore/surging/blob/master/docs/call-chain.png" alt="链路图" />
+
 ### 配置：
 
  ```c#
