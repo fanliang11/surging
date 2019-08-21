@@ -44,9 +44,9 @@ docker hub : docker pull serviceengine/surging:版本号
 
 nuget:Install-Package surging -Version  版本号
 
-### surging模块功能
+### 架构图
 
-<img src="https://github.com/dotnetcore/surging/blob/master/docs/SurgingFunction.png" alt="surging模块功能" />
+<img src="https://github.com/dotnetcore/surging/blob/master/docs/Architecture.png" alt="架构图" />
 
 ### 配置：
 
