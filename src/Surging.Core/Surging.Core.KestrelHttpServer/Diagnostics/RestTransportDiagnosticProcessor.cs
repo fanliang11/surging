@@ -45,7 +45,7 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
             var operationName = TransportOperationNameResolver(eventData);
             var context = _tracingContext.CreateEntrySegmentContext(operationName,
                 new RestTransportCarrierHeaderCollection(eventData.Headers));
-            context.TraceId = new UniqueId(BitConverter.ToInt64(Encoding.Default.GetBytes(eventData.TraceId), 0), 0, 0);
+            context.TraceId = ConvertUniqueId(eventData);
             context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
             context.Span.SpanLayer = SpanLayer.HTTP;
             context.Span.Peer = new StringOrIntValue(eventData.RemoteAddress);
@@ -74,6 +74,21 @@ namespace Surging.Core.KestrelHttpServer.Diagnostics
                 context.Span.ErrorOccurred(eventData.Exception);
                 _tracingContext.Release(context);
             }
+        }
+
+        public UniqueId ConvertUniqueId(TransportEventData eventData)
+        {
+            long part1 = 0, part2 = 0, part3 = 0;
+            UniqueId uniqueId = new UniqueId();
+            var bytes = Encoding.Default.GetBytes($"{eventData.TraceId}-{nameof(RestTransportDiagnosticProcessor)}");
+            part1 = BitConverter.ToInt64(bytes, 0);
+            if (eventData.TraceId.Length > 8)
+                part2 = BitConverter.ToInt64(bytes, 8);
+            if (eventData.TraceId.Length > 16)
+                part3 = BitConverter.ToInt64(bytes, 16);
+            if (!string.IsNullOrEmpty(eventData.TraceId))
+                uniqueId = new UniqueId(part1, part2, part3);
+            return uniqueId;
         }
     }
 }
