@@ -4,10 +4,8 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.Diagnostics
 {
-    public  enum TransportType
+    public interface ILocalSegmentContextAccessor
     {
-        Rpc,
-        Rest,
-        Mqtt,
+        SegmentContext Context { get; set; }
     }
 }

@@ -9,6 +9,10 @@ using System.Linq;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using Surging.Core.Protocol.Mqtt.Internal.Runtime;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform;
+using System.Diagnostics;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Core.Protocol.Mqtt.Implementation
 {
@@ -32,7 +36,10 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
 
         public async Task Login(IChannelHandlerContext context, ConnectPacket packet)
         {
+
             string deviceId = packet.ClientId;
+            var message = TransportMessage.CreateInvokeMessage(new RemoteInvokeMessage() { ServiceId = $"Connect", Parameters = new Dictionary<string, object> { { "packet", packet} } });
+            WirteDiagnosticBefore(message,context.Channel.RemoteAddress.ToString(),  deviceId, packet.PacketType);
             if (string.IsNullOrEmpty(deviceId))
             {
                await ConnAck(context, new ConnAckPacket
@@ -41,6 +48,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
                 });
                 return;
             }
+
             var mqttBehavior = _mqttBehaviorProvider.GetMqttBehavior();
             if (mqttBehavior != null)
             {
@@ -94,11 +102,17 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
                     ReturnCode = ConnectReturnCode.RefusedServerUnavailable
                 });
             }
+            WirteDiagnosticAfter(message);
         }
 
         public async Task Disconnect(IChannelHandlerContext context, DisconnectPacket packet)
         {
-            await _channelService.Close(await _channelService.GetDeviceId(context.Channel), true);
+            var deviceId = await _channelService.GetDeviceId(context.Channel);
+            var message = TransportMessage.CreateInvokeMessage(new RemoteInvokeMessage() { ServiceId = $"Disconnect", Parameters = new Dictionary<string, object> { { "packet", packet } } });
+            WirteDiagnosticBefore(message,context.Channel.RemoteAddress.ToString(), deviceId, packet.PacketType);
+            await _channelService.Close(deviceId, true);
+            WirteDiagnosticAfter(message);
+
         }
 
         public async Task  PingReq(IChannelHandlerContext context, PingReqPacket packet)
@@ -180,10 +194,13 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
         {
             if (packet != null)
             {
+               var deviceId= await _channelService.GetDeviceId(context.Channel);
                 var topics = packet.Requests.Select(p => p.TopicFilter).ToArray();
-                await _channelService.Suscribe(await _channelService.GetDeviceId(context.Channel), topics);
-                await SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce
-                 ));
+                var message = TransportMessage.CreateInvokeMessage(new RemoteInvokeMessage() { ServiceId = $"Subscribe", Parameters=new Dictionary<string, object> { { "packet", packet } } });
+                WirteDiagnosticBefore(message,context.Channel.RemoteAddress.ToString(), deviceId, packet.PacketType); 
+                await _channelService.Suscribe(deviceId, topics);
+                await SubAck(context, SubAckPacket.InResponseTo(packet, QualityOfService.ExactlyOnce));
+                WirteDiagnosticAfter(message);
             }
         }
 
@@ -195,8 +212,43 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
         public  async Task Unsubscribe(IChannelHandlerContext context, UnsubscribePacket packet)
         {
             string [] topics = packet.TopicFilters.ToArray();
-            await _channelService.UnSubscribe(await _channelService.GetDeviceId(context.Channel), topics);
+            var deviceId = await _channelService.GetDeviceId(context.Channel);
+            var message = TransportMessage.CreateInvokeMessage(new RemoteInvokeMessage() { ServiceId = $"Unsubscribe", Parameters = new Dictionary<string, object> { { "packet", packet } } });
+            WirteDiagnosticBefore(message, context.Channel.RemoteAddress.ToString(), deviceId, packet.PacketType);
+            await _channelService.UnSubscribe(deviceId, topics);
             await  UnsubAck(context, UnsubAckPacket.InResponseTo(packet));
+            WirteDiagnosticAfter(message);
+        }
+
+        private void WirteDiagnosticBefore(TransportMessage message,string address, string traceId, PacketType packetType)
+        {
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
+            {
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeMessage = message.GetContent<RemoteInvokeMessage>();
+                diagnosticListener.WriteTransportBefore(TransportType.Mqtt, new TransportEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id,
+                    MessageName = remoteInvokeMessage.ServiceId
+                }, packetType.ToString(),
+                traceId,address ));
+            }
+        }
+
+        private void WirteDiagnosticAfter(TransportMessage message)
+        {
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
+            {
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                diagnosticListener.WriteTransportAfter(TransportType.Mqtt, new ReceiveEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id
+                }));
+            }
         }
     }
 }
