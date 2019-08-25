@@ -51,10 +51,10 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
             context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
             context.Span.SpanLayer = SpanLayer.RPC_FRAMEWORK;
             context.Span.Peer = new StringOrIntValue(eventData.RemoteAddress);
-            _resultDictionary.TryAdd(eventData.OperationId.ToString(), context);
             context.Span.AddTag(Tags.RPC_METHOD, eventData.Method.ToString());
             context.Span.AddTag(Tags.RPC_PARAMETERS, _serializer.Serialize(message.Parameters));
             context.Span.AddTag(Tags.RPC_LOCAL_ADDRESS, NetUtils.GetHostAddress().ToString());
+            _resultDictionary.TryAdd(eventData.OperationId.ToString(), context);
         }
 
         [DiagnosticName(SurgingEvents.SurgingAfterTransport, TransportType.Rpc)]
@@ -82,7 +82,7 @@ namespace Surging.Core.ProxyGenerator.Diagnostics
         {
             long part1 = 0, part2 = 0, part3 = 0;
             UniqueId uniqueId = new UniqueId();
-            var bytes = Encoding.Default.GetBytes($"{eventData.TraceId}-{nameof(RpcTransportDiagnosticProcessor)}");
+            var bytes = Encoding.Default.GetBytes(eventData.TraceId);
             part1 = BitConverter.ToInt64(bytes, 0);
             if (eventData.TraceId.Length > 8)
                 part2 = BitConverter.ToInt64(bytes, 8);
