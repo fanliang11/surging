@@ -15,8 +15,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DNS\Surging.Core.DNS.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.DotNettyWSServer\Surging.Core.DotNettyWSServer.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusRabbitMQ\Surging.Core.EventBusRabbitMQ.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Mqtt\Surging.Core.Protocol.Mqtt.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Udp\Surging.Core.Protocol.Udp.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WS\Surging.Core.Protocol.WS.csproj" />
     <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.Common\Surging.IModuleServices.Common.csproj" />
     <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.Manger\Surging.IModuleServices.Manager.csproj" />

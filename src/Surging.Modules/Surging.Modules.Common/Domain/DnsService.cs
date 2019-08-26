@@ -12,7 +12,7 @@ namespace Surging.Modules.Common.Domain
     {
         public override Task<IPAddress> Resolve(string domainName)
         {
-            if(domainName=="localhost")
+            if (domainName == "localhost")
             {
                 return Task.FromResult<IPAddress>(IPAddress.Parse("127.0.0.1"));
             }

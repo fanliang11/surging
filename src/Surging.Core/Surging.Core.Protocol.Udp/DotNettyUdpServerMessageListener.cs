@@ -1,10 +1,4 @@
-﻿using ARSoft.Tools.Net;
-using ARSoft.Tools.Net.Dns;
-using DotNetty.Buffers;
-using DotNetty.Codecs;
-using DotNetty.Codecs.DNS;
-using DotNetty.Codecs.DNS.Messages;
-using DotNetty.Codecs.DNS.Records;
+﻿using DotNetty.Buffers;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -19,31 +13,30 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Surging.Core.DNS
+namespace Surging.Core.Protocol.Udp
 {
-    class DotNettyDnsServerMessageListener : IMessageListener, IDisposable
+   public class DotNettyUdpServerMessageListener : IMessageListener, IDisposable
     {
         #region Field
 
-        private readonly ILogger<DotNettyDnsServerMessageListener> _logger;
+        private readonly ILogger<DotNettyUdpServerMessageListener> _logger;
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private IChannel _channel;
+        private readonly ISerializer<string> _serializer;
 
         public event ReceivedDelegate Received;
 
         #endregion Field
 
         #region Constructor
-
-        public DotNettyDnsServerMessageListener(ILogger<DotNettyDnsServerMessageListener> logger, ITransportMessageCodecFactory codecFactory)
+        public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger
+            , ITransportMessageCodecFactory codecFactory)
         {
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
         }
-
-        #endregion Constructor
 
         public async Task StartAsync(EndPoint endPoint)
         {
@@ -55,30 +48,36 @@ namespace Surging.Core.DNS
             bootstrap
                 .Group(group)
                 .Channel<SocketDatagramChannel>()
-                .Handler(new ActionChannelInitializer<IDatagramChannel>(channel =>
-                {
-                    IChannelPipeline pipeline = channel.Pipeline;
-                    pipeline.AddLast(new DatagramDnsQueryDecoder());
-                    pipeline.AddLast(new DatagramDnsResponseEncoder());
-                    pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
+                .Option(ChannelOption.SoBacklog, 1024) 
+                .Option(ChannelOption.SoSndbuf, 1024 * 4096*10)
+                .Option(ChannelOption.SoRcvbuf, 1024 * 4096*10) 
+                .Handler(new ServerHandler(async (contenxt, message) =>
                     {
-                        var sender = new DotNettyDnsServerMessageSender(_transportMessageEncoder, contenxt);
+                        var sender = new DotNettyUdpServerMessageSender(_transportMessageEncoder, contenxt);
                         await OnReceived(sender, message);
-                    }, _logger));
-                })).Option(ChannelOption.SoBroadcast, true);
+                    }, _logger, _serializer)
+                ).Option(ChannelOption.SoBroadcast, true);
             try
             {
 
                 _channel = await bootstrap.BindAsync(endPoint);
                 if (_logger.IsEnabled(LogLevel.Debug))
-                    _logger.LogDebug($"DNS服务主机启动成功，监听地址：{endPoint}。");
+                    _logger.LogDebug($"Udp服务主机启动成功，监听地址：{endPoint}。");
             }
-            catch
+            catch(Exception ex)
             {
-                _logger.LogError($"DNS服务主机启动失败，监听地址：{endPoint}。 ");
+                _logger.LogError($"Udp服务主机启动失败，监听地址：{endPoint}。 ");
             }
 
         }
+
+        public async Task OnReceived(IMessageSender sender, TransportMessage message)
+        {
+            if (Received == null)
+                return;
+            await Received(sender, message);
+        }
+
 
         public void CloseAsync()
         {
@@ -89,9 +88,6 @@ namespace Surging.Core.DNS
             }).Wait();
         }
 
-        #region Implementation of IDisposable
-
-
         public void Dispose()
         {
             Task.Run(async () =>
@@ -100,43 +96,35 @@ namespace Surging.Core.DNS
             }).Wait();
         }
 
-        public async Task OnReceived(IMessageSender sender, TransportMessage message)
-        {
-            if (Received == null)
-                return;
-            await Received(sender, message);
-        }
+        #endregion
 
-        #endregion Implementation of IDisposable
-
-        private class ServerHandler : SimpleChannelInboundHandler<DatagramDnsQuery>
+        private class ServerHandler : SimpleChannelInboundHandler<DatagramPacket>
         {
 
             private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
             private readonly ILogger _logger;
+            private readonly ISerializer<string> _serializer;
 
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
+
+
+            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger, ISerializer<string> serializer)
             {
                 _readAction = readAction;
-                _logger = logger; 
+                _logger = logger;
+                _serializer = serializer;
             }
 
-            protected override void ChannelRead0(IChannelHandlerContext ctx, DatagramDnsQuery query)
+            protected override void ChannelRead0(IChannelHandlerContext ctx, DatagramPacket msg)
             {
-
-                DatagramDnsResponse response = new DatagramDnsResponse(query.Recipient, query.Sender, query.Id);
-                DefaultDnsQuestion dnsQuestion = query.GetRecord<DefaultDnsQuestion>(DnsSection.QUESTION);
-                response.AddRecord(DnsSection.QUESTION, dnsQuestion);
-                _readAction(ctx, new TransportMessage(new DnsTransportMessage
-                {
-                    DnsResponse = response,
-                    DnsQuestion = dnsQuestion
-                }));
+               var buff = msg.Content;
+                byte[] messageBytes = new byte[buff.ReadableBytes];
+                buff.ReadBytes(messageBytes);
+                _readAction(ctx, new TransportMessage(messageBytes));
             }
 
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
             {
-                 context.CloseAsync();
+                context.CloseAsync();
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
             }
