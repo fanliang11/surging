@@ -270,11 +270,6 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
 ```C# 
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
-### 捐赠基金
-如果觉得这个框架不错，可以支持surging开源，请fanly喝一杯咖啡或吃一顿午餐或者是更好的社区发展，扫描下方二维码进行捐赠，并在付款说明填写您的改进意见。
-
-![](https://github.com/dotnetcore/surging/blob/master/%E6%8D%90%E8%B5%A0.png)
-
 
 ## 捐赠明细
 
