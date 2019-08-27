@@ -1,5 +1,4 @@
 ﻿using Surging.Core.CPlatform.Messages;
-using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;

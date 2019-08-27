@@ -194,15 +194,13 @@ namespace Surging.Core.Protocol.Mqtt
             }
         }
 
-
-
         private void WirteDiagnosticError(TransportMessage message)
         {
             if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
                 var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
                 var remoteInvokeResultMessage = message.GetContent<RemoteInvokeResultMessage>();
-                diagnosticListener.WriteTransportError(TransportType.Rpc, new TransportErrorEventData(new DiagnosticMessage
+                diagnosticListener.WriteTransportError(TransportType.Mqtt, new TransportErrorEventData(new DiagnosticMessage
                 {
                     Content = message.Content,
                     ContentType = message.ContentType,
