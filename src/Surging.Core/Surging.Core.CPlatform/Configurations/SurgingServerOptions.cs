@@ -40,6 +40,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public bool DisableServiceRegistration { get; set; }
 
+        public bool DisableDiagnostic { get; set; }
+
         public bool ReloadOnChange { get; set; } = false;
 
         public ProtocolPortOptions Ports { get; set; } = new  ProtocolPortOptions();

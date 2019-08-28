@@ -24,6 +24,7 @@ namespace Surging.Core.Stage.Filters
         }
         public async Task OnAuthorization(AuthorizationFilterContext filterContext)
         {
+            var gatewayAppConfig = AppConfig.Options.ApiGetWay;
             if (filterContext.Route != null && filterContext.Route.ServiceDescriptor.DisableNetwork())
                 filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.RequestError, Message = "Request error" };
             else
@@ -52,7 +53,7 @@ namespace Surging.Core.Stage.Filters
                     }
                 }
             }
-            var gatewayAppConfig = AppConfig.Options.ApiGetWay;
+          
             if (String.Compare(filterContext.Path.ToLower(), gatewayAppConfig.TokenEndpointPath, true) == 0)
                 filterContext.Context.Items.Add("path", gatewayAppConfig.AuthorizationRoutePath);
 

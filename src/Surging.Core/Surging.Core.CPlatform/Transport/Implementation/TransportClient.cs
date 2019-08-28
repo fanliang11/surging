@@ -164,39 +164,54 @@ namespace Surging.Core.CPlatform.Transport.Implementation
 
         private void WirteDiagnosticBefore(TransportMessage message)
         {
-            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-            var remoteInvokeMessage = message.GetContent<RemoteInvokeMessage>();
-            diagnosticListener.WriteTransportBefore(TransportType.Rpc, new TransportEventData(new DiagnosticMessage
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
-                Content = message.Content,
-                ContentType = message.ContentType,
-                Id = message.Id,
-                MessageName = remoteInvokeMessage.ServiceId
-            }, remoteInvokeMessage.DecodeJOject?RpcMethod.Json_Rpc.ToString():RpcMethod.Proxy_Rpc.ToString(), RpcContext.GetContext().GetAttachment("RemoteAddress")?.ToString()));
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeMessage = message.GetContent<RemoteInvokeMessage>();
+                remoteInvokeMessage.Attachments.TryGetValue("TraceId", out object traceId);
+                diagnosticListener.WriteTransportBefore(TransportType.Rpc, new TransportEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id,
+                    MessageName = remoteInvokeMessage.ServiceId
+                }, remoteInvokeMessage.DecodeJOject ? RpcMethod.Json_Rpc.ToString() : RpcMethod.Proxy_Rpc.ToString(),
+                 traceId?.ToString(),
+                RpcContext.GetContext().GetAttachment("RemoteAddress")?.ToString()));
+            }
+            var parameters = RpcContext.GetContext().GetContextParameters();
+            parameters.TryRemove("RemoteAddress", out object value);
+            RpcContext.GetContext().SetContextParameters(parameters);
         }
 
         private void WirteDiagnosticAfter(TransportMessage message)
         {
-            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-            var remoteInvokeResultMessage = message.GetContent<RemoteInvokeResultMessage>();
-            diagnosticListener.WriteTransportAfter(TransportType.Rpc, new ReceiveEventData(new DiagnosticMessage
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
-                Content = message.Content,
-                ContentType = message.ContentType,
-                Id = message.Id
-            }));
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeResultMessage = message.GetContent<RemoteInvokeResultMessage>();
+                diagnosticListener.WriteTransportAfter(TransportType.Rpc, new ReceiveEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id
+                }));
+            }
         }
 
         private void WirteDiagnosticError(TransportMessage message)
         {
-            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-            var remoteInvokeResultMessage = message.GetContent<RemoteInvokeResultMessage>();
-            diagnosticListener.WriteTransportError(TransportType.Rpc, new TransportErrorEventData(new DiagnosticMessage
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
-                Content = message.Content,
-                ContentType = message.ContentType,
-                Id = message.Id
-            }, new CPlatformCommunicationException(remoteInvokeResultMessage.ExceptionMessage)));
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeResultMessage = message.GetContent<RemoteInvokeResultMessage>();
+                diagnosticListener.WriteTransportError(TransportType.Rpc, new TransportErrorEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id
+                }, new CPlatformCommunicationException(remoteInvokeResultMessage.ExceptionMessage)));
+            }
         }
 
         #endregion Private Method

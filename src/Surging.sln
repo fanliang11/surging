@@ -91,6 +91,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Apm.Skywalking", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyApm.Transport.Grpc.Protocol", "Surging.Apm\SkyApm.Transport.Grpc.Protocol\SkyApm.Transport.Grpc.Protocol.csproj", "{E9CD6B91-4E20-4FB6-945B-FB2B2A97837A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Protocol.Udp", "Surging.Core\Surging.Core.Protocol.Udp\Surging.Core.Protocol.Udp.csproj", "{F888A99B-9B07-43CC-96D2-B2C700F0620B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.DotNettyWSServer", "Surging.Core\Surging.Core.DotNettyWSServer\Surging.Core.DotNettyWSServer.csproj", "{03C6C6FF-15D2-467E-BC08-2B42AA0D011C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -245,6 +249,14 @@ Global
 		{E9CD6B91-4E20-4FB6-945B-FB2B2A97837A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9CD6B91-4E20-4FB6-945B-FB2B2A97837A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9CD6B91-4E20-4FB6-945B-FB2B2A97837A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F888A99B-9B07-43CC-96D2-B2C700F0620B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F888A99B-9B07-43CC-96D2-B2C700F0620B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F888A99B-9B07-43CC-96D2-B2C700F0620B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F888A99B-9B07-43CC-96D2-B2C700F0620B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03C6C6FF-15D2-467E-BC08-2B42AA0D011C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03C6C6FF-15D2-467E-BC08-2B42AA0D011C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03C6C6FF-15D2-467E-BC08-2B42AA0D011C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03C6C6FF-15D2-467E-BC08-2B42AA0D011C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -285,6 +297,8 @@ Global
 		{27E8A4B2-73DF-4C03-857B-2F529C3C49D6} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{122A50B1-D3BB-4CA4-BCE4-D8642144D6FA} = {F686341B-C87F-489F-8A4D-1C99A79B4603}
 		{E9CD6B91-4E20-4FB6-945B-FB2B2A97837A} = {F686341B-C87F-489F-8A4D-1C99A79B4603}
+		{F888A99B-9B07-43CC-96D2-B2C700F0620B} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{03C6C6FF-15D2-467E-BC08-2B42AA0D011C} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}

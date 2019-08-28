@@ -18,8 +18,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Surging.Apm.Skywalking.Abstractions;
+using Surging.Core.CPlatform;
 
 // ReSharper disable StringLiteralTypo
 namespace Surging.Apm.Skywalking.Configuration
@@ -52,6 +54,9 @@ namespace Surging.Apm.Skywalking.Configuration
 
             builder.AddJsonFile("skyapm.json", true)
                 .AddJsonFile($"skyapm.{_environmentProvider.EnvironmentName}.json", true);
+
+            var skyapmPath = Path.Combine(AppConfig.ServerOptions.RootPath, "skyapm.json");
+            builder.AddJsonFile(skyapmPath, true);
 
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(CONFIG_FILE_PATH_COMPATIBLE)))
             {

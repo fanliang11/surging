@@ -114,7 +114,6 @@ namespace Surging.Core.DNS
 
             private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
             private readonly ILogger _logger;
-            private readonly ISerializer<string> _serializer;
 
             public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
             {

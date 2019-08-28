@@ -5,7 +5,7 @@ namespace Surging.Core.AutoMapper
 {
     public static class ServiceHostBuilderExtensions
     {
-        public static IServiceHostBuilder UserAutoMapper(this IServiceHostBuilder hostBuilder)
+        public static IServiceHostBuilder UseAutoMapper(this IServiceHostBuilder hostBuilder)
         {
             return hostBuilder.MapServices(mapper =>
             {

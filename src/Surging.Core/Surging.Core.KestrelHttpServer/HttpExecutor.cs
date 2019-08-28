@@ -181,15 +181,28 @@ namespace Surging.Core.KestrelHttpServer
 
         private void WirteDiagnosticBefore(TransportMessage message)
         {
-            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-            var remoteInvokeMessage = message.GetContent<HttpMessage>();
-            diagnosticListener.WriteTransportBefore(TransportType.Rest, new TransportEventData(new DiagnosticMessage
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
-                Content = message.Content,
-                ContentType = message.ContentType,
-                Id = message.Id,
-                MessageName = remoteInvokeMessage.RoutePath
-            }, TransportType.Rest.ToString(), RpcContext.GetContext().GetAttachment("RemoteIpAddress")?.ToString()));
+                RpcContext.GetContext().SetAttachment("TraceId", message.Id);
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeMessage = message.GetContent<HttpMessage>();
+                diagnosticListener.WriteTransportBefore(TransportType.Rest, new TransportEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id,
+                    MessageName = remoteInvokeMessage.RoutePath
+                }, TransportType.Rest.ToString(),
+               message.Id,
+                RpcContext.GetContext().GetAttachment("RemoteIpAddress")?.ToString()));
+            }
+            else
+            {
+                var parameters = RpcContext.GetContext().GetContextParameters();
+                parameters.TryRemove("RemoteIpAddress", out object value);
+                RpcContext.GetContext().SetContextParameters(parameters);
+            }
+
         }
 
         #endregion Private Method

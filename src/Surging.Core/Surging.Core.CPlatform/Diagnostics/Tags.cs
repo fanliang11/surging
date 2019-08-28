@@ -26,5 +26,9 @@ namespace Surging.Core.CPlatform.Diagnostics
         public static readonly string REST_METHOD = "rest.method";
         public static readonly string REST_PARAMETERS = "rpc.parameters";
         public static readonly string REST_LOCAL_ADDRESS = "rest.local.address";
+        public static readonly string MQTT_METHOD = "method";
+        public static readonly string MQTT_CLIENT_ID = "mqtt.client.id";
+        public static readonly string MQTT_PARAMETERS = "mqtt.parameters";
+        public static readonly string MQTT_BROKER_ADDRESS = "mqtt.broker.address";
     }
 }
