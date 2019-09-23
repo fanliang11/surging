@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Modules.Common.Domain
 {
-    public class UdpService : UdpBehavior, IDnsService
+    public class UdpService : UdpBehavior,IUdpService
     {
         public override async Task<bool> Dispatch(IEnumerable<byte> bytes)
         {
