@@ -41,6 +41,7 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DotNettyWSServer\Surging.Core.DotNettyWSServer.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DotNetty\Surging.Core.DotNetty.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.EventBusKafka\Surging.Core.EventBusKafka.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Grpc\Surging.Core.Grpc.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Kestrel.Log4net\Surging.Core.Kestrel.Log4net.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Kestrel.Nlog\Surging.Core.Kestrel.Nlog.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.KestrelHttpServer\Surging.Core.KestrelHttpServer.csproj" />
