@@ -8,6 +8,7 @@ using Surging.Core.ServiceHosting.Extensions.Runtime;
 using Surging.Core.ServiceHosting.Extensions.Runtime.Implementation;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Surging.Core.ServiceHosting.Extensions
 {
@@ -24,15 +25,17 @@ namespace Surging.Core.ServiceHosting.Extensions
                 foreach(var entry in entries)
                 {
                      var cts = new CancellationTokenSource();
-                    try
+                    Task.Run(() =>
                     {
-                       
-                        entry.Behavior.StartAsync(cts.Token);
-                    }
-                    catch
-                    {
-                        entry.Behavior.StopAsync(cts.Token).GetAwaiter(); 
-                    }
+                        try
+                        {
+                            entry.Behavior.StartAsync(cts.Token);
+                        }
+                        catch
+                        {
+                            entry.Behavior.StopAsync(cts.Token);
+                        }
+                    });
                 }
             });
         }

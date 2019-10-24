@@ -20,13 +20,14 @@
     "Ports": {
       "HttpPort": "${HttpPort}|280",
       "WSPort": "${WSPort}|96",
-      "MQTTPort": "${MQTTPort}|97"
+      "MQTTPort": "${MQTTPort}|97",
+      "GrpcPort": "${GrpcPort}|95"
     },
     "RequestCacheEnabled": false,
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule"
+        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule;GrpcModule"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages

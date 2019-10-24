@@ -8,6 +8,8 @@
 
         public int WSPort { get; set; }
 
+        public int GrpcPort { get; set; }
+
         public int UdpPort { get; set; }
     }
 }
