@@ -5,7 +5,9 @@ using System;
 using Surging.Core.ProxyGenerator.Interceptors;
 using Surging.Core.ProxyGenerator.Interceptors.Implementation; 
 using Surging.Core.CPlatform.Runtime.Client;
-using Surging.Core.CPlatform.Convertibles; 
+using Surging.Core.CPlatform.Convertibles;
+using Surging.Core.ProxyGenerator.Diagnostics;
+using Surging.Core.CPlatform.Diagnostics;
 
 namespace Surging.Core.ProxyGenerator
 {
@@ -36,6 +38,13 @@ namespace Surging.Core.ProxyGenerator
             var services = builder.Services; 
             services.RegisterTypes(interceptorServiceTypes).As<IInterceptor>().SingleInstance();
             services.RegisterType<InterceptorProvider>().As<IInterceptorProvider>().SingleInstance();
+            return builder;
+        }
+
+        public static IServiceBuilder AddRpcTransportDiagnostic(this IServiceBuilder builder)
+        {
+            var services = builder.Services;
+            services.RegisterType<RpcTransportDiagnosticProcessor>().As<ITracingDiagnosticProcessor>().SingleInstance();
             return builder;
         }
 
