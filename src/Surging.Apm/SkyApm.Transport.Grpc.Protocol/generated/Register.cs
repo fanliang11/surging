@@ -1559,7 +1559,7 @@ namespace SkyWalking.NetworkProtocol {
             break;
           }
           case 40: {
-            from_ = (global::SkyWalking.NetworkProtocol.DetectPoint) input.ReadEnum();
+            From = (global::SkyWalking.NetworkProtocol.DetectPoint) input.ReadEnum();
             break;
           }
         }
@@ -1893,7 +1893,7 @@ namespace SkyWalking.NetworkProtocol {
             break;
           }
           case 32: {
-            from_ = (global::SkyWalking.NetworkProtocol.DetectPoint) input.ReadEnum();
+            From = (global::SkyWalking.NetworkProtocol.DetectPoint) input.ReadEnum();
             break;
           }
         }

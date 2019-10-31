@@ -245,7 +245,7 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.cpu_ != null) {
         if (cpu_ == null) {
-          cpu_ = new global::SkyWalking.NetworkProtocol.CPU();
+          Cpu = new global::SkyWalking.NetworkProtocol.CPU();
         }
         Cpu.MergeFrom(other.Cpu);
       }
@@ -269,9 +269,9 @@ namespace SkyWalking.NetworkProtocol {
           }
           case 18: {
             if (cpu_ == null) {
-              cpu_ = new global::SkyWalking.NetworkProtocol.CPU();
+              Cpu = new global::SkyWalking.NetworkProtocol.CPU();
             }
-            input.ReadMessage(cpu_);
+            input.ReadMessage(Cpu);
             break;
           }
           case 26: {
@@ -749,7 +749,7 @@ namespace SkyWalking.NetworkProtocol {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            type_ = (global::SkyWalking.NetworkProtocol.PoolType) input.ReadEnum();
+            Type = (global::SkyWalking.NetworkProtocol.PoolType) input.ReadEnum();
             break;
           }
           case 16: {
@@ -942,7 +942,7 @@ namespace SkyWalking.NetworkProtocol {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            phrase_ = (global::SkyWalking.NetworkProtocol.GCPhrase) input.ReadEnum();
+            Phrase = (global::SkyWalking.NetworkProtocol.GCPhrase) input.ReadEnum();
             break;
           }
           case 16: {

@@ -593,11 +593,11 @@ public sealed partial class ServiceMeshMetric : pb::IMessage<ServiceMeshMetric> 
           break;
         }
         case 120: {
-          protocol_ = (global::Protocol) input.ReadEnum();
+          Protocol = (global::Protocol) input.ReadEnum();
           break;
         }
         case 128: {
-          detectPoint_ = (global::SkyWalking.NetworkProtocol.DetectPoint) input.ReadEnum();
+          DetectPoint = (global::SkyWalking.NetworkProtocol.DetectPoint) input.ReadEnum();
           break;
         }
       }

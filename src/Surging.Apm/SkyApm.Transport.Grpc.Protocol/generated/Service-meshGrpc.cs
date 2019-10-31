@@ -46,6 +46,7 @@ public static partial class ServiceMeshMetricService
   }
 
   /// <summary>Base class for server-side implementations of ServiceMeshMetricService</summary>
+  [grpc::BindServiceMethod(typeof(ServiceMeshMetricService), "BindService")]
   public abstract partial class ServiceMeshMetricServiceBase
   {
     public virtual global::System.Threading.Tasks.Task<global::MeshProbeDownstream> collect(grpc::IAsyncStreamReader<global::ServiceMeshMetric> requestStream, grpc::ServerCallContext context)
@@ -60,7 +61,7 @@ public static partial class ServiceMeshMetricService
   {
     /// <summary>Creates a new client for ServiceMeshMetricService</summary>
     /// <param name="channel">The channel to use to make remote calls.</param>
-    public ServiceMeshMetricServiceClient(grpc::Channel channel) : base(channel)
+    public ServiceMeshMetricServiceClient(grpc::ChannelBase channel) : base(channel)
     {
     }
     /// <summary>Creates a new client for ServiceMeshMetricService that uses a custom <c>CallInvoker</c>.</summary>
@@ -101,13 +102,13 @@ public static partial class ServiceMeshMetricService
         .AddMethod(__Method_collect, serviceImpl.collect).Build();
   }
 
-  /// <summary>Register service method implementations with a service binder. Useful when customizing the service binding logic.
+  /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
   /// Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
   /// <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
   /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
   public static void BindService(grpc::ServiceBinderBase serviceBinder, ServiceMeshMetricServiceBase serviceImpl)
   {
-    serviceBinder.AddMethod(__Method_collect, serviceImpl.collect);
+    serviceBinder.AddMethod(__Method_collect, serviceImpl == null ? null : new grpc::ClientStreamingServerMethod<global::ServiceMeshMetric, global::MeshProbeDownstream>(serviceImpl.collect));
   }
 
 }

@@ -220,19 +220,19 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.cpu_ != null) {
         if (cpu_ == null) {
-          cpu_ = new global::SkyWalking.NetworkProtocol.CPU();
+          Cpu = new global::SkyWalking.NetworkProtocol.CPU();
         }
         Cpu.MergeFrom(other.Cpu);
       }
       if (other.gc_ != null) {
         if (gc_ == null) {
-          gc_ = new global::SkyWalking.NetworkProtocol.ClrGC();
+          Gc = new global::SkyWalking.NetworkProtocol.ClrGC();
         }
         Gc.MergeFrom(other.Gc);
       }
       if (other.thread_ != null) {
         if (thread_ == null) {
-          thread_ = new global::SkyWalking.NetworkProtocol.ClrThread();
+          Thread = new global::SkyWalking.NetworkProtocol.ClrThread();
         }
         Thread.MergeFrom(other.Thread);
       }
@@ -253,23 +253,23 @@ namespace SkyWalking.NetworkProtocol {
           }
           case 18: {
             if (cpu_ == null) {
-              cpu_ = new global::SkyWalking.NetworkProtocol.CPU();
+              Cpu = new global::SkyWalking.NetworkProtocol.CPU();
             }
-            input.ReadMessage(cpu_);
+            input.ReadMessage(Cpu);
             break;
           }
           case 26: {
             if (gc_ == null) {
-              gc_ = new global::SkyWalking.NetworkProtocol.ClrGC();
+              Gc = new global::SkyWalking.NetworkProtocol.ClrGC();
             }
-            input.ReadMessage(gc_);
+            input.ReadMessage(Gc);
             break;
           }
           case 34: {
             if (thread_ == null) {
-              thread_ = new global::SkyWalking.NetworkProtocol.ClrThread();
+              Thread = new global::SkyWalking.NetworkProtocol.ClrThread();
             }
-            input.ReadMessage(thread_);
+            input.ReadMessage(Thread);
             break;
           }
         }

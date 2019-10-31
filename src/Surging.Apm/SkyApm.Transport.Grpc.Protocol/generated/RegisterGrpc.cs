@@ -86,6 +86,7 @@ namespace SkyWalking.NetworkProtocol {
     }
 
     /// <summary>Base class for server-side implementations of Register</summary>
+    [grpc::BindServiceMethod(typeof(Register), "BindService")]
     public abstract partial class RegisterBase
     {
       public virtual global::System.Threading.Tasks.Task<global::SkyWalking.NetworkProtocol.ServiceRegisterMapping> doServiceRegister(global::SkyWalking.NetworkProtocol.Services request, grpc::ServerCallContext context)
@@ -120,7 +121,7 @@ namespace SkyWalking.NetworkProtocol {
     {
       /// <summary>Creates a new client for Register</summary>
       /// <param name="channel">The channel to use to make remote calls.</param>
-      public RegisterClient(grpc::Channel channel) : base(channel)
+      public RegisterClient(grpc::ChannelBase channel) : base(channel)
       {
       }
       /// <summary>Creates a new client for Register that uses a custom <c>CallInvoker</c>.</summary>
@@ -237,17 +238,17 @@ namespace SkyWalking.NetworkProtocol {
           .AddMethod(__Method_doServiceAndNetworkAddressMappingRegister, serviceImpl.doServiceAndNetworkAddressMappingRegister).Build();
     }
 
-    /// <summary>Register service method implementations with a service binder. Useful when customizing the service binding logic.
+    /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
     /// Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
     /// <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
     /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
     public static void BindService(grpc::ServiceBinderBase serviceBinder, RegisterBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_doServiceRegister, serviceImpl.doServiceRegister);
-      serviceBinder.AddMethod(__Method_doServiceInstanceRegister, serviceImpl.doServiceInstanceRegister);
-      serviceBinder.AddMethod(__Method_doEndpointRegister, serviceImpl.doEndpointRegister);
-      serviceBinder.AddMethod(__Method_doNetworkAddressRegister, serviceImpl.doNetworkAddressRegister);
-      serviceBinder.AddMethod(__Method_doServiceAndNetworkAddressMappingRegister, serviceImpl.doServiceAndNetworkAddressMappingRegister);
+      serviceBinder.AddMethod(__Method_doServiceRegister, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.Services, global::SkyWalking.NetworkProtocol.ServiceRegisterMapping>(serviceImpl.doServiceRegister));
+      serviceBinder.AddMethod(__Method_doServiceInstanceRegister, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.ServiceInstances, global::SkyWalking.NetworkProtocol.ServiceInstanceRegisterMapping>(serviceImpl.doServiceInstanceRegister));
+      serviceBinder.AddMethod(__Method_doEndpointRegister, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.Enpoints, global::SkyWalking.NetworkProtocol.EndpointMapping>(serviceImpl.doEndpointRegister));
+      serviceBinder.AddMethod(__Method_doNetworkAddressRegister, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.NetAddresses, global::SkyWalking.NetworkProtocol.NetAddressMapping>(serviceImpl.doNetworkAddressRegister));
+      serviceBinder.AddMethod(__Method_doServiceAndNetworkAddressMappingRegister, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.ServiceAndNetworkAddressMappings, global::SkyWalking.NetworkProtocol.Commands>(serviceImpl.doServiceAndNetworkAddressMappingRegister));
     }
 
   }

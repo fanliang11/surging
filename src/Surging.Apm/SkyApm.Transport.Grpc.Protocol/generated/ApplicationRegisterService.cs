@@ -280,7 +280,7 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.application_ != null) {
         if (application_ == null) {
-          application_ = new global::SkyWalking.NetworkProtocol.KeyWithIntegerValue();
+          Application = new global::SkyWalking.NetworkProtocol.KeyWithIntegerValue();
         }
         Application.MergeFrom(other.Application);
       }
@@ -297,9 +297,9 @@ namespace SkyWalking.NetworkProtocol {
             break;
           case 10: {
             if (application_ == null) {
-              application_ = new global::SkyWalking.NetworkProtocol.KeyWithIntegerValue();
+              Application = new global::SkyWalking.NetworkProtocol.KeyWithIntegerValue();
             }
-            input.ReadMessage(application_);
+            input.ReadMessage(Application);
             break;
           }
         }
