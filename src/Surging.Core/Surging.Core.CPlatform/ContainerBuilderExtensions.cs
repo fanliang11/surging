@@ -535,7 +535,13 @@ namespace Surging.Core.CPlatform
                        .AsImplementedInterfaces();
                     services.RegisterAssemblyTypes(assembly)
                  //注入实现IServiceBehavior接口并ModuleName为空的类，作为接口实现类
-                 .Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+                 .Where(t => !typeof(ISingleInstance).GetTypeInfo().IsAssignableFrom(t) &&
+                 typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+
+                    services.RegisterAssemblyTypes(assembly)
+             //注入实现IServiceBehavior接口并ModuleName为空的类，作为接口实现类
+             .Where(t => typeof(ISingleInstance).GetTypeInfo().IsAssignableFrom(t) &&
+             typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).SingleInstance().AsImplementedInterfaces();
 
                     var types = assembly.GetTypes().Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
                     foreach (var type in types)
