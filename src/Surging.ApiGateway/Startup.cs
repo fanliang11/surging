@@ -109,6 +109,7 @@ namespace Surging.ApiGateway
             app.UseCors(builder =>
             {
                 var policy = Core.ApiGateWay.AppConfig.Policy;
+                if(policy.Origins !=null)
                 builder.WithOrigins(policy.Origins);
                 if (policy.AllowAnyHeader)
                     builder.AllowAnyHeader();

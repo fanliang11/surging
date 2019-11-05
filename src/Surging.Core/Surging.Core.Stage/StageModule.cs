@@ -41,6 +41,7 @@ namespace Surging.Core.Stage
             {
                 context.Builder.UseCors(builder =>
                 {
+                    if(policy.Origins!=null)
                     builder.WithOrigins(policy.Origins);
                     if (policy.AllowAnyHeader)
                         builder.AllowAnyHeader();
