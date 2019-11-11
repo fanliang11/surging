@@ -55,9 +55,11 @@ namespace Surging.Apm.Skywalking.Configuration
             builder.AddJsonFile("skyapm.json", true)
                 .AddJsonFile($"skyapm.{_environmentProvider.EnvironmentName}.json", true);
 
-            var skyapmPath = Path.Combine(AppConfig.ServerOptions.RootPath, "skyapm.json");
-            builder.AddJsonFile(skyapmPath, true);
-
+            if (!string.IsNullOrEmpty(AppConfig.ServerOptions.RootPath))
+            {
+                var skyapmPath = Path.Combine(AppConfig.ServerOptions.RootPath, "skyapm.json");
+                builder.AddJsonFile(skyapmPath, true);
+            }
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(CONFIG_FILE_PATH_COMPATIBLE)))
             {
                 builder.AddJsonFile(Environment.GetEnvironmentVariable(CONFIG_FILE_PATH_COMPATIBLE), false);

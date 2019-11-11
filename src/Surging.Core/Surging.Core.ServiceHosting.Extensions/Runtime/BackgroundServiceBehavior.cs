@@ -15,7 +15,7 @@ namespace Surging.Core.ServiceHosting.Extensions.Runtime
     public abstract class BackgroundServiceBehavior : IServiceBehavior, IDisposable
     {
         private Task _executingTask;
-        private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
+        private  CancellationTokenSource _stoppingCts = new CancellationTokenSource();
 
         public T CreateProxy<T>(string key) where T : class
         {
@@ -79,9 +79,10 @@ namespace Surging.Core.ServiceHosting.Extensions.Runtime
         protected abstract Task ExecuteAsync(CancellationToken stoppingToken);
          
         public virtual Task StartAsync(CancellationToken cancellationToken)
-        { 
+        {     
+            _stoppingCts = new CancellationTokenSource();
             _executingTask = ExecutingAsync(_stoppingCts.Token);
-             
+        
             if (_executingTask.IsCompleted)
             {
                 return _executingTask;

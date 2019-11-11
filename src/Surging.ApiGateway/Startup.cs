@@ -26,6 +26,8 @@ using ApiGateWayConfig = Surging.Core.ApiGateWay.AppConfig;
 using Surging.Core.Caching;
 using Surging.Core.CPlatform.Cache;
 using System.Linq;
+using Surging.Apm.Skywalking;
+using Surging.Apm.Skywalking.Abstractions;
 
 namespace Surging.ApiGateway
 {
@@ -74,7 +76,9 @@ namespace Surging.ApiGateway
                else if(registerConfig.Provider == RegisterProvider.Zookeeper)
                     option.UseZooKeeperManager(new ZookeeperConfigInfo(registerConfig.Address, enableChildrenMonitor: true));
                 option.UseDotNettyTransport();
-                option.AddApiGateWay();
+                option.AddApiGateWay();  
+                option.AddRpcTransportDiagnostic(); 
+                option.UseSkywalking();
                 option.AddFilter(new ServiceExceptionFilter());
                 //option.UseProtoBufferCodec();
                 option.UseMessagePackCodec();
@@ -93,7 +97,7 @@ namespace Surging.ApiGateway
             ServiceLocator.Current.Resolve<IServiceProxyFactory>();
             ServiceLocator.Current.Resolve<IServiceCacheManager>().SetCachesAsync(addressDescriptors);
             ServiceLocator.Current.Resolve<IConfigurationWatchProvider>();
-
+            ServiceLocator.Current.Resolve<IInstrumentStartup>().StartAsync();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -105,6 +109,7 @@ namespace Surging.ApiGateway
             app.UseCors(builder =>
             {
                 var policy = Core.ApiGateWay.AppConfig.Policy;
+                if(policy.Origins !=null)
                 builder.WithOrigins(policy.Origins);
                 if (policy.AllowAnyHeader)
                     builder.AllowAnyHeader();

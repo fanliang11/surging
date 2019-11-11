@@ -250,7 +250,7 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.traceSegmentId_ != null) {
         if (traceSegmentId_ == null) {
-          traceSegmentId_ = new global::SkyWalking.NetworkProtocol.UniqueId();
+          TraceSegmentId = new global::SkyWalking.NetworkProtocol.UniqueId();
         }
         TraceSegmentId.MergeFrom(other.TraceSegmentId);
       }
@@ -277,9 +277,9 @@ namespace SkyWalking.NetworkProtocol {
             break;
           case 10: {
             if (traceSegmentId_ == null) {
-              traceSegmentId_ = new global::SkyWalking.NetworkProtocol.UniqueId();
+              TraceSegmentId = new global::SkyWalking.NetworkProtocol.UniqueId();
             }
-            input.ReadMessage(traceSegmentId_);
+            input.ReadMessage(TraceSegmentId);
             break;
           }
           case 18: {
@@ -624,7 +624,7 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.parentTraceSegmentId_ != null) {
         if (parentTraceSegmentId_ == null) {
-          parentTraceSegmentId_ = new global::SkyWalking.NetworkProtocol.UniqueId();
+          ParentTraceSegmentId = new global::SkyWalking.NetworkProtocol.UniqueId();
         }
         ParentTraceSegmentId.MergeFrom(other.ParentTraceSegmentId);
       }
@@ -667,14 +667,14 @@ namespace SkyWalking.NetworkProtocol {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            refType_ = (global::SkyWalking.NetworkProtocol.RefType) input.ReadEnum();
+            RefType = (global::SkyWalking.NetworkProtocol.RefType) input.ReadEnum();
             break;
           }
           case 18: {
             if (parentTraceSegmentId_ == null) {
-              parentTraceSegmentId_ = new global::SkyWalking.NetworkProtocol.UniqueId();
+              ParentTraceSegmentId = new global::SkyWalking.NetworkProtocol.UniqueId();
             }
-            input.ReadMessage(parentTraceSegmentId_);
+            input.ReadMessage(ParentTraceSegmentId);
             break;
           }
           case 24: {
@@ -1211,11 +1211,11 @@ namespace SkyWalking.NetworkProtocol {
             break;
           }
           case 80: {
-            spanType_ = (global::SkyWalking.NetworkProtocol.SpanType) input.ReadEnum();
+            SpanType = (global::SkyWalking.NetworkProtocol.SpanType) input.ReadEnum();
             break;
           }
           case 88: {
-            spanLayer_ = (global::SkyWalking.NetworkProtocol.SpanLayer) input.ReadEnum();
+            SpanLayer = (global::SkyWalking.NetworkProtocol.SpanLayer) input.ReadEnum();
             break;
           }
           case 96: {

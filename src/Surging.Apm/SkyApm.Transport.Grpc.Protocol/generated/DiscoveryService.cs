@@ -250,7 +250,7 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.osinfo_ != null) {
         if (osinfo_ == null) {
-          osinfo_ = new global::SkyWalking.NetworkProtocol.OSInfo();
+          Osinfo = new global::SkyWalking.NetworkProtocol.OSInfo();
         }
         Osinfo.MergeFrom(other.Osinfo);
       }
@@ -279,9 +279,9 @@ namespace SkyWalking.NetworkProtocol {
           }
           case 34: {
             if (osinfo_ == null) {
-              osinfo_ = new global::SkyWalking.NetworkProtocol.OSInfo();
+              Osinfo = new global::SkyWalking.NetworkProtocol.OSInfo();
             }
-            input.ReadMessage(osinfo_);
+            input.ReadMessage(Osinfo);
             break;
           }
         }
@@ -626,7 +626,7 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.osinfo_ != null) {
         if (osinfo_ == null) {
-          osinfo_ = new global::SkyWalking.NetworkProtocol.OSInfo();
+          Osinfo = new global::SkyWalking.NetworkProtocol.OSInfo();
         }
         Osinfo.MergeFrom(other.Osinfo);
       }
@@ -655,9 +655,9 @@ namespace SkyWalking.NetworkProtocol {
           }
           case 34: {
             if (osinfo_ == null) {
-              osinfo_ = new global::SkyWalking.NetworkProtocol.OSInfo();
+              Osinfo = new global::SkyWalking.NetworkProtocol.OSInfo();
             }
-            input.ReadMessage(osinfo_);
+            input.ReadMessage(Osinfo);
             break;
           }
         }
@@ -1401,7 +1401,7 @@ namespace SkyWalking.NetworkProtocol {
       }
       if (other.element_ != null) {
         if (element_ == null) {
-          element_ = new global::SkyWalking.NetworkProtocol.ServiceNameElement();
+          Element = new global::SkyWalking.NetworkProtocol.ServiceNameElement();
         }
         Element.MergeFrom(other.Element);
       }
@@ -1422,9 +1422,9 @@ namespace SkyWalking.NetworkProtocol {
           }
           case 18: {
             if (element_ == null) {
-              element_ = new global::SkyWalking.NetworkProtocol.ServiceNameElement();
+              Element = new global::SkyWalking.NetworkProtocol.ServiceNameElement();
             }
-            input.ReadMessage(element_);
+            input.ReadMessage(Element);
             break;
           }
         }
@@ -1609,7 +1609,7 @@ namespace SkyWalking.NetworkProtocol {
             break;
           }
           case 24: {
-            srcSpanType_ = (global::SkyWalking.NetworkProtocol.SpanType) input.ReadEnum();
+            SrcSpanType = (global::SkyWalking.NetworkProtocol.SpanType) input.ReadEnum();
             break;
           }
         }
