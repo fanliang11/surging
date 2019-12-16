@@ -354,7 +354,7 @@ namespace Surging.Core.SwaggerGen
                 parameterInfo = methodInfo.GetParameters();
 
             };
-            if (parameterInfo.Count() > 1 && parameterInfo.Any(p=> !(p.DefaultValue  is IConvertible && UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(p.ParameterType))))
+            if (parameterInfo.Count() > 1)
             {
                 return parameterInfo != null && parameterInfo.Any(p =>
                 !UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(p.ParameterType) && p.ParameterType.Name != "HttpFormCollection")
