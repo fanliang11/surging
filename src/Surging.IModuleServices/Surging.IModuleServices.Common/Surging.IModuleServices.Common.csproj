@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
      <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
      <PackageId>测试模块</PackageId>
      <Description>测试</Description>

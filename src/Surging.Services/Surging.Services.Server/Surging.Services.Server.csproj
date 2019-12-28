@@ -3,13 +3,19 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>false</ServerGarbageCollection>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <TieredCompilation>true</TieredCompilation>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Properties\PublishProfiles\**" />
+    <EmbeddedResource Remove="Properties\PublishProfiles\**" />
+    <None Remove="Properties\PublishProfiles\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="skyapm.json" />
@@ -22,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="Autofac" Version="4.9.4" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.0" />
     <PackageReference Include="Volo.Abp.EventBus" Version="0.18.1" />
   </ItemGroup>
