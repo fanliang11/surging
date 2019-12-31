@@ -101,7 +101,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Kestrel.Nlog",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.ServiceHosting.Extensions", "Surging.Core\Surging.Core.ServiceHosting.Extensions\Surging.Core.ServiceHosting.Extensions.csproj", "{3FDA38C5-2F88-422B-A32F-DE1E0F002B35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Grpc", "Surging.Core\Surging.Core.Grpc\Surging.Core.Grpc.csproj", "{609AEF75-8FB2-4BB6-8A6A-8107151F871E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Grpc", "Surging.Core\Surging.Core.Grpc\Surging.Core.Grpc.csproj", "{609AEF75-8FB2-4BB6-8A6A-8107151F871E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

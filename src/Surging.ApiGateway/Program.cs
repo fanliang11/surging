@@ -2,6 +2,7 @@
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Surging.Core.ApiGateWay;
 using Surging.Core.Codec.MessagePack;
@@ -23,15 +24,13 @@ namespace Surging.ApiGateway
         public static void Main(string[] args)
         {
             var host = new WebHostBuilder()
-                .UseUrls("http://*:729")
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<Startup>()
-                .UseApplicationInsights()
-                .Build();
+          .UseUrls("http://*:729")
+          .UseKestrel()
+          .UseContentRoot(Directory.GetCurrentDirectory())
+          .UseIISIntegration()
+          .UseStartup<Startup>()
+          .Build();
             host.Run();
-          
         }
     }
 }

@@ -15,7 +15,6 @@ using System.Linq;
 using GateWayAppConfig = Surging.Core.ApiGateWay.AppConfig;
 using System.Reflection;
 using Surging.Core.CPlatform.Utilities;
-using Newtonsoft.Json.Linq;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Routing.Template;
 
