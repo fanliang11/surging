@@ -24,7 +24,9 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.CPlatform.Messages;
 using System.Diagnostics;
+using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Diagnostics;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -58,6 +60,11 @@ namespace Surging.Core.KestrelHttpServer
         { 
             try
             {
+                if (AppConfig.ServerOptions.DockerDeployMode == DockerDeployMode.Swarm)
+                {
+                    address = IPAddress.Any;
+                }
+
                 var hostBuilder = new WebHostBuilder()
                   .UseContentRoot(Directory.GetCurrentDirectory())
                   .UseKestrel((context,options) =>
