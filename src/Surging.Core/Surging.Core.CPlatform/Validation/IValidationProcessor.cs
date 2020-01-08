@@ -4,6 +4,6 @@ namespace Surging.Core.CPlatform.Validation
 {
     public interface IValidationProcessor
     {
-        void Validate(ParameterInfo parameterInfo, object value, ValidateAttribute methodValidateAttribute = null);
+        void Validate(ParameterInfo parameterInfo, object value);
     }
 }

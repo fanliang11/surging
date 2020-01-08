@@ -104,9 +104,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             }
             var fastInvoker = GetHandler(serviceId, method);
 
-            var methodValidateAttribute = method.GetCustomAttributes(typeof(ValidateAttribute))
-                .Cast<ValidateAttribute>()
-                .FirstOrDefault();
+            var methodValidateAttribute = attributes.Where(p => p is ValidateAttribute)
+                .Cast<ValidateAttribute>().FirstOrDefault();  
 
             return new ServiceEntry
             {
@@ -135,7 +134,8 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      }
                      var value = parameters[parameterInfo.Name];
 
-                     _validationProcessor.Validate(parameterInfo, value, methodValidateAttribute);
+                     if(methodValidateAttribute !=null)
+                     _validationProcessor.Validate(parameterInfo, value);
 
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
