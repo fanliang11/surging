@@ -386,8 +386,8 @@ namespace Surging.Core.CPlatform
             }
             else if (typeof(IAuthorizationFilter).IsAssignableFrom(filter.GetType()))
             {
-                var exceptionFilter = filter as IAuthorizationFilter;
-                services.Register(p => exceptionFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
+                var authorizationFilter = filter as IAuthorizationFilter;
+                services.Register(p => authorizationFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
             }
             return builder;
         }
@@ -539,7 +539,13 @@ namespace Surging.Core.CPlatform
                        .AsImplementedInterfaces();
                     services.RegisterAssemblyTypes(assembly)
                  //注入实现IServiceBehavior接口并ModuleName为空的类，作为接口实现类
-                 .Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+                 .Where(t => !typeof(ISingleInstance).GetTypeInfo().IsAssignableFrom(t) &&
+                 typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+
+                    services.RegisterAssemblyTypes(assembly)
+             //注入实现IServiceBehavior接口并ModuleName为空的类，作为接口实现类
+             .Where(t => typeof(ISingleInstance).GetTypeInfo().IsAssignableFrom(t) &&
+             typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).SingleInstance().AsImplementedInterfaces();
 
                     var types = assembly.GetTypes().Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
                     foreach (var type in types)

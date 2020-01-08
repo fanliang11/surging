@@ -21,6 +21,18 @@ namespace Surging.Core.CPlatform.Messages
             Content = content;
             ContentType = content.GetType().FullName;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TransportMessage(string id, object content)
+        {
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
+
+            Id = id; 
+            Content = content;
+            ContentType = content.GetType().FullName;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransportMessage(object content, string fullName)
         {

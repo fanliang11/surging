@@ -23,7 +23,7 @@ namespace Surging.IModuleServices.Common
         {
             base.RegisterBuilder(builder);
             //builder.AddClientIntercepted(typeof(CacheProviderInterceptor));
-            builder.AddClientIntercepted(typeof(LogProviderInterceptor));
+            //builder.AddClientIntercepted(typeof(LogProviderInterceptor));
         }
     }
 }

@@ -89,23 +89,23 @@ namespace Surging.Core.DotNetty
             {
                 return await _clients.GetOrAdd(key
                     , k => new Lazy<Task<ITransportClient>>(async () =>
-                        {
-                            //客户端对象
-                            var bootstrap = _bootstrap;
-                            //异步连接返回channel
-                            var channel = await bootstrap.ConnectAsync(k);
-                            var messageListener = new MessageListener();
-                            //设置监听
-                            channel.GetAttribute(messageListenerKey).Set(messageListener);
-                            //实例化发送者
-                            var messageSender = new DotNettyMessageClientSender(_transportMessageEncoder, channel);
-                            //设置channel属性
-                            channel.GetAttribute(messageSenderKey).Set(messageSender);
-                            channel.GetAttribute(origEndPointKey).Set(k);
-                            //创建客户端
-                            var client = new TransportClient(messageSender, messageListener, _logger, _serviceExecutor);
-                            return client;
-                        }
+                    {
+                        //客户端对象
+                        var bootstrap = _bootstrap;
+                        //异步连接返回channel
+                        var channel = await bootstrap.ConnectAsync(k);
+                        var messageListener = new MessageListener();
+                        //设置监听
+                        channel.GetAttribute(messageListenerKey).Set(messageListener);
+                        //实例化发送者
+                        var messageSender = new DotNettyMessageClientSender(_transportMessageEncoder, channel);
+                        //设置channel属性
+                        channel.GetAttribute(messageSenderKey).Set(messageSender);
+                        channel.GetAttribute(origEndPointKey).Set(k);
+                        //创建客户端
+                        var client = new TransportClient(messageSender, messageListener, _logger, _serviceExecutor);
+                        return client;
+                    }
                     )).Value;//返回实例
             }
             catch
@@ -127,9 +127,9 @@ namespace Surging.Core.DotNetty
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public void Dispose()
         {
-            foreach (var client in _clients.Values.Where(i => i.IsValueCreated))
+            foreach (var client in _clients.Values)
             {
-                (client.Value as IDisposable)?.Dispose();
+                (client as IDisposable)?.Dispose();
             }
         }
 

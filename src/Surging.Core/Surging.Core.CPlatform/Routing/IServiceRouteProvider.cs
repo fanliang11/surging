@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Routing;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Routing
@@ -15,6 +16,7 @@ namespace Surging.Core.CPlatform.Routing
         /// <returns></returns>
         Task<ServiceRoute> Locate(string serviceId);
 
+        ValueTask<ServiceRoute> GetLocalRouteByPathRegex(string path);
         /// <summary>
         /// 根据服务路由路径获取路由信息
         /// </summary>

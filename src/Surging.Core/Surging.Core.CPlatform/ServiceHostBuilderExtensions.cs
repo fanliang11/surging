@@ -30,16 +30,19 @@ namespace Surging.Core.CPlatform
             return hostBuilder.MapServices(async mapper =>
             {
                 BuildServiceEngine(mapper);
-                await mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
-                string serviceToken = mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
+
+                mapper.Resolve<IServiceTokenGenerator>().GeneratorToken(token);
                 int _port = AppConfig.ServerOptions.Port = AppConfig.ServerOptions.Port == 0 ? port : AppConfig.ServerOptions.Port;
                 string _ip = AppConfig.ServerOptions.Ip = AppConfig.ServerOptions.Ip ?? ip;
                 _port = AppConfig.ServerOptions.Port = AppConfig.ServerOptions.IpEndpoint?.Port ?? _port;
                 _ip = AppConfig.ServerOptions.Ip = AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
                 _ip = NetUtils.GetHostAddress(_ip);
-
-                await ConfigureRoute(mapper, serviceToken);
                 mapper.Resolve<IModuleProvider>().Initialize();
+                if (!AppConfig.ServerOptions.DisableServiceRegistration)
+                {
+                    await mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();
+                    await ConfigureRoute(mapper);
+                }
                 var serviceHosts = mapper.Resolve<IList<Runtime.Server.IServiceHost>>();
                 Task.Factory.StartNew(async () =>
                 {
@@ -94,7 +97,7 @@ namespace Surging.Core.CPlatform
             }
         }
 
-        public static async Task ConfigureRoute(IContainer mapper, string serviceToken)
+        public static async Task ConfigureRoute(IContainer mapper)
         {
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Tcp ||
              AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)

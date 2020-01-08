@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform.Utilities;
-using Surging.Core.EventBusRabbitMQ.Configurations;
 
 namespace Surging.Services.Server
 {
@@ -42,8 +41,8 @@ namespace Surging.Services.Server
 
         private static void ConfigureEventBus(IConfigurationBuilder build)
         {
-            build
-            .AddEventBusFile("eventBusSettings.json", optional: false);
+          //  build
+           // .AddEventBusFile("eventBusSettings.json", optional: false);
         }
 
         /// <summary>

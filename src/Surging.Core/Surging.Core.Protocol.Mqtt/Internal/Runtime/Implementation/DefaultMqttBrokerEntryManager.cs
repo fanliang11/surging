@@ -70,13 +70,14 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
         }
 
         private void MqttRouteManager_Removed(object sender, MqttServiceRouteEventArgs e)
-        {
+        { 
             var key = GetCacheKey(e.Route.MqttDescriptor);
             _brokerEntries.TryRemove(key, out IEnumerable<AddressModel> value);
         }
 
         private void MqttRouteManager_Removed(object sender, HealthCheckEventArgs e)
         {
+            if(!e.Health)
             _mqttServiceRouteManager.RemveAddressAsync(new AddressModel[] { e.Address });
         }
     }

@@ -43,7 +43,7 @@ namespace Surging.Core.ApiGateWay
                 var serviceProxyProvider = provider.Resolve<IServiceProxyProvider>();
                 var serviceRouteProvider = provider.Resolve<IServiceRouteProvider>();
                 var serviceProvider = provider.Resolve<CPlatformContainer>();
-                return new AuthorizationServerProvider(config, serviceProxyProvider, serviceRouteProvider, serviceProvider);
+                return new AuthorizationServerProvider(serviceProxyProvider, serviceRouteProvider, serviceProvider);
             }).As<IAuthorizationServerProvider>().SingleInstance();
             return builder;
         }

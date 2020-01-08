@@ -13,7 +13,7 @@ using WebSocketCore;
 
 namespace Surging.Modules.Common.Domain
 {
-    public class ChatService : WSServiceBase, IChatService
+    public class ChatService : WSBehavior, IChatService
     {
         private static readonly ConcurrentDictionary<string, string> _users = new ConcurrentDictionary<string, string>();
         private static readonly ConcurrentDictionary<string, string> _clients = new ConcurrentDictionary<string, string>();

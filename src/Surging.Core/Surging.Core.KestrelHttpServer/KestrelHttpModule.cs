@@ -3,11 +3,16 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
+using Surging.Core.KestrelHttpServer.Diagnostics;
+using Surging.Core.KestrelHttpServer.Extensions;
+using Surging.Core.KestrelHttpServer.Filters;
+using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using System.Net;
 
 namespace Surging.Core.KestrelHttpServer
@@ -29,6 +34,8 @@ namespace Surging.Core.KestrelHttpServer
 
         public virtual void RegisterBuilder(ConfigurationContext context)
         {
+            context.Services.AddFilters(typeof(HttpRequestFilterAttribute));
+            context.Services.AddFilters(typeof(CustomerExceptionFilterAttribute));
         }
 
         /// <summary>
@@ -38,6 +45,8 @@ namespace Surging.Core.KestrelHttpServer
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
+            builder.AddFilter(typeof(ServiceExceptionFilter));
+            builder.RegisterType<RestTransportDiagnosticProcessor>().As<ITracingDiagnosticProcessor>().SingleInstance();
             builder.RegisterType(typeof(HttpExecutor)).As(typeof(IServiceExecutor))
                 .Named<IServiceExecutor>(CommunicationProtocol.Http.ToString()).SingleInstance();
             if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.Http)
@@ -98,7 +107,7 @@ namespace Surging.Core.KestrelHttpServer
                 return new HttpServiceHost(async endPoint =>
                 {
                     var address = endPoint as IPEndPoint;
-                    await messageListener.StartAsync(address?.Address,address?.Port);
+                    await messageListener.StartAsync(address?.Address, address?.Port);
                     return messageListener;
                 }, executor, messageListener);
 

@@ -8,6 +8,7 @@ using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
@@ -19,6 +20,7 @@ using Surging.Core.Protocol.Mqtt.Internal.Runtime;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -189,6 +191,21 @@ namespace Surging.Core.Protocol.Mqtt
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError($"message:{ex.Message},Source:{ex.Source},Trace:{ex.StackTrace}");
+            }
+        }
+
+        private void WirteDiagnosticError(TransportMessage message)
+        {
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
+            {
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeResultMessage = message.GetContent<RemoteInvokeResultMessage>();
+                diagnosticListener.WriteTransportError(TransportType.Mqtt, new TransportErrorEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id
+                }, new Exception(remoteInvokeResultMessage.ExceptionMessage)));
             }
         }
     }

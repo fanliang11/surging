@@ -13,7 +13,7 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// 执行委托。
         /// </summary>
         public  Func<string, IDictionary<string, object>, Task<object>> Func { get; set; }
-       
+        public IEnumerable<string>  Methods { get; set; }
         public string RoutePath { get; set; }
         public Type Type { get; set; }
         public string MethodName { get; set; }

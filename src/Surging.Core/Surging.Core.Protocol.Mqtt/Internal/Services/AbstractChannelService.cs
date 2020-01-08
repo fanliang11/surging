@@ -146,7 +146,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services
         {
             if (Topics.ContainsKey(topic))
             {
-                if (Topics["topic"].Count() == 0)
+                if (Topics[topic].Count() == 0)
                     await _mqttBrokerEntryManger.CancellationReg(topic, NetUtils.GetHostAddress());
             }
             else
