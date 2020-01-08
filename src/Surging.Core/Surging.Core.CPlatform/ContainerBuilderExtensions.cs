@@ -40,6 +40,8 @@ using Surging.Core.CPlatform.Support.Implementation;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.CPlatform.Transport.Codec.Implementation;
 using Surging.Core.CPlatform.Utilities;
+using Surging.Core.CPlatform.Validation;
+using Surging.Core.CPlatform.Validation.Implementation;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -445,6 +447,8 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IAuthorizationFilter)).SingleInstance();
             //注册基本过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IFilter)).SingleInstance();
+            //注册默认校验处理器
+            services.RegisterType(typeof(DefaultValidationProcessor)).As(typeof(IValidationProcessor)).SingleInstance();
             //注册服务器路由接口 
             services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
             //注册服务路由工厂 

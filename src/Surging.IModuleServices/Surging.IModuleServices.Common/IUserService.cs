@@ -13,7 +13,9 @@ using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Validation;
 
 namespace Surging.IModuleServices.Common
 {
@@ -36,7 +38,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-        Task<string> GetUserName(int id);
+        Task<string> GetUserName([Validate] [Range(1, 10, ErrorMessage = "只能为1到10")] int id);
 
         /// <summary>
         /// 判断是否存在
@@ -44,7 +46,8 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-       // [ServiceBundle("api/{Service}/{id}", false)]
+        [HttpPost(),HttpPut(), HttpDelete(), HttpGet()]
+        // [ServiceBundle("api/{Service}/{id}", false)]
         Task<bool> Exists(int id);
 
         /// <summary>
@@ -53,7 +56,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="requestData">请求参数</param>
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
-       
+        [HttpPost(true),HttpPut(true)]
         Task<IdentityUser> Save(IdentityUser requestData);
 
         /// <summary>
@@ -62,8 +65,8 @@ namespace Surging.IModuleServices.Common
         /// <param name="userName">用户名</param>
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
-        [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = true)]
-        [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+        [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
+        [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = CacheTargetType.Redis, Time = 480)]
         [ServiceRoute("{userName}")]
         Task<int> GetUserId(string userName);
 
@@ -88,6 +91,7 @@ new Surging.IModuleServices.Common.Models.UserModel
             Age=19
          };", RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+        [Validate]
         Task<UserModel> GetUser(UserModel user);
 
         /// <summary>

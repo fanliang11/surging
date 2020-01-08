@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Validation;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Implementation
@@ -23,14 +25,17 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         private readonly CPlatformContainer _serviceProvider;
         private readonly IServiceIdGenerator _serviceIdGenerator;
         private readonly ITypeConvertibleService _typeConvertibleService;
+        private readonly IValidationProcessor _validationProcessor;
+
         #endregion Field
 
         #region Constructor
-        public ClrServiceEntryFactory(CPlatformContainer serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService)
+        public ClrServiceEntryFactory(CPlatformContainer serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService, IValidationProcessor validationProcessor)
         {
             _serviceProvider = serviceProvider;
             _serviceIdGenerator = serviceIdGenerator;
             _typeConvertibleService = typeConvertibleService;
+            _validationProcessor = validationProcessor;
         }
 
         #endregion Constructor
@@ -75,6 +80,20 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 descriptorAttribute.Apply(serviceDescriptor);
             }
+            var httpMethodAttributes = attributes.Where(p => p is HttpMethodAttribute).Select(p => p as HttpMethodAttribute).ToList();
+            var httpMethods = new List<string>();
+            StringBuilder httpMethod = new StringBuilder();
+            foreach (var attribute in httpMethodAttributes)
+            {
+                httpMethods.AddRange(attribute.HttpMethods);
+                if (attribute.IsRegisterMetadata)
+                    httpMethod.AppendJoin(',',attribute.HttpMethods).Append(",");
+            }
+            if (httpMethod.Length > 0)
+            {
+                httpMethod.Length = httpMethod.Length - 1;
+                serviceDescriptor.HttpMethod(httpMethod.ToString());
+            }
             var authorization = attributes.Where(p => p is AuthorizationFilterAttribute).FirstOrDefault();
             if (authorization != null)
                 serviceDescriptor.EnableAuthorization(true);
@@ -84,10 +103,16 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                     ?? AuthorizationType.AppSecret);
             }
             var fastInvoker = GetHandler(serviceId, method);
+
+            var methodValidateAttribute = method.GetCustomAttributes(typeof(ValidateAttribute))
+                .Cast<ValidateAttribute>()
+                .FirstOrDefault();
+
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
                 RoutePath = serviceDescriptor.RoutePath,
+                Methods=httpMethods,
                 MethodName = method.Name,
                 Type = method.DeclaringType,
                 Attributes = attributes,
@@ -109,6 +134,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                          continue;
                      }
                      var value = parameters[parameterInfo.Name];
+
+                     _validationProcessor.Validate(parameterInfo, value, methodValidateAttribute);
+
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);

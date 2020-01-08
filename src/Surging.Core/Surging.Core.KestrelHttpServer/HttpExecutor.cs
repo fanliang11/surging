@@ -17,6 +17,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
+using System.Diagnostics;
+using Surging.Core.CPlatform.Diagnostics;
+using Surging.Core.CPlatform.Exceptions;
+using Surging.Core.CPlatform.Transport.Implementation;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -29,6 +33,7 @@ namespace Surging.Core.KestrelHttpServer
         private readonly IAuthorizationFilter _authorizationFilter;
         private readonly CPlatformContainer _serviceProvider;
         private readonly ITypeConvertibleService _typeConvertibleService;
+        private readonly IServiceProxyProvider _serviceProxyProvider;
         private readonly ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>> _concurrent =
         new ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>>();
         #endregion Field
@@ -37,7 +42,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public HttpExecutor(IServiceEntryLocate serviceEntryLocate, IServiceRouteProvider serviceRouteProvider,
             IAuthorizationFilter authorizationFilter,
-            ILogger<HttpExecutor> logger, CPlatformContainer serviceProvider, ITypeConvertibleService typeConvertibleService)
+            ILogger<HttpExecutor> logger, CPlatformContainer serviceProvider, IServiceProxyProvider serviceProxyProvider, ITypeConvertibleService typeConvertibleService)
         {
             _serviceEntryLocate = serviceEntryLocate;
             _logger = logger;
@@ -45,6 +50,7 @@ namespace Surging.Core.KestrelHttpServer
             _typeConvertibleService = typeConvertibleService;
             _serviceRouteProvider = serviceRouteProvider;
             _authorizationFilter = authorizationFilter;
+            _serviceProxyProvider = serviceProxyProvider;
         }
         #endregion Constructor
 
@@ -67,27 +73,26 @@ namespace Surging.Core.KestrelHttpServer
                 _logger.LogError(exception, "将接收到的消息反序列化成 TransportMessage<httpMessage> 时发送了错误。");
                 return;
             }
-            var entry = _serviceEntryLocate.Locate(httpMessage);
-            if (entry == null)
+            if (httpMessage.Attachments != null)
             {
-                if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError($"根据服务routePath：{httpMessage.RoutePath}，找不到服务条目。");
-                return;
+                foreach (var attachment in httpMessage.Attachments)
+                    RpcContext.GetContext().SetAttachment(attachment.Key, attachment.Value);
             }
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("准备执行本地逻辑。");
+            WirteDiagnosticBefore(message);
+            var entry = _serviceEntryLocate.Locate(httpMessage);
+
             HttpResultMessage<object> httpResultMessage = new HttpResultMessage<object>() { };
 
-            if (_serviceProvider.IsRegisteredWithKey(httpMessage.ServiceKey, entry.Type))
+            if (entry!=null && _serviceProvider.IsRegisteredWithKey(httpMessage.ServiceKey, entry.Type))
             {
                 //执行本地代码。
                 httpResultMessage = await LocalExecuteAsync(entry, httpMessage);
             }
             else
             {
-                httpResultMessage = await RemoteExecuteAsync(entry, httpMessage);
+                httpResultMessage = await RemoteExecuteAsync(httpMessage);
             }
-            await SendRemoteInvokeResult(sender, httpResultMessage);
+            await SendRemoteInvokeResult(sender,message.Id, httpResultMessage);
         }
         
 
@@ -95,42 +100,12 @@ namespace Surging.Core.KestrelHttpServer
 
         #region Private Method
 
-        private async Task<HttpResultMessage<object>> RemoteExecuteAsync(ServiceEntry entry, HttpMessage httpMessage)
+        private async Task<HttpResultMessage<object>> RemoteExecuteAsync(HttpMessage httpMessage)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
-            var provider = _concurrent.GetValueOrDefault(httpMessage.RoutePath);
-            var list = new List<object>();
-            if (provider.Item1 == null)
-            {
-                provider.Item2 = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(httpMessage.ServiceKey, entry.Type);
-                provider.Item3 = provider.Item2.GetType().GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault(); 
-                provider.Item1 = FastInvoke.GetMethodInvoker(provider.Item3);
-                _concurrent.GetOrAdd(httpMessage.RoutePath, ValueTuple.Create<FastInvokeHandler, object, MethodInfo>(provider.Item1, provider.Item2, provider.Item3));
-            }
-            foreach (var parameterInfo in provider.Item3.GetParameters())
-            {
-                var value = httpMessage.Parameters[parameterInfo.Name];
-                var parameterType = parameterInfo.ParameterType;
-                var parameter = _typeConvertibleService.Convert(value, parameterType);
-                list.Add(parameter);
-            }
-            try
-            {
-                var methodResult = provider.Item1(provider.Item2, list.ToArray());
-
-                var task = methodResult as Task;
-                if (task == null)
-                {
-                    resultMessage.Entity = methodResult;
-                }
-                else
-                {
-                    await task;
-                    var taskType = task.GetType().GetTypeInfo();
-                    if (taskType.IsGenericType)
-                        resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
-                }
-                resultMessage.IsSucceed = resultMessage.Entity != null;
+            try {
+                resultMessage.Entity=await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
+                resultMessage.IsSucceed = resultMessage.Entity != default;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
             }
             catch (Exception ex)
@@ -161,8 +136,18 @@ namespace Surging.Core.KestrelHttpServer
                     if (taskType.IsGenericType)
                         resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
                 }
+
                 resultMessage.IsSucceed = resultMessage.Entity != null;
-                resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
+                resultMessage.StatusCode =
+                    resultMessage.IsSucceed ? (int) StatusCode.Success : (int) StatusCode.RequestError;
+            }
+            catch (ValidateException validateException)
+            {
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(validateException, "执行本地逻辑时候发生了错误。", validateException);
+
+                resultMessage.Message = validateException.Message;
+                resultMessage.StatusCode = validateException.HResult;
             }
             catch (Exception exception)
             {
@@ -174,14 +159,14 @@ namespace Surging.Core.KestrelHttpServer
             return resultMessage;
         }
 
-        private async Task SendRemoteInvokeResult(IMessageSender sender, HttpResultMessage resultMessage)
+        private async Task SendRemoteInvokeResult(IMessageSender sender,string messageId, HttpResultMessage resultMessage)
         {
             try
             {
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug("准备发送响应消息。");
 
-                await sender.SendAndFlushAsync(new TransportMessage(resultMessage));
+                await sender.SendAndFlushAsync(new TransportMessage(messageId,resultMessage));
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug("响应消息发送成功。");
             }
@@ -203,6 +188,32 @@ namespace Surging.Core.KestrelHttpServer
                 message += "|InnerException:" + GetExceptionMessage(exception.InnerException);
             }
             return message;
+        }
+
+        private void WirteDiagnosticBefore(TransportMessage message)
+        {
+            if (!AppConfig.ServerOptions.DisableDiagnostic)
+            {
+                RpcContext.GetContext().SetAttachment("TraceId", message.Id);
+                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+                var remoteInvokeMessage = message.GetContent<HttpMessage>();
+                diagnosticListener.WriteTransportBefore(TransportType.Rest, new TransportEventData(new DiagnosticMessage
+                {
+                    Content = message.Content,
+                    ContentType = message.ContentType,
+                    Id = message.Id,
+                    MessageName = remoteInvokeMessage.RoutePath
+                }, TransportType.Rest.ToString(),
+               message.Id,
+                RpcContext.GetContext().GetAttachment("RemoteIpAddress")?.ToString()));
+            }
+            else
+            {
+                var parameters = RpcContext.GetContext().GetContextParameters();
+                parameters.TryRemove("RemoteIpAddress", out object value);
+                RpcContext.GetContext().SetContextParameters(parameters);
+            }
+
         }
 
         #endregion Private Method
