@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
 using System.Diagnostics;
 using Surging.Core.CPlatform.Diagnostics;
+using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Transport.Implementation;
 
 namespace Surging.Core.KestrelHttpServer
@@ -135,8 +136,18 @@ namespace Surging.Core.KestrelHttpServer
                     if (taskType.IsGenericType)
                         resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
                 }
+
                 resultMessage.IsSucceed = resultMessage.Entity != null;
-                resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
+                resultMessage.StatusCode =
+                    resultMessage.IsSucceed ? (int) StatusCode.Success : (int) StatusCode.RequestError;
+            }
+            catch (ValidateException validateException)
+            {
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(validateException, "执行本地逻辑时候发生了错误。", validateException);
+
+                resultMessage.Message = validateException.Message;
+                resultMessage.StatusCode = validateException.HResult;
             }
             catch (Exception exception)
             {
