@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Validation;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Implementation
@@ -24,14 +25,17 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         private readonly CPlatformContainer _serviceProvider;
         private readonly IServiceIdGenerator _serviceIdGenerator;
         private readonly ITypeConvertibleService _typeConvertibleService;
+        private readonly IValidationProcessor _validationProcessor;
+
         #endregion Field
 
         #region Constructor
-        public ClrServiceEntryFactory(CPlatformContainer serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService)
+        public ClrServiceEntryFactory(CPlatformContainer serviceProvider, IServiceIdGenerator serviceIdGenerator, ITypeConvertibleService typeConvertibleService, IValidationProcessor validationProcessor)
         {
             _serviceProvider = serviceProvider;
             _serviceIdGenerator = serviceIdGenerator;
             _typeConvertibleService = typeConvertibleService;
+            _validationProcessor = validationProcessor;
         }
 
         #endregion Constructor
@@ -99,6 +103,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                     ?? AuthorizationType.AppSecret);
             }
             var fastInvoker = GetHandler(serviceId, method);
+
+            var methodValidateAttribute = attributes.Where(p => p is ValidateAttribute)
+                .Cast<ValidateAttribute>().FirstOrDefault();  
+
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
@@ -125,6 +133,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                          continue;
                      }
                      var value = parameters[parameterInfo.Name];
+
+                     if(methodValidateAttribute !=null)
+                     _validationProcessor.Validate(parameterInfo, value);
+
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);

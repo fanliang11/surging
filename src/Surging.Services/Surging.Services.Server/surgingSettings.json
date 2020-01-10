@@ -7,6 +7,7 @@
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
     "WanIp": "${WanIp}|192.168.249.103",
+    "DockerDeployMode": "${DockerDeployMode}|Standard",
     "Libuv": true,
     "SoBacklog": 100,
     "MaxConcurrentRequests": 20,

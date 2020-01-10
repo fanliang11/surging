@@ -13,7 +13,9 @@ using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Validation;
 
 namespace Surging.IModuleServices.Common
 {
@@ -36,7 +38,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-        Task<string> GetUserName(int id);
+        Task<string> GetUserName([Validate] [Range(1, 10, ErrorMessage = "只能为1到10")] int id);
 
         /// <summary>
         /// 判断是否存在
@@ -89,6 +91,7 @@ new Surging.IModuleServices.Common.Models.UserModel
             Age=19
          };", RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+        [Validate]
         Task<UserModel> GetUser(UserModel user);
 
         /// <summary>
