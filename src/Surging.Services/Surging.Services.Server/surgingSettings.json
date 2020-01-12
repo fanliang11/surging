@@ -28,7 +28,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule;GrpcModule"
+        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;SerilogModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule;GrpcModule"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -159,6 +159,46 @@
     },
     "LogLevel": {
       "Default": "${LogLevel}|Debug"
+    }
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning"
+      }
+    },
+    "WriteTo:RollingFile": {
+      "Name": "RollingFile",
+      "Args": {
+        "formatter": "Serilog.Formatting.Elasticsearch.ElasticsearchJsonFormatter, Serilog.Formatting.Elasticsearch",
+        "pathFormat": "c:/logs/{Level}/log-{Date}.log"
+      }
+    },
+    //"WriteTo:Sublogger": {
+    //  "Name": "Logger",
+    //  "Args": {
+    //    "configureLogger": {
+    //      "MinimumLevel": "Verbose",
+    //      "WriteTo": [
+    //        {
+    //          "Name": "RollingFile",
+    //          "Args": {
+    //            "formatter": "Serilog.Formatting.Elasticsearch.ElasticsearchJsonFormatter, Serilog.Formatting.Elasticsearch",
+    //            "pathFormat": "C:/logs/{Level}/log-{Date}.log"
+    //            //"outputTemplate": "[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}",
+    //            //"theme": "Serilog.Sinks.SystemConsole.Themes.SystemConsoleTheme::Grayscale, Serilog.Sinks.Console"
+    //          }
+    //        }
+    //      ]
+    //    },
+    //    "restrictedToMinimumLevel": "Verbose",
+    //    "levelSwitch": "$controlSwitch"
+    //  }
+    //},
+    "Properties": {
+      "Application": "surging.server"
     }
   }
 }
