@@ -162,6 +162,8 @@
     }
   },
   "Serilog": {
+    "Using": [ "Serilog.Sinks.RollingFile" ],
+    "LevelSwitches": { "$controlSwitch": "Verbose" },
     "MinimumLevel": {
       "Default": "Information",
       "Override": {
@@ -173,32 +175,12 @@
       "Name": "RollingFile",
       "Args": {
         "formatter": "Serilog.Formatting.Elasticsearch.ElasticsearchJsonFormatter, Serilog.Formatting.Elasticsearch",
-        "pathFormat": "c:/logs/{Level}/log-{Date}.log"
+        "pathFormat": "Logs\\log-{Date}.log"
       }
     },
-    //"WriteTo:Sublogger": {
-    //  "Name": "Logger",
-    //  "Args": {
-    //    "configureLogger": {
-    //      "MinimumLevel": "Verbose",
-    //      "WriteTo": [
-    //        {
-    //          "Name": "RollingFile",
-    //          "Args": {
-    //            "formatter": "Serilog.Formatting.Elasticsearch.ElasticsearchJsonFormatter, Serilog.Formatting.Elasticsearch",
-    //            "pathFormat": "C:/logs/{Level}/log-{Date}.log"
-    //            //"outputTemplate": "[{Timestamp:HH:mm:ss} {SourceContext} [{Level}] {Message}{NewLine}{Exception}",
-    //            //"theme": "Serilog.Sinks.SystemConsole.Themes.SystemConsoleTheme::Grayscale, Serilog.Sinks.Console"
-    //          }
-    //        }
-    //      ]
-    //    },
-    //    "restrictedToMinimumLevel": "Verbose",
-    //    "levelSwitch": "$controlSwitch"
-    //  }
-    //},
+    "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ],
     "Properties": {
-      "Application": "surging.server"
+      "Application": "Sample"
     }
   }
 }

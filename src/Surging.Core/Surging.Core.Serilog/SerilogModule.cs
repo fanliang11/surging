@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Events;
 using Serilog.Formatting.Elasticsearch;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
@@ -13,23 +14,17 @@ namespace Surging.Core.Serilog
         {
             var serviceProvider = context.ServiceProvoider;
             base.Initialize(context);
-            var section = AppConfig.GetSection("Serilog");
 
-            var logger = new LoggerConfiguration().ReadFrom.Configuration(section)
+            var logger = new LoggerConfiguration().ReadFrom.Configuration(AppConfig.Configuration)
                 //.WriteTo.RollingFile(new ElasticsearchJsonFormatter(renderMessageTemplate:false),"c:/logs/log-{Date}.log")
-                //.WriteTo.Logger(config => { 
-                //    config.Filter.ByIncludingOnly(evt=>evt.Level== Serilog.Events.LogEventLevel.Information).WriteTo.RollingFile()
+                //.WriteTo.Logger(config =>
+                //{
+                //    //config.Filter.ByIncludingOnly(evt => evt.Level == LogEventLevel.Information).ReadFrom.Configuration(AppConfig.Configuration.GetSection("Information"))
                 //})
                 .CreateLogger();
             
             serviceProvider.GetInstances<ILoggerFactory>().AddSerilog(logger);
             serviceProvider.GetInstances<IApplicationLifetime>().ApplicationStopped.Register(Log.CloseAndFlush);
         }
-
-        //public override void Dispose()
-        //{
-        //    //Log.CloseAndFlush();
-        //    base.Dispose();
-        //}
     }
 }
