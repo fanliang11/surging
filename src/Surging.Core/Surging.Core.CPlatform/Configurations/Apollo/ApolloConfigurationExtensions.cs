@@ -1,11 +1,8 @@
 ﻿using Com.Ctrip.Framework.Apollo;
-using Com.Ctrip.Framework.Apollo.Enums;
 using Microsoft.Extensions.Configuration;
 using Surging.Core.CPlatform.Utilities;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Surging.Core.CPlatform.Configurations.Apollo
 {

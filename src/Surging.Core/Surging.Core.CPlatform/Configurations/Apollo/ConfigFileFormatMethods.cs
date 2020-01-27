@@ -1,7 +1,4 @@
 ﻿using Com.Ctrip.Framework.Apollo.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Surging.Core.CPlatform.Configurations.Apollo
 {

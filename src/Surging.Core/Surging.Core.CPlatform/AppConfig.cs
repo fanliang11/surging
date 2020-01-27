@@ -12,14 +12,14 @@ using System.Text;
 
 namespace Surging.Core.CPlatform
 {
-   public class AppConfig
+    public class AppConfig
     {
         #region 字段
-        private static AddressSelectorMode _loadBalanceMode=AddressSelectorMode.Polling;
-        private static SurgingServerOptions _serverOptions=new SurgingServerOptions();
+        private static AddressSelectorMode _loadBalanceMode = AddressSelectorMode.Polling;
+        private static SurgingServerOptions _serverOptions = new SurgingServerOptions();
         #endregion
 
-        public static IConfigurationRoot Configuration { get;  set; }
+        public static IConfigurationRoot Configuration { get; internal set; }
 
         /// <summary>
         /// 负载均衡模式
@@ -29,8 +29,8 @@ namespace Surging.Core.CPlatform
             get
             {
                 AddressSelectorMode mode = _loadBalanceMode; ;
-                if(Configuration !=null 
-                    && Configuration["AccessTokenExpireTimeSpan"]!=null
+                if (Configuration != null
+                    && Configuration["AccessTokenExpireTimeSpan"] != null
                     && !Enum.TryParse(Configuration["AccessTokenExpireTimeSpan"], out mode))
                 {
                     mode = _loadBalanceMode;
@@ -54,7 +54,7 @@ namespace Surging.Core.CPlatform
             {
                 return _serverOptions;
             }
-             set
+            internal set
             {
                 _serverOptions = value;
             }
