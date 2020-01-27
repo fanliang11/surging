@@ -7,6 +7,7 @@ using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.Configurations.Apollo;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusKafka.Configurations;
@@ -48,12 +49,13 @@ namespace Surging.Services.Server
                     logger.AddConfiguration(
                         Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
-                .UseServer(options =>{ })
+                .UseServer(options => { })
                 .UseConsoleLifetime()
                 .Configure(build =>
-                build.AddCacheFile("${cachepath}|cacheSettings.json",basePath:AppContext.BaseDirectory, optional: false, reloadOnChange: true))
+                build.AddCacheFile("${cachepath}|cacheSettings.json", basePath: AppContext.BaseDirectory, optional: false, reloadOnChange: true))
                   .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
+                  .Configure(build => build.UseApollo(apollo => apollo.AddNamespaceSurgingApollo("surgingSettings")))
                 .UseStartup<Startup>()
                 .Build();
 
