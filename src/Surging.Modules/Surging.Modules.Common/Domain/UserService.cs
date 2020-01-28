@@ -1,9 +1,11 @@
 ﻿
 using Surging.Core.Common;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.ProxyGenerator;
@@ -30,7 +32,7 @@ namespace Surging.Modules.Common.Domain
 
         public async Task<string> GetUserName(int id)
         {
-           var text= await this.GetService<IManagerService>().SayHello("fanly");
+            var text = await GetService<IManagerService>().SayHello("fanly"); 
             return await Task.FromResult<string>(text);
         }
 
@@ -39,9 +41,10 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
-       public Task<UserModel> GetUserById(Guid id)
+        public Task<UserModel> GetUserById(Guid id)
         {
-            return Task.FromResult(new UserModel {
+            return Task.FromResult(new UserModel
+            {
 
             });
         }
@@ -125,7 +128,7 @@ namespace Surging.Modules.Common.Domain
             {
                 using (var stream = new FileStream(Path.Combine(AppContext.BaseDirectory, file.FileName), FileMode.OpenOrCreate))
                 {
-                   await stream.WriteAsync(file.File, 0, (int)file.Length);
+                    await stream.WriteAsync(file.File, 0, (int)file.Length);
                 }
             }
             return true;
@@ -141,9 +144,9 @@ namespace Surging.Modules.Common.Domain
             return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });
         }
 
-        public async Task<IActionResult> DownFile(string fileName,string contentType)
+        public async Task<IActionResult> DownFile(string fileName, string contentType)
         {
-            string uploadPath = Path.Combine(AppContext.BaseDirectory, fileName); 
+            string uploadPath = Path.Combine(AppContext.BaseDirectory, fileName);
             if (File.Exists(uploadPath))
             {
                 using (var stream = new FileStream(uploadPath, FileMode.Open))

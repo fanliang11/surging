@@ -1,0 +1,14 @@
+{
+  "apollo": {
+    "AppId": "surging-server",
+    "MetaServer": "http://10.1.6.121:8080/",
+    //"RefreshInterval": 60000,
+    "Env": "Dev",
+    "Meta": {
+      "DEV": "http://10.1.6.121:8080/",
+      "FAT": "http://10.1.6.121:8080/",
+      "UAT": "http://10.1.6.121:8080/",
+      "PRO": "http://10.1.6.121:8080/"
+    }
+  }
+}

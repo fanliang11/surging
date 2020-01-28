@@ -41,6 +41,7 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Codec.MessagePack\Surging.Core.Codec.MessagePack.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Codec.ProtoBuffer\Surging.Core.Codec.ProtoBuffer.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Configuration.Apollo\Surging.Core.Configuration.Apollo.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Consul\Surging.Core.Consul.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.DNS\Surging.Core.DNS.csproj" />
@@ -58,6 +59,7 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Udp\Surging.Core.Protocol.Udp.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WS\Surging.Core.Protocol.WS.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Serilog\Surging.Core.Serilog.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting.Extensions\Surging.Core.ServiceHosting.Extensions.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Swagger\Surging.Core.Swagger.csproj" />
@@ -72,6 +74,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="apollo.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="cacheSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -95,5 +100,7 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties surgingsettings_1json__JsonSchema="..ElasticsearchJsonFormatter" /></VisualStudio></ProjectExtensions>
 
 </Project>
