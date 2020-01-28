@@ -6,7 +6,7 @@ using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Generic;
 
-namespace Surging.Core.CPlatform.Configurations.Apollo
+namespace Surging.Core.Configuration.Apollo.Configurations
 {
     public class SurgingApolloConfigurationProvider : ApolloConfigurationProvider
     {

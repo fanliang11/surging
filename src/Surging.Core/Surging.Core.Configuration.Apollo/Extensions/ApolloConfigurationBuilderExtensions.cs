@@ -4,7 +4,7 @@ using Com.Ctrip.Framework.Apollo.Spi;
 using System;
 using System.Linq;
 
-namespace Surging.Core.CPlatform.Configurations.Apollo
+namespace Surging.Core.Configuration.Apollo.Configurations
 {
     public static class ApolloConfigurationBuilderExtensions
     {

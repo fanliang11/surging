@@ -1,6 +1,9 @@
 ﻿using Com.Ctrip.Framework.Apollo.Enums;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Surging.Core.CPlatform.Configurations.Apollo
+namespace Surging.Core.Configuration.Apollo.Configurations
 {
     public static class ConfigFileFormatMethods
     {

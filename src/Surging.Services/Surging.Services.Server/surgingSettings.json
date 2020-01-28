@@ -28,7 +28,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;SerilogModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule;GrpcModule"
+        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;SerilogModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule;GrpcModule;ApolloModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages

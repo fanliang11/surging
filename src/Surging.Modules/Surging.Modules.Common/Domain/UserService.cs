@@ -32,11 +32,7 @@ namespace Surging.Modules.Common.Domain
 
         public async Task<string> GetUserName(int id)
         {
-            var text = await this.GetService<IManagerService>().SayHello("fanly");
-            //var builder = ServiceLocator.GetService<Microsoft.Extensions.Configuration.IConfigurationBuilder>();
-            //var config = builder.Build();
-            //text=config.GetSection("Surging:WatchInterval").Value;
-            //text=AppConfig.Configuration.GetSection("Surging:WatchInterval").Value;
+            var text = await GetService<IManagerService>().SayHello("fanly"); 
             return await Task.FromResult<string>(text);
         }
 
