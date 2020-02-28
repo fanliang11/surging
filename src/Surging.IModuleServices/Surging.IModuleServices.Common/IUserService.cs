@@ -164,7 +164,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// </summary>
         /// <param name="form">HttpFormCollection 类型参数</param>
         /// <returns></returns>
-        Task<bool> UploadFile(HttpFormCollection form);
+        Task<bool> UploadFile(HttpFormCollection form1);
 
         /// <summary>
         /// 测试下载文件
