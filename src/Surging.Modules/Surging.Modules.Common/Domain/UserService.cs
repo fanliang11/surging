@@ -121,9 +121,9 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(new ApiResult<UserModel>() { Value = new UserModel { Name = "fanly" }, StatusCode = 200 });
         }
 
-        public async Task<bool> UploadFile(HttpFormCollection form)
+        public async Task<bool> UploadFile(HttpFormCollection form1)
         {
-            var files = form.Files;
+            var files = form1.Files;
             foreach (var file in files)
             {
                 using (var stream = new FileStream(Path.Combine(AppContext.BaseDirectory, file.FileName), FileMode.OpenOrCreate))

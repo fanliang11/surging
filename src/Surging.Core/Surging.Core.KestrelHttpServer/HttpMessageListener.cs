@@ -85,7 +85,10 @@ namespace Surging.Core.KestrelHttpServer
             if (context.Request.HasFormContentType)
             {
                 var collection = await GetFormCollection(context.Request);
-                httpMessage.Parameters.Add("form", collection);
+                foreach (var item in collection)
+                {
+                    httpMessage.Parameters.Add(item.Key, item.Value);
+                }
                 if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage }, 
                     sender, messageId, actionFilters)) return;
                 httpMessage.Attachments = RpcContext.GetContext().GetContextParameters();
@@ -189,59 +192,75 @@ namespace Surging.Core.KestrelHttpServer
             return true;
         }
 
-        private async Task<HttpFormCollection> GetFormCollection(HttpRequest request)
+        private async Task<Dictionary<string, HttpFormCollection>> GetFormCollection(HttpRequest request)
         {
-            var boundary = GetName("boundary=", request.ContentType); 
+            var boundary = GetName("boundary=", request.ContentType);
             var reader = new MultipartReader(boundary, request.Body);
             var collection = await GetMultipartForm(reader);
-            var fileCollection = new HttpFormFileCollection();
-            var fields = new Dictionary<string, StringValues>();
-            foreach (var item in collection)
-            {
-                if (item.Value is HttpFormFileCollection)
-                {
-                    var itemCollection = item.Value as HttpFormFileCollection;
-                    fileCollection.AddRange(itemCollection);
-                }
-                else
-                {
-                    var itemCollection = item.Value as Dictionary<string, StringValues>;
-                    fields = fields.Concat(itemCollection).ToDictionary(k => k.Key, v => v.Value);
 
+            return collection.ToDictionary(item => item.Key, item =>
+            {
+                var fieldsDict = new Dictionary<string, StringValues>();
+                if (item.Value.Fields.HasValue)
+                {
+                    fieldsDict.Add(item.Key, item.Value.Fields.Value);
                 }
-            }
-           return new HttpFormCollection(fields, fileCollection);
+
+                return new HttpFormCollection(fieldsDict, item.Value.HttpFormFileCollection);
+            });
         }
 
-        private async Task<IDictionary<string,object>> GetMultipartForm(MultipartReader reader)
+        private async Task<IDictionary<string, (StringValues? Fields, HttpFormFileCollection HttpFormFileCollection)>> GetMultipartForm(MultipartReader reader)
         {
-           var section = await reader.ReadNextSectionAsync();
-            var collection = new Dictionary<string, object>();
+            var section = await reader.ReadNextSectionAsync();
+            var collection = new Dictionary<string, (StringValues? Fields, HttpFormFileCollection HttpFormFileCollection)>();
             if (section != null)
-            { 
-                var name=GetName("name=",section.ContentDisposition);
-                var fileName = GetName("filename=",section.ContentDisposition);
+            {
+                var name = GetName("name=", section.ContentDisposition);
+                var fileName = GetName("filename=", section.ContentDisposition);
                 var buffer = new MemoryStream();
                 await section.Body.CopyToAsync(buffer);
-                if(string.IsNullOrEmpty(fileName))
+                if (string.IsNullOrEmpty(fileName))
                 {
                     var fields = new Dictionary<string, StringValues>();
                     StreamReader streamReader = new StreamReader(buffer);
-                    fields.Add(name, new StringValues(UTF8Encoding.Default.GetString(buffer.GetBuffer(),0,(int)buffer.Length)));
-                    collection.Add(name, fields);
+                    fields.Add(name, new StringValues(Encoding.Default.GetString(buffer.GetBuffer(), 0, (int)buffer.Length)));
+                    collection.Add(name, (fields[name], null));
                 }
                 else
                 {
                     var fileCollection = new HttpFormFileCollection();
                     StreamReader streamReader = new StreamReader(buffer);
-                    fileCollection.Add(new HttpFormFile(buffer.Length,name,fileName,buffer.GetBuffer()));
-                    collection.Add(name, fileCollection);
+                    fileCollection.Add(new HttpFormFile(buffer.Length, name, fileName, buffer.GetBuffer()));
+                    collection.Add(name, (null, fileCollection));
                 }
-                var formCollection= await GetMultipartForm(reader);
-                foreach(var item in formCollection)
+                var formCollection = await GetMultipartForm(reader);
+                foreach (var item in formCollection)
                 {
                     if (!collection.ContainsKey(item.Key))
-                        collection.Add(item.Key,item.Value);
+                        collection.Add(item.Key, item.Value);
+                    else
+                    {
+                        var (fields, httpFormFileCollection) = collection[item.Key];
+                        if (item.Value.Fields.HasValue && !fields.HasValue)
+                        {
+                            fields = item.Value.Fields.Value;
+                        }
+
+                        if (httpFormFileCollection == null)
+                        {
+                            httpFormFileCollection = item.Value.HttpFormFileCollection;
+                        }
+                        else
+                        {
+                            var formFiles =
+                            item.Value.HttpFormFileCollection.Where(v =>
+                                !httpFormFileCollection.Exists(p => p.FileName == v.FileName));
+                            httpFormFileCollection.AddRange(formFiles);
+                        }
+
+                        collection[item.Key] = (fields, httpFormFileCollection);
+                    }
                 }
             }
             return collection;
