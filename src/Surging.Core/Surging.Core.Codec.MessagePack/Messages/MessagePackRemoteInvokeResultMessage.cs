@@ -13,6 +13,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         {
             ExceptionMessage = message.ExceptionMessage;
             Result = message.Result == null ? null : new DynamicItem(message.Result);
+            StatusCode = message.StatusCode;
         }
 
         public MessagePackRemoteInvokeResultMessage()
@@ -27,13 +28,17 @@ namespace Surging.Core.Codec.MessagePack.Messages
         [Key(1)]
         public DynamicItem Result { get; set; }
 
+        [Key(2)]
+        public int StatusCode { get; set; }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RemoteInvokeResultMessage GetRemoteInvokeResultMessage()
         {
             return new RemoteInvokeResultMessage
             {
                 ExceptionMessage = ExceptionMessage,
-                Result = Result?.Get()
+                Result = Result?.Get(),
+                StatusCode = StatusCode
             };
         }
     }
