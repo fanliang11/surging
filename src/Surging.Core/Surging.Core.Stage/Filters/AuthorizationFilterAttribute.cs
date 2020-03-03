@@ -12,6 +12,7 @@ using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using System.Threading.Tasks;
 using Autofac;
 using System;
+using Surging.Core.KestrelHttpServer.Internal;
 
 namespace Surging.Core.Stage.Filters
 {
@@ -44,7 +45,7 @@ namespace Surging.Core.Stage.Filters
                             else
                             {
                                 var payload = _authorizationServerProvider.GetPayloadString(author);
-                                RpcContext.GetContext().SetAttachment("payload", payload);
+                                RestContext.GetContext().SetAttachment("payload", payload);
                             }
                         }
                         else

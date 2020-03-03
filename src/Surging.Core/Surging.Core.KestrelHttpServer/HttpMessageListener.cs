@@ -47,9 +47,9 @@ namespace Surging.Core.KestrelHttpServer
 
         public async Task OnReceived(IMessageSender sender,string messageId, HttpContext context, IEnumerable<IActionFilter> actionFilters)
         {
-            var serviceRoute = context.Items["route"] as ServiceRoute;
-
-            var path = (context.Items["path"]
+            var serviceRoute = RestContext.GetContext().GetAttachment("route") as ServiceRoute;
+            RestContext.GetContext().RemoveContextParameters("route");
+            var path = (RestContext.GetContext().GetAttachment("path")
                 ?? HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()))) as string;
             if (serviceRoute == null)
             {
@@ -88,7 +88,7 @@ namespace Surging.Core.KestrelHttpServer
                 httpMessage.Parameters.Add("form", collection);
                 if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage }, 
                     sender, messageId, actionFilters)) return;
-                httpMessage.Attachments = RpcContext.GetContext().GetContextParameters();
+                httpMessage.Attachments = RestContext.GetContext().GetContextParameters();
                 await Received(sender, new TransportMessage(messageId,httpMessage));
             }
             else
@@ -102,14 +102,14 @@ namespace Surging.Core.KestrelHttpServer
                         httpMessage.Parameters.Add(param.Key, param.Value);
                     if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage },
                        sender,  messageId, actionFilters)) return;
-                    httpMessage.Attachments = RpcContext.GetContext().GetContextParameters();
+                    httpMessage.Attachments = RestContext.GetContext().GetContextParameters();
                     await Received(sender, new TransportMessage(messageId,httpMessage));
                 }
                 else
                 {
                     if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage }, 
                         sender, messageId, actionFilters)) return;
-                    httpMessage.Attachments = RpcContext.GetContext().GetContextParameters();
+                    httpMessage.Attachments = RestContext.GetContext().GetContextParameters();
                     await Received(sender, new TransportMessage(messageId,httpMessage));
                 }
             }
@@ -151,7 +151,7 @@ namespace Surging.Core.KestrelHttpServer
                 var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString()));
                 var serviceRoute = await _serviceRouteProvider.GetRouteByPathRegex(path);
                 if (serviceRoute == null) serviceRoute = await _serviceRouteProvider.GetLocalRouteByPathRegex(path);
-                context.Items.Add("route", serviceRoute);
+                RestContext.GetContext().SetAttachment("route", serviceRoute);
                 var filterContext = new AuthorizationFilterContext
                 {
                     Path = path,

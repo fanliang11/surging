@@ -13,6 +13,7 @@ using Surging.Core.KestrelHttpServer.Diagnostics;
 using Surging.Core.KestrelHttpServer.Extensions;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
+using Surging.Core.KestrelHttpServer.Internal;
 using System.Net;
 
 namespace Surging.Core.KestrelHttpServer
@@ -26,6 +27,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public virtual void Initialize(ApplicationInitializationContext builder)
         {
+            RestContext.GetContext().Initialize(builder.Builder.ApplicationServices);
         }
 
         public virtual void RegisterBuilder(WebHostContext context)

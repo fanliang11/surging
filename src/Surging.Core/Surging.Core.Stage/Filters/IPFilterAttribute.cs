@@ -4,6 +4,7 @@ using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
+using Surging.Core.KestrelHttpServer.Internal;
 using Surging.Core.Stage.Internal;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace Surging.Core.Stage.Filters
         public    Task OnActionExecuting(ActionExecutingContext filterContext)
         {
             var address = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
-            RpcContext.GetContext().SetAttachment("RemoteIpAddress", address.ToString());
+            RestContext.GetContext().SetAttachment("RemoteIpAddress", address.ToString());
             if (_ipChecker.IsBlackIp(address,filterContext.Message.RoutePath))
             {
                 filterContext.Result = new HttpResultMessage<object> { IsSucceed = false, StatusCode = (int)ServiceStatusCode.AuthorizationFailed, Message = "Your IP address is not allowed" };
