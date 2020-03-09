@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
@@ -36,6 +37,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public virtual void RegisterBuilder(ConfigurationContext context)
         {
+            context.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             context.Services.AddFilters(typeof(HttpRequestFilterAttribute));
             context.Services.AddFilters(typeof(CustomerExceptionFilterAttribute));
         }
