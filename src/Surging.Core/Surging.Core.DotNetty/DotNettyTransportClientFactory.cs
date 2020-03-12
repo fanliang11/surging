@@ -63,6 +63,7 @@ namespace Surging.Core.DotNetty
             _bootstrap = GetBootstrap();
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
             {
+                //设置数据传输协议和解码器，与服务端对应
                 var pipeline = c.Pipeline;
                 pipeline.AddLast(new LengthFieldPrepender(4));
                 pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
@@ -138,7 +139,7 @@ namespace Surging.Core.DotNetty
         private static Bootstrap GetBootstrap()
         {
             IEventLoopGroup group;
-            
+
             var bootstrap = new Bootstrap();
             if (AppConfig.ServerOptions.Libuv)
             {

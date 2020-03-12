@@ -25,6 +25,9 @@ using Surging.Core.CPlatform;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
+    /// <summary>
+    /// 服务代理生成器
+    /// </summary>
     public class ServiceProxyGenerater : IServiceProxyGenerater,IDisposable
     {
         #region Field

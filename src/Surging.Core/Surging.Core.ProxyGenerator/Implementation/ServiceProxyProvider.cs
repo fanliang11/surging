@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
+    /// <summary>
+    /// 服务代理提供者，通过RoutePath调用服务时使用
+    /// </summary>
     public class ServiceProxyProvider : IServiceProxyProvider
     {
         private readonly IServiceRouteProvider _serviceRouteProvider;
