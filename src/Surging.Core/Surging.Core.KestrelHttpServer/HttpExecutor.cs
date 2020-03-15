@@ -21,6 +21,7 @@ using System.Diagnostics;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.KestrelHttpServer.Internal;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -205,12 +206,11 @@ namespace Surging.Core.KestrelHttpServer
                     MessageName = remoteInvokeMessage.RoutePath
                 }, TransportType.Rest.ToString(),
                message.Id,
-                RpcContext.GetContext().GetAttachment("RemoteIpAddress")?.ToString()));
+                RestContext.GetContext().GetAttachment("RemoteIpAddress")?.ToString()));
             }
             else
             {
-                var parameters = RpcContext.GetContext().GetContextParameters();
-                parameters.TryRemove("RemoteIpAddress", out object value);
+                var parameters = RpcContext.GetContext().GetContextParameters(); 
                 RpcContext.GetContext().SetContextParameters(parameters);
             }
 

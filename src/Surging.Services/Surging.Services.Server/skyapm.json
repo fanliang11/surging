@@ -19,7 +19,7 @@
       "QueueSize": 30000,
       "BatchSize": 3000,
       "gRPC": {
-        "Servers": "10.1.7.143:11800",
+        "Servers": "localhost:11800",
         "Timeout": 100000,
         "ConnectTimeout": 100000,
         "ReportTimeout": 600000
