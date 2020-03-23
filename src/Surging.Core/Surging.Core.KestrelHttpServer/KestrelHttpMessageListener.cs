@@ -40,6 +40,7 @@ namespace Surging.Core.KestrelHttpServer
         private readonly IModuleProvider _moduleProvider;
         private readonly CPlatformContainer _container;
         private readonly IServiceRouteProvider _serviceRouteProvider;
+        private readonly DiagnosticListener _diagnosticListener;
 
         public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger,
             ISerializer<string> serializer, 
@@ -54,6 +55,7 @@ namespace Surging.Core.KestrelHttpServer
             _moduleProvider = moduleProvider;
             _container = container;
             _serviceRouteProvider = serviceRouteProvider;
+            _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
         }
 
         public async Task StartAsync(IPAddress address,int? port)
@@ -154,8 +156,7 @@ namespace Surging.Core.KestrelHttpServer
 
         private void WirteDiagnosticError(string messageId,Exception ex)
         {
-            var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-            diagnosticListener.WriteTransportError(CPlatform.Diagnostics.TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
+            _diagnosticListener.WriteTransportError(CPlatform.Diagnostics.TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
             {
                 Id = messageId
             }, ex));

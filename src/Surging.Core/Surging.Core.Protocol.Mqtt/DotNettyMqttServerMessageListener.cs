@@ -35,6 +35,7 @@ namespace Surging.Core.Protocol.Mqtt
         private IChannel _channel;
         private readonly IChannelService _channelService;
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
+        private readonly DiagnosticListener _diagnosticListener;
         #endregion Field
 
         public event ReceivedDelegate Received;
@@ -47,6 +48,7 @@ namespace Surging.Core.Protocol.Mqtt
             _logger = logger;
             _channelService = channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
+            _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
         }
         #endregion
 
@@ -198,9 +200,8 @@ namespace Surging.Core.Protocol.Mqtt
         {
             if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
-                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
                 var remoteInvokeResultMessage = message.GetContent<RemoteInvokeResultMessage>();
-                diagnosticListener.WriteTransportError(TransportType.Mqtt, new TransportErrorEventData(new DiagnosticMessage
+                _diagnosticListener.WriteTransportError(TransportType.Mqtt, new TransportErrorEventData(new DiagnosticMessage
                 {
                     Content = message.Content,
                     ContentType = message.ContentType,

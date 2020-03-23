@@ -46,7 +46,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-        [HttpPost(),HttpPut(), HttpDelete(), HttpGet()]
+        [HttpPost(true),HttpPut(true), HttpDelete(true), HttpGet(true)]
         // [ServiceBundle("api/{Service}/{id}", false)]
         Task<bool> Exists(int id);
 
