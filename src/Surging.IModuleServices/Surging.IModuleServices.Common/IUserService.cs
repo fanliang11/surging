@@ -94,6 +94,9 @@ new Surging.IModuleServices.Common.Models.UserModel
         [Validate]
         Task<UserModel> GetUser(UserModel user);
 
+        [Service(Name = "CreateUser")]
+        Task CreateUser(UserModel user);
+
         /// <summary>
         /// 更新用户
         /// </summary>

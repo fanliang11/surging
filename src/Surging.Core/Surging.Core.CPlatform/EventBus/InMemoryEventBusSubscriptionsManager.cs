@@ -11,7 +11,7 @@ namespace Surging.Core.CPlatform.EventBus
     {
         private readonly Dictionary<string, List<Delegate>> _handlers;
         private readonly Dictionary<Delegate, string> _consumers;
-        private readonly List<Type> _eventTypes;
+        private readonly Dictionary<string, Type> _eventTypes;
 
         public event EventHandler<ValueTuple<string, string>> OnEventRemoved;
 
@@ -19,7 +19,7 @@ namespace Surging.Core.CPlatform.EventBus
         {
             _handlers = new Dictionary<string, List<Delegate>>();
             _consumers = new Dictionary<Delegate, string>();
-            _eventTypes = new List<Type>();
+            _eventTypes = new Dictionary<string, Type>();
         }
 
         public bool IsEmpty => !_handlers.Keys.Any();
@@ -35,7 +35,7 @@ namespace Surging.Core.CPlatform.EventBus
             }
             _handlers[key].Add(handler);
             _consumers.Add(handler, consumerName);
-            _eventTypes.Add(typeof(T));
+            _eventTypes.Add(key, typeof(T));
         }
 
         public void RemoveSubscription<T, TH>()
@@ -50,12 +50,11 @@ namespace Surging.Core.CPlatform.EventBus
                 if (!_handlers[key].Any())
                 {
                     _handlers.Remove(key);
-                    var eventType = _eventTypes.SingleOrDefault(e => e.Name == key);
-                    if (eventType != null)
+                    if (_eventTypes.ContainsKey(key))
                     {
-                        _eventTypes.Remove(eventType);
+                        _eventTypes.Remove(key);
                         _consumers.Remove(handlerToRemove);
-                        RaiseOnEventRemoved(eventType.Name,consumerName);
+                        RaiseOnEventRemoved(key, consumerName);
                     }
                 }
 
@@ -106,11 +105,17 @@ namespace Surging.Core.CPlatform.EventBus
         }
         public bool HasSubscriptionsForEvent(string eventName) => _handlers.ContainsKey(eventName);
 
-        public Type GetEventTypeByName(string eventName) => _eventTypes.Single(t => t.Name == eventName);
+        public Type GetEventTypeByName(string eventName) => _eventTypes[eventName];
 
         private string GetEventKey<T>()
         {
-            return typeof(T).Name;
+            var eventType = typeof(T);
+            if (eventType.IsGenericType)
+            {
+                var genericArgumentName = eventType.GetGenericArguments()[0].Name;
+                return $"{eventType.Name}_{genericArgumentName}";
+            }
+            return eventType.Name;
         }
     }
 }

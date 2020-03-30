@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Surging.IModuleServices.Common.Models.Events;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -72,6 +73,18 @@ namespace Surging.Modules.Common.Domain
                 Name = "fanly",
                 Age = 18
             });
+        }
+
+        public Task CreateUser(UserModel user)
+        {
+            var creatingEvent = new EntityCreatingEvent<UserModel>
+            {
+                Entity = user
+            };
+            Publish(creatingEvent);
+
+            // _repository.Insert(...)
+            return Task.FromResult(0);
         }
 
         public Task<bool> Update(int id, UserModel model)

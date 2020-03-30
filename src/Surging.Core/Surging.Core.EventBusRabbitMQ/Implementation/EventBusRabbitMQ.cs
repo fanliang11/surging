@@ -89,8 +89,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
 
             using (var channel = _persistentConnection.CreateModel())
             {
-                var eventName = @event.GetType()
-                    .Name;
+                var eventName = GetEventName(@event.GetType());
 
                 channel.ExchangeDeclare(exchange: BROKER_NAME,
                                     type: "direct");
@@ -112,7 +111,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
         public void Subscribe<T, TH>(Func<TH> handler)
             where TH : IIntegrationEventHandler<T>
         {
-            var eventName = typeof(T).Name;
+            var eventName = GetEventName<T>();
             var queueConsumerAttr = typeof(TH).GetCustomAttribute<QueueConsumerAttribute>();
             if (queueConsumerAttr == null)
                 throw new ArgumentNullException("QueueConsumerAttribute");
@@ -515,6 +514,22 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
         private void PersistentConnection_OnEventShutDown(object sender, ShutdownEventArgs reason)
         {
             OnShutdown(this,new EventArgs());
+        }
+
+        private string GetEventName(Type eventType)
+        {
+            if (eventType.IsGenericType)
+            {
+                var genericArgumentName = eventType.GetGenericArguments()[0].Name;
+                return $"{eventType.Name}_{genericArgumentName}";
+            }
+            return eventType.Name;
+        }
+
+        private string GetEventName<T>()
+        {
+            var eventType = typeof(T);
+            return GetEventName(eventType);
         }
     }
 }

@@ -64,8 +64,7 @@ namespace Surging.Core.EventBusKafka.Implementation
             {
                 _producerConnection.TryConnect();
             }
-            var eventName = @event.GetType()
-                   .Name;
+            var eventName = GetEventName(@event.GetType());
             var body = JsonConvert.SerializeObject(@event);
             var policy = RetryPolicy.Handle<KafkaException>()
                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
@@ -82,7 +81,7 @@ namespace Surging.Core.EventBusKafka.Implementation
 
         public void Subscribe<T, TH>(Func<TH> handler) where TH : IIntegrationEventHandler<T>
         {
-            var eventName = typeof(T).Name;
+            var eventName = GetEventName<T>();
             var containsKey = _subsManager.HasSubscriptionsForEvent<T>();
             if (!containsKey)
             {
@@ -124,6 +123,22 @@ namespace Surging.Core.EventBusKafka.Implementation
                     }
                 }
             }
+        }
+
+        private string GetEventName(Type eventType)
+        {
+            if (eventType.IsGenericType)
+            {
+                var genericArgumentName = eventType.GetGenericArguments()[0].Name;
+                return $"{eventType.Name}_{genericArgumentName}";
+            }
+            return eventType.Name;
+        }
+
+        private string GetEventName<T>()
+        {
+            var eventType = typeof(T);
+            return GetEventName(eventType);
         }
     }
 }

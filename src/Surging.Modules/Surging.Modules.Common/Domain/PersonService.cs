@@ -56,6 +56,11 @@ namespace Surging.Modules.Common.Domain
             });
         }
 
+        public Task CreateUser(UserModel user)
+        {
+            return GetService<IUserService>("User").CreateUser(user);
+        }
+
         public Task<bool> Get(List<UserModel> users)
         {
             return Task.FromResult(true);
