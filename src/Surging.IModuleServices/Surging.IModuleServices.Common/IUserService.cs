@@ -15,7 +15,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Surging.Core.CPlatform.Validation;
+using Surging.Core.CPlatform.Validation; 
+using Metadatas=Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas;
 
 namespace Surging.IModuleServices.Common
 {
@@ -67,6 +68,7 @@ namespace Surging.IModuleServices.Common
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = CacheTargetType.Redis, Time = 480)]
+       [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = "ddlCache", L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = Metadatas.CacheTargetType.Redis, Time = 480)]
         [ServiceRoute("{userName}")]
         Task<int> GetUserId(string userName);
 
