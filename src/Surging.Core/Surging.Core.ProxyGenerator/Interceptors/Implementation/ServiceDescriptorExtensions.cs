@@ -9,111 +9,160 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 {
    public static class ServiceDescriptorExtensions
     {
-        public static ServiceDescriptor CacheTime(this ServiceDescriptor descriptor,int time)
+        public static ServiceDescriptor CacheTime(this ServiceDescriptor descriptor,int time, string metadataId)
         {
-            if(string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-            descriptor.Metadatas["CacheIntercept"] = time;
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = time.ToString();
             else
-                descriptor.Metadatas["CacheIntercept"] += $"|{time}";
-
+                metadata.Item1 += $"|{time}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor Mode(this ServiceDescriptor descriptor, CacheTargetType cacheTargetType)
+        public static ServiceDescriptor Mode(this ServiceDescriptor descriptor, CacheTargetType cacheTargetType, string metadataId)
         {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
             var targetType= Convert.ToInt32(cacheTargetType).ToString();
-            if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                descriptor.Metadatas["CacheIntercept"] = targetType;
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = targetType;
             else
-                descriptor.Metadatas["CacheIntercept"] += $"|{targetType}";
-
+                metadata.Item1 += $"|{targetType}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor  Method(this ServiceDescriptor descriptor, CachingMethod cachingMethod)
+        public static ServiceDescriptor  Method(this ServiceDescriptor descriptor, CachingMethod cachingMethod, string metadataId)
         {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
             var iCachingMethod = Convert.ToInt32(cachingMethod).ToString();
-            if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                descriptor.Metadatas["CacheIntercept"] = iCachingMethod;
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = iCachingMethod;
             else
-                descriptor.Metadatas["CacheIntercept"] += $"|{iCachingMethod}";
-
+                metadata.Item1 += $"|{iCachingMethod}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor CacheSectionType(this ServiceDescriptor descriptor, string cacheSectionType)
+        public static ServiceDescriptor CacheSectionType(this ServiceDescriptor descriptor, string cacheSectionType, string metadataId)
         {
-            if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                descriptor.Metadatas["CacheIntercept"] = cacheSectionType;
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = cacheSectionType;
             else
-                descriptor.Metadatas["CacheIntercept"] += $"|{cacheSectionType}";
-
+                metadata.Item1 += $"|{cacheSectionType}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor Force(this ServiceDescriptor descriptor, bool Force)
+        public static ServiceDescriptor Force(this ServiceDescriptor descriptor, bool Force, string metadataId)
         {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
             var iForce = Convert.ToInt32(Force).ToString();
-            if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                descriptor.Metadatas["CacheIntercept"] = iForce;
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = iForce;
             else
-                descriptor.Metadatas["CacheIntercept"] += $"|{iForce}";
-
+                metadata.Item1 += $"|{iForce}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor Key(this ServiceDescriptor descriptor, string key)
+        public static ServiceDescriptor Key(this ServiceDescriptor descriptor, string key, string metadataId)
         {
-            if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                descriptor.Metadatas["CacheIntercept"] = key;
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = key;
             else
-                descriptor.Metadatas["CacheIntercept"] += $"|{key}";
-
+                metadata.Item1 += $"|{key}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor L2Key(this ServiceDescriptor descriptor, string L2Key)
+        public static ServiceDescriptor Intercept(this ServiceDescriptor descriptor, string metadataId)
         {
-            if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                descriptor.Metadatas["CacheIntercept"] = L2Key;
-            else
-                descriptor.Metadatas["CacheIntercept"] += $"|{L2Key}";
-
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
+            
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor EnableL2Cache(this ServiceDescriptor descriptor, bool enableL2Cache)
+        public static ServiceDescriptor L2Key(this ServiceDescriptor descriptor, string L2Key, string metadataId)
         {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = L2Key;
+            else
+                metadata.Item1 += $"|{L2Key}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
+            return descriptor;
+        }
+
+        public static ServiceDescriptor EnableL2Cache(this ServiceDescriptor descriptor, bool enableL2Cache,string metadataId)
+        {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
             var iEnableL2Cache = Convert.ToInt32(enableL2Cache).ToString();
-            if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                descriptor.Metadatas["CacheIntercept"] = iEnableL2Cache;
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = iEnableL2Cache;
             else
-                descriptor.Metadatas["CacheIntercept"] += $"|{iEnableL2Cache}";
-
+                metadata.Item1 += $"|{iEnableL2Cache}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
 
-        public static ServiceDescriptor CorrespondingKeys(this ServiceDescriptor descriptor, string[] CorrespondingKeys)
+        public static ServiceDescriptor CorrespondingKeys(this ServiceDescriptor descriptor, string[] CorrespondingKeys, string metadataId)
         {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
             if (CorrespondingKeys != null)
             {
                 var correspondingKey = string.Join(",", CorrespondingKeys);
-                if (string.IsNullOrEmpty(descriptor.GetMetadata<string>("CacheIntercept")))
-                    descriptor.Metadatas["CacheIntercept"] = correspondingKey;
+                if (string.IsNullOrEmpty(metadata.Item1))
+                    metadata.Item1  = correspondingKey;
                 else
-                    descriptor.Metadatas["CacheIntercept"] += $"|{correspondingKey}";
+                    metadata.Item1 += $"|{correspondingKey}";
             }
             else
             {
-                descriptor.Metadatas["CacheIntercept"] += "|";
+                metadata.Item1 += "|";
             }
-
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
+         
 
-        public static ServiceCacheIntercept GetCacheIntercept(this ServiceDescriptor descriptor)
+        public static ServiceCacheIntercept GetCacheIntercept(this ServiceDescriptor descriptor,string metadataId)
         {
-            return  new ServiceCacheIntercept( descriptor.GetMetadata("CacheIntercept", "").Split("|"));
+          var metadata=  descriptor.GetMetadata<Dictionary<string, object>>("Intercept", new Dictionary<string, object>());
+           if( metadata.ContainsKey(metadataId))
+            {
+                return new ServiceCacheIntercept(metadata[metadataId].ToString().Split("|"));
+            }
+            return default;
         }
+
+        private static (string,Dictionary<string, object>) GetInterceptMetadata( ServiceDescriptor descriptor, string metadataId)
+        {
+            var result = "";
+            var metadata = descriptor.GetMetadata<Dictionary<string, object>>("Intercept", new Dictionary<string, object>());
+            if (metadata.ContainsKey(metadataId))
+            {
+                result= metadata[metadataId].ToString();
+            }
+            else
+            {
+                metadata.Add(metadataId, result);
+            }
+            return (result, metadata);
+        }
+
     }
 }

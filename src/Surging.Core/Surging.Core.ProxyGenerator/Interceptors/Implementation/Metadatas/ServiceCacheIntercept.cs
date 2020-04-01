@@ -6,8 +6,8 @@ using System.Text;
 
 namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
 {
-    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-  public  class ServiceCacheIntercept : ServiceDescriptorAttribute
+  [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+  public  class ServiceCacheIntercept : ServiceIntercept
     {
         #region 字段
 
@@ -35,7 +35,20 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
 
          internal ServiceCacheIntercept(string [] serviceInterceptItem)
         {
-
+            Key = serviceInterceptItem[0];
+            L2Key= serviceInterceptItem[1];
+            EnableL2Cache= Convert.ToBoolean(serviceInterceptItem[3]);
+           Enum.TryParse<CacheTargetType>(serviceInterceptItem[4],out CacheTargetType mode);
+            Mode = mode;
+            CacheSectionType = serviceInterceptItem[5];
+                Enum.TryParse<CachingMethod>(serviceInterceptItem[6], out CachingMethod method);
+            Method = method;
+            Force= Convert.ToBoolean(serviceInterceptItem[7]);
+            Time = Convert.ToInt32(serviceInterceptItem[8]);
+            if(!string.IsNullOrEmpty(serviceInterceptItem[9]))
+            {
+                CorrespondingKeys = serviceInterceptItem[9].Split(",");
+            }
         }
         #endregion
 
@@ -82,18 +95,19 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
         /// 获取或设置与当前缓存方式相关的方法名称。注：此参数仅在缓存方式为Remove时起作用。
         /// </summary>
         public string[] CorrespondingKeys { get; set; }
+        protected override string MetadataId { get; set; } = "Cache";
 
         public override void Apply(ServiceDescriptor descriptor)
         {
-            descriptor.Key(Key)
-                .L2Key(L2Key)
-                .EnableL2Cache(EnableL2Cache)
-                .Mode(Mode)
-                .CacheSectionType(CacheSectionType)
-                .Method(Method)
-                .Force(Force)
-                .CacheTime(Time)
-                .CorrespondingKeys(CorrespondingKeys);
+            descriptor.Intercept(MetadataId).Key(Key, MetadataId)
+                .L2Key(L2Key, MetadataId)
+                .EnableL2Cache(EnableL2Cache, MetadataId)
+                .Mode(Mode, MetadataId)
+                .CacheSectionType(CacheSectionType, MetadataId)
+                .Method(Method, MetadataId)
+                .Force(Force, MetadataId)
+                .CacheTime(Time, MetadataId)
+                .CorrespondingKeys(CorrespondingKeys, MetadataId);
         }
 
         #endregion
