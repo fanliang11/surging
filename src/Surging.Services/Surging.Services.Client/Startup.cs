@@ -83,6 +83,12 @@ namespace Surging.Services.Client
                 RpcContext.GetContext().SetAttachment("xid",124);
 
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+                var user = userProxy.GetUser(new UserModel {
+                    UserId = 1,
+                    Name = "fanly",
+                    Age=120,
+                     Sex=0
+                }).GetAwaiter().GetResult();
                 var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
                 var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
                 var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
@@ -142,17 +148,17 @@ namespace Surging.Services.Client
         public static void TestForRoutePath(IServiceProxyProvider serviceProxyProvider)
         {
             Dictionary<string, object> model = new Dictionary<string, object>();
-            model.Add("user", JsonConvert.SerializeObject( new
+            model.Add("user",new UserModel
             {
                 Name = "fanly",
-                Age = 18,
-                UserId = 1,
-                Sex = "Man"
-            }));
+                Age =12,
+                UserId = 2,
+                Sex = Sex.Woman
+            });
             string path = "api/user/getuser";
             string serviceKey = "User";
 
-            var userProxy = serviceProxyProvider.Invoke<object>(model, path, serviceKey);
+            var userProxy = serviceProxyProvider.Invoke<UserModel>(model, path, serviceKey);
             var s = userProxy.Result;
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();

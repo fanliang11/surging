@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 {
@@ -141,12 +142,29 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 
         public static ServiceCacheIntercept GetCacheIntercept(this ServiceDescriptor descriptor,string metadataId)
         {
-          var metadata=  descriptor.GetMetadata<Dictionary<string, object>>("Intercept", new Dictionary<string, object>());
+          var metadata=  descriptor.GetMetadata<JObject>("Intercept",new JObject());
            if( metadata.ContainsKey(metadataId))
             {
                 return new ServiceCacheIntercept(metadata[metadataId].ToString().Split("|"));
             }
             return default;
+        }
+
+        public static string GetIntercept(this ServiceDescriptor descriptor, string metadataId)
+        {
+            var metadata = descriptor.GetMetadata<JObject>("Intercept", new JObject());
+            if (metadata.ContainsKey(metadataId))
+            {
+                return metadata[metadataId].ToString();
+            }
+            return null;
+        }
+
+        public static bool ExistIntercept(this ServiceDescriptor descriptor)
+        {
+            var metadata = descriptor.GetMetadata<JObject>("Intercept", null);
+         
+            return metadata!=null;
         }
 
         private static (string,Dictionary<string, object>) GetInterceptMetadata( ServiceDescriptor descriptor, string metadataId)

@@ -8,6 +8,7 @@ using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Convertibles;
 using Surging.Core.ProxyGenerator.Diagnostics;
 using Surging.Core.CPlatform.Diagnostics;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.ProxyGenerator
 {
@@ -27,6 +28,7 @@ namespace Surging.Core.ProxyGenerator
                  provider.Resolve<IRemoteInvokeService>(),
                  provider.Resolve<ITypeConvertibleService>(),
                  provider.Resolve<IServiceProvider>(),
+                provider.Resolve<IServiceRouteProvider>(),
                  builder.GetInterfaceService(),
                  builder.GetDataContractName()
                  )).As<IServiceProxyFactory>().SingleInstance();

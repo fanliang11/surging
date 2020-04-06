@@ -14,6 +14,7 @@ namespace Surging.IModuleServices.Common.Models
         public int UserId { get; set; }
 
         [ProtoMember(2)]
+        [CacheKey(2)]
         public string Name { get; set; }
 
         [ProtoMember(3)]

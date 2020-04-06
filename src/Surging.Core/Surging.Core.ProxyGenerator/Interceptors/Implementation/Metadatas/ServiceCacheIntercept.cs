@@ -37,17 +37,17 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
         {
             Key = serviceInterceptItem[0];
             L2Key= serviceInterceptItem[1];
-            EnableL2Cache= Convert.ToBoolean(serviceInterceptItem[3]);
-           Enum.TryParse<CacheTargetType>(serviceInterceptItem[4],out CacheTargetType mode);
+            EnableL2Cache = serviceInterceptItem[2] == "1" ? true : false ;
+           Enum.TryParse<CacheTargetType>(serviceInterceptItem[3],out CacheTargetType mode);
             Mode = mode;
-            CacheSectionType = serviceInterceptItem[5];
-                Enum.TryParse<CachingMethod>(serviceInterceptItem[6], out CachingMethod method);
+            CacheSectionType = serviceInterceptItem[4];
+                Enum.TryParse<CachingMethod>(serviceInterceptItem[5], out CachingMethod method);
             Method = method;
-            Force= Convert.ToBoolean(serviceInterceptItem[7]);
-            Time = Convert.ToInt32(serviceInterceptItem[8]);
-            if(!string.IsNullOrEmpty(serviceInterceptItem[9]))
+            Force=  serviceInterceptItem[6]== "1" ? true : false; ;
+            Time = Convert.ToInt32(serviceInterceptItem[7]);
+            if(!string.IsNullOrEmpty(serviceInterceptItem[8]))
             {
-                CorrespondingKeys = serviceInterceptItem[9].Split(",");
+                CorrespondingKeys = serviceInterceptItem[8].Split(",");
             }
         }
         #endregion
