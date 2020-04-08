@@ -23,7 +23,14 @@ namespace Surging.Core.KestrelHttpServer
             _context = httpContext;
             _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
         }
-        
+
+        internal HttpServerMessageSender(ISerializer<string> serializer, HttpContext httpContext, DiagnosticListener diagnosticListener)
+        {
+            _serializer = serializer;
+            _context = httpContext;
+            _diagnosticListener = diagnosticListener;
+        }
+
         public async Task SendAndFlushAsync(TransportMessage message)
         { 
             var httpMessage = message.GetContent<HttpResultMessage<Object>>();

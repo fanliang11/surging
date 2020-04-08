@@ -134,7 +134,7 @@ namespace Surging.Core.KestrelHttpServer
             app.Run(async (context) =>
             {
                 var messageId = Guid.NewGuid().ToString("N");
-                var sender = new HttpServerMessageSender(_serializer, context);
+                var sender = new HttpServerMessageSender(_serializer, context,_diagnosticListener);
                 try
                 {
                     var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
