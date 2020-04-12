@@ -94,7 +94,7 @@ new Surging.IModuleServices.Common.Models.UserModel
             Age=19
          };", RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
-        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetUser_{0}_{1}", CacheSectionType = "ddlCache", Mode = Metadatas.CacheTargetType.Redis, Time = 480)]
+        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetUser_{0}_{1}", L2Key = "GetUser_{0}_{1}",EnableL2Cache =true, CacheSectionType = "ddlCache", Mode = Metadatas.CacheTargetType.Redis, Time = 480)]
         [Validate]
         Task<UserModel> GetUser(UserModel user);
 
@@ -184,5 +184,8 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// </summary>
         /// <returns></returns>
         Task<Dictionary<string, object>> GetAllThings();
+
+        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Remove, "GetUser_{0}_{1}", CacheSectionType ="ddlCache", Mode = Metadatas.CacheTargetType.Redis)]
+        public Task<bool> RemoveUser(UserModel user);
     }
 }

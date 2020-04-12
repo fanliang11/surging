@@ -19,6 +19,7 @@ namespace Surging.IModuleServices.Common.Models
 
         [ProtoMember(3)]
         [Range(0, 150, ErrorMessage = "年龄只能在0到150岁之间")]
+        [CacheKey(3)]
         public int Age { get; set; }
 
         [ProtoMember(4)]

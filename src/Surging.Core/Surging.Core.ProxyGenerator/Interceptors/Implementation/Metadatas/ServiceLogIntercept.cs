@@ -8,9 +8,9 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
    public class ServiceLogIntercept : ServiceIntercept
     {
         protected override string MetadataId { get; set; } = "Log";
-         
 
-        #region 构造函数 
+
+        #region 构造函数  
         /// <summary>
         ///  初始化一个新的<c>InterceptMethodAttribute</c>类型。
         /// </summary>

@@ -165,6 +165,11 @@ namespace Surging.Modules.Common.Domain
             return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });
         }
 
+        public Task<bool> RemoveUser(UserModel user)
+        {
+            return Task.FromResult(true);
+        }
+
         #endregion Implementation of IUserService
     }
 }

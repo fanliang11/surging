@@ -69,23 +69,23 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
         {
             get;
             set;
-        }
+        } = "";
 
-        public string L2Key
+        public string L2Key 
         {
             get; set;
-        }
+        }= "";
 
         public bool EnableL2Cache
         {
             get; set;
         }
 
-        public string Key { get; set; }
+        public string Key { get; set; } = "";
         /// <summary>
         /// 获取或设置缓存方式。
         /// </summary>
-        public CachingMethod Method { get; set; }
+        public CachingMethod Method { get; set; } 
 
         /// <summary>
         /// 获取或设置一个<see cref="Boolean"/>值，该值表示当缓存方式为Put时，是否强制将值写入缓存中。
