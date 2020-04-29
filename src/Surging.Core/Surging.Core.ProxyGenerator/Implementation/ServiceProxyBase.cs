@@ -69,7 +69,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             var decodeJOject = typeof(T) == UtilityType.ObjectType;
             IInvocation invocation = null;
             var serviceRoute =await _serviceRouteProvider.Locate(serviceId);
-            if (serviceRoute ==null || !serviceRoute.ServiceDescriptor.ExistIntercept())
+            if ((serviceRoute ==null || !serviceRoute.ServiceDescriptor.ExistIntercept()) ||decodeJOject)
             {
                 message = await _breakeRemoteInvokeService.InvokeAsync(parameters, serviceId, _serviceKey, decodeJOject);
                 if (message == null)
