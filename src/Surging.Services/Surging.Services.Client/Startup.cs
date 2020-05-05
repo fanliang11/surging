@@ -83,6 +83,9 @@ namespace Surging.Services.Client
                 RpcContext.GetContext().SetAttachment("xid",124);
 
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+
+                var asyncProxy = serviceProxyFactory.CreateProxy<IAsyncService>();
+                var result= await  asyncProxy.AddAsync(1, 2);
                 var user = userProxy.GetUser(new UserModel {
                     UserId = 1,
                     Name = "fanly",
@@ -142,6 +145,44 @@ namespace Surging.Services.Client
                 UserId = 1
             });
             Console.WriteLine("Press any key to exit...");
+            Console.ReadLine();
+        }
+
+
+        public static void TestThriftInvoker(IServiceProxyFactory serviceProxyFactory)
+        {
+            var proxy = serviceProxyFactory.CreateProxy<IAsyncService>();
+            var proxy1 = serviceProxyFactory.CreateProxy<IThirdAsyncService>();
+            Task.Run(async () =>
+            {
+                do
+                {
+                    var result1 = await proxy.SayHelloAsync();
+                    var result2 = await proxy1.SayHelloAsync();
+                    Console.WriteLine("正在循环 1w次调用 GetUser.....");
+                    
+                    var watch = Stopwatch.StartNew();
+                    
+                    for (var i = 0; i < 10000; i++)
+                    {
+                        try
+                        {
+                            var result = await proxy.SayHelloAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                    watch.Stop();
+                    Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
+                    Console.WriteLine("Press any key to continue, q to exit the loop...");
+                    var key = Console.ReadLine();
+                    if (key.ToLower() == "q")
+                        break;
+                } while (true);
+            }).Wait();
+
             Console.ReadLine();
         }
 

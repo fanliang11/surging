@@ -2,7 +2,7 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|98",
+    "Port": "${Surging_Server_Port}|981",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
@@ -19,16 +19,16 @@
     "IsModulePerLifetimeScope": false,
     "ReloadOnChange": false,
     "Ports": {
-      "HttpPort": "${HttpPort}|280",
-      "WSPort": "${WSPort}|96",
-      "MQTTPort": "${MQTTPort}|97",
-      "GrpcPort": "${GrpcPort}|95"
+      "HttpPort": "${HttpPort}|281",
+      "WSPort": "${WSPort}|961",
+      "MQTTPort": "${MQTTPort}|971",
+      "GrpcPort": "${GrpcPort}|951"
     },
     "RequestCacheEnabled": false,
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;SerilogModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule;GrpcModule;ApolloModule;"
+        "Using": "${UseEngineParts}|ServiceProxyModule;ThriftModule;SerilogModule;NLogModule;MessagePackModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;DnsProtocolModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;KestrelNLogModule;ServiceHostModule;GrpcModule;ApolloModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages

@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Messages;
-using Surging.Core.CPlatform.Runtime.Client;
-using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Transport;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
@@ -11,51 +12,39 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Thrift;
+using Thrift.Protocol;
 
-namespace Surging.Core.CPlatform.Transport.Implementation
+namespace Surging.Core.Thrift.Extensions
 {
-    /// <summary>
-    /// 一个默认的传输客户端实现。
-    /// </summary>
-    public class TransportClient : ITransportClient, IDisposable
+   public class TThriftClient : TBaseClient, ITransportClient, IDisposable
     {
         #region Field
 
-        private readonly IMessageSender _messageSender;
-        private readonly IMessageListener _messageListener;
+        private readonly IMessageSender _messageSender; 
         private readonly ILogger _logger;
-        private readonly IServiceExecutor _serviceExecutor;
-
-        private readonly ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>> _resultDictionary =
-            new ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>>();
+        private readonly ChannelHandler _channelHandler;
         private readonly DiagnosticListener _diagnosticListener;
-
+        private readonly TProtocol _protocol;
+        private readonly ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>> _resultDictionary =
+           new ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>>();
         #endregion Field
 
         #region Constructor
 
-        public TransportClient(IMessageSender messageSender, IMessageListener messageListener, ILogger logger,
-            IServiceExecutor serviceExecutor)
+        public TThriftClient(TProtocol protocol, IMessageSender messageSender, IMessageListener messageListener, ChannelHandler channelHandler, ILogger logger ):base(protocol, protocol)
         {
 
-           _diagnosticListener =new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName); 
+            _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
             _messageSender = messageSender;
-            _messageListener = messageListener;
+            _channelHandler = channelHandler;
             _logger = logger;
-            _serviceExecutor = serviceExecutor;
+            _protocol = protocol;
             messageListener.Received += MessageListener_Received;
         }
 
-        #endregion Constructor
+        #endregion
 
-        #region Implementation of ITransportClient
-
-        /// <summary>
-        /// 发送消息。
-        /// </summary>
-        /// <param name="message">远程调用消息模型。</param>
-        /// <returns>远程调用消息的传输消息。</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message, CancellationToken cancellationToken)
         {
             try
@@ -65,13 +54,14 @@ namespace Surging.Core.CPlatform.Transport.Implementation
 
                 var transportMessage = TransportMessage.CreateInvokeMessage(message);
                 WirteDiagnosticBefore(transportMessage);
-                //注册结果回调
-                var callbackTask = RegisterResultCallbackAsync(transportMessage.Id,cancellationToken);
-
+                var callbackTask = RegisterResultCallbackAsync(transportMessage.Id, cancellationToken);
                 try
                 {
+                  
                     //发送
                     await _messageSender.SendAndFlushAsync(transportMessage);
+                    await _channelHandler.ChannelRead(_protocol);
+                    
                 }
                 catch (Exception exception)
                 {
@@ -91,30 +81,6 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             }
         }
 
-        #endregion Implementation of ITransportClient
-
-        #region Implementation of IDisposable
-
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-        public void Dispose()
-        {
-            (_messageSender as IDisposable)?.Dispose();
-            (_messageListener as IDisposable)?.Dispose();
-            foreach (var taskCompletionSource in _resultDictionary.Values)
-            {
-                taskCompletionSource.SetCanceled();
-            }
-        }
-
-        #endregion Implementation of IDisposable
-
-        #region Private Method
-
-        /// <summary>
-        /// 注册指定消息的回调任务。
-        /// </summary>
-        /// <param name="id">消息Id。</param>
-        /// <returns>远程调用结果消息模型。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task<RemoteInvokeResultMessage> RegisterResultCallbackAsync(string id, CancellationToken cancellationToken)
         {
@@ -134,6 +100,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
                 ManualResetValueTaskSource<TransportMessage> value;
                 _resultDictionary.TryRemove(id, out value);
                 value.SetCanceled();
+
             }
         }
 
@@ -152,7 +119,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
                 if (!string.IsNullOrEmpty(content.ExceptionMessage))
                 {
                     WirteDiagnosticError(message);
-                    task.SetException(new CPlatformCommunicationException(content.ExceptionMessage,content.StatusCode));
+                    task.SetException(new CPlatformCommunicationException(content.ExceptionMessage, content.StatusCode));
                 }
                 else
                 {
@@ -160,8 +127,6 @@ namespace Surging.Core.CPlatform.Transport.Implementation
                     WirteDiagnosticAfter(message);
                 }
             }
-            if (_serviceExecutor != null && message.IsInvokeMessage())
-                await _serviceExecutor.ExecuteAsync(sender, message);
         }
 
 
@@ -214,6 +179,8 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             }
         }
 
-        #endregion Private Method
+        public void Dispose()
+        {
+        }
     }
 }

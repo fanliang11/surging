@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.Validation;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
+using System.Threading;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Implementation
 {
@@ -130,6 +131,11 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      if (parameterInfo.HasDefaultValue && !parameters.ContainsKey(parameterInfo.Name))
                      {
                          list.Add(parameterInfo.DefaultValue);
+                         continue;
+                     }
+                     else if(parameterInfo.ParameterType == typeof(CancellationToken))
+                     {
+                         list.Add(new CancellationToken());
                          continue;
                      }
                      var value = parameters[parameterInfo.Name];

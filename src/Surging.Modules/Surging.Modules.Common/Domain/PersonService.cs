@@ -14,10 +14,12 @@ using Surging.Core.KestrelHttpServer.Internal;
 using System.IO;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.Common;
+using Surging.Core.Thrift.Attributes;
+using static ThriftCore.Calculator;
 
 namespace Surging.Modules.Common.Domain
 {
-    [ModuleName("Person")]
+    [ModuleName("Person")] 
     public class PersonService : ProxyServiceBase, IUserService
     {
         #region Implementation of IUserService
