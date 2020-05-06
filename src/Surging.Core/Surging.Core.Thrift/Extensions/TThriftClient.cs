@@ -104,14 +104,14 @@ namespace Surging.Core.Thrift.Extensions
             }
         }
 
-        private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
+        private  Task MessageListener_Received(IMessageSender sender, TransportMessage message)
         {
             if (_logger.IsEnabled(LogLevel.Trace))
                 _logger.LogTrace("服务消费者接收到消息。");
 
             ManualResetValueTaskSource<TransportMessage> task;
             if (!_resultDictionary.TryGetValue(message.Id, out task))
-                return;
+                return Task.CompletedTask;
 
             if (message.IsInvokeResultMessage())
             {
@@ -127,6 +127,7 @@ namespace Surging.Core.Thrift.Extensions
                     WirteDiagnosticAfter(message);
                 }
             }
+            return Task.CompletedTask;
         }
 
 
@@ -179,8 +180,15 @@ namespace Surging.Core.Thrift.Extensions
             }
         }
 
-        public void Dispose()
+        public new void Dispose()
         {
+            (_messageSender as IDisposable)?.Dispose(); 
+            foreach (var taskCompletionSource in _resultDictionary.Values)
+            {
+                taskCompletionSource.SetCanceled();
+            }
+            base.Dispose();
+            _protocol.Dispose();
         }
     }
 }
