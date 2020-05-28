@@ -78,7 +78,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
         {
             var key = GetCacheKey(e.Route.ServiceDescriptor);
-            Lazy<AddressEntry> value;
             var addressEntry = _concurrent.GetOrAdd(key, k => new Lazy<AddressEntry>(() => new AddressEntry(e.Route.Address))).Value;
             addressEntry.SetAddresses(e.Route.Address.ToArray());
         }
@@ -90,7 +89,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             private readonly AtomicLong current = new AtomicLong(0);
             private long lastUpdate;
 
-            public int getWeight()
+            public int GetWeight()
             {
                 return _weight;
             }
@@ -154,7 +153,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 WeightedRoundRobin selectedWRR = null;
                 foreach (var address in _address)
                 {
-                    String identifyString = address.ToString();
+                    var identifyString = address.ToString();
                     int weight = GetWeight(address);
                     var weightedRoundRobin = _concurrent.GetOrAdd(identifyString, k => new Lazy<WeightedRoundRobin>(() =>
                     {
@@ -162,7 +161,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                         wrr.SetWeight(weight);
                         return wrr;
                     })).Value;
-                    if (weight != weightedRoundRobin.getWeight())
+                    if (weight != weightedRoundRobin.GetWeight())
                     {
                         //weight changed
                         weightedRoundRobin.SetWeight(weight);
