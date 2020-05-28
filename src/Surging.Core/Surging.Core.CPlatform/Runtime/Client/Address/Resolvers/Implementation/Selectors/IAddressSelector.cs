@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Address;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         public IEnumerable<AddressModel> Address { get; set; }
     }
-
+      
     /// <summary>
     /// 一个抽象的地址选择器。
     /// </summary>

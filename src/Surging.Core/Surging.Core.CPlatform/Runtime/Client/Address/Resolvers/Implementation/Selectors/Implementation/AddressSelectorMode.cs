@@ -14,7 +14,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// </summary>
         HashAlgorithm,
         /// <summary>
-        /// 轮训
+        /// 轮询
         /// </summary>
         Polling,
         /// <summary>
@@ -25,5 +25,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         /// 压力最小优先
         /// </summary>
         FairPolling,
+        /// <summary>
+        /// 权重轮询
+        /// </summary>
+        RoundRobin
     }
 }
