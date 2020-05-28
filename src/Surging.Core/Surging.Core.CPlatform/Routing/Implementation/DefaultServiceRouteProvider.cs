@@ -125,6 +125,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             var addess = NetUtils.GetHostAddress();
             addess.ProcessorTime = processorTime;
             addess.Weight = AppConfig.ServerOptions.Weight;
+            if(addess.Weight>0)
             addess.Timestamp = DateTimeConverter.DateTimeToUnixTimestamp(DateTime.Now);
             RpcContext.GetContext().SetAttachment("Host", addess);
             var addressDescriptors = _serviceEntryManager.GetEntries().Select(i =>
