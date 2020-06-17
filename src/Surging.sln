@@ -107,7 +107,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Serilog", "Sur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Configuration.Apollo", "Surging.Core\Surging.Core.Configuration.Apollo\Surging.Core.Configuration.Apollo.csproj", "{FA1216E9-867C-4CAC-BFB5-0BDE8BC6CD2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Thrift", "Surging.Core\Surging.Core.Thrift\Surging.Core.Thrift.csproj", "{734B6128-C5E7-4746-B8B9-58B9798F9174}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Thrift", "Surging.Core\Surging.Core.Thrift\Surging.Core.Thrift.csproj", "{734B6128-C5E7-4746-B8B9-58B9798F9174}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Surging.Tools", "Surging.Tools", "{78305463-1A38-4431-AFB0-0A0BE59D5A03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Tools.Cli", "Surging.Tools\Surging.Tools.Cli\Surging.Tools.Cli.csproj", "{39B65A52-996E-4429-95DB-4731CD1EEAA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -299,6 +303,10 @@ Global
 		{734B6128-C5E7-4746-B8B9-58B9798F9174}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{734B6128-C5E7-4746-B8B9-58B9798F9174}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{734B6128-C5E7-4746-B8B9-58B9798F9174}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39B65A52-996E-4429-95DB-4731CD1EEAA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39B65A52-996E-4429-95DB-4731CD1EEAA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39B65A52-996E-4429-95DB-4731CD1EEAA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39B65A52-996E-4429-95DB-4731CD1EEAA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -348,6 +356,7 @@ Global
 		{6F45517A-4465-4F68-89B5-BB315EAD7CCD} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{FA1216E9-867C-4CAC-BFB5-0BDE8BC6CD2E} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{734B6128-C5E7-4746-B8B9-58B9798F9174} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{39B65A52-996E-4429-95DB-4731CD1EEAA9} = {78305463-1A38-4431-AFB0-0A0BE59D5A03}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
