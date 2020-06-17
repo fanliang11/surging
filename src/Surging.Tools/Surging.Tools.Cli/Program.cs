@@ -23,8 +23,6 @@ namespace Surging.Tools.Cli
         }
 
   
-
-
         private int Execute(string[] args)
         {
             var app = new CommandLineApplication<Program>();
