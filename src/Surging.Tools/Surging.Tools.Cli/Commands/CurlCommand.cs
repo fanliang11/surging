@@ -1,8 +1,16 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Surging.Tools.Cli.Utilities;
 using System;
-using System.Collections.Generic;
+using Autofac;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text;
+using Surging.Tools.Cli.Internal;
+using System.Net;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Surging.Tools.Cli.Internal.Messages;
+using System.Collections.Generic;
 
 namespace Surging.Tools.Cli.Commands
 {
@@ -17,11 +25,56 @@ namespace Surging.Tools.Cli.Commands
         /// http://127.0.0.1:280
         [Argument(0, Name = "address")]
         [Required(ErrorMessage = "The Address is required.")]
-        public string Address { get; set; }
+        public string Address { get; }
 
-        private void OnExecute(IConsole console)
-        { 
-            console.WriteLine(Address);
+        [Option("-X|--request", "http method", CommandOptionType.SingleValue)] 
+        public string Method { get; } = "GET";
+
+
+        [Option("-H|--header", "http request header", CommandOptionType.MultipleValue)]
+        public string[] Header { get; }
+
+        [Option("-d|--data", "request content", CommandOptionType.SingleValue)]
+        [Required(ErrorMessage = "The data is required.")]
+        public string Data { get; }
+
+        [Option("--mqtt-clientid", "mqtt clientid", CommandOptionType.SingleValue)]
+        public string ClientID { get; }
+
+        [Option("--mqtt-productid", "mqtt broker productid", CommandOptionType.SingleValue)]
+        public string ProductId { get; }
+
+        [Option("--mqtt-password", "mqtt broker password", CommandOptionType.SingleValue)]
+        public string MqttPassword { get; }
+
+        [Option("--mqtt-pub", "mqtt broker publish path", CommandOptionType.SingleValue)]
+        public string MqttPublishPath { get; }
+
+        private async Task OnExecute(CommandLineApplication app, IConsole console)
+        {
+            var uri = new Uri(Address);
+            if (!ServiceLocator.IsRegistered<ITransportClientFactory>(uri.Scheme.ToLower()))
+            {
+                console.ForegroundColor = ConsoleColor.Red;
+                console.WriteLine($"{uri.Scheme} not supported");
+            }
+            else
+            {
+                var transportClientFactory = ServiceLocator.GetService<ITransportClientFactory>(uri.Scheme.ToLower());
+                var transportClient = await transportClientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse(uri.Host), uri.Port));
+                var remoteInvokeMessage = new RemoteInvokeMessage();
+                if (!string.IsNullOrEmpty(Data))
+                    remoteInvokeMessage.Parameters = JsonConvert.DeserializeObject<Dictionary<string, object>>(Data);
+                var message = await transportClient.SendAsync(remoteInvokeMessage, new System.Threading.CancellationToken());
+                if (message.StatusCode == 200)
+                    console.WriteLine(JsonConvert.SerializeObject(message.Result));
+                else
+                {
+                    console.ForegroundColor = ConsoleColor.Red;
+                    console.WriteLine(JsonConvert.SerializeObject(message.Result));
+                } 
+            } 
+            console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

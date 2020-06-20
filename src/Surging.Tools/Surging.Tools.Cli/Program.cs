@@ -1,6 +1,11 @@
-﻿using McMaster.Extensions.CommandLineUtils;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Tools.Cli.Commands;
+using Surging.Tools.Cli.Internal;
+using Surging.Tools.Cli.Internal.Http;
+using Surging.Tools.Cli.Utilities;
 using System;
 
 namespace Surging.Tools.Cli
@@ -46,8 +51,12 @@ namespace Surging.Tools.Cli
 
         private static IServiceProvider ConfigureServices()
         {
-            var services = new ServiceCollection();
-            return services.BuildServiceProvider();
+            var serviceCollection = new ServiceCollection();
+            var builder = new ContainerBuilder();
+            builder.Populate(serviceCollection); 
+            builder.RegisterType<HttpTransportClientFactory>().Named<ITransportClientFactory>("http").SingleInstance();
+            ServiceLocator.Current = builder.Build();
+            return serviceCollection.BuildServiceProvider();
         }
 
         private int OnExecute(CommandLineApplication app, IConsole console)
