@@ -9,6 +9,6 @@ namespace Surging.Tools.Cli.Internal
 {
   public  interface ITransportClient
     {
-        Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message, CancellationToken cancellationToken);
+        Task<RemoteInvokeResultMessage> SendAsync(CancellationToken cancellationToken);
     }
 }

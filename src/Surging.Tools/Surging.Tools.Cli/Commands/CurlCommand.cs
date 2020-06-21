@@ -62,10 +62,8 @@ namespace Surging.Tools.Cli.Commands
             {
                 var transportClientFactory = ServiceLocator.GetService<ITransportClientFactory>(uri.Scheme.ToLower());
                 var transportClient = await transportClientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse(uri.Host), uri.Port));
-                var remoteInvokeMessage = new RemoteInvokeMessage();
-                if (!string.IsNullOrEmpty(Data))
-                    remoteInvokeMessage.Parameters = JsonConvert.DeserializeObject<Dictionary<string, object>>(Data);
-                var message = await transportClient.SendAsync(remoteInvokeMessage, new System.Threading.CancellationToken());
+       
+                var message = await transportClient.SendAsync( new System.Threading.CancellationToken());
                 if (message.StatusCode == 200)
                     console.WriteLine(JsonConvert.SerializeObject(message.Result));
                 else
