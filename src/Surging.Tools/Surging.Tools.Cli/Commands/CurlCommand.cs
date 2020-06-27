@@ -34,6 +34,9 @@ namespace Surging.Tools.Cli.Commands
         [Option("-H|--header", "http request header", CommandOptionType.MultipleValue)]
         public string[] Header { get; }
 
+        [Option("-F|--form", "http request header", CommandOptionType.MultipleValue)]
+        public string[] FormData { get; }
+
         [Option("-d|--data", "request content", CommandOptionType.SingleValue)]
         [Required(ErrorMessage = "The data is required.")]
         public string Data { get; }
@@ -52,27 +55,36 @@ namespace Surging.Tools.Cli.Commands
 
         private async Task OnExecute(CommandLineApplication app, IConsole console)
         {
-            var uri = new Uri(Address);
-            if (!ServiceLocator.IsRegistered<ITransportClientFactory>(uri.Scheme.ToLower()))
+            try
             {
-                console.ForegroundColor = ConsoleColor.Red;
-                console.WriteLine($"{uri.Scheme} not supported");
-            }
-            else
-            {
-                var transportClientFactory = ServiceLocator.GetService<ITransportClientFactory>(uri.Scheme.ToLower());
-                var transportClient = await transportClientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse(uri.Host), uri.Port));
-       
-                var message = await transportClient.SendAsync( new System.Threading.CancellationToken());
-                if (message.StatusCode == 200)
-                    console.WriteLine(JsonConvert.SerializeObject(message.Result));
-                else
+                var uri = new Uri(Address);
+                if (!ServiceLocator.IsRegistered<ITransportClientFactory>(uri.Scheme.ToLower()))
                 {
                     console.ForegroundColor = ConsoleColor.Red;
-                    console.WriteLine(JsonConvert.SerializeObject(message.Result));
-                } 
-            } 
-            console.ForegroundColor = ConsoleColor.White;
+                    console.WriteLine($"{uri.Scheme} not supported");
+                }
+                else
+                {
+                    var transportClientFactory = ServiceLocator.GetService<ITransportClientFactory>(uri.Scheme.ToLower());
+                    var transportClient = await transportClientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse(uri.Host), uri.Port));
+
+                    var message = await transportClient.SendAsync(new System.Threading.CancellationToken());
+                    if (message.StatusCode == 200)
+                        console.WriteLine(JsonConvert.SerializeObject(message.Result));
+                    else
+                    {
+                        console.ForegroundColor = ConsoleColor.Red;
+                        console.WriteLine(JsonConvert.SerializeObject(message.Result));
+                    }
+                }
+                console.ForegroundColor = ConsoleColor.White;
+            }
+            catch(Exception ex)
+            {
+                console.ForegroundColor = ConsoleColor.Red;
+                console.WriteLine(ex.Message);
+                console.ForegroundColor = ConsoleColor.White; 
+            }
         }
     }
 }

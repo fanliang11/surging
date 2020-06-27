@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Tools.Cli.Commands;
 using Surging.Tools.Cli.Internal;
 using Surging.Tools.Cli.Internal.Http;
+using Surging.Tools.Cli.Internal.Netty;
 using Surging.Tools.Cli.Utilities;
 using System;
 
@@ -56,10 +57,13 @@ namespace Surging.Tools.Cli
         private  IServiceProvider ConfigureServices()
         {
             var serviceCollection = new ServiceCollection();
+             serviceCollection.AddHttpClient();
             serviceCollection.AddSingleton<IConsole>(PhysicalConsole.Singleton);
             var builder = new ContainerBuilder();
             builder.Populate(serviceCollection);
             builder.RegisterType<HttpTransportClientFactory>().Named<ITransportClientFactory>("http").SingleInstance();
+            builder.RegisterType<NettyTransportClientFactory>().Named<ITransportClientFactory>("netty").SingleInstance();
+            builder.RegisterType<HttpClientProvider>().As<IHttpClientProvider>().SingleInstance();
             builder.Register(provider=> _curlCommand).As<CommandLineApplication>().SingleInstance();
             ServiceLocator.Current = builder.Build();
             return serviceCollection.BuildServiceProvider();
