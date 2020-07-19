@@ -5,7 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Surging.Tools.Cli.Commands;
 using Surging.Tools.Cli.Internal;
 using Surging.Tools.Cli.Internal.Http;
+using Surging.Tools.Cli.Internal.Implementation;
+using Surging.Tools.Cli.Internal.MessagePack;
 using Surging.Tools.Cli.Internal.Netty;
+using Surging.Tools.Cli.Internal.Thrift;
 using Surging.Tools.Cli.Utilities;
 using System;
 
@@ -63,7 +66,14 @@ namespace Surging.Tools.Cli
             builder.Populate(serviceCollection);
             builder.RegisterType<HttpTransportClientFactory>().Named<ITransportClientFactory>("http").SingleInstance();
             builder.RegisterType<NettyTransportClientFactory>().Named<ITransportClientFactory>("netty").SingleInstance();
+            builder.RegisterType<ThriftTransportClientFactory>().Named<ITransportClientFactory>("thrift").SingleInstance();
             builder.RegisterType<HttpClientProvider>().As<IHttpClientProvider>().SingleInstance();
+            builder.RegisterType<MessagePackTransportMessageEncoder>().As<ITransportMessageEncoder>().SingleInstance();
+            builder.RegisterType<MessagePackTransportMessageDecoder>().As<ITransportMessageDecoder>().SingleInstance();
+            builder.RegisterType<MessagePackTransportMessageCodecFactory>().As<ITransportMessageCodecFactory>().SingleInstance();
+            builder.RegisterType<DotNettyMessageClientSender>().Named<IMessageSender>("netty").SingleInstance();
+            builder.RegisterType<ThriftMessageClientSender>().Named<IMessageSender>("thrift").SingleInstance();
+            builder.RegisterType<MessageListener>().As<IMessageListener>().SingleInstance();
             builder.Register(provider=> _curlCommand).As<CommandLineApplication>().SingleInstance();
             ServiceLocator.Current = builder.Build();
             return serviceCollection.BuildServiceProvider();

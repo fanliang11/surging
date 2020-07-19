@@ -21,20 +21,20 @@ namespace Surging.Tools.Cli.Internal.Http
         }
 
         public async Task<RemoteInvokeResultMessage> SendAsync(CancellationToken cancellationToken)
-        { 
-                var command = _app.Model;
+        {
+            var command = _app.Model;
             var httpMessage = new HttpResultMessage<Object>();
             switch (command.Method.ToLower())
             {
                 case "post":
                     {
-                        var formData=  command.FormData.ToDictionary();
-                        if(formData.ContainsKey("type") && formData["type"]== "application/octet-stream")
+                        var formData = command.FormData.ToDictionary();
+                        if (formData.ContainsKey("type") && formData["type"] == "application/octet-stream")
                         {
                             httpMessage = await _httpClientProvider.UploadFileAsync<HttpResultMessage<Object>>(command.Address, command.FormData.ToDictionary(), command.Header.ToDictionary());
                         }
                         else
-                        httpMessage= await _httpClientProvider.PostJsonMessageAsync<HttpResultMessage<Object>>(command.Address, command.Data, command.Header.ToDictionary());
+                            httpMessage = await _httpClientProvider.PostJsonMessageAsync<HttpResultMessage<Object>>(command.Address, command.Data, command.Header.ToDictionary());
                         break;
                     }
                 case "get":
@@ -51,7 +51,7 @@ namespace Surging.Tools.Cli.Internal.Http
                     {
                         httpMessage = await _httpClientProvider.DeleteJsonMessageAsync<HttpResultMessage<Object>>(command.Address, command.Data, command.Header.ToDictionary());
                         break;
-                    } 
+                    }
 
             }
             return new RemoteInvokeResultMessage

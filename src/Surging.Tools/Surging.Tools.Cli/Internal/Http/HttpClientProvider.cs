@@ -34,7 +34,7 @@ namespace Surging.Tools.Cli.Internal.Http
             }
             var httpClient = _clientFactory.CreateClient();
             var response = await httpClient.SendAsync(request);
-            json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8); ;
+            json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8);
             return JsonSerializer.Deserialize<T>(json);
         }
 
@@ -47,7 +47,7 @@ namespace Surging.Tools.Cli.Internal.Http
             }
             var httpClient = _clientFactory.CreateClient();
             var response = await httpClient.SendAsync(request);
-            var json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8); ;
+            var json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8);
             return JsonSerializer.Deserialize<T>(json);
         }
 
@@ -87,7 +87,7 @@ namespace Surging.Tools.Cli.Internal.Http
             }
             var httpClient = _clientFactory.CreateClient();
             var response = await httpClient.SendAsync(request);
-            json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8); ;
+            json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8);
             return JsonSerializer.Deserialize<T>(json);
         }
 
@@ -117,7 +117,7 @@ namespace Surging.Tools.Cli.Internal.Http
                     }
                     var httpClient = _clientFactory.CreateClient();
                     var response = await httpClient.SendAsync(request);
-                    var json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8); ;
+                    var json = await response.Content.ReadAsByteArrayAsync(Encoding.UTF8);
                     return JsonSerializer.Deserialize<T>(json);
                 }
             }

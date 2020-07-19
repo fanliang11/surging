@@ -34,7 +34,16 @@ namespace Surging.Tools.Cli.Commands
         [Option("-H|--header", "http request header", CommandOptionType.MultipleValue)]
         public string[] Header { get; }
 
-        [Option("-F|--form", "http request header", CommandOptionType.MultipleValue)]
+        [Option("--serviceid", "remote service call parameter serviceid", CommandOptionType.SingleValue)]
+        public string ServiceId { get; set; }
+
+        [Option("--servicekey", "remote service call parameter servicekey", CommandOptionType.SingleValue)]
+        public string ServiceKey { get; set; }
+
+        [Option("--attachments", "remote service call invisible parameter transfer, CommandOptionType.SingleValue", CommandOptionType.SingleValue)]
+        public string Attachments { get; set; }
+
+        [Option("-F|--form", "http request form data", CommandOptionType.MultipleValue)]
         public string[] FormData { get; }
 
         [Option("-d|--data", "request content", CommandOptionType.SingleValue)]
