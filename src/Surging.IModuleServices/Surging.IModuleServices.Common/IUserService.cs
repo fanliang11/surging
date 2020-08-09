@@ -120,8 +120,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// 测试无参数调用
         /// </summary>
         /// <returns>返回是否成功</returns>
-        [Command(Strategy = StrategyType.Injection,ShuntStrategy = AddressSelectorMode.Polling, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return false;",FallBackName = "GetDictionaryMethodBreaker", RequestCacheEnabled = false)]
-        [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+       
         Task<bool> GetDictionary();
 
        /// <summary>

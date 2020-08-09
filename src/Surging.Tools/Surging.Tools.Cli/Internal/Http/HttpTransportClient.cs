@@ -1,6 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
+using Surging.Core.CPlatform.Messages;
 using Surging.Tools.Cli.Commands;
-using Surging.Tools.Cli.Internal.Messages;
 using Surging.Tools.Cli.Utilities;
 using System;
 using System.Collections.Generic;

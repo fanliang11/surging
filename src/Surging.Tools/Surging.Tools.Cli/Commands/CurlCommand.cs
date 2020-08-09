@@ -9,7 +9,6 @@ using Surging.Tools.Cli.Internal;
 using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Surging.Tools.Cli.Internal.Messages;
 using System.Collections.Generic;
 
 namespace Surging.Tools.Cli.Commands
@@ -47,7 +46,6 @@ namespace Surging.Tools.Cli.Commands
         public string[] FormData { get; }
 
         [Option("-d|--data", "request content", CommandOptionType.SingleValue)]
-        [Required(ErrorMessage = "The data is required.")]
         public string Data { get; }
 
         [Option("--mqtt-clientid", "mqtt clientid", CommandOptionType.SingleValue)]
@@ -92,6 +90,7 @@ namespace Surging.Tools.Cli.Commands
             {
                 console.ForegroundColor = ConsoleColor.Red;
                 console.WriteLine(ex.Message);
+                console.WriteLine(ex.StackTrace);
                 console.ForegroundColor = ConsoleColor.White; 
             }
         }

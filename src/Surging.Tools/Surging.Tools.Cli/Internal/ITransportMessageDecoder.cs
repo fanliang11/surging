@@ -1,11 +1,8 @@
-﻿using Surging.Tools.Cli.Internal.Messages;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Surging.Core.CPlatform.Messages;
 
 namespace Surging.Tools.Cli.Internal
 {
-   public  interface ITransportMessageDecoder
+    public  interface ITransportMessageDecoder
     {
         TransportMessage Decode(byte[] data);
     }

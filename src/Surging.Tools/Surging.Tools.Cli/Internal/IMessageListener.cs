@@ -1,4 +1,5 @@
-﻿using Surging.Tools.Cli.Internal.Messages;
+﻿
+using Surging.Core.CPlatform.Messages;
 using System;
 using System.Collections.Generic;
 using System.Text;

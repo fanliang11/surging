@@ -1,12 +1,9 @@
-﻿using Surging.Tools.Cli.Internal.Messages;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Surging.Core.CPlatform.Messages;
 using System.Threading.Tasks;
 
 namespace Surging.Tools.Cli.Internal
 {
-   public interface IMessageSender
+    public interface IMessageSender
     {
 
         /// <summary>

@@ -1,5 +1,5 @@
 using MessagePack;
-using Surging.Tools.Cli.Internal.Messages;
+using Surging.Core.CPlatform.Messages;
 using System.Runtime.CompilerServices;
 
 namespace Surging.Tools.Cli.Internal.MessagePack.Messages

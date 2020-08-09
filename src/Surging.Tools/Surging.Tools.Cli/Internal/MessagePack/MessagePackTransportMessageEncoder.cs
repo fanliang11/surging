@@ -1,13 +1,10 @@
-﻿using Surging.Tools.Cli.Internal.Messages;
+﻿using Surging.Core.CPlatform.Messages;
 using Surging.Tools.Cli.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Surging.Tools.Cli.Internal.MessagePack
 {
-   public sealed class MessagePackTransportMessageEncoder : ITransportMessageEncoder
+    public sealed class MessagePackTransportMessageEncoder : ITransportMessageEncoder
     {
         #region Implementation of ITransportMessageEncoder
 

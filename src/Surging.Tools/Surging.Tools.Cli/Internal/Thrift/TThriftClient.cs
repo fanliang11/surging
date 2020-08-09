@@ -1,11 +1,10 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
+using Surging.Core.CPlatform.Messages;
 using Surging.Tools.Cli.Commands;
-using Surging.Tools.Cli.Internal.Messages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Thrift;
@@ -13,7 +12,7 @@ using Thrift.Protocol;
 
 namespace Surging.Tools.Cli.Internal.Thrift
 {
-   public class TThriftClient : TBaseClient, ITransportClient
+    public class TThriftClient : TBaseClient, ITransportClient
     {
 
         private readonly IMessageSender _messageSender;
@@ -25,7 +24,6 @@ namespace Surging.Tools.Cli.Internal.Thrift
             new ConcurrentDictionary<string, TaskCompletionSource<TransportMessage>>();
 
         private readonly CommandLineApplication<CurlCommand> _app;
-        private readonly IHttpClientProvider _httpClientProvider;
 
         public TThriftClient(TProtocol protocol, IMessageSender messageSender, IMessageListener messageListener, ChannelHandler channelHandler, CommandLineApplication app) : base(protocol, protocol)
         {
@@ -41,16 +39,16 @@ namespace Surging.Tools.Cli.Internal.Thrift
         {
             try
             {
+                var def = new Dictionary<string, object>();
                 var command = _app.Model;
                 var transportMessage = TransportMessage.CreateInvokeMessage(new RemoteInvokeMessage
                 {
                     DecodeJOject = true,
-                    Parameters = JsonConvert.DeserializeObject<IDictionary<string, object>>(command.Data),
+                    Parameters = string.IsNullOrEmpty(command.Data) ? def : JsonConvert.DeserializeObject<IDictionary<string, object>>(command.Data),
                     ServiceId = command.ServiceId,
                     ServiceKey = command.ServiceKey,
-                    Attachments = JsonConvert.DeserializeObject<IDictionary<string, object>>(command.Attachments)
+                    Attachments = string.IsNullOrEmpty(command.Attachments)? def : JsonConvert.DeserializeObject<IDictionary<string, object>>(command.Attachments)
                 });
-                 
                 var callbackTask = RegisterResultCallbackAsync(transportMessage.Id, cancellationToken);
                 try
                 {
@@ -62,7 +60,7 @@ namespace Surging.Tools.Cli.Internal.Thrift
                 }
                 catch (Exception exception)
                 {
-                    throw new Exception("与服务端通讯时发生了异常。", exception);
+                    throw ;
                 }
                  
 
@@ -89,7 +87,7 @@ namespace Surging.Tools.Cli.Internal.Thrift
                 //删除回调任务
                 TaskCompletionSource<TransportMessage> value;
                 _resultDictionary.TryRemove(id, out value);
-                value.SetCanceled();
+               value.SetCanceled();
 
             }
         }

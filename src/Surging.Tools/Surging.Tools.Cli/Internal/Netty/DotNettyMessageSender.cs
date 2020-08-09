@@ -1,9 +1,7 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Transport.Channels;
-using Surging.Tools.Cli.Internal.Messages;
+using Surging.Core.CPlatform.Messages;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Surging.Tools.Cli.Internal.Netty

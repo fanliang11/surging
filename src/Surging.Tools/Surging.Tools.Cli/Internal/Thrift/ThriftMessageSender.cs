@@ -1,7 +1,5 @@
-﻿using Surging.Tools.Cli.Internal.Messages;
+﻿using Surging.Core.CPlatform.Messages;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Thrift.Protocol;
 using Thrift.Protocol.Entities;
