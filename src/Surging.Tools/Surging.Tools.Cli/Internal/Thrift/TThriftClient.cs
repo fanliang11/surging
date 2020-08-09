@@ -87,7 +87,7 @@ namespace Surging.Tools.Cli.Internal.Thrift
                 //删除回调任务
                 TaskCompletionSource<TransportMessage> value;
                 _resultDictionary.TryRemove(id, out value);
-               value.SetCanceled();
+               //value.SetCanceled();
 
             }
         }
