@@ -53,7 +53,7 @@ namespace Surging.Tools.Cli.Internal.Netty
                 }
                 catch (Exception exception)
                 {
-                    throw new Exception("与服务端通讯时发生了异常。", exception);
+                    throw;
                 }
 
                 return await callbackTask;
