@@ -26,7 +26,7 @@ namespace Surging.Core.System.MongoProvider
         public static IMongoCollection<T> GetCollectionFromConnectionString<T>(string connectionstring)
             where T : IEntity
         {
-            return GetDatabase(GetDefaultConnectionString()).GetCollection<T>(GetCollectionName<T>());
+            return GetDatabase(connectionstring).GetCollection<T>(GetCollectionName<T>());
         }
 
         private static string GetCollectionName<T>() where T : IEntity
