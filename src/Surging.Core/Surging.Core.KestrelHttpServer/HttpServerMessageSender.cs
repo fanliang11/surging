@@ -16,12 +16,21 @@ namespace Surging.Core.KestrelHttpServer
     {
         private readonly ISerializer<string> _serializer;
         private readonly HttpContext _context;
-       public  HttpServerMessageSender(ISerializer<string> serializer,HttpContext httpContext)
+        private readonly DiagnosticListener _diagnosticListener;
+        public  HttpServerMessageSender(ISerializer<string> serializer,HttpContext httpContext)
         {
             _serializer = serializer;
             _context = httpContext;
+            _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
         }
-        
+
+        internal HttpServerMessageSender(ISerializer<string> serializer, HttpContext httpContext, DiagnosticListener diagnosticListener)
+        {
+            _serializer = serializer;
+            _context = httpContext;
+            _diagnosticListener = diagnosticListener;
+        }
+
         public async Task SendAndFlushAsync(TransportMessage message)
         { 
             var httpMessage = message.GetContent<HttpResultMessage<Object>>();
@@ -55,11 +64,11 @@ namespace Surging.Core.KestrelHttpServer
         {
             if (!CPlatform.AppConfig.ServerOptions.DisableDiagnostic)
             {
-                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+            
                 var remoteInvokeResultMessage = message.GetContent<HttpResultMessage>();
                 if (remoteInvokeResultMessage.IsSucceed)
                 {
-                    diagnosticListener.WriteTransportAfter(TransportType.Rest, new ReceiveEventData(new DiagnosticMessage
+                    _diagnosticListener.WriteTransportAfter(TransportType.Rest, new ReceiveEventData(new DiagnosticMessage
                     {
                         Content = message.Content,
                         ContentType = message.ContentType,
@@ -68,7 +77,7 @@ namespace Surging.Core.KestrelHttpServer
                 }
                 else
                 {
-                    diagnosticListener.WriteTransportError(TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
+                    _diagnosticListener.WriteTransportError(TransportType.Rest, new TransportErrorEventData(new DiagnosticMessage
                     {
                         Content = message.Content,
                         ContentType = message.ContentType,

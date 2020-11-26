@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
      <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
      <PackageId>测试模块</PackageId>
      <Description>测试</Description>
@@ -16,6 +16,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
+ </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ApacheThrift" Version="0.13.0.1" />
+    <PackageReference Include="Google.Protobuf" Version="3.10.1" />
+    <PackageReference Include="Grpc.Core" Version="2.24.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.24.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="protobuf-net" Version="2.4.0" />
   </ItemGroup>

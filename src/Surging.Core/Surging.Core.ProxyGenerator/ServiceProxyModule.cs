@@ -24,20 +24,20 @@ namespace Surging.Core.ProxyGenerator
             serviceProvider.GetInstances<IServiceProxyFactory>();
             if (AppConfig.ServerOptions.ReloadOnChange)
             {
-                new ServiceRouteWatch(serviceProvider,
-                        () =>
-                        {
-                            var builder = new ContainerBuilder();
-                            var result = serviceProvider.GetInstances<IServiceEngineBuilder>().ReBuild(builder);
-                            if (result != null)
-                            {
-                                builder.Update(serviceProvider.Current.ComponentRegistry);
-                                serviceProvider.GetInstances<IServiceEntryManager>().UpdateEntries(serviceProvider.GetInstances<IEnumerable<IServiceEntryProvider>>());
-                            //  serviceProvider.GetInstances<IServiceProxyFactory>().RegisterProxType(result.Value.Item2.ToArray(), result.Value.Item1.ToArray());
-                            serviceProvider.GetInstances<IServiceRouteProvider>().RegisterRoutes(0);
-                                serviceProvider.GetInstances<IServiceProxyFactory>();
-                            }
-                        });
+                //new ServiceRouteWatch(serviceProvider,
+                //        () =>
+                //        {
+                //            var builder = new ContainerBuilder();
+                //            var result = serviceProvider.GetInstances<IServiceEngineBuilder>().ReBuild(builder);
+                //            if (result != null)
+                //            {
+                //                builder.Update(serviceProvider.Current.ComponentRegistry);
+                //                serviceProvider.GetInstances<IServiceEntryManager>().UpdateEntries(serviceProvider.GetInstances<IEnumerable<IServiceEntryProvider>>());
+                //            //  serviceProvider.GetInstances<IServiceProxyFactory>().RegisterProxType(result.Value.Item2.ToArray(), result.Value.Item1.ToArray());
+                //            serviceProvider.GetInstances<IServiceRouteProvider>().RegisterRoutes(0);
+                //                serviceProvider.GetInstances<IServiceProxyFactory>();
+                //            }
+                //        });
             }
         }
 

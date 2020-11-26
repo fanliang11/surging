@@ -5,6 +5,7 @@ using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -32,7 +33,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
 
             if (valueType == UtilityType.JObjectType || valueType == UtilityType.JArrayType)
                 Content = SerializerUtilitys.Serialize(value.ToString());
-            else
+            else if(valueType != typeof(CancellationToken))
                 Content = SerializerUtilitys.Serialize(value);
         }
 

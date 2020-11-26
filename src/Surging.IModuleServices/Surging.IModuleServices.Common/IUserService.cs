@@ -13,7 +13,10 @@ using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Validation; 
+using Metadatas=Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas;
 
 namespace Surging.IModuleServices.Common
 {
@@ -36,7 +39,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-        Task<string> GetUserName(int id);
+        Task<string> GetUserName([Validate] [Range(1, 10, ErrorMessage = "只能为1到10")] int id);
 
         /// <summary>
         /// 判断是否存在
@@ -44,7 +47,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-        [HttpPost(),HttpPut(), HttpDelete(), HttpGet()]
+        [HttpPost(true),HttpPut(true), HttpDelete(true), HttpGet(true)]
         // [ServiceBundle("api/{Service}/{id}", false)]
         Task<bool> Exists(int id);
 
@@ -65,6 +68,8 @@ namespace Surging.IModuleServices.Common
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
         [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = CacheTargetType.Redis, Time = 480)]
+        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = "ddlCache", L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = Metadatas.CacheTargetType.Redis, Time = 480)]
+       [Metadatas.ServiceLogIntercept()]
         [ServiceRoute("{userName}")]
         Task<int> GetUserId(string userName);
 
@@ -89,6 +94,8 @@ new Surging.IModuleServices.Common.Models.UserModel
             Age=19
          };", RequestCacheEnabled = true, InjectionNamespaces = new string[] { "Surging.IModuleServices.Common" })]
         [InterceptMethod(CachingMethod.Get, Key = "GetUser_id_{0}", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetUser_{0}_{1}", L2Key = "GetUser_{0}_{1}",EnableL2Cache =true, CacheSectionType = "ddlCache", Mode = Metadatas.CacheTargetType.Redis, Time = 480)]
+        [Validate]
         Task<UserModel> GetUser(UserModel user);
 
         /// <summary>
@@ -113,8 +120,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// 测试无参数调用
         /// </summary>
         /// <returns>返回是否成功</returns>
-        [Command(Strategy = StrategyType.Injection,ShuntStrategy = AddressSelectorMode.Polling, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return false;",FallBackName = "GetDictionaryMethodBreaker", RequestCacheEnabled = false)]
-        [InterceptMethod(CachingMethod.Get, Key = "GetDictionary", CacheSectionType = SectionType.ddlCache, Mode = CacheTargetType.Redis, Time = 480)]
+       
         Task<bool> GetDictionary();
 
        /// <summary>
@@ -161,7 +167,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// </summary>
         /// <param name="form">HttpFormCollection 类型参数</param>
         /// <returns></returns>
-        Task<bool> UploadFile(HttpFormCollection form);
+        Task<bool> UploadFile(HttpFormCollection form1);
 
         /// <summary>
         /// 测试下载文件
@@ -177,5 +183,8 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// </summary>
         /// <returns></returns>
         Task<Dictionary<string, object>> GetAllThings();
+
+        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Remove, "GetUser_{0}_{1}", CacheSectionType ="ddlCache", Mode = Metadatas.CacheTargetType.Redis)]
+        public Task<bool> RemoveUser(UserModel user);
     }
 }

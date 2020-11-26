@@ -64,9 +64,12 @@ namespace Surging.Services.Client
 
             using (host.Run())
             {
-                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
+                //Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
+           
+                Startup.TestThriftInvoker(ServiceLocator.GetService<IServiceProxyFactory>());
+              
                 /// test Parallel 
                 //var connectionCount = 300000;
                 //StartRequest(connectionCount);

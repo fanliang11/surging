@@ -40,6 +40,8 @@ using Surging.Core.CPlatform.Support.Implementation;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.CPlatform.Transport.Codec.Implementation;
 using Surging.Core.CPlatform.Utilities;
+using Surging.Core.CPlatform.Validation;
+using Surging.Core.CPlatform.Validation.Implementation;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -264,6 +266,19 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
+
+        /// <summary>
+        /// 使用权重轮询选择器。
+        /// </summary>
+        /// <param name="builder">服务构建者。</param>
+        /// <returns>服务构建者。</returns>
+        public static IServiceBuilder UseRoundRobinAddressSelector(this IServiceBuilder builder)
+        {
+            builder.Services.RegisterType(typeof(RoundRobinAddressSelector))
+                .Named(AddressSelectorMode.RoundRobin.ToString(), typeof(IAddressSelector)).SingleInstance();
+            return builder;
+        }
+
         /// <summary>
         /// 设置服务地址选择器。
         /// </summary>
@@ -272,7 +287,7 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder UseAddressSelector(this IServiceBuilder builder)
         {
-            return builder.UseRandomAddressSelector().UsePollingAddressSelector().UseFairPollingAddressSelector().UseHashAlgorithmAddressSelector();
+            return builder.UseRandomAddressSelector().UsePollingAddressSelector().UseFairPollingAddressSelector().UseHashAlgorithmAddressSelector().UseRoundRobinAddressSelector();
         }
 
         #endregion AddressSelector
@@ -445,6 +460,8 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IAuthorizationFilter)).SingleInstance();
             //注册基本过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IFilter)).SingleInstance();
+            //注册默认校验处理器
+            services.RegisterType(typeof(DefaultValidationProcessor)).As(typeof(IValidationProcessor)).SingleInstance();
             //注册服务器路由接口 
             services.RegisterType(typeof(DefaultServiceRouteProvider)).As(typeof(IServiceRouteProvider)).SingleInstance();
             //注册服务路由工厂 
@@ -535,7 +552,13 @@ namespace Surging.Core.CPlatform
                        .AsImplementedInterfaces();
                     services.RegisterAssemblyTypes(assembly)
                  //注入实现IServiceBehavior接口并ModuleName为空的类，作为接口实现类
-                 .Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+                 .Where(t => !typeof(ISingleInstance).GetTypeInfo().IsAssignableFrom(t) &&
+                 typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).AsImplementedInterfaces();
+
+                    services.RegisterAssemblyTypes(assembly)
+             //注入实现IServiceBehavior接口并ModuleName为空的类，作为接口实现类
+             .Where(t => typeof(ISingleInstance).GetTypeInfo().IsAssignableFrom(t) &&
+             typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() == null).SingleInstance().AsImplementedInterfaces();
 
                     var types = assembly.GetTypes().Where(t => typeof(IServiceBehavior).GetTypeInfo().IsAssignableFrom(t) && t.GetTypeInfo().GetCustomAttribute<ModuleNameAttribute>() != null);
                     foreach (var type in types)

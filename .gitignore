@@ -267,3 +267,5 @@ __pycache__/
 api/
 _site/
 
+/src/Surging.ApiGateway
+/src/Surging.Services/Surging.Services.Server/Dockerfile

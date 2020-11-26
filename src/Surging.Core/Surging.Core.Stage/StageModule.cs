@@ -41,6 +41,7 @@ namespace Surging.Core.Stage
             {
                 context.Builder.UseCors(builder =>
                 {
+                    if(policy.Origins!=null)
                     builder.WithOrigins(policy.Origins);
                     if (policy.AllowAnyHeader)
                         builder.AllowAnyHeader();
@@ -90,7 +91,7 @@ namespace Surging.Core.Stage
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 }
             });
-            context.Services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
+          
             context.Services.AddSingleton<IIPChecker,IPAddressChecker>();
             context.Services.AddFilters(typeof(AuthorizationFilterAttribute));
             context.Services.AddFilters(typeof(ActionFilterAttribute));

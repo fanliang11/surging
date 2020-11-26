@@ -33,7 +33,7 @@ namespace Surging.Core.ServiceHosting.Extensions
                         }
                         catch
                         {
-                            entry.Behavior.StopAsync(cts.Token).GetAwaiter();
+                            entry.Behavior.StopAsync(cts.Token);
                         }
                     });
                 }

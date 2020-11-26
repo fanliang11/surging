@@ -56,6 +56,7 @@ namespace SkyWalking.NetworkProtocol {
     }
 
     /// <summary>Base class for server-side implementations of InstanceDiscoveryService</summary>
+    [grpc::BindServiceMethod(typeof(InstanceDiscoveryService), "BindService")]
     public abstract partial class InstanceDiscoveryServiceBase
     {
       public virtual global::System.Threading.Tasks.Task<global::SkyWalking.NetworkProtocol.ApplicationInstanceMapping> registerInstance(global::SkyWalking.NetworkProtocol.ApplicationInstance request, grpc::ServerCallContext context)
@@ -75,7 +76,7 @@ namespace SkyWalking.NetworkProtocol {
     {
       /// <summary>Creates a new client for InstanceDiscoveryService</summary>
       /// <param name="channel">The channel to use to make remote calls.</param>
-      public InstanceDiscoveryServiceClient(grpc::Channel channel) : base(channel)
+      public InstanceDiscoveryServiceClient(grpc::ChannelBase channel) : base(channel)
       {
       }
       /// <summary>Creates a new client for InstanceDiscoveryService that uses a custom <c>CallInvoker</c>.</summary>
@@ -141,14 +142,14 @@ namespace SkyWalking.NetworkProtocol {
           .AddMethod(__Method_heartbeat, serviceImpl.heartbeat).Build();
     }
 
-    /// <summary>Register service method implementations with a service binder. Useful when customizing the service binding logic.
+    /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
     /// Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
     /// <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
     /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
     public static void BindService(grpc::ServiceBinderBase serviceBinder, InstanceDiscoveryServiceBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_registerInstance, serviceImpl.registerInstance);
-      serviceBinder.AddMethod(__Method_heartbeat, serviceImpl.heartbeat);
+      serviceBinder.AddMethod(__Method_registerInstance, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.ApplicationInstance, global::SkyWalking.NetworkProtocol.ApplicationInstanceMapping>(serviceImpl.registerInstance));
+      serviceBinder.AddMethod(__Method_heartbeat, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.ApplicationInstanceHeartbeat, global::SkyWalking.NetworkProtocol.Downstream>(serviceImpl.heartbeat));
     }
 
   }
@@ -176,6 +177,7 @@ namespace SkyWalking.NetworkProtocol {
     }
 
     /// <summary>Base class for server-side implementations of ServiceNameDiscoveryService</summary>
+    [grpc::BindServiceMethod(typeof(ServiceNameDiscoveryService), "BindService")]
     public abstract partial class ServiceNameDiscoveryServiceBase
     {
       public virtual global::System.Threading.Tasks.Task<global::SkyWalking.NetworkProtocol.ServiceNameMappingCollection> discovery(global::SkyWalking.NetworkProtocol.ServiceNameCollection request, grpc::ServerCallContext context)
@@ -190,7 +192,7 @@ namespace SkyWalking.NetworkProtocol {
     {
       /// <summary>Creates a new client for ServiceNameDiscoveryService</summary>
       /// <param name="channel">The channel to use to make remote calls.</param>
-      public ServiceNameDiscoveryServiceClient(grpc::Channel channel) : base(channel)
+      public ServiceNameDiscoveryServiceClient(grpc::ChannelBase channel) : base(channel)
       {
       }
       /// <summary>Creates a new client for ServiceNameDiscoveryService that uses a custom <c>CallInvoker</c>.</summary>
@@ -239,13 +241,13 @@ namespace SkyWalking.NetworkProtocol {
           .AddMethod(__Method_discovery, serviceImpl.discovery).Build();
     }
 
-    /// <summary>Register service method implementations with a service binder. Useful when customizing the service binding logic.
+    /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
     /// Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
     /// <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
     /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
     public static void BindService(grpc::ServiceBinderBase serviceBinder, ServiceNameDiscoveryServiceBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_discovery, serviceImpl.discovery);
+      serviceBinder.AddMethod(__Method_discovery, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::SkyWalking.NetworkProtocol.ServiceNameCollection, global::SkyWalking.NetworkProtocol.ServiceNameMappingCollection>(serviceImpl.discovery));
     }
 
   }

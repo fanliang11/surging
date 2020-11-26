@@ -51,6 +51,11 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
                 }) as IInvocation;
         }
 
+        public string[] GetCacheKeyVaule(IDictionary<string, object> parameterValue)
+        {
+            return this.GetKey(parameterValue);
+        }
+
         private string[] GetKey(IDictionary<string, object> parameterValue)
         {
             var param = parameterValue.Values.FirstOrDefault();
@@ -88,5 +93,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             }
             return result;
         }
+
+
     }
 }

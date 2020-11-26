@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -172,6 +173,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
                     UsingDirective(GetQualifiedNameSyntax("System.Collections.Generic")),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ITypeConvertibleService).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(IRemoteInvokeService).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(IServiceRouteProvider).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(CPlatformContainer).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
@@ -207,7 +209,12 @@ namespace Surging.Core.ProxyGenerator.Implementation
                                 Parameter(
                                     Identifier("serviceProvider"))
                                     .WithType(
-                                        IdentifierName("CPlatformContainer"))
+                                        IdentifierName("CPlatformContainer")),
+                                Token(SyntaxKind.CommaToken),
+                                Parameter(
+                                    Identifier("serviceRouteProvider"))
+                                    .WithType(
+                                        IdentifierName("IServiceRouteProvider"))
                             })))
                 .WithInitializer(
                         ConstructorInitializer(
@@ -225,7 +232,10 @@ namespace Surging.Core.ProxyGenerator.Implementation
                                             IdentifierName("serviceKey")),
                                            Token(SyntaxKind.CommaToken),
                                         Argument(
-                                            IdentifierName("serviceProvider"))
+                                            IdentifierName("serviceProvider")),
+                                           Token(SyntaxKind.CommaToken),
+                                            Argument(
+                                            IdentifierName("serviceRouteProvider"))
                                     }))))
                 .WithBody(Block());
         }

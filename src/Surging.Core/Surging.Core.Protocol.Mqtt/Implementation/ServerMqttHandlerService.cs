@@ -21,12 +21,15 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
         private readonly ILogger _logger;
         private readonly IChannelService _channelService;
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
+        private readonly DiagnosticListener _diagnosticListener;
+
         public ServerMqttHandlerService(
             ILogger logger, IChannelService channelService, IMqttBehaviorProvider mqttBehaviorProvider)
         {
             _logger = logger;
             _channelService = channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
+            _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
         }
 
         public async Task ConnAck(IChannelHandlerContext context, ConnAckPacket packet)
@@ -224,9 +227,8 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
         {
             if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
-                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
                 var remoteInvokeMessage = message.GetContent<RemoteInvokeMessage>();
-                diagnosticListener.WriteTransportBefore(TransportType.Mqtt, new TransportEventData(new DiagnosticMessage
+                _diagnosticListener.WriteTransportBefore(TransportType.Mqtt, new TransportEventData(new DiagnosticMessage
                 {
                     Content = message.Content,
                     ContentType = message.ContentType,
@@ -241,8 +243,7 @@ namespace Surging.Core.Protocol.Mqtt.Implementation
         {
             if (!AppConfig.ServerOptions.DisableDiagnostic)
             {
-                var diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
-                diagnosticListener.WriteTransportAfter(TransportType.Mqtt, new ReceiveEventData(new DiagnosticMessage
+                _diagnosticListener.WriteTransportAfter(TransportType.Mqtt, new ReceiveEventData(new DiagnosticMessage
                 {
                     Content = message.Content,
                     ContentType = message.ContentType,

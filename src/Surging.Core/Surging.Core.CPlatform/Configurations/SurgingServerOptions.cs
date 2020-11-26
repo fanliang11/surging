@@ -23,7 +23,11 @@ namespace Surging.Core.CPlatform.Configurations
 
         public bool Libuv { get; set; } = false;
 
+        public DockerDeployMode DockerDeployMode { get; set; } = DockerDeployMode.Standard;
+
         public int SoBacklog { get; set; } = 8192;
+
+        public int Weight { get; set; }
 
         public bool EnableRouteWatch { get; set; }
 

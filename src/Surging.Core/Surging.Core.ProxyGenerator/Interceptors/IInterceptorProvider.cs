@@ -9,5 +9,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors
         IInvocation GetInvocation(object proxy, IDictionary<string, object> parameters, string serviceId, Type returnType);
 
         IInvocation GetCacheInvocation(object proxy, IDictionary<string, object> parameters,string serviceId, Type returnType);
+
+        string[] GetCacheKeyVaule(IDictionary<string, object> parameterValue);
     }
 }

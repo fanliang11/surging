@@ -12,5 +12,9 @@ namespace Surging.IModuleServices.Common
     public interface IWorkService : IServiceKey
     {
         Task<bool> AddWork(Message message);
+
+         Task StartAsync();
+
+        Task StopAsync();
     }
 }
