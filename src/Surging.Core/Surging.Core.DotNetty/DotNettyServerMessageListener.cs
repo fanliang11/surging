@@ -88,8 +88,8 @@ namespace Surging.Core.DotNetty
                 var pipeline = channel.Pipeline;
                 pipeline.AddLast(new LengthFieldPrepender(4));
                 pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
-                pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
+                pipeline.AddLast(workerGroup, "HandlerAdapter", new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
+                pipeline.AddLast(workerGroup, "ServerHandler", new ServerHandler(async (contenxt, message) =>
                 {
                     var sender = new DotNettyServerMessageSender(_transportMessageEncoder, contenxt);
                     await OnReceived(sender, message);
@@ -145,12 +145,9 @@ namespace Surging.Core.DotNetty
             #region Overrides of ChannelHandlerAdapter
 
             public override void ChannelRead(IChannelHandlerContext context, object message)
-            {
-                Task.Run(() =>
-                {
-                    var transportMessage = (TransportMessage)message;
-                    _readAction(context, transportMessage);
-                });
+            { 
+                var transportMessage = (TransportMessage)message;
+                _readAction(context, transportMessage); 
             }
 
             public override void ChannelReadComplete(IChannelHandlerContext context)
