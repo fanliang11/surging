@@ -114,6 +114,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 RoutePath = serviceDescriptor.RoutePath,
                 Methods=httpMethods,
                 MethodName = method.Name,
+                Parameters = method.GetParameters(),
                 Type = method.DeclaringType,
                 Attributes = attributes,
                 Func = (key, parameters) =>

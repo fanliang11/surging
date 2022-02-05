@@ -18,6 +18,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using TaskCompletionSource = DotNetty.Common.Concurrency.TaskCompletionSource;
 
 namespace Surging.Core.Protocol.Http
 {

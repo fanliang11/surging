@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28527.54
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Common", "Surging.Core\Surging.Core.Common\Surging.Core.Common.csproj", "{F9B2DBAE-34D5-4CF0-9CBB-67A87580BB6A}"
 EndProject
@@ -77,8 +77,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetty.Codecs.DNS", "DotN
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.DNS", "Surging.Core\Surging.Core.DNS\Surging.Core.DNS.csproj", "{3FA2B587-8490-4874-8318-84C1CBA2B111}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Swagger", "Surging.Core\Surging.Core.Swagger\Surging.Core.Swagger.csproj", "{F824A598-F19F-4A32-A28E-FF2FE96EFC10}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Abp", "Surging.Core\Surging.Core.Abp\Surging.Core.Abp.csproj", "{00BFD602-245D-4052-8B8C-7AA319BBD567}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.AutoMapper", "Surging.Core\Surging.Core.AutoMapper\Surging.Core.AutoMapper.csproj", "{8D796D5A-9FC6-491B-906D-50B2AABAECF3}"
@@ -111,7 +109,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Thrift", "Surg
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Surging.Tools", "Surging.Tools", "{78305463-1A38-4431-AFB0-0A0BE59D5A03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Tools.Cli", "Surging.Tools\Surging.Tools.Cli\Surging.Tools.Cli.csproj", "{39B65A52-996E-4429-95DB-4731CD1EEAA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Tools.Cli", "Surging.Tools\Surging.Tools.Cli\Surging.Tools.Cli.csproj", "{39B65A52-996E-4429-95DB-4731CD1EEAA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Swagger_V5", "Surging.Core\Surging.Core.Swagger_V5\Surging.Core.Swagger_V5.csproj", "{4EF33237-E340-4041-9A83-11B012D3A736}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -243,10 +243,6 @@ Global
 		{3FA2B587-8490-4874-8318-84C1CBA2B111}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FA2B587-8490-4874-8318-84C1CBA2B111}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FA2B587-8490-4874-8318-84C1CBA2B111}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F824A598-F19F-4A32-A28E-FF2FE96EFC10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F824A598-F19F-4A32-A28E-FF2FE96EFC10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F824A598-F19F-4A32-A28E-FF2FE96EFC10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F824A598-F19F-4A32-A28E-FF2FE96EFC10}.Release|Any CPU.Build.0 = Release|Any CPU
 		{00BFD602-245D-4052-8B8C-7AA319BBD567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{00BFD602-245D-4052-8B8C-7AA319BBD567}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00BFD602-245D-4052-8B8C-7AA319BBD567}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -307,6 +303,10 @@ Global
 		{39B65A52-996E-4429-95DB-4731CD1EEAA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39B65A52-996E-4429-95DB-4731CD1EEAA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39B65A52-996E-4429-95DB-4731CD1EEAA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EF33237-E340-4041-9A83-11B012D3A736}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EF33237-E340-4041-9A83-11B012D3A736}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EF33237-E340-4041-9A83-11B012D3A736}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EF33237-E340-4041-9A83-11B012D3A736}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -341,7 +341,6 @@ Global
 		{A0502179-D200-49AE-9897-A6B189A75B45} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{A3B75BE5-A26A-46AC-9C1F-64CDCB2D413B} = {C76A8400-CEFF-4E68-B632-CC4E888C6A31}
 		{3FA2B587-8490-4874-8318-84C1CBA2B111} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
-		{F824A598-F19F-4A32-A28E-FF2FE96EFC10} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{00BFD602-245D-4052-8B8C-7AA319BBD567} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{8D796D5A-9FC6-491B-906D-50B2AABAECF3} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{27E8A4B2-73DF-4C03-857B-2F529C3C49D6} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
@@ -357,6 +356,7 @@ Global
 		{FA1216E9-867C-4CAC-BFB5-0BDE8BC6CD2E} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{734B6128-C5E7-4746-B8B9-58B9798F9174} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{39B65A52-996E-4429-95DB-4731CD1EEAA9} = {78305463-1A38-4431-AFB0-0A0BE59D5A03}
+		{4EF33237-E340-4041-9A83-11B012D3A736} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
