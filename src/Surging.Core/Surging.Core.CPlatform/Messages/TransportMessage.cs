@@ -79,6 +79,12 @@ namespace Surging.Core.CPlatform.Messages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsReactiveMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.reactiveResultMessageTypeName;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsHttpMessage()
         {
             return ContentType == MessagePackTransportMessageType.httpMessageTypeName;

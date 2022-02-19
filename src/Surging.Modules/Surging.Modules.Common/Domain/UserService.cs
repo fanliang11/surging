@@ -17,6 +17,9 @@ using Surging.Modules.Common.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using static ThriftCore.Calculator;
 
@@ -174,6 +177,21 @@ namespace Surging.Modules.Common.Domain
         {
             return Task.FromResult(true);
         }
+        public Task<int> ReactiveTest(int value)
+        { 
+            ISubject<int> subject = new ReplaySubject<int>();
+            var result = 0;
+            var exception = new Exception("");
+            subject.Subscribe((temperature) => result = temperature, temperature => exception = temperature, async () => await Write(result, default, exception.Message));
+             
+            GetGenerateObservable().Subscribe(subject);
+            return Task.FromResult<int>(default);
+        }
         #endregion Implementation of IUserService
+
+        private static IObservable<int> GetGenerateObservable()
+        { 
+            return Observable.Return(30, ThreadPoolScheduler.Instance);
+        }
     }
 }

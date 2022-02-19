@@ -8,11 +8,43 @@ using Surging.Core.ProxyGenerator;
 using System;
 using WebSocketCore.Server;
 using System.Linq;
+using System.Threading.Tasks;
+using Surging.Core.CPlatform.Messages;
 
 namespace Surging.Core.Protocol.WS
 {
    public abstract class WSBehavior : WebSocketBehavior, IServiceBehavior
-    { 
+    {
+        private ServerReceivedDelegate received;
+        public event ServerReceivedDelegate Received
+        {
+            add
+            {
+                if (received == null)
+                {
+                    received += value;
+                }
+            }
+            remove
+            {
+                received -= value;
+            }
+        }
+
+        public string MessageId { get; } = Guid.NewGuid().ToString("N");
+        public async Task Write(object result, int statusCode = 200, string exceptionMessage = "")
+        {
+            if (received == null)
+                return;
+            var message = new TransportMessage(MessageId, new ReactiveResultMessage
+            {
+                ExceptionMessage = exceptionMessage,
+                StatusCode = statusCode,
+                Result = result
+
+            });
+            await received(message);
+        }
         public T CreateProxy<T>(string key) where T : class
         {
             return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
