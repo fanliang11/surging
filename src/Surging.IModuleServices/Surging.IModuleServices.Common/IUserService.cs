@@ -186,5 +186,9 @@ new Surging.IModuleServices.Common.Models.UserModel
 
         [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Remove, "GetUser_{0}_{1}", CacheSectionType ="ddlCache", Mode = Metadatas.CacheTargetType.Redis)]
         public Task<bool> RemoveUser(UserModel user);
+
+
+        [Reactive]
+        public Task<int> ReactiveTest(int value);
     }
 }

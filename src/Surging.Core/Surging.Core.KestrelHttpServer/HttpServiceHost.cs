@@ -25,11 +25,8 @@ namespace Surging.Core.KestrelHttpServer
             _messageListenerFactory = messageListenerFactory;
             _serverMessageListener = httpMessageListener;
             _serverMessageListener.Received += async (sender, message) =>
-            {
-                await Task.Run(async () =>
-                {
-                   await MessageListener.OnReceived(sender, message);
-                });
+            { 
+                 await  MessageListener.OnReceived(sender, message);
             };
         }
 

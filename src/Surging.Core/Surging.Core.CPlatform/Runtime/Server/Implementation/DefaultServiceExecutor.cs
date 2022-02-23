@@ -144,6 +144,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 resultMessage.ExceptionMessage = GetExceptionMessage(exception);
                 resultMessage.StatusCode = exception.HResult;
             }
+             finally
+            {
+                RpcContext.RemoveContext();
+            }
         }
          
         private async Task SendRemoteInvokeResult(IMessageSender sender, string messageId, RemoteInvokeResultMessage resultMessage)

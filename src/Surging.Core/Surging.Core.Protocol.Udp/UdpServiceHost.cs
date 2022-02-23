@@ -44,10 +44,7 @@ namespace Surging.Core.Protocol.Udp
             _serverMessageListener = await _messageListenerFactory(endPoint);
             _serverMessageListener.Received += async (sender, message) =>
             {
-                await Task.Run(() =>
-                {
-                    MessageListener.OnReceived(sender, message);
-                });
+                await MessageListener.OnReceived(sender, message);
             };
         }
 
@@ -57,11 +54,8 @@ namespace Surging.Core.Protocol.Udp
                 return;
             _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.UdpPort));
             _serverMessageListener.Received += async (sender, message) =>
-            {
-                await Task.Run(() =>
-                {
-                    MessageListener.OnReceived(sender, message);
-                });
+            { 
+                await  MessageListener.OnReceived(sender, message);
             };
         }
 

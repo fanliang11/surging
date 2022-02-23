@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Server
@@ -17,6 +18,7 @@ namespace Surging.Core.CPlatform.Runtime.Server
         public string RoutePath { get; set; }
         public Type Type { get; set; }
         public string MethodName { get; set; }
+        public ParameterInfo[] Parameters { get; set; }
         public List<Attribute> Attributes { get; set; }
         /// <summary>
         /// 服务描述符。

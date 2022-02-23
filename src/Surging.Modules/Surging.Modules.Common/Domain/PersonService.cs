@@ -16,6 +16,9 @@ using Surging.Core.KestrelHttpServer;
 using Surging.Core.Common;
 using Surging.Core.Thrift.Attributes;
 using static ThriftCore.Calculator;
+using System.Reactive.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Subjects;
 
 namespace Surging.Modules.Common.Domain
 {
@@ -171,7 +174,21 @@ namespace Surging.Modules.Common.Domain
         {
             return Task.FromResult(true);
         }
+        public Task<int> ReactiveTest(int value)
+        {
+            ISubject<int> subject = new ReplaySubject<int>();
+            var result = 0;
+            var exception = new Exception("");
+            subject.Subscribe((temperature) => result = temperature, temperature => exception = temperature, async () => await Write(result, default, exception.Message));
 
+            GetGenerateObservable().Subscribe(subject);
+            return Task.FromResult<int>(default);
+        }
         #endregion Implementation of IUserService
+
+        private static IObservable<int> GetGenerateObservable()
+        {
+            return Observable.Return(30, ThreadPoolScheduler.Instance);
+        }
     }
 }

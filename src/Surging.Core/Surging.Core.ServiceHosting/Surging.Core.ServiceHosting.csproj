@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <PackageId>Surging.Core.ServiceHosting</PackageId>
     <Copyright>Copyright © fanly All Rights Reserved.</Copyright>
     <Version>1.1.0.0</Version>

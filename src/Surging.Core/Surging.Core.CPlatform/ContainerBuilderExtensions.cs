@@ -518,7 +518,7 @@ namespace Surging.Core.CPlatform
                 {
                     builder = null;
                 }
-            }).As<IServiceEntryProvider>();
+            }).As<IServiceEntryProvider>().SingleInstance();
             builder.Services.RegisterType(typeof(DefaultServiceEntryManager)).As(typeof(IServiceEntryManager)).SingleInstance();
             return builder;
         }

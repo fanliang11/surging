@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="SwaggerUI\index.html" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\absolute-path.js" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\favicon-16x16.png" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\favicon-32x32.png" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\index.html" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\index.js" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\LICENSE" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\NOTICE" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\oauth2-redirect.html" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\package.json" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-bundle.js" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-bundle.js.map" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle-core.js" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle-core.js.map" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle.js" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle.js.map" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-standalone-preset.js" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-standalone-preset.js.map" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.css" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.css.map" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.js" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SwaggerUI\index.html" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\absolute-path.js" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\favicon-16x16.png" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\favicon-32x32.png" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\index.html" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\index.js" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\LICENSE" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\NOTICE" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\oauth2-redirect.html" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\package.json" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-bundle.js" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-bundle.js.map" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle-core.js" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle-core.js.map" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle.js" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-es-bundle.js.map" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-standalone-preset.js" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui-standalone-preset.js.map" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.css" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.css.map" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.js" />
+    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.OpenApi" Version="1.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Surging.Core.KestrelHttpServer\Surging.Core.KestrelHttpServer.csproj" />
+  </ItemGroup>
+
+</Project>

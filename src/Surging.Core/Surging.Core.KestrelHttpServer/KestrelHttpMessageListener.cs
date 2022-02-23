@@ -55,7 +55,7 @@ namespace Surging.Core.KestrelHttpServer
             _moduleProvider = moduleProvider;
             _container = container;
             _serviceRouteProvider = serviceRouteProvider;
-            _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+            _diagnosticListener = new DiagnosticListener(CPlatform.Diagnostics.DiagnosticListenerExtensions.DiagnosticListenerName);
         }
 
         public async Task StartAsync(IPAddress address,int? port)
@@ -115,7 +115,7 @@ namespace Surging.Core.KestrelHttpServer
         public void ConfigureServices(IServiceCollection services)
         { 
             var builder = new ContainerBuilder();
-            services.AddMvc();
+            services.AddMvc(option => option.EnableEndpointRouting = false);
             _moduleProvider.ConfigureServices(new ConfigurationContext(services,
                 _moduleProvider.Modules,
                 _moduleProvider.VirtualPaths,

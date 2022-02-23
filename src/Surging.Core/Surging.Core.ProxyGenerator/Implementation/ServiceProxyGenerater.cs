@@ -63,7 +63,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             types = interfacTypes.Except(types);
             foreach (var t in types)
             {
-                assemblys = assemblys.Append(t.Assembly);
+                assemblys = assemblys.Append(t.Assembly).ToArray();
             }
             var trees = interfacTypes.Select(p=>GenerateProxyTree(p,namespaces)).ToList();
             var stream = CompilationUtilitys.CompileClientProxy(trees,
