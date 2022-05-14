@@ -11,5 +11,7 @@
         public int GrpcPort { get; set; }
 
         public int UdpPort { get; set; }
+
+        public int TcpPort { get; set; }
     }
 }
