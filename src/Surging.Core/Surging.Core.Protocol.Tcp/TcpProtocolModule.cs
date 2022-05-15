@@ -23,7 +23,8 @@ namespace Surging.Core.Protocol.Tcp
             config.Add("script", @"parser.Fixed(4).Handler(""function(buffer){
                     var buf = BytesUtils.Slice(buffer,1,4);
                     parser.Fixed(buffer.ReadableBytes).Result(buf);
-             }"").Handler(""function(buffer){parser.Result(buffer).Complete();}"")");
+             }"").Handler(""function(buffer){parser.Fixed(8).Result(buffer);}"")
+                  .Handler(""function(buffer){parser.Result('处理完成','gb2312').Complete();}"")");
            var network=  serviceProvider.ServiceProvoider.GetInstances<INetworkProvider<TcpServerProperties>>().CreateNetwork(new TcpServerProperties
            {
                ParserType = PayloadParserType.Script,

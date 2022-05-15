@@ -17,11 +17,10 @@ namespace Surging.Modules.Common.Domain
             _deviceProvider = deviceProvider;
         }
 
-        public override void Load(string clientId,TcpServerProperties tcpServerProperties)
-        { 
-         var deviceStatus =_deviceProvider.IsConnected(clientId);
-       
-            this.Parser.HandlePayload().Subscribe(buffer=>ParserBuffer(buffer));
+        public override void Load(string clientId, TcpServerProperties tcpServerProperties)
+        {
+            var deviceStatus = _deviceProvider.IsConnected(clientId);
+            this.Parser.HandlePayload().Subscribe(buffer => ParserBuffer(buffer));
         }
 
         public override void DeviceStatusProcess(DeviceStatus status, string clientId, TcpServerProperties tcpServerProperties)

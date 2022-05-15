@@ -31,6 +31,11 @@ namespace Surging.Core.Protocol.Tcp.RuleParser.Implementation
             return Result(Unpooled.CopiedBuffer(buffer, Encoding.UTF8));
         }
 
+        public RulePipePayloadParser Result(string buffer,string encodeName)
+        {
+            return Result(Unpooled.CopiedBuffer(buffer, Encoding.GetEncoding(encodeName)));
+        }
+
         public RulePipePayloadParser Result(byte[] buffer)
         {
             return Result(Unpooled.CopiedBuffer(buffer));
