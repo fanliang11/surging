@@ -19,13 +19,17 @@ namespace Surging.Core.Protocol.Tcp
         public override void Initialize(AppModuleContext serviceProvider)
         {
             base.Initialize(serviceProvider);
-            var config =new Dictionary<string, object>();
-            config.Add("script", @"parser.Fixed(4).Handler(""function(buffer){
+            var config = new Dictionary<string, object>();
+            config.Add("script", @"parser.Fixed(4).Handler(
+                  function(buffer){
                     var buf = BytesUtils.Slice(buffer,1,4);
                     parser.Fixed(buffer.ReadableBytes).Result(buf);
-             }"").Handler(""function(buffer){parser.Fixed(8).Result(buffer);}"")
-                  .Handler(""function(buffer){parser.Result('处理完成','gb2312').Complete();}"")");
-           var network=  serviceProvider.ServiceProvoider.GetInstances<INetworkProvider<TcpServerProperties>>().CreateNetwork(new TcpServerProperties
+             }).Handler(
+                    function(buffer){parser.Fixed(8).Result(buffer);}
+            ).Handler(
+                 function(buffer){parser.Result('处理完成','gb2312').Complete();}
+             )");
+            var network=  serviceProvider.ServiceProvoider.GetInstances<INetworkProvider<TcpServerProperties>>().CreateNetwork(new TcpServerProperties
            {
                ParserType = PayloadParserType.Script,
                PayloadType = PayloadType.String,

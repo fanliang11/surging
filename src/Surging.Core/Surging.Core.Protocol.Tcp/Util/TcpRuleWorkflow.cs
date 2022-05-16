@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Tcp.Util
@@ -17,7 +18,9 @@ namespace Surging.Core.Protocol.Tcp.Util
 
         public TcpRuleWorkflow(string actionExpression) : this()
         {
-            Context.Add("expression", actionExpression);
+            var str = Regex.Replace(actionExpression, @"(\.Handler\()[.\r|\n|\t|\s]*?(?=(function))", ".Handler(\"", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, @"(})[.\r|\n|\t|\s]*?(?=(\)))", "}\"", RegexOptions.IgnoreCase);
+            Context.Add("expression", str ?? "1 == 1");
         }
 
         public TcpRuleWorkflow(string workflowName,string ruleName,string expression,string ruleActionName, Dictionary<string, object> context)
