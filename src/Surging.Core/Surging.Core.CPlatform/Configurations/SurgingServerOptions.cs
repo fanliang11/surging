@@ -55,5 +55,7 @@ namespace Surging.Core.CPlatform.Configurations
         public string NotRelatedAssemblyFiles { get; set; }
 
         public string RelatedAssemblyFiles { get; set; } = "";
+
+        public string PreferredNetworks { get; set; } = "";
     }
 }

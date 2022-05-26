@@ -61,7 +61,7 @@ namespace Surging.Core.CPlatform.Utilities
                     UnicastIPAddressInformationCollection ipCollection = ipxx.UnicastAddresses;
                     foreach (UnicastIPAddressInformation ipadd in ipCollection)
                     {
-                        if (ipadd.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        if (ipadd.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork&&IsPreferredAddress(ipadd.Address.ToString()))
                         {
                             result = ipadd.Address.ToString();
                         }
@@ -69,6 +69,15 @@ namespace Surging.Core.CPlatform.Utilities
                 }
             }
             return result;
+        }
+
+        private static bool IsPreferredAddress(string hostAddress)
+        {
+            if (string.IsNullOrEmpty(AppConfig.ServerOptions.PreferredNetworks))
+            {
+                return true;
+            }
+            return hostAddress.StartsWith(AppConfig.ServerOptions.PreferredNetworks);
         }
 
         public static string GetHostAddress(string hostAddress)
