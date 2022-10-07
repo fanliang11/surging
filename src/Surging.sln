@@ -113,7 +113,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Tools.Cli", "Surgin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Swagger_V5", "Surging.Core\Surging.Core.Swagger_V5\Surging.Core.Swagger_V5.csproj", "{4EF33237-E340-4041-9A83-11B012D3A736}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Protocol.Tcp", "Surging.Core\Surging.Core.Protocol.Tcp\Surging.Core.Protocol.Tcp.csproj", "{E66C6AB7-A91F-4702-935D-71893499AE3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Protocol.Tcp", "Surging.Core\Surging.Core.Protocol.Tcp\Surging.Core.Protocol.Tcp.csproj", "{E66C6AB7-A91F-4702-935D-71893499AE3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

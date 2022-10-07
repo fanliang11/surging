@@ -59,7 +59,7 @@ namespace Surging.Core.Swagger_V5
             {
                 serviceCollection.AddSwaggerGen(options =>
                 {
-                    options.OperationFilter<AddAuthorizationOperationFilter>();
+                    //options.OperationFilter<AddAuthorizationOperationFilter>();
                     var securityScheme = new OpenApiSecurityScheme()
                     {
                         Description = "JWT Authorization header using the ApiKey scheme. Example: \"Authorization: {token}\"",
