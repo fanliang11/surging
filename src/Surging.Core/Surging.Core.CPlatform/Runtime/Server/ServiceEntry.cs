@@ -17,6 +17,7 @@ namespace Surging.Core.CPlatform.Runtime.Server
         public IEnumerable<string>  Methods { get; set; }
         public string RoutePath { get; set; }
         public Type Type { get; set; }
+        public bool IsPermission { get; set; }
         public string MethodName { get; set; }
         public ParameterInfo[] Parameters { get; set; }
         public List<Attribute> Attributes { get; set; }

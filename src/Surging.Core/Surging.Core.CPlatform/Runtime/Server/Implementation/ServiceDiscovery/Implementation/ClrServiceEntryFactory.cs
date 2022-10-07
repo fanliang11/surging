@@ -121,6 +121,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 Methods=httpMethods,
                 MethodName = method.Name,
                 Parameters = method.GetParameters(),
+                IsPermission = method.DeclaringType.GetCustomAttribute<BaseActionFilterAttribute>() != null || attributes.Any(p => p is BaseActionFilterAttribute),
                 Type = method.DeclaringType,
                 Attributes = attributes,
                 Func = async (key, parameters) =>

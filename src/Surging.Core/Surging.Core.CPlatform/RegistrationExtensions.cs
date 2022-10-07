@@ -19,8 +19,11 @@ namespace Surging.Core.CPlatform
             {
                 builder.RegisterType(filter).As<IAuthorizationFilter>().SingleInstance();
             }
+            else if (typeof(IActionFilter).IsAssignableFrom(filter))
+            {
+                builder.RegisterType(filter).As<IActionFilter>().SingleInstance();
+            }
         }
-
        
     }
 }

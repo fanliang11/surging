@@ -402,6 +402,11 @@ namespace Surging.Core.CPlatform
                 var authorizationFilter = filter as IAuthorizationFilter;
                 services.Register(p => authorizationFilter).As(typeof(IAuthorizationFilter)).SingleInstance();
             }
+            else if (typeof(IActionFilter).IsAssignableFrom(filter.GetType()))
+            {
+                var authorizationFilter = filter as IActionFilter;
+                services.Register(p => authorizationFilter).As(typeof(IActionFilter)).SingleInstance();
+            }
             return builder;
         }
 
@@ -458,6 +463,8 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(DefaultTypeConvertibleService)).As(typeof(ITypeConvertibleService)).SingleInstance();
             //注册权限过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IAuthorizationFilter)).SingleInstance();
+            services.RegisterType(typeof(ActionFilterAttribute)).As(typeof(IActionFilter)).SingleInstance();
+            services.RegisterType(typeof(ActionFilterAttribute)).As(typeof(IFilter)).SingleInstance();
             //注册基本过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IFilter)).SingleInstance();
             //注册默认校验处理器

@@ -60,8 +60,34 @@ namespace Surging.Core.Swagger_V5
                 serviceCollection.AddSwaggerGen(options =>
                 {
                     options.OperationFilter<AddAuthorizationOperationFilter>();
-                   
-                        options.SwaggerDoc(info.Version, new OpenApiInfo
+                    var securityScheme = new OpenApiSecurityScheme()
+                    {
+                        Description = "JWT Authorization header using the ApiKey scheme. Example: \"Authorization: {token}\"",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "ApiKey",
+                        BearerFormat = "JWT"
+                    };
+
+                    //把所有方法配置为增加bearer头部信息
+                    var securityRequirement = new OpenApiSecurityRequirement
+                    {
+                        {
+                                new OpenApiSecurityScheme
+                                {
+                                    Reference = new OpenApiReference
+                                    {
+                                        Type = ReferenceType.SecurityScheme,
+                                        Id = "Auth"
+                                    }
+                                },
+                                new string[] {}
+                        }
+                    };
+                    options.AddSecurityDefinition("Auth", securityScheme);
+                    options.AddSecurityRequirement(securityRequirement);
+                    options.SwaggerDoc(info.Version, new OpenApiInfo
                         {
 
                             Title = info.Title,
