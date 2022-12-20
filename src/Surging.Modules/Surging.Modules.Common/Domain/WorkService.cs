@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using RulesEngine.Models;
-using Surging.Core.CPlatform.Ioc; 
+using Surging.Core.CPlatform.Ioc;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.ProxyGenerator;
 using Surging.Core.ServiceHosting.Extensions.Rules;
 using Surging.Core.ServiceHosting.Extensions.Runtime;
@@ -21,6 +22,8 @@ namespace Surging.Modules.Common.Domain
         private readonly Queue<Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>> _queue = new Queue<Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>>();
         private readonly ConcurrentDictionary<string, DateTime> _keyValuePairs = new ConcurrentDictionary<string, DateTime>();
         private readonly IServiceProxyProvider _serviceProxyProvider;
+        private AtomicLong _atomic=new AtomicLong(1);
+        private const int EXECSIZE = 1;
         private CancellationToken _token;
 
         public WorkService(ILogger<WorkService> logger, IServiceProxyProvider serviceProxyProvider)
@@ -37,7 +40,7 @@ namespace Surging.Modules.Common.Domain
             }).Skip(
              function(lastExecTime){
                 return DateUtils.IsWeekend(lastExecTime);
-            }).Weekdays().SecondAt(3).Between(""8:00"", ""22:00"")";
+            }).Weekdays().SecondAt(3).Between(""8:00"", ""23:30"")";
             var ruleWorkflow = GetSchedulerRuleWorkflow(script);
             var messageId = Guid.NewGuid().ToString();
             _keyValuePairs.AddOrUpdate(messageId, DateTime.Now, (key, value) => DateTime.Now);
@@ -67,8 +70,12 @@ namespace Surging.Modules.Common.Domain
                     _keyValuePairs.TryGetValue(message.Item1.MessageId, out DateTime dateTime);
                     parser.Build(dateTime == DateTime.MinValue ? DateTime.Now : dateTime);
                 }
-                if (!_token.IsCancellationRequested)
+                if (!_token.IsCancellationRequested && (message == null || _atomic.GetAndAdd(1) == EXECSIZE))
+                {
+                    _atomic = new AtomicLong(1);
                     await Task.Delay(1000, stoppingToken);
+
+                }
             }
             catch (Exception ex){
                 _logger.LogError("WorkService execute error, message：{message} ,trace info:{trace} ", ex.Message, ex.StackTrace);
@@ -93,13 +100,15 @@ namespace Surging.Modules.Common.Domain
 
         private async Task PayloadSubscribe(RulePipePayloadParser parser, Message message, RulesEngine.RulesEngine rulesEngine, SchedulerRuleWorkflow ruleWorkflow)
         {
-            parser.HandlePayload().Subscribe((temperature) =>
+            parser.HandlePayload().Subscribe(async (temperature) =>
             {
                 try
                 {
                     if (temperature)
                     {
+                       await  ExecuteByPlanAsyn(message);
                         _logger.LogInformation("Worker exec at: {time}", DateTimeOffset.Now);
+
                     }
                 }
                 catch (Exception ex) { }
@@ -110,6 +119,30 @@ namespace Surging.Modules.Common.Domain
 
                 }
             });
+        }
+
+        private async Task<bool> ExecuteByPlanAsyn(Message message)
+        {
+            var result = false;
+            var isExec = true;
+            try
+            {
+                if (!string.IsNullOrEmpty(message.RoutePath))
+                {
+                    var serviceResult = await _serviceProxyProvider.Invoke<object>(message.Parameters, message.RoutePath, message.ServiceKey);
+                    bool.TryParse(serviceResult?.ToString(), out result);
+                    isExec = true;
+                }
+            }
+            catch { }
+            finally
+            {
+                if (isExec && message.Config.IsPersistence)
+                    _keyValuePairs.AddOrUpdate(message.MessageId, DateTime.Now, (key, value) => DateTime.Now);
+                else if (!message.Config.IsPersistence)
+                    _keyValuePairs.TryRemove(message.MessageId, out DateTime dateTime);
+            }
+            return result;
         }
 
         private async Task<RulePipePayloadParser> GetParser(SchedulerRuleWorkflow ruleWorkflow, RulesEngine.RulesEngine engine)
