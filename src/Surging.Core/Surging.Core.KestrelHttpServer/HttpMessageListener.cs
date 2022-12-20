@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -45,7 +46,7 @@ namespace Surging.Core.KestrelHttpServer
             await Received(sender, message);
         }
 
-        public async Task OnReceived(IMessageSender sender,string messageId, HttpContext context, IEnumerable<IActionFilter> actionFilters)
+        public async Task OnReceived(IMessageSender sender,string messageId, HttpContext context, IEnumerable<IActionFilter> actionFilters, ReplaySubject<HttpResultMessage<object>> subject)
         {
             var serviceRoute = RestContext.GetContext().GetAttachment("route") as ServiceRoute;
             RestContext.GetContext().RemoveContextParameters("route");
@@ -116,8 +117,11 @@ namespace Surging.Core.KestrelHttpServer
                     await Received(sender, new TransportMessage(messageId,httpMessage));
                 }
             }
-          
-            await OnActionExecuted(context, httpMessage, actionFilters);
+
+            subject.Subscribe(async (message) =>
+            {
+                await OnActionExecuted(context, httpMessage, message, actionFilters);
+            });
         }
 
         public async Task<bool> OnActionExecuting(ActionExecutingContext filterContext, IMessageSender sender, string messageId, IEnumerable<IActionFilter> filters)
@@ -134,14 +138,15 @@ namespace Surging.Core.KestrelHttpServer
             return true;
         }
 
-        public async Task OnActionExecuted(HttpContext context, HttpMessage message, IEnumerable<IActionFilter> filters)
+        public async Task OnActionExecuted(HttpContext context, HttpMessage message, HttpResultMessage<object> resultMessage, IEnumerable<IActionFilter> filters)
         {
             foreach (var fiter in filters)
             {
                 var filterContext = new ActionExecutedContext()
                 {
                     Context = context,
-                    Message = message
+                    ResultMessage = resultMessage,
+                    Message = message 
                 };
                 await fiter.OnActionExecuted(filterContext);
             }

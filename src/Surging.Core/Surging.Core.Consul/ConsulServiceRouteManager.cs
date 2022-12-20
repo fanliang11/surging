@@ -89,37 +89,29 @@ namespace Surging.Core.Consul
         }
 
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
-        {
-            var locks = await CreateLock();
-            try
+        { 
+            await _consulClientProvider.Check();
+            var hostAddr = NetUtils.GetHostAddress();
+            var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
+            foreach (var route in routes)
             {
-                await _consulClientProvider.Check();
-                var hostAddr = NetUtils.GetHostAddress();
-                var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _configInfo.RoutePath}{p.ServiceDescriptor.Id}"));
-                foreach (var route in routes)
+                var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
+
+                if (serviceRoute != null)
                 {
-                    var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
+                    var addresses = serviceRoute.Address.Concat(
+                      route.Address.Except(serviceRoute.Address)).ToList();
 
-                    if (serviceRoute != null)
+                    foreach (var address in route.Address)
                     {
-                        var addresses = serviceRoute.Address.Concat(
-                          route.Address.Except(serviceRoute.Address)).ToList();
-
-                        foreach (var address in route.Address)
-                        {
-                            addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
-                            addresses.Add(address);
-                        }
-                        route.Address = addresses;
+                        addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
+                        addresses.Add(address);
                     }
+                    route.Address = addresses;
                 }
-                await RemoveExceptRoutesAsync(routes, hostAddr);
-                await base.SetRoutesAsync(routes);
             }
-            finally
-            {
-                locks.ForEach(p => p.Release());
-            }
+            await RemoveExceptRoutesAsync(routes, hostAddr);
+            await base.SetRoutesAsync(routes);
         }
 
         public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)

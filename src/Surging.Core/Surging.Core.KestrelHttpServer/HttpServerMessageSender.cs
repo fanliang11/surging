@@ -7,6 +7,7 @@ using Surging.Core.CPlatform.Transport.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +18,7 @@ namespace Surging.Core.KestrelHttpServer
         private readonly ISerializer<string> _serializer;
         private readonly HttpContext _context;
         private readonly DiagnosticListener _diagnosticListener;
+        private readonly ReplaySubject<HttpResultMessage<Object>> _subject = null;
         public  HttpServerMessageSender(ISerializer<string> serializer,HttpContext httpContext)
         {
             _serializer = serializer;
@@ -24,11 +26,12 @@ namespace Surging.Core.KestrelHttpServer
             _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
         }
 
-        internal HttpServerMessageSender(ISerializer<string> serializer, HttpContext httpContext, DiagnosticListener diagnosticListener)
+        internal HttpServerMessageSender(ISerializer<string> serializer, HttpContext httpContext, DiagnosticListener diagnosticListener, ReplaySubject<HttpResultMessage<Object>> subject)
         {
             _serializer = serializer;
             _context = httpContext;
             _diagnosticListener = diagnosticListener;
+            _subject = subject;
         }
 
         public async Task SendAndFlushAsync(TransportMessage message)
@@ -53,6 +56,8 @@ namespace Surging.Core.KestrelHttpServer
                     Message = message
                 });
             }
+            if (_subject != null)
+                _subject.OnNext(httpMessage);
         }
 
         public async Task SendAsync(TransportMessage message)

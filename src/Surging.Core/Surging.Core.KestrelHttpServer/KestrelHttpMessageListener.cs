@@ -27,6 +27,7 @@ using System.Diagnostics;
 using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Utilities;
+using System.Reactive.Subjects;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -134,7 +135,8 @@ namespace Surging.Core.KestrelHttpServer
             app.Run(async (context) =>
             {
                 var messageId = Guid.NewGuid().ToString("N");
-                var sender = new HttpServerMessageSender(_serializer, context,_diagnosticListener);
+                var subject = new ReplaySubject<HttpResultMessage<object>>();
+                var sender = new HttpServerMessageSender(_serializer, context,_diagnosticListener, subject);
                 try
                 {
                     var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
@@ -142,7 +144,7 @@ namespace Surging.Core.KestrelHttpServer
                     if (isSuccess)
                     {
                         var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
-                        await OnReceived(sender, messageId, context, actionFilters);
+                        await OnReceived(sender, messageId, context, actionFilters, subject);
                     }
                 }
                 catch (Exception ex)

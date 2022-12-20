@@ -1,10 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
-using Surging.Core.CPlatform.Ioc;
+using RulesEngine.Models;
+using Surging.Core.CPlatform.Ioc; 
 using Surging.Core.ProxyGenerator;
+using Surging.Core.ServiceHosting.Extensions.Rules;
 using Surging.Core.ServiceHosting.Extensions.Runtime;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -15,7 +18,8 @@ namespace Surging.Modules.Common.Domain
     public class WorkService : BackgroundServiceBehavior, IWorkService, ISingleInstance
     {
         private readonly ILogger<WorkService> _logger;
-        private   readonly Queue<Message> _queue = new Queue<Message>();
+        private readonly Queue<Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>> _queue = new Queue<Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>>();
+        private readonly ConcurrentDictionary<string, DateTime> _keyValuePairs = new ConcurrentDictionary<string, DateTime>();
         private readonly IServiceProxyProvider _serviceProxyProvider;
         private CancellationToken _token;
 
@@ -23,11 +27,29 @@ namespace Surging.Modules.Common.Domain
         {
             _logger = logger;
             _serviceProxyProvider = serviceProxyProvider;
+            /*   var script = @"parser
+                               .Weekdays().SecondAt(3).Between(""8:00"", ""22:00"")";*/
+            var script = @"parser
+                              .TimeZone(""utc"")
+                               .When(
+                              function(lastExecTime){
+                return DateUtils.IsToday(lastExecTime);
+            }).Skip(
+             function(lastExecTime){
+                return DateUtils.IsWeekend(lastExecTime);
+            }).Weekdays().SecondAt(3).Between(""8:00"", ""22:00"")";
+            var ruleWorkflow = GetSchedulerRuleWorkflow(script);
+            var messageId = Guid.NewGuid().ToString();
+            _keyValuePairs.AddOrUpdate(messageId, DateTime.Now, (key, value) => DateTime.Now);
+            _queue.Enqueue(new Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>(new Message() { MessageId= messageId,Config=new SchedulerConfig() {  IsPersistence=true} }, GetRuleEngine(ruleWorkflow), ruleWorkflow));
+
         }
 
         public  Task<bool> AddWork(Message message)
         {
-            _queue.Enqueue(message);
+            var ruleWorkflow = GetSchedulerRuleWorkflow(message.Config.Script);
+            _keyValuePairs.AddOrUpdate(message.MessageId, DateTime.Now, (key, value) => DateTime.Now);
+            _queue.Enqueue(new Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>(message, GetRuleEngine(ruleWorkflow), ruleWorkflow));
             return Task.FromResult(true);
         }
 
@@ -36,12 +58,14 @@ namespace Surging.Modules.Common.Domain
             try
             {
                 _token = stoppingToken;
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                _queue.TryDequeue(out Message message);
+                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now); 
+                _queue.TryDequeue(out Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>? message);
                 if (message != null)
                 {
-                    var result = await _serviceProxyProvider.Invoke<object>(message.Parameters, message.RoutePath, message.ServiceKey);
-                    _logger.LogInformation("Invoke Service at: {time},Invoke result:{result}", DateTimeOffset.Now, result);
+                    var parser = await GetParser(message.Item3, message.Item2);
+                    await PayloadSubscribe(parser, message.Item1, message.Item2, message.Item3);
+                    _keyValuePairs.TryGetValue(message.Item1.MessageId, out DateTime dateTime);
+                    parser.Build(dateTime == DateTime.MinValue ? DateTime.Now : dateTime);
                 }
                 if (!_token.IsCancellationRequested)
                     await Task.Delay(1000, stoppingToken);
@@ -65,6 +89,53 @@ namespace Surging.Modules.Common.Domain
             {
                await  base.StopAsync(_token);
             }
+        }
+
+        private async Task PayloadSubscribe(RulePipePayloadParser parser, Message message, RulesEngine.RulesEngine rulesEngine, SchedulerRuleWorkflow ruleWorkflow)
+        {
+            parser.HandlePayload().Subscribe((temperature) =>
+            {
+                try
+                {
+                    if (temperature)
+                    {
+                        _logger.LogInformation("Worker exec at: {time}", DateTimeOffset.Now);
+                    }
+                }
+                catch (Exception ex) { }
+                finally
+                {
+                    if (message.Config.IsPersistence || (!temperature && !message.Config.IsPersistence))
+                        _queue.Enqueue(new Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>(message, rulesEngine, ruleWorkflow));
+
+                }
+            });
+        }
+
+        private async Task<RulePipePayloadParser> GetParser(SchedulerRuleWorkflow ruleWorkflow, RulesEngine.RulesEngine engine)
+        {
+            var payloadParser = new RulePipePayloadParser();
+            var ruleResult = await engine.ExecuteActionWorkflowAsync(ruleWorkflow.WorkflowName, ruleWorkflow.RuleName, new RuleParameter[] { new RuleParameter("parser", payloadParser) });
+            if (ruleResult.Exception != null && _logger.IsEnabled(LogLevel.Error))
+                _logger.LogError(ruleResult.Exception, ruleResult.Exception.Message);
+            return payloadParser;
+        }
+
+        private RulesEngine.RulesEngine GetRuleEngine(SchedulerRuleWorkflow ruleWorkFlow)
+        {
+            var reSettingsWithCustomTypes = new ReSettings { CustomTypes = new Type[] { typeof(RulePipePayloadParser) } };
+            var result = new RulesEngine.RulesEngine(new Workflow[] { ruleWorkFlow.GetWorkflow() }, null, reSettingsWithCustomTypes);
+            return result;
+        }
+
+        private SchedulerRuleWorkflow GetSchedulerRuleWorkflow(string script)
+        {
+            var result = new SchedulerRuleWorkflow("1==1");
+            if (!string.IsNullOrEmpty(script))
+            {
+                result = new SchedulerRuleWorkflow(script);
+            }
+            return result;
         }
     }
 }
