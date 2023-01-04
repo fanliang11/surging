@@ -132,7 +132,7 @@ namespace Surging.Core.KestrelHttpServer
             _moduleProvider.Initialize(new ApplicationInitializationContext(app, _moduleProvider.Modules,
                 _moduleProvider.VirtualPaths,
                 AppConfig.Configuration));
-            app.Run(async (context) =>
+            app.Use(async (context,next) =>
             {
                 var messageId = Guid.NewGuid().ToString("N");
                 var subject = new ReplaySubject<HttpResultMessage<object>>();
@@ -146,6 +146,7 @@ namespace Surging.Core.KestrelHttpServer
                         var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
                         await OnReceived(sender, messageId, context, actionFilters, subject);
                     }
+                    await next();
                 }
                 catch (Exception ex)
                 {
@@ -154,6 +155,7 @@ namespace Surging.Core.KestrelHttpServer
                     await OnException(context, sender, messageId, ex, filters);
                 }
             });
+            app.Run( context=> Task.CompletedTask);
         }
 
         private void WirteDiagnosticError(string messageId,Exception ex)

@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.Extensions.Logging;
 using Surging.Core.Common;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.EventBus.Events;
@@ -30,9 +31,11 @@ namespace Surging.Modules.Common.Domain
     {
         #region Implementation of IUserService
         private readonly UserRepository _repository;
-        public UserService(UserRepository repository)
+        private readonly ILogger<UserService> _logger;
+        public UserService(UserRepository repository,ILogger<UserService> logger)
         {
             this._repository = repository;
+            _logger = logger;
         }
 
         public async Task<string> GetUserName(int id)
@@ -86,6 +89,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<bool> GetDictionary()
         {
+            _logger.LogError("测试");
             return Task.FromResult<bool>(true);
         }
 
