@@ -126,6 +126,30 @@ namespace Surging.Core.Consul
             return caches.ToArray();
         }
 
+                private async Task<ServiceCache[]> GetCaches(IEnumerable<byte[]> childrens)
+        {
+            if (childrens == null) return new ServiceCache[0];
+            childrens = childrens.ToArray();
+            var caches = new List<ServiceCache>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取缓存信息。");
+
+                var cache = await GetCache(children);
+                if (cache != null)
+                {
+                    caches.Add(cache);
+                    var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, $"{_configInfo.CachePath}{cache.CacheDescriptor.Id}",
+                   async (oldData, newData) => await NodeChange(oldData, newData), null);
+                    watcher.SetCurrentData(children);
+                }
+            }
+            return caches.ToArray();
+        }
+
+
         private async Task<ServiceCache> GetCache(string path)
         {
             ServiceCache result = null;
@@ -178,11 +202,10 @@ namespace Surging.Core.Consul
                   (result) => ConvertPaths(result).Result);
             if (client.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
             {
-                var result = await client.GetChildrenAsync(_configInfo.CachePath);
-                var keys = await client.KV.Keys(_configInfo.CachePath);
-                var childrens = result; 
-                watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
-                _serviceCaches = await GetCaches(keys.Response);
+                var response = await client.GetChildrenListAsync(_configInfo.CachePath);
+                _serviceCaches = await GetCaches(response);
+                var serviceCacheIds = _serviceCaches.Select(p => p.CacheDescriptor.Id).ToArray();
+                watcher.SetCurrentData(serviceCacheIds.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
             }
             else
             {

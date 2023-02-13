@@ -149,7 +149,9 @@ namespace Surging.Core.Consul
 
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
-            var commands = await GetServiceCommands(serviceCommands.Select(p => $"{ _configInfo.CommandPath}{ p.ServiceId}"));
+            var client = await GetConsulClient();
+            var response = await client.GetChildrenListAsync(_configInfo.CommandPath);
+            var commands = await GetServiceCommands(response);  //传参数到方法中  
             if (commands.Count() == 0 || _configInfo.ReloadOnChange)
             {
                 await SetServiceCommandsAsync(serviceCommands);
@@ -242,6 +244,34 @@ namespace Surging.Core.Consul
             }
             return serviceCommands.ToArray();
         }
+
+        private Task<ServiceCommandDescriptor[]> GetServiceCommands(IEnumerable<byte[]> childrens)
+        {
+            if (childrens == null) return Task.FromResult(new ServiceCommandDescriptor[0]);
+            childrens = childrens.ToArray();
+            var serviceCommands = new List<ServiceCommandDescriptor>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取服务命令信息。");
+
+                var serviceCommand = GetServiceCommand(children);
+                if (serviceCommand != null)
+                {
+                    serviceCommands.Add(serviceCommand);
+                    var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, $"{ _configInfo.CommandPath}{ serviceCommand.ServiceId}",
+                   (oldData, newData) => NodeChange(oldData, newData), tmpPath =>
+                   {
+                       var index = tmpPath.LastIndexOf("/");
+                       return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                   });
+                    watcher.SetCurrentData(children);
+                }
+            }
+            return Task.FromResult(serviceCommands.ToArray());
+        }
+
         private async ValueTask<ConsulClient> GetConsulClient()
         {
             var client = await _consulClientFactory.GetClient();
@@ -263,11 +293,10 @@ namespace Surging.Core.Consul
             }
             if (client.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
             {
-                var result = await client.GetChildrenAsync(_configInfo.CommandPath);
-                var keys = await client.KV.Keys(_configInfo.CommandPath);
-                var childrens = result;
-                action?.Invoke(ConvertPaths(childrens).Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
-                _serviceCommands = await GetServiceCommands(keys.Response);
+                var response = await client.GetChildrenListAsync(_configInfo.CommandPath);
+                _serviceCommands = await GetServiceCommands(response);
+                var serviceIds = _serviceCommands.Select(p => p.ServiceId).ToArray();
+                action?.Invoke(serviceIds.Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
             }
             else
             {

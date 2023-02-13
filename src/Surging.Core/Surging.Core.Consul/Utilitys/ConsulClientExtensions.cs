@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace Surging.Core.Consul.Utilitys
 {
@@ -16,6 +17,19 @@ namespace Surging.Core.Consul.Utilitys
             {
                 var queryResult = await client.KV.List(path);
                 return queryResult.Response?.Select(p => Encoding.UTF8.GetString(p.Value)).ToArray();
+            }
+            catch (HttpRequestException)
+            {
+                return null;
+            }
+        }
+
+        public static async Task<List<byte[]>> GetChildrenListAsync(this ConsulClient client, string path)
+        {
+            try
+            {
+                var queryResult = await client.KV.List(path);
+                return queryResult.Response?.Select(p => p.Value).ToList();
             }
             catch (HttpRequestException)
             {
