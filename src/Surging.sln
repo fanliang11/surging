@@ -115,6 +115,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Swagger_V5", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Surging.Core.Protocol.Tcp", "Surging.Core\Surging.Core.Protocol.Tcp\Surging.Core.Protocol.Tcp.csproj", "{E66C6AB7-A91F-4702-935D-71893499AE3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Core.Protocol.WebService", "Surging.Core\Surging.Core.Protocol.WebService\Surging.Core.Protocol.WebService.csproj", "{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -313,6 +315,10 @@ Global
 		{E66C6AB7-A91F-4702-935D-71893499AE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E66C6AB7-A91F-4702-935D-71893499AE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E66C6AB7-A91F-4702-935D-71893499AE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -364,6 +370,7 @@ Global
 		{39B65A52-996E-4429-95DB-4731CD1EEAA9} = {78305463-1A38-4431-AFB0-0A0BE59D5A03}
 		{4EF33237-E340-4041-9A83-11B012D3A736} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{E66C6AB7-A91F-4702-935D-71893499AE3C} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}

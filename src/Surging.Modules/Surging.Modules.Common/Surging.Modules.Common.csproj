@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Mqtt\Surging.Core.Protocol.Mqtt.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Tcp\Surging.Core.Protocol.Tcp.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.Udp\Surging.Core.Protocol.Udp.csproj" />
+    <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WebService\Surging.Core.Protocol.WebService.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Protocol.WS\Surging.Core.Protocol.WS.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.ServiceHosting.Extensions\Surging.Core.ServiceHosting.Extensions.csproj" />
     <ProjectReference Include="..\..\Surging.Core\Surging.Core.Thrift\Surging.Core.Thrift.csproj" />
