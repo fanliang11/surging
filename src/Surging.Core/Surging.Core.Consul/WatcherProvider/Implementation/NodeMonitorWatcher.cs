@@ -11,15 +11,18 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
     {
         private readonly Action<byte[], byte[]> _action;
         private readonly IClientWatchManager _manager;
-        private readonly ConsulClient _client;
+        private readonly Func<ValueTask<ConsulClient>> _clientCall;
         private readonly string _path;
         private byte[] _currentData = new byte[0];
-        public NodeMonitorWatcher(ConsulClient client, IClientWatchManager manager, string path, Action<byte[], byte[]> action)
+        Func<string,bool> _allowChange;
+        public NodeMonitorWatcher(Func<ValueTask<ConsulClient>> clientCall, IClientWatchManager manager, string path,
+            Action<byte[], byte[]> action,Func<string,bool> allowChange)
         {
             this._action = action;
             _manager = manager;
-            _client = client;
+            _clientCall = clientCall;
             _path = path;
+            _allowChange = allowChange;
             RegisterWatch();
         }
 
@@ -32,7 +35,9 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
         protected override async Task ProcessImpl()
         {
             RegisterWatch(this);
-            var result = await _client.GetDataAsync(_path);
+            if (_allowChange!=null&&! _allowChange(_path)) return;
+            var client = await _clientCall();
+            var result =await client.GetDataAsync(_path);
             if (result != null)
             {
                 _action(_currentData, result);

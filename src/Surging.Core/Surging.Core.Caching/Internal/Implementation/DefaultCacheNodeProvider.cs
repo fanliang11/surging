@@ -9,6 +9,9 @@ using System.Text;
 
 namespace Surging.Core.Caching.Internal.Implementation
 {
+    /// <summary>
+    /// 默认缓存节点提供者
+    /// </summary>
     public class DefaultCacheNodeProvider : ICacheNodeProvider
     {
         private readonly CPlatformContainer _serviceProvider;

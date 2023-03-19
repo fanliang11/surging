@@ -4,6 +4,8 @@ using Newtonsoft.Json.Linq;
 using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Utilities;
 using System;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -15,6 +17,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         public DynamicItem()
         { }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public DynamicItem(object value)
         {
             if (value == null)
@@ -23,14 +26,14 @@ namespace Surging.Core.Codec.MessagePack.Messages
             var valueType = value.GetType();
             var code = Type.GetTypeCode(valueType);
 
-            if (code != TypeCode.Object)
+            if (code != TypeCode.Object && valueType.BaseType!=typeof(Enum))
                 TypeName = valueType.FullName;
             else
                 TypeName = valueType.AssemblyQualifiedName;
 
             if (valueType == UtilityType.JObjectType || valueType == UtilityType.JArrayType)
                 Content = SerializerUtilitys.Serialize(value.ToString());
-            else
+            else if(valueType != typeof(CancellationToken))
                 Content = SerializerUtilitys.Serialize(value);
         }
 
@@ -46,6 +49,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         #endregion Property
 
         #region Public Method
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Get()
         {
             if (Content == null || TypeName == null)
@@ -55,7 +59,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
             if (typeName == UtilityType.JObjectType || typeName == UtilityType.JArrayType)
             {
                 var content = SerializerUtilitys.Deserialize<string>(Content);
-                return JsonConvert.DeserializeObject(content,typeName);
+                return JsonConvert.DeserializeObject(content, typeName);
             }
             else
             {

@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.AddressResolvers.Implementation
 {
+    /// <summary>
+    /// 默认地址解析程序
+    /// </summary>
     public class DefaultAddressResolver : IAddressResolver
     {
 
@@ -92,35 +95,43 @@ new ConcurrentDictionary<string, ServiceCache>();
         private void ServiceCacheManager_Removed(object sender, ServiceCacheEventArgs e)
         {
             var key = GetKey(e.Cache.CacheDescriptor);
-            var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
-            ServiceCache value;
-            _concurrent.TryRemove(key, out value);
-            ConsistentHash<ConsistentHashNode> hash;
-            redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
-            if (hash != null)
-                foreach (var node in e.Cache.CacheEndpoint)
-                {
-                    var hashNode = node as ConsistentHashNode;
-                    hash.Remove(hashNode);
-                    hash.Add(hashNode);
-                }
-
+            if (CacheContainer.IsRegistered<RedisContext>(e.Cache.CacheDescriptor.Prefix))
+            {
+                var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
+                ServiceCache value;
+                _concurrent.TryRemove(key, out value);
+                ConsistentHash<ConsistentHashNode> hash;
+                redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
+                if (hash != null)
+                    foreach (var node in e.Cache.CacheEndpoint)
+                    {
+              
+                         var hashNode = node as ConsistentHashNode;
+                        var addr = string.Format("{0}:{1}", hashNode.Host, hashNode.Port);
+                        hash.Remove(addr);
+                        hash.Add(hashNode, addr);
+                    }
+            }
         }
 
         private void ServiceCacheManager_Add(object sender, ServiceCacheEventArgs e)
         {
             var key = GetKey(e.Cache.CacheDescriptor);
-            var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
-            _concurrent.GetOrAdd(key, e.Cache);
-            ConsistentHash<ConsistentHashNode> hash;
-            redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
-            if (hash != null)
-                foreach (var node in e.Cache.CacheEndpoint)
-                {
-                    var hashNode = node as ConsistentHashNode;
-                    hash.Remove(hashNode);
-                    hash.Add(hashNode);
-                }
+            if (CacheContainer.IsRegistered<RedisContext>(e.Cache.CacheDescriptor.Prefix))
+            {
+                var redisContext = CacheContainer.GetService<RedisContext>(e.Cache.CacheDescriptor.Prefix);
+                _concurrent.GetOrAdd(key, e.Cache);
+                ConsistentHash<ConsistentHashNode> hash;
+                redisContext.dicHash.TryGetValue(e.Cache.CacheDescriptor.Type, out hash);
+                if (hash != null)
+                    foreach (var node in e.Cache.CacheEndpoint)
+                    {
+                        var hashNode = node as ConsistentHashNode;
+                        var addr = string.Format("{0}:{1}", hashNode.Host, hashNode.Port);
+                        hash.Remove(addr);
+                        hash.Add(hashNode, addr);
+                    }
+            }
         }
     }
 }

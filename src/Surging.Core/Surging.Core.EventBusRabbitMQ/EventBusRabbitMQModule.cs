@@ -12,15 +12,25 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.CPlatform.EventBus.Implementation;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.EventBusRabbitMQ
 {
     public class EventBusRabbitMQModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
-            serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
+            var serviceProvider = context.ServiceProvoider;
+            base.Initialize(context);
+            new ServiceRouteWatch(serviceProvider.GetInstances<CPlatformContainer>(), () =>
+            {
+                var subscriptionAdapt = serviceProvider.GetInstances<ISubscriptionAdapt>();
+                serviceProvider.GetInstances<IEventBus>().OnShutdown += (sender, args) =>
+                 {
+                     subscriptionAdapt.Unsubscribe();
+                 };
+                serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
+            });
         }
 
         /// <summary>
@@ -60,6 +70,7 @@ namespace Surging.Core.EventBusRabbitMQ
                 AppConfig.BrokerName = option.BrokerName;
                 AppConfig.MessageTTL = option.MessageTTL;
                 AppConfig.RetryCount = option.RetryCount;
+                AppConfig.PrefetchCount = option.PrefetchCount;
                 AppConfig.FailCount = option.FailCount;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();

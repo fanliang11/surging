@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation.Selectors.Implementation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Surging.Core.CPlatform.Support
 {
@@ -28,7 +25,13 @@ namespace Surging.Core.CPlatform.Support
                 FallBackName = AppConfig.ServerOptions.FallBackName;
             }
         }
+        /// <summary>
+        /// 故障转移次数
+        /// </summary>
         public int FailoverCluster { get; set; } = 3;
+        /// <summary>
+        /// 是否强制开启熔断
+        /// </summary>
         public bool CircuitBreakerForceOpen { get; set; }
         /// <summary>
         /// 容错策略
@@ -48,7 +51,6 @@ namespace Surging.Core.CPlatform.Support
         /// </summary>
         public string Injection { get; set; } = "return null";
         
-
         /// <summary>
         /// IFallbackInvoker 实例名称
         /// </summary>
@@ -58,9 +60,10 @@ namespace Surging.Core.CPlatform.Support
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public AddressSelectorMode ShuntStrategy { get; set; } = AddressSelectorMode.Polling;
-
+        /// <summary>
+        /// 注入命名空间
+        /// </summary>
         public string[] InjectionNamespaces { get; set; }
-
         /// <summary>
         /// 错误率达到多少开启熔断保护
         /// </summary>
@@ -70,12 +73,12 @@ namespace Surging.Core.CPlatform.Support
         /// </summary>
         public int BreakeSleepWindowInMilliseconds { get; set; } = 60000;
         /// <summary>
-        ///  	是否强制关闭熔断
+        /// 是否强制关闭熔断
         /// </summary>
         public bool BreakerForceClosed { get; set; }
 
         /// <summary>
-        ///    10秒钟内至少多少请求失败，熔断器才发挥起作用
+        /// 10秒钟内至少多少请求失败，熔断器才发挥起作用
         /// </summary>
         public int BreakerRequestVolumeThreshold { get; set; } = 20;
 

@@ -9,7 +9,7 @@ namespace Surging.Core.CPlatform.Module
     /// </summary>
     public class BusinessModule : AbstractModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext serviceProvider)
         {
             base.Initialize(serviceProvider);
         }

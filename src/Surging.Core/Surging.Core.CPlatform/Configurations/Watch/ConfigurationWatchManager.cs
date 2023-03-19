@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -11,9 +12,11 @@ namespace Surging.Core.CPlatform.Configurations.Watch
         internal   HashSet<ConfigurationWatch> dataWatches =
             new  HashSet<ConfigurationWatch>();
         private readonly Timer _timer;
+        private readonly ILogger<ConfigurationWatchManager> _logger;
 
-        public ConfigurationWatchManager()
+        public ConfigurationWatchManager(ILogger<ConfigurationWatchManager> logger)
         {
+            _logger = logger;
             var timeSpan = TimeSpan.FromSeconds(AppConfig.ServerOptions.WatchInterval);
             _timer = new Timer(async s =>
             {
@@ -21,7 +24,7 @@ namespace Surging.Core.CPlatform.Configurations.Watch
             }, null, timeSpan, timeSpan);
         }
 
-        public   HashSet<ConfigurationWatch> DataWatches
+        public  HashSet<ConfigurationWatch> DataWatches
         {
             get
             {
@@ -46,7 +49,19 @@ namespace Surging.Core.CPlatform.Configurations.Watch
         { 
             foreach (var watch in dataWatches)
             {
-                await watch.Process();
+                try
+                {
+                    var task= watch.Process();
+                    if (!task.IsCompletedSuccessfully)
+                        await task;
+                    else
+                        task.GetAwaiter().GetResult();
+                }
+                catch(Exception ex)
+                { 
+                    if (_logger.IsEnabled(LogLevel.Error))
+                        _logger.LogError($"message:{ex.Message},Source:{ex.Source},Trace:{ex.StackTrace}");
+                }
             }
         }
     }

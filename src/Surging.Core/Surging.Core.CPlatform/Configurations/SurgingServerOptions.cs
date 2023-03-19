@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Surging.Core.CPlatform.Configurations
 {
@@ -14,7 +13,23 @@ namespace Surging.Core.CPlatform.Configurations
 
         public int MappingPort { get; set; }
 
+        public string WanIp { get; set; }
+
+        public bool IsModulePerLifetimeScope { get; set; }
+
         public double WatchInterval { get; set; } = 20d;
+
+        public int DisconnTimeInterval { get; set; } = 60;
+
+        public bool Libuv { get; set; } = false;
+
+        public DockerDeployMode DockerDeployMode { get; set; } = DockerDeployMode.Standard;
+
+        public int SoBacklog { get; set; } = 8192;
+
+        public int Weight { get; set; }
+
+        public bool EnableRouteWatch { get; set; }
 
         public IPEndPoint IpEndpoint { get; set; }
 
@@ -23,7 +38,15 @@ namespace Surging.Core.CPlatform.Configurations
         public CommunicationProtocol Protocol { get; set; }
         public string RootPath { get; set; }
 
+        public string WebRootPath { get; set; } = AppContext.BaseDirectory;
+
         public int Port { get; set; }
+
+        public bool DisableServiceRegistration { get; set; }
+
+        public bool DisableDiagnostic { get; set; }
+
+        public bool ReloadOnChange { get; set; } = false;
 
         public ProtocolPortOptions Ports { get; set; } = new  ProtocolPortOptions();
 

@@ -12,6 +12,7 @@ namespace Surging.Core.CPlatform.Routing.Template
         {
             StringBuilder result = new StringBuilder();
             var parameters = routeTemplet.Split(@"/");
+            bool isAppendMethod=false;
             foreach (var parameter in parameters)
             {
                 var param = GetParameters(parameter).FirstOrDefault();
@@ -26,11 +27,19 @@ namespace Surging.Core.CPlatform.Routing.Template
                 else if (param == "Method")
                 {
                     result.Append(method);
+                    isAppendMethod = true;
+                }
+                else
+                {
+                    if (!isAppendMethod) result.AppendFormat("{0}/", method);
+                    result.Append(parameter);
+                    isAppendMethod = true;
                 }
                 result.Append("/");
             }
-
-            return result.Append(method).ToString().ToLower();
+            result.Length = result.Length - 1;
+            if (!isAppendMethod) result.AppendFormat("/{0}", method);
+            return result.ToString().ToLower();
         }
 
         public static string Parse(string routeTemplet, string service)

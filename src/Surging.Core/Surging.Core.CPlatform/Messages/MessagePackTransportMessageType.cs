@@ -14,5 +14,7 @@ namespace Surging.Core.CPlatform.Messages
         public static string httpMessageTypeName = typeof(HttpMessage).FullName;
 
         public static string httpResultMessageTypeName = typeof(HttpResultMessage<object>).FullName;
+
+        public static string reactiveResultMessageTypeName = typeof(ReactiveResultMessage).FullName;
     }
 }

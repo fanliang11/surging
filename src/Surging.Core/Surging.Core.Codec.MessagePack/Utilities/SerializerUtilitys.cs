@@ -10,7 +10,6 @@ namespace Surging.Core.Codec.MessagePack.Utilities
         static SerializerUtilitys()
         {
             CompositeResolver.RegisterAndSetAsDefault(NativeDateTimeResolver.Instance, ContractlessStandardResolverAllowPrivate.Instance);
-            MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolverAllowPrivate.Instance);
         }
 
         public static byte[] Serialize<T>(T instance)

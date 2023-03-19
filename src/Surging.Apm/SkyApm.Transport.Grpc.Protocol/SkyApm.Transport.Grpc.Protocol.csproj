@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+
+    <PropertyGroup>
+        <Description>$(Product) gRPC data transmitter.</Description>
+        <AssemblyTitle>$(PackagePrefix).Transport.Grpc.Protocol</AssemblyTitle>
+        <AssemblyName>SkyApm.Transport.Grpc.Protocol</AssemblyName>
+        <PackageId>$(PackagePrefix).Transport.Grpc.Protocol</PackageId>
+        <PackageTags>SkyWalking;Grpc</PackageTags>
+        <PackageReleaseNotes>
+        </PackageReleaseNotes>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>SkyApm.Transport.Grpc.Protocol</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" Version="3.10.1" />
+        <PackageReference Include="Grpc" Version="2.24.0" />
+        <PackageReference Include="Grpc.Tools" Version="2.24.0" PrivateAssets="All" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Protobuf Include="protocol/**/*.proto" ProtoRoot="protocol" OutputDir="%(RelativePath)generated" CompileOutputs="false" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <Protobuf_NoWarnMissingExpected>true</Protobuf_NoWarnMissingExpected>
+        <Protobuf_TouchMissingExpected>true</Protobuf_TouchMissingExpected>
+    </PropertyGroup>
+</Project>

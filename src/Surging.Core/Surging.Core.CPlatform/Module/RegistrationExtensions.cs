@@ -22,7 +22,7 @@ namespace Surging.Core.CPlatform.Module
         {
             return builder.ContainerBuilder.Register<T>(@delegate);
         }
-
+        
         public static void RegisterModule(this ContainerBuilderWrapper builder, IModule module)
         {
             builder.ContainerBuilder.RegisterModule(module);
@@ -48,6 +48,11 @@ namespace Surging.Core.CPlatform.Module
         public static IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterType(this ContainerBuilderWrapper builder, Type implementationType)
         {
             return builder.ContainerBuilder.RegisterType(implementationType);
+        }
+
+        public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterTypes(this ContainerBuilderWrapper builder, params Type [] implementationTypes)
+        {
+            return builder.ContainerBuilder.RegisterTypes(implementationTypes);
         }
 
         public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterAssemblyTypes(this ContainerBuilderWrapper builder, params Assembly[] assemblies)
