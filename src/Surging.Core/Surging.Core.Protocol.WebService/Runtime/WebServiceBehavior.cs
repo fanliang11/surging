@@ -1,20 +1,29 @@
 ﻿using Autofac;
+using Surging.Core.ApiGateWay.OAuth;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Utilities;
+using Surging.Core.Protocol.WebService.Runtime.Implementation;
 using Surging.Core.ProxyGenerator;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml;
 
 namespace Surging.Core.Protocol.WebService.Runtime
 {
     public abstract class WebServiceBehavior : IServiceBehavior
     {
+        private HeaderValue _headerValue ;
+
+        public WebServiceBehavior()
+        {
+            _headerValue = new HeaderValue(); 
+        }
+
+        public HeaderValue HeaderValue
+        {
+            get { return _headerValue; }
+        }
         private ServerReceivedDelegate _received;
         public event ServerReceivedDelegate Received
         {
@@ -101,6 +110,37 @@ namespace Surging.Core.Protocol.WebService.Runtime
 
         }
 
+        public void ParseHeaderFromBody(Stream body)
+        {
+            try
+            {
+                body.Seek(0, SeekOrigin.Begin);
+                using var reader = new StreamReader(body);
+                var xml = reader.ReadToEndAsync().GetAwaiter().GetResult();
+                if (string.IsNullOrEmpty(xml))
+                {
+                    return;
+                }
+                var envelope = new XmlDocument();
+                envelope.LoadXml(xml);
+                var node = envelope.DocumentElement?.ChildNodes.Cast<XmlNode>().FirstOrDefault(n => n.LocalName == "Header")?.FirstChild;
+                if (node == null)
+                {
+                    return;
+                }
+                var cns = node.ChildNodes.Cast<XmlNode>();
+                _headerValue.Token = cns.FirstOrDefault(d => d.LocalName == "Token")?.InnerText;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        } 
+
+        public async Task<bool> ValidateAuthentication(string token)
+        {
+           return await GetService<IAuthorizationServerProvider>().ValidateClientAuthentication(token);
+        }
 
         public void Publish(IntegrationEvent @event)
         {

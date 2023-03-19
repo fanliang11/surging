@@ -1,5 +1,6 @@
 ﻿using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Attributes;
+using Surging.IModuleServices.Common.Models;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
@@ -11,5 +12,8 @@ namespace Surging.IModuleServices.Common
     {
         [OperationContract]
         Task<string> SayHello(string name);
+
+        [OperationContract]
+        Task<string> Authentication(AuthenticationRequestData requestData);
     }
 }

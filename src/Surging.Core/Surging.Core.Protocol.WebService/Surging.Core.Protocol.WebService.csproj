@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Surging.Core.ApiGateWay\Surging.Core.ApiGateWay.csproj" />
     <ProjectReference Include="..\Surging.Core.KestrelHttpServer\Surging.Core.KestrelHttpServer.csproj" />
   </ItemGroup>
 
