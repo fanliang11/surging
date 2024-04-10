@@ -34,5 +34,6 @@ namespace Surging.Core.Configuration.Apollo.Configurations
             Data = data;
         }
 
+
     }
 }

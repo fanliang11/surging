@@ -122,6 +122,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.IModuleServices.OpenApi", "Surging.IModuleServices\Surging.IModuleServices.OpenApi\Surging.IModuleServices.OpenApi.csproj", "{F931F4E0-2C26-4B7C-86CC-68800F89361E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Surging.Modules.OpenApi", "Surging.Modules\Surging.Modules.OpenApi\Surging.Modules.OpenApi.csproj", "{24399530-134C-433D-B8F1-EDF20090E32B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -324,6 +328,14 @@ Global
 		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F931F4E0-2C26-4B7C-86CC-68800F89361E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F931F4E0-2C26-4B7C-86CC-68800F89361E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F931F4E0-2C26-4B7C-86CC-68800F89361E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F931F4E0-2C26-4B7C-86CC-68800F89361E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24399530-134C-433D-B8F1-EDF20090E32B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24399530-134C-433D-B8F1-EDF20090E32B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24399530-134C-433D-B8F1-EDF20090E32B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24399530-134C-433D-B8F1-EDF20090E32B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -376,6 +388,8 @@ Global
 		{4EF33237-E340-4041-9A83-11B012D3A736} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{E66C6AB7-A91F-4702-935D-71893499AE3C} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
 		{401892FA-BF59-4CD3-9DA3-A47BD553BEAD} = {E3ADE8DE-5F3A-4E76-B22F-2C9435AACA06}
+		{F931F4E0-2C26-4B7C-86CC-68800F89361E} = {F65BE227-30B5-4217-AEC8-AD7F96411702}
+		{24399530-134C-433D-B8F1-EDF20090E32B} = {CAC2EAD5-5AC7-44A2-9705-F2D8D3012A6F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9889BCDC-E6A6-448F-B01A-ECFD0FAF294C}
