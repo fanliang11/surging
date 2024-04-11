@@ -65,12 +65,14 @@ namespace Surging.Core.DotNetty
             IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
             IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
-           
+            IEventLoopGroup eventExecutor = new MultithreadEventLoopGroup();
             if (AppConfig.ServerOptions.Libuv)
             {
                 var dispatcher = new DispatcherEventLoopGroup();
                 bossGroup = dispatcher;
                 workerGroup = new WorkerEventLoopGroup(dispatcher);
+                var dispatcherExecutor = new DispatcherEventLoopGroup();
+                eventExecutor = new WorkerEventLoopGroup(dispatcherExecutor);
                 bootstrap.Channel<TcpServerChannel>();
             }
             else
@@ -79,7 +81,6 @@ namespace Surging.Core.DotNetty
                 workerGroup = new MultithreadEventLoopGroup();
                 bootstrap.Channel<TcpServerSocketChannel>();
             }
-            var eventExecutor = new MultithreadEventLoopGroup(); 
             bootstrap
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
