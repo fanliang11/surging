@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Surging.Core.Protocol.Udp
 {
-    public class DnsProtocolModule : EnginePartModule
+    public class UdpProtocolModule : EnginePartModule
     {
         public override void Initialize(AppModuleContext serviceProvider)
         {
