@@ -23,19 +23,19 @@
                 {
                   "Name": null,
                   "Ref": null,
-                  "Value": "127.0.0.1:7000::1",
-                  "Maps": null
-                },
-                {
-                  "Name": null,
-                  "Ref": null,
-                  "Value": "127.0.0.1:7005::1",
-                  "Maps": null
-                },
-                {
-                  "Name": null,
-                  "Ref": null,
                   "Value": "127.0.0.1:6379::1",
+                  "Maps": null
+                },
+                {
+                  "Name": null,
+                  "Ref": null,
+                  "Value": "127.0.0.1:6379::2",
+                  "Maps": null
+                },
+                {
+                  "Name": null,
+                  "Ref": null,
+                  "Value": "127.0.0.1:6379::3",
                   "Maps": null
                 }
               ]
@@ -95,19 +95,19 @@
                 {
                   "Name": null,
                   "Ref": null,
-                  "Value": "127.0.0.1:7000::1",
-                  "Maps": null
-                },
-                {
-                  "Name": null,
-                  "Ref": null,
-                  "Value": "127.0.0.1:7005::1",
-                  "Maps": null
-                },
-                {
-                  "Name": null,
-                  "Ref": null,
                   "Value": "127.0.0.1:6379::1",
+                  "Maps": null
+                },
+                {
+                  "Name": null,
+                  "Ref": null,
+                  "Value": "127.0.0.1:6379::2",
+                  "Maps": null
+                },
+                {
+                  "Name": null,
+                  "Ref": null,
+                  "Value": "127.0.0.1:6379::3",
                   "Maps": null
                 }
               ]
