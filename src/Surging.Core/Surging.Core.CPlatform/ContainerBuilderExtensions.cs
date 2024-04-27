@@ -637,7 +637,7 @@ namespace Surging.Core.CPlatform
             return builder;
         }
 
-		/// <summary>
+        /// <summary>
         /// 依赖注入组件模块程序集
         /// </summary>
         /// <param name="builder"></param>
@@ -654,19 +654,19 @@ namespace Surging.Core.CPlatform
             {
                 GetAbstractModules(moduleAssembly).ForEach(p =>
                 {
-		   if (!_modules.Any(m => p.ModuleName == m.ModuleName))
-		   {
-		      services.RegisterModule(p);
-		      if (packages.ContainsKey(p.TypeName))
-		      {
-			var useModules = packages[p.TypeName];
-			if (useModules.AsSpan().IndexOf(p.ModuleName) >= 0)
-			    p.Enable = true;
-			else
-			    p.Enable = false;
-		     }
-		      _modules.Add(p);
-		   }
+                    if (!_modules.Any(m => p.ModuleName == m.ModuleName))
+                    {
+                        services.RegisterModule(p);
+                        if (packages.ContainsKey(p.TypeName))
+                        {
+                            var useModules = packages[p.TypeName];
+                            if (useModules.AsSpan().IndexOf(p.ModuleName) >= 0)
+                                p.Enable = true;
+                            else
+                                p.Enable = false;
+                        }
+                        _modules.Add(p);
+                    }
                 });
             }
             builder.Services.Register(provider => new ModuleProvider(

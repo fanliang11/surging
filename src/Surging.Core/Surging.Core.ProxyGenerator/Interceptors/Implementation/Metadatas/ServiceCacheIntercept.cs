@@ -33,22 +33,24 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
             this.CorrespondingKeys = correspondingMethodNames;
         }
 
-         internal ServiceCacheIntercept(string [] serviceInterceptItem)
+        internal ServiceCacheIntercept(string[] serviceInterceptItem)
         {
             Key = serviceInterceptItem[0];
-            L2Key= serviceInterceptItem[1];
-            EnableL2Cache = serviceInterceptItem[2] == "1" ? true : false ;
-           Enum.TryParse<CacheTargetType>(serviceInterceptItem[3],out CacheTargetType mode);
+            L2Key = serviceInterceptItem[1];
+            EnableL2Cache = serviceInterceptItem[2] == "1" ? true : false;
+            Enum.TryParse<CacheTargetType>(serviceInterceptItem[3], out CacheTargetType mode);
             Mode = mode;
             CacheSectionType = serviceInterceptItem[4];
-                Enum.TryParse<CachingMethod>(serviceInterceptItem[5], out CachingMethod method);
+            Enum.TryParse<CachingMethod>(serviceInterceptItem[5], out CachingMethod method);
             Method = method;
-            Force=  serviceInterceptItem[6]== "1" ? true : false; ;
+            Force = serviceInterceptItem[6] == "1" ? true : false; ;
             Time = Convert.ToInt32(serviceInterceptItem[7]);
-            if(!string.IsNullOrEmpty(serviceInterceptItem[8]))
+            if (!string.IsNullOrEmpty(serviceInterceptItem[8]))
             {
                 CorrespondingKeys = serviceInterceptItem[8].Split(",");
             }
+            if (serviceInterceptItem.Length > 9)
+                EnableStageCache = serviceInterceptItem[9] == "1" ? true : false;
         }
         #endregion
 
@@ -71,10 +73,10 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
             set;
         } = "";
 
-        public string L2Key 
+        public string L2Key
         {
             get; set;
-        }= "";
+        } = "";
 
         public bool EnableL2Cache
         {
@@ -85,12 +87,14 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
         /// <summary>
         /// 获取或设置缓存方式。
         /// </summary>
-        public CachingMethod Method { get; set; } 
+        public CachingMethod Method { get; set; }
 
         /// <summary>
         /// 获取或设置一个<see cref="Boolean"/>值，该值表示当缓存方式为Put时，是否强制将值写入缓存中。
         /// </summary>
         public bool Force { get; set; }
+
+        public bool EnableStageCache { get; set; } = AppConfig.ServerOptions.RequestCacheEnabled;
         /// <summary>
         /// 获取或设置与当前缓存方式相关的方法名称。注：此参数仅在缓存方式为Remove时起作用。
         /// </summary>
@@ -107,7 +111,8 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
                 .Method(Method, MetadataId)
                 .Force(Force, MetadataId)
                 .CacheTime(Time, MetadataId)
-                .CorrespondingKeys(CorrespondingKeys, MetadataId);
+                .CorrespondingKeys(CorrespondingKeys, MetadataId)
+                .EnableStageCache(EnableStageCache, MetadataId);
         }
 
         #endregion

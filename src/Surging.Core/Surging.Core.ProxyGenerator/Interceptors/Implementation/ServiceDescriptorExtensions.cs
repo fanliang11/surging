@@ -138,7 +138,20 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             descriptor.Metadatas["Intercept"] = metadata.Item2;
             return descriptor;
         }
-         
+
+        public static ServiceDescriptor EnableStageCache(this ServiceDescriptor descriptor, bool enableStageCache, string metadataId)
+        {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
+            var iEnableL2Cache = Convert.ToInt32(enableStageCache).ToString();
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = iEnableL2Cache;
+            else
+                metadata.Item1 += $"|{iEnableL2Cache}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
+            return descriptor;
+        }
+
 
         public static ServiceCacheIntercept GetCacheIntercept(this ServiceDescriptor descriptor,string metadataId)
         {

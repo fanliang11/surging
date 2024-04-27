@@ -45,6 +45,7 @@ namespace Surging.Core.CPlatform.Support
         /// <summary>
         /// 是否开启缓存
         /// </summary>
+        [JsonIgnore]
         public bool RequestCacheEnabled { get; set; }
         /// <summary>
         /// 注入
