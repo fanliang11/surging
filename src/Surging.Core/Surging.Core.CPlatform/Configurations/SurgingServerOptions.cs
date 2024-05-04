@@ -33,6 +33,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public IPEndPoint IpEndpoint { get; set; }
 
+        public bool EnableObjectConvert { get; set; } = true;
+
         public List<ModulePackage> Packages { get; set; } = new List<ModulePackage>();
 
         public CommunicationProtocol Protocol { get; set; }

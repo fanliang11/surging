@@ -22,6 +22,7 @@ using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.KestrelHttpServer.Internal;
+using Newtonsoft.Json;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -106,8 +107,12 @@ namespace Surging.Core.KestrelHttpServer
         private async Task<HttpResultMessage<object>> RemoteExecuteAsync(HttpMessage httpMessage)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
-            try {
-                resultMessage.Entity=await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
+            try
+            {
+              var entity = await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
+                if (entity != null && AppConfig.ServerOptions.EnableObjectConvert)
+                    entity = JsonConvert.DeserializeObject(entity.ToString(), typeof(Object));
+                resultMessage.Entity = entity; 
                 resultMessage.IsSucceed = resultMessage.Entity != default;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
             }

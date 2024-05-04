@@ -11,6 +11,7 @@
     "Libuv": true,
     "SoBacklog": 100,
     "Weight": 20,
+    "EnableObjectConvert": false,
     "MaxConcurrentRequests": 20,
     "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,

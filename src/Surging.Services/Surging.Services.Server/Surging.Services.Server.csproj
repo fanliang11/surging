@@ -71,6 +71,7 @@
     <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.Common\Surging.IModuleServices.Common.csproj" />
     <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.Manger\Surging.IModuleServices.Manager.csproj" />
     <ProjectReference Include="..\..\Surging.IModuleServices\Surging.IModuleServices.OpenApi\Surging.IModuleServices.OpenApi.csproj" />
+    <ProjectReference Include="..\..\Surging.Modules\Surging.Modules.Manager\Surging.Modules.Manager.csproj" />
     <ProjectReference Include="..\..\Surging.Web\Surging.Web.csproj" />
     <ProjectReference Include="..\..\WebSocket\WebSocketCore\WebSocketCore.csproj" />
   </ItemGroup>
