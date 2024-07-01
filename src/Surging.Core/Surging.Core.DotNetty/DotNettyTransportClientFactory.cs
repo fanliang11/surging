@@ -153,7 +153,7 @@ namespace Surging.Core.DotNetty
             bootstrap
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
-                .Option(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+                .Option(ChannelOption.Allocator,new UnpooledByteBufferAllocator(false,false))
                 .Group(group);
 
             return bootstrap;
