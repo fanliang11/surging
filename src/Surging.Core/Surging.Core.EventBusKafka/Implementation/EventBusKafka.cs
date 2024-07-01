@@ -10,6 +10,7 @@ using Surging.Core.CPlatform.EventBus.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Core.EventBusKafka.Implementation
@@ -20,6 +21,8 @@ namespace Surging.Core.EventBusKafka.Implementation
         private readonly IEventBusSubscriptionsManager _subsManager;
         private readonly IKafkaPersisterConnection _producerConnection;
         private readonly IKafkaPersisterConnection _consumerConnection;
+
+        public event EventHandler OnShutdown;
 
         public EventBusKafka( ILogger<EventBusKafka> logger,
             IEventBusSubscriptionsManager subsManager,
@@ -57,31 +60,24 @@ namespace Surging.Core.EventBusKafka.Implementation
 
         public void Publish(IntegrationEvent @event)
         {
-
             if (!_producerConnection.IsConnected)
             {
                 _producerConnection.TryConnect();
             }
-
             var eventName = @event.GetType()
                    .Name;
-            
-            var message = JsonConvert.SerializeObject(@event);
-            var body =message;
-
+            var body = JsonConvert.SerializeObject(@event);
             var policy = RetryPolicy.Handle<KafkaException>()
                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                {
                    _logger.LogWarning(ex.ToString());
                });
 
-            using (var conn = _producerConnection.CreateConnect() as Producer<Null,string>)
-            {
-                policy.Execute(() =>
-                {
-                     conn.ProduceAsync(eventName, null, body).GetAwaiter().GetResult();
-                });
-            }
+            var conn = _producerConnection.CreateConnect() as Producer<Null, string>;
+            policy.Execute(() =>
+           {
+               conn.ProduceAsync(eventName, null, body).GetAwaiter().GetResult();
+           });
         }
 
         public void Subscribe<T, TH>(Func<TH> handler) where TH : IIntegrationEventHandler<T>
@@ -90,54 +86,25 @@ namespace Surging.Core.EventBusKafka.Implementation
             var containsKey = _subsManager.HasSubscriptionsForEvent<T>();
             if (!containsKey)
             {
-                if (!_consumerConnection.IsConnected)
-                {
-                    _consumerConnection.TryConnect();
-                }
-
-                using (var channel = _consumerConnection.CreateConnect() as Consumer<Null, string>)
-                {
-                    channel.OnMessage += ConsumerClient_OnMessage;
-                    channel.Subscribe(eventName); 
-                    channel.Poll(TimeSpan.FromMilliseconds(100)); 
-                }
+                var channel = _consumerConnection.CreateConnect() as Consumer<Null, string>;
+                channel.OnMessage += ConsumerClient_OnMessage;
+                channel.Subscribe(eventName);
             }
-            _subsManager.AddSubscription<T, TH>(handler,null);
-
-           
-
+            _subsManager.AddSubscription<T, TH>(handler, null);
         }
-
+        
         public void Unsubscribe<T, TH>() where TH : IIntegrationEventHandler<T>
         {
             _subsManager.RemoveSubscription<T, TH>();
         }
-
-        //private void CreateConsumerChannel()
-        //{
-        //    if (!_consumerConnection.IsConnected)
-        //    {
-        //        _consumerConnection.TryConnect();
-        //    }
-
-        //    using (var channel = _consumerConnection.CreateConnect() as Consumer<Null, string>)
-        //    {
-
-        //        channel.OnMessage += ConsumerClient_OnMessage;
-
-        //    }
-        //}
-
-
+        
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
         {
             ProcessEvent(e.Topic, e.Value).Wait();
         }
-
-
+        
         private async Task ProcessEvent(string eventName, string message)
         {
-
             if (_subsManager.HasSubscriptionsForEvent(eventName))
             {
                 var eventType = _subsManager.GetEventTypeByName(eventName);
@@ -146,9 +113,15 @@ namespace Surging.Core.EventBusKafka.Implementation
 
                 foreach (var handlerfactory in handlers)
                 {
-                    var handler = handlerfactory.DynamicInvoke();
-                    var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-                    await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
+                    try
+                    {
+                        var handler = handlerfactory.DynamicInvoke();
+                        var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
+                        await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
+                    }
+                    catch
+                    {
+                    }
                 }
             }
         }

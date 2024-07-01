@@ -13,6 +13,6 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers
         /// </summary>
         /// <param name="serviceId">服务Id。</param>
         /// <returns>服务地址模型。</returns>
-        ValueTask<AddressModel> Resolver(string serviceId, int hashCode);
+        ValueTask<AddressModel> Resolver(string serviceId, string item);
     }
 }

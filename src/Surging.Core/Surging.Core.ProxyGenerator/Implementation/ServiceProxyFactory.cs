@@ -8,6 +8,8 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Support;
 using System.Collections.Generic;
 using Surging.Core.CPlatform.DependencyResolution;
+using System.Runtime.CompilerServices;
+using Surging.Core.CPlatform.Routing;
 
 namespace Surging.Core.ProxyGenerator.Implementation
 {
@@ -20,21 +22,23 @@ namespace Surging.Core.ProxyGenerator.Implementation
         private readonly IRemoteInvokeService _remoteInvokeService;
         private readonly ITypeConvertibleService _typeConvertibleService;
         private readonly IServiceProvider _serviceProvider;
-        private Type[] _serviceTypes;
+        private readonly IServiceRouteProvider _serviceRouteProvider;
+        private Type[] _serviceTypes=new Type[0];
 
         #endregion Field
 
         #region Constructor
 
         public ServiceProxyFactory(IRemoteInvokeService remoteInvokeService, ITypeConvertibleService typeConvertibleService,
-           IServiceProvider serviceProvider):this(remoteInvokeService, typeConvertibleService, serviceProvider,null,null)
+           IServiceProvider serviceProvider, IServiceRouteProvider serviceRouteProvider) :this(remoteInvokeService, typeConvertibleService, serviceProvider, serviceRouteProvider,null, null)
         {
 
         }
 
         public ServiceProxyFactory(IRemoteInvokeService remoteInvokeService, ITypeConvertibleService typeConvertibleService,
-            IServiceProvider serviceProvider, IEnumerable<Type> types, IEnumerable<string> namespaces)
+            IServiceProvider serviceProvider,IServiceRouteProvider serviceRouteProvider, IEnumerable<Type> types, IEnumerable<string> namespaces)
         {
+            _serviceRouteProvider = serviceRouteProvider;
             _remoteInvokeService = remoteInvokeService;
             _typeConvertibleService = typeConvertibleService;
             _serviceProvider = serviceProvider;
@@ -48,7 +52,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
 
         #region Implementation of IServiceProxyFactory
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object CreateProxy(Type type)
         {
             var instance = ServiceResolver.Current.GetService(type);
@@ -56,12 +60,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
             {
                 var proxyType = _serviceTypes.Single(type.GetTypeInfo().IsAssignableFrom);
                 instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService, null,
-             _serviceProvider.GetService<CPlatformContainer>()});
+             _serviceProvider.GetService<CPlatformContainer>(),_serviceRouteProvider});
                 ServiceResolver.Current.Register(null, instance, type);
             }
             return instance;
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object CreateProxy(string key,Type type)
         {
             var instance = ServiceResolver.Current.GetService(type,key);
@@ -69,12 +74,13 @@ namespace Surging.Core.ProxyGenerator.Implementation
             {
                 var proxyType = _serviceTypes.Single(type.GetTypeInfo().IsAssignableFrom);
                  instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService, key,
-             _serviceProvider.GetService<CPlatformContainer>()});
+             _serviceProvider.GetService<CPlatformContainer>(),_serviceRouteProvider});
                 ServiceResolver.Current.Register(key, instance, type);
             }
             return instance;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T CreateProxy<T>(string key) where T:class
         {
             var instanceType = typeof(T);
@@ -83,7 +89,7 @@ namespace Surging.Core.ProxyGenerator.Implementation
             {
                 var proxyType = _serviceTypes.Single(typeof(T).GetTypeInfo().IsAssignableFrom);
                  instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteInvokeService, _typeConvertibleService,key,
-                _serviceProvider.GetService<CPlatformContainer>() });
+                _serviceProvider.GetService<CPlatformContainer>(),_serviceRouteProvider });
                 ServiceResolver.Current.Register(key, instance, instanceType);
             }
             return instance as T;
@@ -94,11 +100,14 @@ namespace Surging.Core.ProxyGenerator.Implementation
             return CreateProxy<T>(null);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RegisterProxType(string[] namespaces,params Type[] types)
         {
             var proxyGenerater = _serviceProvider.GetService<IServiceProxyGenerater>();
-            _serviceTypes = proxyGenerater.GenerateProxys(types, namespaces).ToArray();
+            var serviceTypes = proxyGenerater.GenerateProxys(types, namespaces).ToArray();
+            _serviceTypes= _serviceTypes.Except(serviceTypes).Concat(serviceTypes).ToArray();
             proxyGenerater.Dispose();
+            GC.Collect();
         }
 
         #endregion Implementation of IServiceProxyFactory

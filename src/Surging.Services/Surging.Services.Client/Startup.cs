@@ -4,7 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Surging.Apm.Skywalking.Abstractions.Common.Tracing;
+using Surging.Apm.Skywalking.Abstractions.Tracing;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.EventBusRabbitMQ.Configurations;
@@ -74,22 +77,37 @@ namespace Surging.Services.Client
         /// <param name="serviceProxyFactory"></param>
         public static void Test(IServiceProxyFactory serviceProxyFactory)
         {
+            var  tracingContext =  ServiceLocator.GetService<ITracingContext>();
             Task.Run(async () =>
             {
+                RpcContext.GetContext().SetAttachment("xid",124);
+
                 var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
-                var v =  userProxy.GetUserId("fanly").GetAwaiter().GetResult();
-                var fa=   userProxy.GetUserName(1).GetAwaiter().GetResult();
+
+                var asyncProxy = serviceProxyFactory.CreateProxy<IAsyncService>();
+                var result= await  asyncProxy.AddAsync(1, 2);
+                var user = userProxy.GetUser(new UserModel {
+                    UserId = 1,
+                    Name = "fanly",
+                    Age=120,
+                     Sex=0
+                }).GetAwaiter().GetResult();
+                var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
+                var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
+                var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
+                userProxy.Try().GetAwaiter().GetResult();
                 var v1 = userProxy.GetUserLastSignInTime(1).Result;
-                var apiResult =  userProxy.GetApiResult().GetAwaiter().GetResult();
+                var things = userProxy.GetAllThings().Result;
+                var apiResult = userProxy.GetApiResult().GetAwaiter().GetResult();
                 userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
-                    UserId = "1",
+                    UserId = 1,
                     Name = "fanly"
                 }).Wait();
 
-                  userProxy.PublishThroughEventBusAsync(new UserEvent
+                userProxy.PublishThroughEventBusAsync(new UserEvent
                 {
-                    UserId = "1",
+                    UserId = 1,
                     Name = "fanly"
                 }).Wait();
 
@@ -105,7 +123,7 @@ namespace Surging.Services.Client
                     for (var i = 0; i < 10000; i++)
                     {
                         //var a = userProxy.GetDictionary().Result;
-                        var a = userProxy.GetDictionary().Result;
+                        var a = await userProxy.GetDictionary();
                         //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();
@@ -122,27 +140,66 @@ namespace Surging.Services.Client
         {
             serviceProxyFactory.CreateProxy<IUserService>("User").PublishThroughEventBusAsync(new UserEvent()
             {
-                Age = "18",
+                Age = 18,
                 Name = "fanly",
-                UserId = "1"
+                UserId = 1
             });
             Console.WriteLine("Press any key to exit...");
+            Console.ReadLine();
+        }
+
+
+        public static void TestThriftInvoker(IServiceProxyFactory serviceProxyFactory)
+        {
+            var proxy = serviceProxyFactory.CreateProxy<IAsyncService>();
+            var proxy1 = serviceProxyFactory.CreateProxy<IThirdAsyncService>();
+            Task.Run(async () =>
+            {
+                do
+                {
+                    var result1 = await proxy.SayHelloAsync();
+                    var result2 = await proxy1.SayHelloAsync();
+                    Console.WriteLine("正在循环 1w次调用 GetUser.....");
+                    
+                    var watch = Stopwatch.StartNew();
+                    
+                    for (var i = 0; i < 10000; i++)
+                    {
+                        try
+                        {
+                            var result = await proxy.SayHelloAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                    watch.Stop();
+                    Console.WriteLine($"1w次调用结束，执行时间：{watch.ElapsedMilliseconds}ms");
+                    Console.WriteLine("Press any key to continue, q to exit the loop...");
+                    var key = Console.ReadLine();
+                    if (key.ToLower() == "q")
+                        break;
+                } while (true);
+            }).Wait();
+
             Console.ReadLine();
         }
 
         public static void TestForRoutePath(IServiceProxyProvider serviceProxyProvider)
         {
             Dictionary<string, object> model = new Dictionary<string, object>();
-            model.Add("user", JsonConvert.SerializeObject( new
+            model.Add("user",new UserModel
             {
                 Name = "fanly",
-                Age = 18,
-                UserId = 1
-            }));
+                Age =12,
+                UserId = 2,
+                Sex = Sex.Woman
+            });
             string path = "api/user/getuser";
             string serviceKey = "User";
 
-            var userProxy = serviceProxyProvider.Invoke<object>(model, path, serviceKey);
+            var userProxy = serviceProxyProvider.Invoke<UserModel>(model, path, serviceKey);
             var s = userProxy.Result;
             Console.WriteLine("Press any key to exit...");
             Console.ReadLine();

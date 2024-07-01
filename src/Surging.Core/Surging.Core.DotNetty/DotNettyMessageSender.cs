@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
 {
-    /// <summary>
+        /// <summary>
     /// 基于DotNetty的消息发送者基类。
     /// </summary>
     public abstract class DotNettyMessageSender
@@ -59,22 +59,23 @@ namespace Surging.Core.DotNetty
         /// 发送消息。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
+            var buffer = GetByteBuffer(message); 
             await _channel.WriteAndFlushAsync(buffer);
+          
         }
 
         /// <summary>
         /// 发送消息并清空缓冲区。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _channel.WriteAndFlushAsync(buffer);
+            var buffer = GetByteBuffer(message); 
+            await _channel.WriteAndFlushAsync(buffer); 
         }
 
         #endregion Implementation of IMessageSender
@@ -98,21 +99,21 @@ namespace Surging.Core.DotNetty
         /// 发送消息。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _context.WriteAsync(buffer);
+            var buffer = GetByteBuffer(message); 
+             await _context.WriteAsync(buffer); 
         }
 
         /// <summary>
         /// 发送消息并清空缓冲区。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
+            var buffer = GetByteBuffer(message); 
             await _context.WriteAndFlushAsync(buffer);
         }
 

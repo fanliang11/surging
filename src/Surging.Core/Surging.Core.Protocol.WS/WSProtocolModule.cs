@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
@@ -6,6 +7,7 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport.Codec;
+using Surging.Core.Protocol.WS.Configurations;
 using Surging.Core.Protocol.WS.Runtime;
 using Surging.Core.Protocol.WS.Runtime.Implementation;
 using System;
@@ -14,11 +16,11 @@ using System.Text;
 
 namespace Surging.Core.Protocol.WS
 {
-   public class WSProtocolModule : EnginePartModule
+    public class WSProtocolModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>
@@ -27,25 +29,39 @@ namespace Surging.Core.Protocol.WS
         /// <param name="builder"></param>
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
+            var options = new WebSocketOptions();
+            var section = AppConfig.GetSection("WebSocket");
+            if (section.Exists())
+                options = section.Get<WebSocketOptions>();
             base.RegisterBuilder(builder);
-            builder.RegisterType(typeof(DefaultWSServiceEntryProvider)).As(typeof(IWSServiceEntryProvider)).SingleInstance();
+            builder.Register(provider =>
+            {
+                return new DefaultWSServiceEntryProvider(
+                       provider.Resolve<IServiceEntryProvider>(),
+                    provider.Resolve<ILogger<DefaultWSServiceEntryProvider>>(),
+                      provider.Resolve<CPlatformContainer>(),
+                      options
+                      );
+            }).As(typeof(IWSServiceEntryProvider)).SingleInstance();
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.WS)
             {
-                RegisterDefaultProtocol(builder);
+                RegisterDefaultProtocol(builder, options);
             }
             else if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.None)
             {
-                RegisterWSProtocol(builder);
+                RegisterWSProtocol(builder, options);
             }
         }
 
-        private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder)
+        private static void RegisterDefaultProtocol(ContainerBuilderWrapper builder, WebSocketOptions options)
         {
+
             builder.Register(provider =>
             {
                 return new DefaultWSServerMessageListener(
                     provider.Resolve<ILogger<DefaultWSServerMessageListener>>(),
-                      provider.Resolve<IWSServiceEntryProvider>()
+                      provider.Resolve<IWSServiceEntryProvider>(),
+                      options
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -60,12 +76,13 @@ namespace Surging.Core.Protocol.WS
             }).As<IServiceHost>();
         }
 
-        private static void RegisterWSProtocol(ContainerBuilderWrapper builder)
+        private static void RegisterWSProtocol(ContainerBuilderWrapper builder, WebSocketOptions options)
         {
             builder.Register(provider =>
             {
                 return new DefaultWSServerMessageListener(provider.Resolve<ILogger<DefaultWSServerMessageListener>>(),
-                      provider.Resolve<IWSServiceEntryProvider>()
+                      provider.Resolve<IWSServiceEntryProvider>(),
+                      options
                       );
             }).SingleInstance();
             builder.Register(provider =>

@@ -38,15 +38,23 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             return descriptor.Id;
         }
 
-        protected override async Task<AddressModel> SelectAsync(AddressSelectContext context)
+        protected override async ValueTask<AddressModel> SelectAsync(AddressSelectContext context)
         {
             var key = GetCacheKey(context.Descriptor);
             //根据服务id缓存服务地址。
             var addressEntry = _concurrent.GetOrAdd(key, k => new Lazy<AddressEntry>(() => new AddressEntry(context.Address))).Value;
             AddressModel addressModel;
+            var index = 0;
+            var len = context.Address.Count();
             do
             {
                 addressModel = addressEntry.GetAddress();
+                if (len <= index)
+                {
+                    addressModel = null;
+                    break;
+                }
+                index++;
             } while (await _healthCheckService.IsHealth(addressModel) == false);
             return addressModel;
         }

@@ -6,6 +6,7 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
+    "Libuv": true,
     "Protocol": "${Protocol}|Tcp", //Http¡¢Tcp¡¢None
     "RootPath": "${RootPath}|d:\\microsurging",
     "Ports": {
@@ -15,15 +16,16 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;EventBusKafkaModule;"
+        "Using": "${UseEngineParts}|ThriftModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;ServiceProxyModule;EventBusRabbitMQModule;SkywalkingModule;"
       }
     ]
   },
   "Consul": {
-    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500",
+    "ConnectionString": "${Register_Conn}|127.0.0.1:8500", // "127.0.0.1:8500,127.0.0.1:9500",
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
-    "ReloadOnChange": true
+    "ReloadOnChange": true,
+    "EnableChildrenMonitor": false
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",

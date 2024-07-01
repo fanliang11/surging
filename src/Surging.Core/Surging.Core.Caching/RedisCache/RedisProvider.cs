@@ -78,7 +78,7 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public void AddAsync(string key, object value)
         {
-            this.AddTaskAsync(key, value, TimeSpan.FromMinutes(ExpireTime));
+            this.AddTaskAsync(key, value, TimeSpan.FromSeconds(ExpireTime));
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public void Add(string key, object value, bool defaultExpire)
         {
-            this.Add(key, value, TimeSpan.FromMinutes(defaultExpire ? DefaultExpireTime : ExpireTime));
+            this.Add(key, value, TimeSpan.FromSeconds(defaultExpire ? DefaultExpireTime : ExpireTime));
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public void AddAsync(string key, object value, bool defaultExpire)
         {
-            this.AddTaskAsync(key, value, TimeSpan.FromMinutes(defaultExpire ? DefaultExpireTime : ExpireTime));
+            this.AddTaskAsync(key, value, TimeSpan.FromSeconds(defaultExpire ? DefaultExpireTime : ExpireTime));
         }
 
         /// <summary>

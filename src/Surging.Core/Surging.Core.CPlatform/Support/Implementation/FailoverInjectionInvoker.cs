@@ -1,10 +1,9 @@
-﻿using Surging.Core.CPlatform.Runtime.Server;
+﻿using Surging.Core.CPlatform.Convertibles;
+using Surging.Core.CPlatform.Runtime.Server;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using System.Linq;
-using Surging.Core.CPlatform.Convertibles;
+using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
@@ -23,7 +22,8 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         public async Task Invoke(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
-            var command = await _serviceCommandProvider.GetCommand(serviceId);
+            var vt = _serviceCommandProvider.GetCommand(serviceId);
+            var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             var result = await _serviceCommandProvider.Run(command.Injection, command.InjectionNamespaces);
             if (result is Boolean)
             {
@@ -38,7 +38,8 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         public async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
-            var command =await _serviceCommandProvider.GetCommand(serviceId);
+            var vt = _serviceCommandProvider.GetCommand(serviceId);
+            var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             var injectionResult = await _serviceCommandProvider.Run(command.Injection, command.InjectionNamespaces);
             if (injectionResult is Boolean)
             {

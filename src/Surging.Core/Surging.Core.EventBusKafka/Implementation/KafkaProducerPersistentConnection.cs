@@ -12,14 +12,14 @@ namespace Surging.Core.EventBusKafka.Implementation
     {
         private Producer<Null, string> _connection;
         private readonly ILogger<KafkaProducerPersistentConnection> _logger;
-        private readonly ISerializer<string> _stringDeserializer;
+        private readonly ISerializer<string> _stringSerializer;
         bool _disposed;
 
         public KafkaProducerPersistentConnection(ILogger<KafkaProducerPersistentConnection> logger)
             :base(logger,AppConfig.KafkaProducerConfig)
-        {
-            _logger = logger; 
-            _stringDeserializer = new StringSerializer(Encoding.UTF8);
+        { 
+            _logger = logger;
+            _stringSerializer = new StringSerializer(Encoding.UTF8);
         }
 
         public override bool IsConnected =>   _connection != null &&  !_disposed;
@@ -28,15 +28,15 @@ namespace Surging.Core.EventBusKafka.Implementation
         public override Action Connection(IEnumerable<KeyValuePair<string, object>> options)
         {
             return () =>
-            {
-                _connection = new Producer<Null, string>(options,null, _stringDeserializer);
-                _connection.OnError += OnConnectionException;
- 
+            { 
+                _connection = new Producer<Null, string>(options,null, _stringSerializer);
+                _connection.OnError += OnConnectionException; 
             };
         }
 
         public override object CreateConnect()
         {
+            TryConnect();
             return _connection;
         }
 

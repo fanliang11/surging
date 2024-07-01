@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using System; 
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Nlog
 {
@@ -17,6 +18,7 @@ namespace Surging.Core.Nlog
             return NoopDisposable.Instance;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             switch (logLevel)
@@ -60,16 +62,16 @@ namespace Surging.Core.Nlog
                 switch (logLevel)
                 {
                     case LogLevel.Critical:
-                        _log.Fatal(message);
+                        _log.Fatal(exception, message);
                         break;
                     case LogLevel.Debug:
-                        _log.Debug(message);
+                        _log.Debug(exception, message);
                         break;
                     case LogLevel.Trace:
-                        _log.Trace(message);
+                        _log.Trace(exception, message);
                         break;
                     case LogLevel.Error:
-                        _log.Error(message, exception,null);
+                        _log.Error(exception, message);
                         break;
                     case LogLevel.Information:
                         _log.Info(message);
@@ -79,7 +81,7 @@ namespace Surging.Core.Nlog
                         break;
                     default:
                         _log.Warn($"遇到未知日志级别{logLevel}");
-                        _log.Info(message, exception,null);
+                        _log.Info(message, exception, null);
                         break;
                 }
             }

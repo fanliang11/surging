@@ -7,6 +7,7 @@ using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Configurations;
+using Surging.Core.CPlatform.DependencyResolution;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusRabbitMQ;
@@ -19,6 +20,7 @@ using Surging.Core.ServiceHosting.Internal.Implementation;
 using Surging.Core.System.Intercept;
 using Surging.IModuleServices.Common;
 using System;
+using System.Diagnostics;
 //using Surging.Core.Zookeeper;
 //using Surging.Core.Zookeeper.Configurations;
 using System.Text;
@@ -40,10 +42,14 @@ namespace Surging.Services.Client
                     builder.AddMicroService(option =>
                     {
                         option.AddClient()
-                        .AddClientIntercepted(typeof(CacheProviderInterceptor))
                         .AddCache();
                         builder.Register(p => new CPlatformContainer(ServiceLocator.Current));
                     });
+                })
+                .ConfigureLogging(logger =>
+                {
+                    logger.AddConfiguration(
+                        Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
                 .Configure(build =>
                 build.AddEventBusFile("eventBusSettings.json", optional: false))
@@ -51,18 +57,21 @@ namespace Surging.Services.Client
                 build.AddCacheFile("cacheSettings.json", optional: false, reloadOnChange: true))
                 .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
-                .UseNLog(LogLevel.Error)
                 .UseClient()
+                .UseProxy()
                 .UseStartup<Startup>()
                 .Build();
 
             using (host.Run())
             {
-                 Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
+                //Startup.Test(ServiceLocator.GetService<IServiceProxyFactory>());
                 //Startup.TestRabbitMq(ServiceLocator.GetService<IServiceProxyFactory>());
                 // Startup.TestForRoutePath(ServiceLocator.GetService<IServiceProxyProvider>());
-                /// test Parallel
-                //var connectionCount = 200000;
+           
+                Startup.TestThriftInvoker(ServiceLocator.GetService<IServiceProxyFactory>());
+              
+                /// test Parallel 
+                //var connectionCount = 300000;
                 //StartRequest(connectionCount);
                 //Console.ReadLine();
             }
@@ -70,19 +79,26 @@ namespace Surging.Services.Client
 
         private static void StartRequest(int connectionCount)
         {
-
+            // var service = ServiceLocator.GetService<IServiceProxyFactory>(); 
+            var sw = new Stopwatch();
+            sw.Start();
+            var userProxy = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<IUserService>("User");
+            ServiceResolver.Current.Register("User", userProxy);
             var service = ServiceLocator.GetService<IServiceProxyFactory>();
-            var userProxy = service.CreateProxy<IUserService>("User");
-            Parallel.For(0, connectionCount /1000, new ParallelOptions() { MaxDegreeOfParallelism = 10 },u =>
-             {
-                 for (var i = 0; i < 1000; i++)
-                     Test(userProxy, connectionCount);
-             });
+            userProxy = ServiceResolver.Current.GetService<IUserService>("User");
+            sw.Stop();
+            Console.WriteLine($"代理所花{sw.ElapsedMilliseconds}ms");
+            ThreadPool.SetMinThreads(100, 100);
+            Parallel.For(0, connectionCount / 6000, new ParallelOptions() { MaxDegreeOfParallelism = 50 }, async u =>
+               {
+                   for (var i = 0; i < 6000; i++)
+                       await Test(userProxy, connectionCount);
+               });
         }
 
-        public static void Test(IUserService userProxy,int connectionCount)
+        public static async Task Test(IUserService userProxy,int connectionCount)
         {
-            var a = userProxy.GetDictionary().Result;
+            var a =await userProxy.GetDictionary();
             IncreaseSuccessConnection(connectionCount);
         }
         
