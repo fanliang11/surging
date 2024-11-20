@@ -93,7 +93,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
 
                     cancel.ThrowIfCancellationRequested();
 
-                    await destination.WriteAsync(buffer, 0, read);
+                  await destination.WriteAsync(buffer, 0, read);
                 }
             }
             finally

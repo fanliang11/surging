@@ -233,12 +233,18 @@ namespace Surging.Core.Consul
         private async Task<MqttServiceRoute> GetRoute(string path)
         {
             MqttServiceRoute result = null;
+            Action<byte[]> action = null;
             var client = await GetConsulClient();
-            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
-                async (oldData, newData) => await NodeChange(oldData, newData),tmpPath=> {
+            if (_configInfo.NotifyMode == NotifyType.Heartbeat)
+            {
+                var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+                async (oldData, newData) => await NodeChange(oldData, newData), tmpPath =>
+                {
                     var index = tmpPath.LastIndexOf("/");
                     return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
-                }); 
+                });
+                action = currentData => watcher.SetCurrentData(currentData);
+            }
          
             var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
@@ -246,7 +252,7 @@ namespace Surging.Core.Consul
                 var data = (await client.GetDataAsync(path));
                 if (data != null)
                 {
-                    watcher.SetCurrentData(data);
+                    action?.Invoke(data);
                     result = await GetRoute(data);
                 }
             }
@@ -259,7 +265,7 @@ namespace Surging.Core.Consul
                 return;
             Action<string[]> action = null;
             var client =await GetConsulClient();
-            if (_configInfo.EnableChildrenMonitor)
+            if (_configInfo.EnableChildrenMonitor && _configInfo.NotifyMode == NotifyType.Heartbeat)
             {
                 var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.MqttRoutePath,
              async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
@@ -319,6 +325,79 @@ namespace Surging.Core.Consul
                     topics.Add(topic);
             }
             return topics.ToArray();
+        }
+
+        public async Task NodeChange(byte[] newData)
+        {
+            var newRoute = await GetRoute(newData); 
+            //得到旧的路由。
+            var oldRoute = _routes.FirstOrDefault(i => i.MqttDescriptor.Topic == newRoute.MqttDescriptor.Topic);
+            if (oldRoute.Equals(newRoute))
+                return;
+            lock (_routes)
+            {
+                //删除旧路由，并添加上新的路由。
+                _routes =
+                    _routes
+                        .Where(i => i.MqttDescriptor.Topic != newRoute.MqttDescriptor.Topic)
+                        .Concat(new[] { newRoute }).ToArray();
+            }
+
+            //触发路由变更事件。
+            OnChanged(new MqttServiceRouteChangedEventArgs(newRoute, oldRoute));
+        }
+
+
+        public async Task ChildrenChange(Dictionary<string, byte[]> newDatas)
+        {
+        
+            var oldChildrens = _routes.Select(p => $"{ _configInfo.MqttRoutePath}{ p.MqttDescriptor.Topic}").ToList();
+            var newChildrens = newDatas.Keys.ToList();
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"最新的mqtt节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"旧的mqtt节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的mqtt路由节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的mqtt路由节点：{string.Join(",", createdChildrens)}");
+
+            //获取新增的路由信息。
+            var newRouteBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
+            var newRoutes = new List<MqttServiceRoute>();
+            foreach (var newRouteByte in newRouteBytes)
+            {
+                newRoutes.Add(await GetRoute(newRouteByte));
+            }
+            var routes = _routes.ToArray();
+            lock (_routes)
+            {
+                #region 节点变更操作
+                _routes = _routes
+                        //删除无效的节点路由。
+                        .Where(i => !deletedChildrens.Contains($"{_configInfo.MqttRoutePath}{i.MqttDescriptor.Topic}"))
+                    //连接上新的路由。
+                    .Concat(newRoutes)
+                    .ToArray();
+                #endregion
+            }
+            //需要删除的路由集合。
+            var deletedRoutes = routes.Where(i => deletedChildrens.Contains($"{_configInfo.MqttRoutePath}{i.MqttDescriptor.Topic}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedRoutes.Select(route => new MqttServiceRouteEventArgs(route)).ToArray());
+
+            //触发路由被创建事件。
+            OnCreated(newRoutes.Select(route => new MqttServiceRouteEventArgs(route)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("mqtt路由数据更新成功。");
         }
 
         private async Task NodeChange(byte[] oldData, byte[] newData)

@@ -4,13 +4,17 @@ using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.Protocol.Tcp.RuleParser.Implementation;
+using Surging.Core.Protocol.Tcp.Runtime.Implementation;
 using Surging.Core.ProxyGenerator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,12 +36,12 @@ namespace Surging.Core.Protocol.Tcp.Runtime
             }
         }
 
-        public abstract void Load(string clientId,TcpServerProperties tcpServerProperties);
-         
+        public abstract void Load(TcpClient client, NetworkProperties tcpServerProperties);
 
-        public string MessageId { get; } = Guid.NewGuid().ToString("N");
+        public ISubject<string> NetworkId { get; internal set; }=new ReplaySubject<string>();
+        public string MessageId { get; internal set; } = Guid.NewGuid().ToString("N");
 
-        public abstract void DeviceStatusProcess(DeviceStatus status, string clientId, TcpServerProperties tcpServerProperties);
+        public abstract void DeviceStatusProcess(DeviceStatus status, string clientId, NetworkProperties tcpServerProperties);
 
         public async Task SendClientMessage(string clientId, object message)
         {

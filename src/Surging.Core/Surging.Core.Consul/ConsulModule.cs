@@ -47,7 +47,9 @@ namespace Surging.Core.Consul
               .UseConsulCommandManager(builder, configInfo)
               .UseConsulCacheManager(builder, configInfo)
               .UseConsulWatch(builder, configInfo)
+              .RegisterConfig(builder, configInfo)
               .UseConsulMqttRouteManager(builder, configInfo);
+             
         }
 
         public ConsulModule UseConsulRouteManager(ContainerBuilderWrapper builder, ConfigInfo configInfo)
@@ -128,6 +130,12 @@ namespace Surging.Core.Consul
             return this;
         }
 
+        public ConsulModule RegisterConfig(ContainerBuilderWrapper builder, ConfigInfo configInfo)
+        {
+            builder.Register(provider => configInfo);
+            return this;
+        }
+
         /// <summary>
         /// 设置使用基于Consul的Watch机制
         /// </summary>
@@ -201,6 +209,8 @@ namespace Surging.Core.Consul
             return builder;
         }
 
+
+
         private ConfigInfo GetConfigInfo(ConfigInfo config)
         {
             ConsulOption option = null;
@@ -227,6 +237,7 @@ namespace Surging.Core.Consul
                     option.EnableChildrenMonitor != null ? bool.Parse(option.EnableChildrenMonitor) :
                     config.EnableChildrenMonitor
                    );
+                config.NotifyMode = option.NotifyMode;
             }
             return config;
         }

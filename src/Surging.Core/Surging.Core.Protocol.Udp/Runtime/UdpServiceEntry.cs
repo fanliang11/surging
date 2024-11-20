@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Subjects;
 using System.Text;
 
 namespace Surging.Core.Protocol.Udp.Runtime
@@ -10,7 +11,9 @@ namespace Surging.Core.Protocol.Udp.Runtime
 
         public Type Type { get; set; }
 
-        public UdpBehavior Behavior { get; set; }
+        public Func<UdpBehavior> Behavior { get; set; }
+
+        public  ISubject<UdpBehavior> BehaviorSubject { get; set; }=new ReplaySubject<UdpBehavior>();
     }
 
 }

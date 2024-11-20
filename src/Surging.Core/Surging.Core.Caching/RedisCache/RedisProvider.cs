@@ -156,16 +156,20 @@ namespace Surging.Core.Caching.RedisCache
         public void Add(string key, object value, TimeSpan timeSpan)
         {
             var node = GetRedisNode(key);
-            var redis = GetRedisClient(new RedisEndpoint()
+            if (node != null)
             {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
-            redis.Set(GetKeySuffix(key), value, timeSpan);
+                var redis = GetRedisClient(new RedisEndpoint()
+                {
+                    DbIndex = int.Parse(node.Db),
+                    Host = node.Host,
+                    Password = node.Password,
+                    Port = int.Parse(node.Port),
+                    MinSize = int.Parse(node.MinSize),
+                    MaxSize = int.Parse(node.MaxSize),
+                });
+                redis.Set(GetKeySuffix(key), value, timeSpan);
+            }
+            
         }
 
         /// <summary>
@@ -195,21 +199,24 @@ namespace Surging.Core.Caching.RedisCache
         /// </remarks>
         public IDictionary<string, T> Get<T>(IEnumerable<string> keys)
         {
-            IDictionary<string, T> result = null;
+            IDictionary<string, T> result = new Dictionary<string, T>();
             foreach (var key in keys)
             {
 
                 var node = GetRedisNode(key);
-                var redis = GetRedisClient(new RedisEndpoint()
+                if (node != null)
                 {
-                    DbIndex = int.Parse(node.Db),
-                    Host = node.Host,
-                    Password = node.Password,
-                    Port = int.Parse(node.Port),
-                    MinSize = int.Parse(node.MinSize),
-                    MaxSize = int.Parse(node.MaxSize),
-                });
-                result.Add(key, redis.Get<T>(key));
+                    var redis = GetRedisClient(new RedisEndpoint()
+                    {
+                        DbIndex = int.Parse(node.Db),
+                        Host = node.Host,
+                        Password = node.Password,
+                        Port = int.Parse(node.Port),
+                        MinSize = int.Parse(node.MinSize),
+                        MaxSize = int.Parse(node.MaxSize),
+                    });
+                    result.Add(key, redis.Get<T>(key));
+                }
             }
             return result;
         }
@@ -231,16 +238,19 @@ namespace Surging.Core.Caching.RedisCache
             {
 
                 var node = GetRedisNode(key);
-                var redis = GetRedisClient(new RedisEndpoint()
+                if (node != null)
                 {
-                    DbIndex = int.Parse(node.Db),
-                    Host = node.Host,
-                    Password = node.Password,
-                    Port = int.Parse(node.Port),
-                    MinSize = int.Parse(node.MinSize),
-                    MaxSize = int.Parse(node.MaxSize),
-                });
-                result.Add(key, await redis.GetAsync<T>(key));
+                    var redis = GetRedisClient(new RedisEndpoint()
+                    {
+                        DbIndex = int.Parse(node.Db),
+                        Host = node.Host,
+                        Password = node.Password,
+                        Port = int.Parse(node.Port),
+                        MinSize = int.Parse(node.MinSize),
+                        MaxSize = int.Parse(node.MaxSize),
+                    });
+                    result.Add(key, await redis.GetAsync<T>(key));
+                }
             }
             return result;
         }
@@ -285,16 +295,19 @@ namespace Surging.Core.Caching.RedisCache
         {
             var node = GetRedisNode(key);
             var result = default(T);
-            var redis = GetRedisClient(new RedisEndpoint()
+            if (node != null)
             {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
-            result = redis.Get<T>(GetKeySuffix(key));
+                var redis = GetRedisClient(new RedisEndpoint()
+                {
+                    DbIndex = int.Parse(node.Db),
+                    Host = node.Host,
+                    Password = node.Password,
+                    Port = int.Parse(node.Port),
+                    MinSize = int.Parse(node.MinSize),
+                    MaxSize = int.Parse(node.MaxSize),
+                });
+                result = redis.Get<T>(GetKeySuffix(key));
+            }
             return result;
         }
 
@@ -309,17 +322,20 @@ namespace Surging.Core.Caching.RedisCache
         public async Task<T> GetAsync<T>(string key)
         {
             var node = GetRedisNode(key);
-            var redis = GetRedisClient(new RedisEndpoint()
+            var result = default(T);
+            if (node != null)
             {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
-
-            var result = await Task.Run(() => redis.Get<T>(GetKeySuffix(key)));
+                var redis = GetRedisClient(new RedisEndpoint()
+                {
+                    DbIndex = int.Parse(node.Db),
+                    Host = node.Host,
+                    Password = node.Password,
+                    Port = int.Parse(node.Port),
+                    MinSize = int.Parse(node.MinSize),
+                    MaxSize = int.Parse(node.MaxSize),
+                }); 
+                  result = await Task.Run(() => redis.Get<T>(GetKeySuffix(key)));
+            }
             return result;
 
         }
@@ -353,16 +369,19 @@ namespace Surging.Core.Caching.RedisCache
         public void Remove(string key)
         {
             var node = GetRedisNode(key);
-            var redis = GetRedisClient(new RedisEndpoint()
+            if (node != null)
             {
-                DbIndex = int.Parse(node.Db),
-                Host = node.Host,
-                Password = node.Password,
-                Port = int.Parse(node.Port),
-                MinSize = int.Parse(node.MinSize),
-                MaxSize = int.Parse(node.MaxSize),
-            });
-            redis.Remove(GetKeySuffix(key));
+                var redis = GetRedisClient(new RedisEndpoint()
+                {
+                    DbIndex = int.Parse(node.Db),
+                    Host = node.Host,
+                    Password = node.Password,
+                    Port = int.Parse(node.Port),
+                    MinSize = int.Parse(node.MinSize),
+                    MaxSize = int.Parse(node.MaxSize),
+                });
+                redis.Remove(GetKeySuffix(key));
+            }
 
         }
 

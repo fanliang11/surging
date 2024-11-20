@@ -47,13 +47,13 @@ namespace Surging.Core.Codec.MessagePack.Messages
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvokeMessage()
         {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName || ContentType == "RemoteInvokeMessage";
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvokeResultMessage()
         {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName || ContentType == "RemoteInvokeResultMessage";
         }
 
         public TransportMessage GetTransportMessage()
@@ -76,6 +76,38 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 contentObject =
                     SerializerUtilitys.Deserialize<MessagePackRemoteInvokeResultMessage>(Content)
                         .GetRemoteInvokeResultMessage();
+            }
+            else
+            {
+                throw new NotSupportedException($"无法支持的消息类型：{ContentType}！");
+            }
+            message.Content = contentObject;
+            return message;
+        }
+
+        public TransportMessage GetTransportMessage(object [] objects)
+        {
+            var message = new TransportMessage
+            {
+                ContentType = ContentType,
+                Id = Id,
+                Content = null
+            };
+
+            object contentObject;
+            if (IsInvokeMessage())
+            {
+                contentObject =
+                    SerializerUtilitys.Deserialize<MessagePackRemoteInvokeMessage>(Content).GetRemoteInvokeMessage();
+            }
+            else if (IsInvokeResultMessage())
+            {
+                var resultObj = objects[1] as object[];
+                contentObject = new RemoteInvokeResultMessage
+                {
+                    ExceptionMessage = objects[0] == null ? null : objects[0].ToString(),
+                    Result = resultObj[1].ToString().Substring(1)
+                };
             }
             else
             {

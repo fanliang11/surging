@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
@@ -27,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Mqtt
 {
-    public class DotNettyMqttServerMessageListener : IMessageListener, IDisposable
+    public class DotNettyMqttServerMessageListener : IMessageListener,INetwork, IDisposable
     {
         #region Field
 
@@ -36,25 +37,36 @@ namespace Surging.Core.Protocol.Mqtt
         private readonly IChannelService _channelService;
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
         private readonly DiagnosticListener _diagnosticListener;
+        private readonly NetworkProperties _properties;
+        public string Id { get; set; }
         #endregion Field
 
         public event ReceivedDelegate Received;
 
         #region Constructor
+        public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger,
+       IChannelService channelService,
+       IMqttBehaviorProvider mqttBehaviorProvider):this(logger, channelService, mqttBehaviorProvider, new NetworkProperties())
+        {
+
+        }
         public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger, 
             IChannelService channelService,
-            IMqttBehaviorProvider mqttBehaviorProvider)
+            IMqttBehaviorProvider mqttBehaviorProvider,
+             NetworkProperties properties)
         {
+            Id = properties?.Id;
             _logger = logger;
             _channelService = channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
             _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+            _properties = properties;
         }
         #endregion
 
-        public void Dispose()
+        public async void Dispose()
         {
-            throw new NotImplementedException();
+            await _channel.CloseAsync();
         }
 
         public async Task OnReceived(IMessageSender sender, TransportMessage message)
@@ -208,6 +220,33 @@ namespace Surging.Core.Protocol.Mqtt
                     Id = message.Id
                 }, new Exception(remoteInvokeResultMessage.ExceptionMessage)));
             }
+        }
+
+        public async Task StartAsync()
+        {
+            await StartAsync(_properties.CreateSocketAddress());
+        }
+
+        NetworkType INetwork.GetType()
+        {
+            return NetworkType.Mqtt;
+        }
+
+        public async void Shutdown()
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"Mqtt服务主机已停止。");
+            await _channel.CloseAsync();
+        }
+
+        public bool IsAlive()
+        {
+            return _channel.Active;
+        }
+
+        public bool IsAutoReload()
+        {
+            return false;
         }
     }
 }

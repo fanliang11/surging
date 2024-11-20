@@ -45,6 +45,9 @@ namespace Surging.Core.CPlatform.Engines.Implementation
                     if (_logger.IsEnabled(LogLevel.Debug))
                         _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的组件模块。");
                     serviceBuilder.RegisterModules(paths);
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                        _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的消息协议模块。");
+                    serviceBuilder.RegisterProtocols(paths);
                 }
                 _lastBuildTime = DateTime.Now;
             }
@@ -62,29 +65,36 @@ namespace Surging.Core.CPlatform.Engines.Implementation
                 if (_serviceEngine.ModuleServiceLocationFormats != null)
                 {
                     var paths = GetPaths(_serviceEngine.ModuleServiceLocationFormats);
-                    paths = paths?.Where(p => (Directory.GetLastWriteTime(Path.Combine(rootPath,p)) - _lastBuildTime).TotalSeconds > 0).ToArray();
-                    if (paths == null || paths.Length==0) return null;
-                    if (_logger.IsEnabled(LogLevel.Debug))
-                        _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的业务模块。");
+                    paths = paths?.Where(p => (Directory.GetLastWriteTime(Path.Combine(rootPath, p)) - _lastBuildTime).TotalSeconds > 0).ToArray();
+                    if (paths != null && paths.Length > 0)
+                    {
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的业务模块。");
 
-                   
-                    serviceBuilder.RegisterServices(paths);
-                    serviceBuilder.RegisterRepositories(paths);
-                    serviceBuilder.RegisterServiceBus(paths);
-                    result = new ValueTuple<List<Type>, IEnumerable<string>>(serviceBuilder.GetInterfaceService(paths), serviceBuilder.GetDataContractName(paths));
+                        serviceBuilder.RegisterServices(paths);
+                        serviceBuilder.RegisterRepositories(paths);
+                        serviceBuilder.RegisterServiceBus(paths);
+                        result = new ValueTuple<List<Type>, IEnumerable<string>>(serviceBuilder.GetInterfaceService(paths), serviceBuilder.GetDataContractName(paths));
+                        _lastBuildTime = DateTime.Now;
+                    }
                 }
                 if (_serviceEngine.ComponentServiceLocationFormats != null)
                 {
                     var paths = GetPaths(_serviceEngine.ComponentServiceLocationFormats);
-                    paths = paths?.Where(p => (Directory.GetLastWriteTime(p) - _lastBuildTime).TotalSeconds > 0).ToArray();
+                    paths = paths?.Where(p => (Directory.GetLastWriteTime(Path.Combine(rootPath, p)) - _lastBuildTime).TotalSeconds > 0).ToArray();
                     if (paths != null && paths.Length > 0)
                     {
                         if (_logger.IsEnabled(LogLevel.Debug))
                             _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的组件模块。");
                         serviceBuilder.RegisterModules(paths);
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的消息协议模块。");
+                        serviceBuilder.RegisterProtocols(paths);
+                        result = new ValueTuple<List<Type>, IEnumerable<string>>();
+                       _lastBuildTime = DateTime.Now; 
                     }
                 }
-                _lastBuildTime = DateTime.Now;
+            
             }
             return result;
         }

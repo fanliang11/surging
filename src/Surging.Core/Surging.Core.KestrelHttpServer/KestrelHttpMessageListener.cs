@@ -14,7 +14,7 @@ using Surging.Core.CPlatform.Serialization;
 using Surging.Core.KestrelHttpServer.Extensions;
 using Surging.Core.KestrelHttpServer.Internal; 
 using System;
-using System.IO;
+using System.IO; 
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -27,11 +27,20 @@ using System.Diagnostics;
 using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Utilities;
-using System.Reactive.Subjects;
+using Microsoft.AspNetCore.Mvc;
+using Surging.Core.CPlatform.Network;
+using Microsoft.AspNetCore;
+using Autofac.Core;
+using Surging.Core.CPlatform.Transport;
+using System.Collections.Concurrent;
+using Surging.Core.CPlatform.Address;
+using Surging.Core.KestrelHttpServer.Runtime;
+using System.Net.Http.Headers;
+using Surging.Core.KestrelHttpServer.Interceptors;
 
 namespace Surging.Core.KestrelHttpServer
 {
-    public class KestrelHttpMessageListener : HttpMessageListener, IDisposable
+    public class KestrelHttpMessageListener : HttpMessageListener, INetwork, IDisposable
     {
         private readonly ILogger<KestrelHttpMessageListener> _logger;
         private IWebHost _host;
@@ -42,21 +51,38 @@ namespace Surging.Core.KestrelHttpServer
         private readonly CPlatformContainer _container;
         private readonly IServiceRouteProvider _serviceRouteProvider;
         private readonly DiagnosticListener _diagnosticListener;
+        private readonly IHttpServiceEntryProvider _httpServiceEntryProvider;
+        private readonly NetworkProperties _httpServerProperties;
+         
+        public string Id { get ; set ; }
+        public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger,
+            ISerializer<string> serializer,
+            IServiceEngineLifetime lifetime,
+            IModuleProvider moduleProvider,
+            IServiceRouteProvider serviceRouteProvider,
+            IHttpServiceEntryProvider httpServiceEntryProvider,
+            CPlatformContainer container):this(logger, serializer, lifetime, moduleProvider, serviceRouteProvider, httpServiceEntryProvider, container,new NetworkProperties())
+        {
 
+        }
         public KestrelHttpMessageListener(ILogger<KestrelHttpMessageListener> logger,
             ISerializer<string> serializer, 
             IServiceEngineLifetime lifetime,
             IModuleProvider moduleProvider,
             IServiceRouteProvider serviceRouteProvider,
-            CPlatformContainer container) : base(logger, serializer, serviceRouteProvider)
+            IHttpServiceEntryProvider httpServiceEntryProvider,
+            CPlatformContainer container, NetworkProperties properties) : base(logger, serializer, serviceRouteProvider)
         {
+            Id = properties?.Id;
             _logger = logger;
             _serializer = serializer;
             _lifetime = lifetime;
             _moduleProvider = moduleProvider;
             _container = container;
-            _serviceRouteProvider = serviceRouteProvider;
-            _diagnosticListener = new DiagnosticListener(CPlatform.Diagnostics.DiagnosticListenerExtensions.DiagnosticListenerName);
+            _httpServiceEntryProvider = httpServiceEntryProvider;
+           _serviceRouteProvider = serviceRouteProvider;
+            _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
+            _httpServerProperties = properties;
         }
 
         public async Task StartAsync(IPAddress address,int? port)
@@ -97,6 +123,7 @@ namespace Surging.Core.KestrelHttpServer
                 _host = hostBuilder.Build();
                 _lifetime.ServiceEngineStarted.Register(async () =>
                 {
+                    if(port!=null && address !=null)
                     await _host.RunAsync();
                 });
 
@@ -116,7 +143,7 @@ namespace Surging.Core.KestrelHttpServer
         public void ConfigureServices(IServiceCollection services)
         { 
             var builder = new ContainerBuilder();
-            services.AddMvc(option => option.EnableEndpointRouting = false);
+            services.AddMvc(option=>option.EnableEndpointRouting = false); 
             _moduleProvider.ConfigureServices(new ConfigurationContext(services,
                 _moduleProvider.Modules,
                 _moduleProvider.VirtualPaths,
@@ -127,26 +154,33 @@ namespace Surging.Core.KestrelHttpServer
 
         private void AppResolve(IApplicationBuilder app)
         { 
-            app.UseStaticFiles();
+            app.UseStaticFiles(); 
             app.UseMvc();
-            _moduleProvider.Initialize(new ApplicationInitializationContext(app, _moduleProvider.Modules,
+            var httpEntry=  _httpServiceEntryProvider.GetEntry();
+           _moduleProvider.Initialize(new ApplicationInitializationContext(app, _moduleProvider.Modules,
                 _moduleProvider.VirtualPaths,
                 AppConfig.Configuration));
-            app.Use(async (context,next) =>
+            app.Use(async (context, next) =>
             {
                 var messageId = Guid.NewGuid().ToString("N");
-                var subject = new ReplaySubject<HttpResultMessage<object>>();
-                var sender = new HttpServerMessageSender(_serializer, context,_diagnosticListener, subject);
+                var sender = new HttpServerMessageSender(_serializer, context,_diagnosticListener);
                 try
                 {
-                    var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
-                    var isSuccess = await OnAuthorization(context, sender, messageId, filters);
-                    if (isSuccess)
+                    var httpInterceptors = app.ApplicationServices.GetServices<IHttpInterceptor>();
+                    var isIntercept = false;
+                    if (!string.IsNullOrEmpty(Id))
+                        isIntercept= await OnHttpInterceptor(context, sender,Id, messageId ,httpEntry, httpInterceptors);
+                    if (!isIntercept)
                     {
-                        var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
-                        await OnReceived(sender, messageId, context, actionFilters, subject);
+                        var filters = app.ApplicationServices.GetServices<IAuthorizationFilter>();
+                        var isSuccess = await OnAuthorization(context, sender, messageId, filters);
+                        if (isSuccess)
+                        {
+                            var actionFilters = app.ApplicationServices.GetServices<IActionFilter>();
+                            await OnReceived(sender, messageId, context, actionFilters);
+                        }
+                        await next();
                     }
-                    await next();
                 }
                 catch (Exception ex)
                 {
@@ -154,8 +188,9 @@ namespace Surging.Core.KestrelHttpServer
                     WirteDiagnosticError(messageId, ex);
                     await OnException(context, sender, messageId, ex, filters);
                 }
-            });
-            app.Run( context=> Task.CompletedTask);
+           
+            });  
+            app.Run(context => Task.CompletedTask);
         }
 
         private void WirteDiagnosticError(string messageId,Exception ex)
@@ -171,5 +206,54 @@ namespace Surging.Core.KestrelHttpServer
             _host.Dispose();
         }
 
+        public async Task StartAsync()
+        { 
+            _moduleProvider.Modules.ForEach(p =>
+            {
+                if (p.ModuleName== "StageModule")
+                    p.Enable = false;
+                _httpServerProperties.ParserConfiguration.TryGetValue("enableSwagger", out object enableSwagger);
+                _httpServerProperties.ParserConfiguration.TryGetValue("enableWebService", out object enableWebService);
+                if (enableSwagger != null && bool.Parse(enableSwagger.ToString()) == false && p.ModuleName == "SwaggerModule")
+                    p.Enable = false;
+                if (enableWebService != null && bool.Parse(enableWebService.ToString()) == false && p.ModuleName == "WebServiceModule")
+                    p.Enable = false;
+
+            });
+            var executor = _container.GetInstances<IServiceExecutor>(CommunicationProtocol.Http.ToString());
+            var host =new DefaultHttpServiceHost(async endPoint =>
+            {
+                await StartAsync(_httpServerProperties.CreateSocketAddress().Address, _httpServerProperties.Port);
+                return this;
+            }, executor, this);
+           await host.StartAsync(new IPEndPoint(_httpServerProperties.CreateSocketAddress().Address, _httpServerProperties.Port));
+            _moduleProvider.Modules.ForEach(p =>
+            {
+                if (p.ModuleName == "StageModule" || p.ModuleName == "SwaggerModule" || p.ModuleName == "WebServiceModule")
+                    p.Enable = true;
+            });
+        }
+
+        NetworkType INetwork.GetType()
+        {
+            return NetworkType.Http;
+        }
+
+        public async void Shutdown()
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"Http服务主机已停止。");
+            await _host.StopAsync();
+        }
+
+        public bool IsAlive()
+        {
+            return true;
+        }
+
+        public bool IsAutoReload()
+        {
+            return false;
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Primitives;
+﻿using MessagePack;
+using MessagePack.Formatters;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +8,7 @@ using System.Text;
 
 namespace Surging.Core.KestrelHttpServer.Internal
 {
+    [MessagePackObject] 
     public class HttpFormCollection : IEnumerable<KeyValuePair<string, StringValues>>, IEnumerable
     {
         public static readonly HttpFormCollection Empty = new HttpFormCollection();
@@ -22,13 +25,18 @@ namespace Surging.Core.KestrelHttpServer.Internal
         private HttpFormCollection()
         {
         }
-
+         
+        [SerializationConstructor]
         public HttpFormCollection(Dictionary<string, StringValues> fields, HttpFormFileCollection files = null)
         {
             Store = fields;
             _files = files;
         }
-
+         [Key(0)]
+        public Dictionary<string, StringValues> Store { get; set; }
+       
+        [Key(1)]
+        [MessagePackFormatter(typeof(GenericCollectionFormatter<HttpFormFile,HttpFormFileCollection>))]
         public HttpFormFileCollection Files
         {
             get
@@ -37,10 +45,8 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
             private set { _files = value; }
         }
-
-        private Dictionary<string, StringValues> Store { get; set; }
-
-      
+          
+        [IgnoreMember]
         public StringValues this[string key]
         {
             get
@@ -59,7 +65,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
-        
+        [IgnoreMember]
         public int Count
         {
             get
@@ -68,6 +74,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             }
         }
 
+        [IgnoreMember]
         public ICollection<string> Keys
         {
             get

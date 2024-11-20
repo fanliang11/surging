@@ -5,6 +5,7 @@ using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Mqtt;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Transport.Codec;
@@ -64,7 +65,7 @@ namespace Surging.Core.Protocol.Mqtt
                     );
             }).As(typeof(IChannelService)).SingleInstance();
             builder.RegisterType(typeof(DefaultMqttBehaviorProvider)).As(typeof(IMqttBehaviorProvider)).SingleInstance();
-
+            builder.RegisterType(typeof(MqttNetworkProvider)).Named(NetworkType.Mqtt.ToString(), typeof(INetworkProvider<NetworkProperties>)).SingleInstance();
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.Mqtt)
             {
                 RegisterDefaultProtocol(builder);

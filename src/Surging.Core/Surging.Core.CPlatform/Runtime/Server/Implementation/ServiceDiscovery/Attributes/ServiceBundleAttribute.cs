@@ -11,7 +11,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         public ServiceBundleAttribute(string routeTemplate,bool isPrefix=true)
         {
             RouteTemplate = routeTemplate;
-            IsPrefix = isPrefix;
+            IsPrefix = isPrefix; 
         }
         public string RouteTemplate { get; }
 

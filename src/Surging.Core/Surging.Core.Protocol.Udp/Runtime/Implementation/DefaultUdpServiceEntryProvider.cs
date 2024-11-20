@@ -46,7 +46,7 @@ namespace Surging.Core.Protocol.Udp.Runtime.Implementation
             var services = _types.ToArray();
             if (_udpServiceEntry == null)
             {
-                _udpServiceEntry = new UdpServiceEntry();
+                _udpServiceEntry = new UdpServiceEntry(); 
                 foreach (var service in services)
                 {
                     var entry = CreateServiceEntry(service);
@@ -76,7 +76,7 @@ namespace Surging.Core.Protocol.Udp.Runtime.Implementation
             if (behavior != null)
                 result = new UdpServiceEntry
                 {
-                    Behavior = behavior,
+                    Behavior = ()=> _serviceProvider.GetInstances(service) as UdpBehavior,
                     Type = behavior.GetType(),
                     Path = path,
                 };

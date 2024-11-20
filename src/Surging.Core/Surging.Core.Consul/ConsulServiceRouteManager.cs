@@ -74,6 +74,11 @@ namespace Surging.Core.Consul
             }
         }
 
+        public override void ClearRoute()
+        {
+            _routes = null;
+        }
+
         public void Dispose()
         {
         }
@@ -382,6 +387,26 @@ namespace Surging.Core.Consul
             return paths.ToArray();
         }
 
+        public async Task NodeChange(byte[] newData)
+        {
+            var newRoute = await GetRoute(newData);
+            //得到旧的路由。
+            var oldRoute = _routes.FirstOrDefault(i => i.ServiceDescriptor.Id == newRoute.ServiceDescriptor.Id);
+            if (oldRoute.Equals(newRoute))
+                return;
+            lock (_routes)
+            {
+                //删除旧路由，并添加上新的路由。
+                _routes =
+                    _routes
+                        .Where(i => i.ServiceDescriptor.Id != newRoute.ServiceDescriptor.Id)
+                        .Concat(new[] { newRoute }).ToArray();
+            }
+
+            //触发路由变更事件。
+            OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
+        }
+
         private async Task NodeChange(byte[] oldData, byte[] newData)
         {
             if (DataEquals(oldData, newData))
@@ -402,6 +427,58 @@ namespace Surging.Core.Consul
 
             //触发路由变更事件。
             OnChanged(new ServiceRouteChangedEventArgs(newRoute, oldRoute));
+        }
+
+        public async Task ChildrenChange(Dictionary<string, byte[]> newDatas)
+        {
+            var oldChildrens = _routes.Select(p => $"{_configInfo.RoutePath}{p.ServiceDescriptor.Id}").ToList();
+            var newChildrens = newDatas.Keys.ToList();
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"旧的节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的路由节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的路由节点：{string.Join(",", createdChildrens)}");
+
+            //获取新增的路由信息。
+            var newRouteBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
+            var newRoutes = new List<ServiceRoute>();
+            foreach (var newRouteByte in newRouteBytes)
+            {
+                newRoutes.Add(await GetRoute(newRouteByte));
+            }
+
+            var routes = _routes.ToArray();
+            lock (_routes)
+            {
+                #region 节点变更操作
+                _routes = _routes
+                //删除无效的节点路由。
+                .Where(i => !deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}"))
+                    //连接上新的路由。
+                    .Concat(newRoutes)
+                    .ToArray();
+                #endregion
+            }
+            //需要删除的路由集合。
+            var deletedRoutes = routes.Where(i => deletedChildrens.Contains($"{_configInfo.RoutePath}{i.ServiceDescriptor.Id}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
+
+            //触发路由被创建事件。
+            OnCreated(newRoutes.Select(route => new ServiceRouteEventArgs(route)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("路由数据更新成功。");
         }
 
         /// <summary>

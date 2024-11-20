@@ -3,6 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Routing;
+using Surging.Core.CPlatform.Utilities;
+using Microsoft.AspNetCore.Components;
 
 namespace Surging.Core.Stage.Internal.Implementation
 {
@@ -10,6 +14,7 @@ namespace Surging.Core.Stage.Internal.Implementation
     {
         private readonly ConcurrentDictionary<string, ValueTuple<List<IPNetworkSegment>, List<IPNetworkSegment>>> _ipNetworkSegments = new ConcurrentDictionary<string, ValueTuple<List<IPNetworkSegment>, List<IPNetworkSegment>>>();
         private readonly ConcurrentDictionary<string, ValueTuple<List<string>, List<string>>> _ipAddresses = new ConcurrentDictionary<string, ValueTuple<List<string>, List<string>>>();
+       
         public IPAddressChecker()
         {
             Init();
@@ -26,15 +31,15 @@ namespace Surging.Core.Stage.Internal.Implementation
                 result = ipNetworkSegments.Item1.Count > 0 && ipAddresses.Item1.Count > 0;
                 if (ipNetworkSegments.Item2.Count > 0|| ipAddresses.Item2.Count>0)
                 {
-                    result = ipNetworkSegments.Item2.Any(p => p.LongFirstUsable >= longIpAddress && p.LongLastUsable <= longIpAddress);
+                    result = ipNetworkSegments.Item2.Any(p => p.LongFirstUsable <= longIpAddress && p.LongLastUsable >= longIpAddress);
                     if (!result)
-                        result = ipAddresses.Item2.Any(p => p == ip.ToString());
-                }
+                        result = ipAddresses.Item2.Any(p =>p.Equals("all",StringComparison.OrdinalIgnoreCase) ||  p == ip.ToString());
+                } 
                 if (ipNetworkSegments.Item1.Count > 0  || ipAddresses.Item1.Count > 0)
                 {
-                    result = !ipNetworkSegments.Item1.Any(p => p.LongFirstUsable >= longIpAddress && p.LongLastUsable <= longIpAddress);
+                    result = !ipNetworkSegments.Item1.Any(p => p.LongFirstUsable <= longIpAddress && p.LongLastUsable >= longIpAddress);
                     if (result)
-                        result = !ipAddresses.Item1.Any(p => p == ip.ToString());
+                        result = !ipAddresses.Item1.Any(p => p.Equals("all", StringComparison.OrdinalIgnoreCase) || p == ip.ToString());
                 }
             }
             return result;
@@ -59,6 +64,30 @@ namespace Surging.Core.Stage.Internal.Implementation
                 }
                 );
             }
+        }
+
+        public void AddCheckIpAddresses(IpCheckerProperties checkerProperties)
+        {
+            var whiteList = checkerProperties.WhiteIpAddress?.Split(",");
+            var blackList = checkerProperties.BlackIpAddress?.Split(",");
+            var whiteIPNetworkSegments = GetIPNetworkSegments(whiteList);
+            var blackIPNetworkSegments = GetIPNetworkSegments(blackList);
+            var segment = new ValueTuple<List<IPNetworkSegment>, List<IPNetworkSegment>>(whiteIPNetworkSegments, blackIPNetworkSegments);
+            var address = new ValueTuple<List<string>, List<string>>(GetIPAddresses(whiteList), GetIPAddresses(blackList));
+            var keys = _ipNetworkSegments.Keys.Where(p => PathUtils.Match(checkerProperties.RoutePathPattern, p));
+            foreach (var key in keys)
+                _ipNetworkSegments.TryRemove(key, out var value);
+            _ipNetworkSegments.AddOrUpdate(checkerProperties.RoutePathPattern ?? "", segment,(key,value)=> segment);
+            _ipAddresses.AddOrUpdate(checkerProperties.RoutePathPattern ?? "", address,(key,value)=> address); 
+        }
+
+        public void Remove(IpCheckerProperties checkerProperties)
+        {
+            var keys = _ipNetworkSegments.Keys.Where(p => PathUtils.Match(checkerProperties.RoutePathPattern, p));
+            foreach (var key in keys)
+                _ipNetworkSegments.TryRemove(key, out var value1);
+            _ipNetworkSegments.TryRemove(checkerProperties.RoutePathPattern, out var value);
+            _ipAddresses.TryRemove(checkerProperties.RoutePathPattern, out var ipaddresses);
         }
 
         private List<IPNetworkSegment> GetIPNetworkSegments(IEnumerable<string> ipAddresses)
@@ -91,7 +120,7 @@ namespace Surging.Core.Stage.Internal.Implementation
             var valueTuple = _ipNetworkSegments.GetValueOrDefault(routePath);
             if (valueTuple == (null, null))
             {
-                var keys = _ipNetworkSegments.Keys.Where(p => routePath.Contains(p));
+                var keys = _ipNetworkSegments.Keys.Where(p => PathUtils.Match(p,routePath ));
                 foreach (var key in keys)
                 {
                     whiteIPNetworkSegments.AddRange(_ipNetworkSegments[key].Item1);

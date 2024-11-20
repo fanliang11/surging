@@ -20,7 +20,7 @@ namespace Surging.Core.ServiceHosting.Extensions.Runtime
         {
             add
             {
-                if (received == null)
+                if (value == null)
                 {
                     received += value;
                 }

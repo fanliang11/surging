@@ -16,13 +16,15 @@ namespace Surging.Core.CPlatform.Routing
         /// <returns></returns>
         Task<ServiceRoute> Locate(string serviceId);
 
-        ValueTask<ServiceRoute> GetLocalRouteByPathRegex(string path);
+         Task<ServiceRoute> GetLocalRouteByPathRegex(string path);
+
+         void  ResetLocalRoute();
         /// <summary>
         /// 根据服务路由路径获取路由信息
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        ValueTask<ServiceRoute> GetRouteByPath(string path);
+        Task<ServiceRoute> GetRouteByPath(string path);
 
         /// <summary>
         /// 根据服务路由路径找到相关服务信息
@@ -38,6 +40,6 @@ namespace Surging.Core.CPlatform.Routing
         /// <returns></returns>
         Task RegisterRoutes(decimal processorTime);
 
-        ValueTask<ServiceRoute> GetRouteByPathRegex(string path);
+        Task<ServiceRoute> GetRouteByPathRegex(string path);
     }
 }

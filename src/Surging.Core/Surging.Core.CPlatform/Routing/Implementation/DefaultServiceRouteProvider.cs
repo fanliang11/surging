@@ -58,7 +58,7 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return route;
         }
 
-        public  ValueTask<ServiceRoute> GetLocalRouteByPathRegex(string path)
+        public  Task<ServiceRoute> GetLocalRouteByPathRegex(string path)
         {
             var addess = NetUtils.GetHostAddress();
 
@@ -74,33 +74,32 @@ namespace Surging.Core.CPlatform.Routing.Implementation
                     };
                 }).ToList());
             }
-
             path = path.ToLower();
             _serviceRoute.TryGetValue(path, out ServiceRoute route);
             if (route == null)
             {
-                return new ValueTask<ServiceRoute>(GetRouteByPathRegexAsync(_localRoutes, path));
+                return GetRouteByPathRegexAsync(_localRoutes, path);
             }
             else
             {
-                return new ValueTask<ServiceRoute>(route);
+                return Task.FromResult(route);
             }
         }
 
-        public ValueTask<ServiceRoute> GetRouteByPath(string path)
+        public Task<ServiceRoute> GetRouteByPath(string path)
         {
             _serviceRoute.TryGetValue(path.ToLower(), out ServiceRoute route);
             if (route == null)
             {
-                return new ValueTask<ServiceRoute>(GetRouteByPathAsync(path));
+                return  GetRouteByPathAsync(path);
             }
             else
             {
-                return new ValueTask<ServiceRoute>(route);
+                return  Task.FromResult(route);
             }
         }
 
-        public async ValueTask<ServiceRoute> GetRouteByPathRegex(string path)
+        public async Task<ServiceRoute> GetRouteByPathRegex(string path)
         {
             path = path.ToLower();
             _serviceRoute.TryGetValue(path, out ServiceRoute route);
@@ -209,6 +208,11 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             else
               if(!Regex.IsMatch(route.ServiceDescriptor.RoutePath, pattern))  _serviceRoute.GetOrAdd(path, route);
             return await Task.FromResult(route);
+        }
+
+        public void ResetLocalRoute()
+        {
+            _localRoutes.Clear();
         }
 
         #endregion

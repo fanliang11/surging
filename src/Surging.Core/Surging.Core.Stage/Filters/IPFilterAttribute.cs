@@ -2,6 +2,7 @@
 using Surging.Core.ApiGateWay;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using Surging.Core.KestrelHttpServer.Internal;
@@ -18,17 +19,17 @@ namespace Surging.Core.Stage.Filters
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IIPChecker _ipChecker;
-        public IPFilterAttribute(IHttpContextAccessor httpContextAccessor, IIPChecker ipChecker)
+        public IPFilterAttribute(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
-            _ipChecker = ipChecker;
+            _ipChecker = ServiceLocator.GetService<IIPChecker>();
         }
         public  Task OnActionExecuted(ActionExecutedContext filterContext)
         {
             return Task.CompletedTask;
         }
 
-        public    Task OnActionExecuting(ActionExecutingContext filterContext)
+        public Task OnActionExecuting(ActionExecutingContext filterContext)
         {
             var address = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
             RestContext.GetContext().SetAttachment("RemoteIpAddress", address.ToString());

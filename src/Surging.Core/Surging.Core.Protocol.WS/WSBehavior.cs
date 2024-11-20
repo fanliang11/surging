@@ -8,8 +8,8 @@ using Surging.Core.ProxyGenerator;
 using System;
 using WebSocketCore.Server;
 using System.Linq;
-using System.Threading.Tasks;
 using Surging.Core.CPlatform.Messages;
+using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.WS
 {
@@ -20,7 +20,7 @@ namespace Surging.Core.Protocol.WS
         {
             add
             {
-                if (received == null)
+                if (value == null)
                 {
                     received += value;
                 }

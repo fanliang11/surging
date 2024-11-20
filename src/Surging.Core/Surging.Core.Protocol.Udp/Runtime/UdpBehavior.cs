@@ -3,10 +3,14 @@ using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Network;
+using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Utilities;
+using Surging.Core.Protocol.Udp.Runtime.Implementation;
 using Surging.Core.ProxyGenerator;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,11 +19,12 @@ namespace Surging.Core.Protocol.Udp.Runtime
     public abstract class UdpBehavior : IServiceBehavior
     {
         private ServerReceivedDelegate received;
+
         public event ServerReceivedDelegate Received
         {
             add
             {
-                if (received == null)
+                if (value == null)
                 {
                     received += value;
                 }
@@ -30,7 +35,10 @@ namespace Surging.Core.Protocol.Udp.Runtime
             }
         }
 
-        public string MessageId { get; } = Guid.NewGuid().ToString("N");
+        public IUdpMessageSender Sender { get; set; }
+        public ISubject<string> NetworkId { get; internal set; } = new ReplaySubject<string>();
+        public abstract void Load(UdpClient client, NetworkProperties udpServerProperties);
+        public string MessageId { get;  internal set; } = Guid.NewGuid().ToString("N");
         public async Task Write(object result, int statusCode = 200, string exceptionMessage = "")
         {
             if (received == null)
@@ -98,7 +106,7 @@ namespace Surging.Core.Protocol.Udp.Runtime
 
         }
 
-        public abstract Task<bool> Dispatch(IEnumerable<byte> bytes);
+        public abstract Task Dispatch(IEnumerable<byte> bytes);
 
         public void Publish(IntegrationEvent @event)
         {

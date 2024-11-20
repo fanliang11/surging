@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.OpenApi.Models;
+using Surging.Core.CPlatform.Runtime.Server;
 
 namespace Surging.Core.Swagger_V5.SwaggerGen
 {
@@ -16,15 +17,17 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
             ISchemaGenerator schemaGenerator,
             SchemaRepository schemaRepository,
             PropertyInfo propertyInfo = null,
-            ParameterInfo parameterInfo = null)
+            ParameterInfo parameterInfo = null, ServiceEntry serviceEntry=null)
         {
             ApiParameterDescription = apiParameterDescription;
             SchemaGenerator = schemaGenerator;
             SchemaRepository = schemaRepository;
             PropertyInfo = propertyInfo;
             ParameterInfo = parameterInfo;
+            ServiceEntry = serviceEntry;
         }
 
+        public ServiceEntry ServiceEntry { get; set; }
         public ApiParameterDescription ApiParameterDescription { get; }
 
         public ISchemaGenerator SchemaGenerator { get; }

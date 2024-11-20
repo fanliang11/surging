@@ -12,6 +12,7 @@ namespace Surging.Core.Protocol.Tcp.Runtime
 
         public Type Type { get; set; }
 
-        public TcpBehavior Behavior { get; set; }
+
+        public Func<TcpBehavior> Behavior { get; set; }
     }
 }

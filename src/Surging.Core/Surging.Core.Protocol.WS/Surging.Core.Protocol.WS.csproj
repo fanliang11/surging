@@ -18,6 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\WebSocket\WebSocketCore\WebSocketCore.csproj" />
     <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />

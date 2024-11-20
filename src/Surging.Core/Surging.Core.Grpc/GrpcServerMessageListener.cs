@@ -1,6 +1,7 @@
 ﻿using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.Grpc.Runtime;
 using System;
@@ -11,17 +12,24 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Grpc
 {
-   public  class GrpcServerMessageListener: IMessageListener, IDisposable
+   public  class GrpcServerMessageListener: IMessageListener, INetwork, IDisposable
     { 
         private Server _server;
         private readonly ILogger<GrpcServerMessageListener> _logger;
         private readonly IGrpcServiceEntryProvider _grpcServiceEntryProvider;
+        private readonly NetworkProperties _networkProperties;
 
         public GrpcServerMessageListener(ILogger<GrpcServerMessageListener> logger,
-            IGrpcServiceEntryProvider grpcServiceEntryProvider)
+            IGrpcServiceEntryProvider grpcServiceEntryProvider):this(logger, grpcServiceEntryProvider, new NetworkProperties())
+        {
+        }
+
+        public GrpcServerMessageListener(ILogger<GrpcServerMessageListener> logger,
+        IGrpcServiceEntryProvider grpcServiceEntryProvider, NetworkProperties networkProperties)
         {
             _logger = logger;
-            _grpcServiceEntryProvider = grpcServiceEntryProvider; 
+            _grpcServiceEntryProvider = grpcServiceEntryProvider;
+            _networkProperties = networkProperties;
         }
         public  Task StartAsync(EndPoint endPoint)
         {
@@ -69,6 +77,8 @@ namespace Surging.Core.Grpc
             }
         }
 
+        public string Id { get; set; }
+
         public event ReceivedDelegate Received;
 
         public Task OnReceived(IMessageSender sender, TransportMessage message)
@@ -79,6 +89,33 @@ namespace Surging.Core.Grpc
         public void Dispose()
         {
             _server.ShutdownAsync();
+        }
+
+        public async Task StartAsync()
+        {
+           await StartAsync(_networkProperties.CreateSocketAddress());
+        }
+
+        NetworkType INetwork.GetType()
+        {
+            return NetworkType.Grpc;
+        }
+
+        public void Shutdown()
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"Grpc服务主机已停止。");
+            _server.ShutdownAsync();
+        }
+
+        public bool IsAlive()
+        {
+            return true;
+        }
+
+        public bool IsAutoReload()
+        {
+            return false;
         }
     }
 }

@@ -78,13 +78,16 @@ namespace Surging.Core.Protocol.Tcp.Runtime.Implementation
             if (path.Length > 0 && path[0] != '/')
                 path = $"/{path}";
             if (behavior != null)
+#pragma warning disable CS8603 // 可能返回 null 引用。
                 result = new TcpServiceEntry
                 {
-                    Behavior = behavior,
+                    Behavior =()=> _serviceProvider.GetInstances(service) as TcpBehavior,
                     Type = behavior.GetType(),
-                    Path = path,
+                    Path = path, 
                 };
+
             return result;
+#pragma warning restore CS8603 // 可能返回 null 引用。
         }
         #endregion
     }

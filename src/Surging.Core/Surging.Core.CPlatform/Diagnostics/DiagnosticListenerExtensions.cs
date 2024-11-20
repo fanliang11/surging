@@ -10,7 +10,7 @@ namespace Surging.Core.CPlatform.Diagnostics
     public static class DiagnosticListenerExtensions
     {
         public const string DiagnosticListenerName = "SurgingDiagnosticListener";
-        public const string Prefix = "Surging.Core.";
+        public const string Prefix = "Surging.Core";
         public const string SurgingBeforeTransport = Prefix +".{0}."+ nameof(WriteTransportBefore);
         public const string SurgingAfterTransport= Prefix + ".{0}." + nameof(WriteTransportAfter);
         public const string SurgingErrorTransport = Prefix + ".{0}." + nameof(WriteTransportError);

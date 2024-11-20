@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Serialization;
@@ -34,6 +35,7 @@ namespace Surging.Core.Protocol.WS
             if (section.Exists())
                 options = section.Get<WebSocketOptions>();
             base.RegisterBuilder(builder);
+            builder.RegisterType(typeof(WSNetworkProvider)).Named(NetworkType.WS.ToString(), typeof(INetworkProvider<NetworkProperties>)).SingleInstance();
             builder.Register(provider =>
             {
                 return new DefaultWSServiceEntryProvider(

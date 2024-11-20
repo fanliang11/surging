@@ -1,4 +1,6 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Codecs;
+using DotNetty.Common;
 using Jint;
 using Surging.Core.Protocol.Tcp.Util;
 using System;
@@ -14,16 +16,82 @@ namespace Surging.Core.Protocol.Tcp.RuleParser.Implementation
     public class RulePipePayloadParser : IRulePayloadParser
     {
         private readonly List<IByteBuffer> _result = new List<IByteBuffer>();
+        private readonly List<IByteBuffer> _delimited = new List<IByteBuffer>();
+        private bool discardingTooLongFrame = true;
         private ISubject<IByteBuffer> _bufferSubject = new ReplaySubject<IByteBuffer>();
         private readonly List<Action<IByteBuffer>> _pipe = new List<Action<IByteBuffer>>();
         private readonly List<int> _fixedRecordLength = new List<int>();
         private readonly AtomicInteger _currentPipe = new AtomicInteger();
         private readonly AtomicInteger _currentFixedRecordLength = new AtomicInteger();
         private  Func<IByteBuffer, IByteBuffer> _directMapper;
+        private int _bufLen = 0;
         public RulePipePayloadParser Result(IByteBuffer buffer)
         {
             _result.Add(buffer);
+            _bufLen += buffer.ReadableBytes;
+            //_pipe.Add(buffer =>
+            //{
+            //    IReferenceCounted referenceCounted = null;
+            //    do
+            //    {
+            //        referenceCounted = NewDelimited(buffer);
+            //    } while (referenceCounted != null);
+            //});
             return this;
+        }
+
+        public RulePipePayloadParser Delimited(IByteBuffer buffer)
+        {
+            _delimited.Add(buffer);
+            return this;
+        }
+
+        public IReferenceCounted NewDelimited(IByteBuffer buffer)
+        {
+            int num = int.MaxValue;
+            IByteBuffer byteBuffer = null;
+            IByteBuffer[] array = _delimited.ToArray();
+            foreach (IByteBuffer byteBuffer2 in array)
+            {
+                int num2 = IndexOf(buffer, byteBuffer2);
+                if (num2 >= 0 && num2 < num)
+                {
+                    num = num2;
+                    byteBuffer = byteBuffer2;
+                }
+            }
+
+            if (byteBuffer != null)
+            {
+                int capacity = byteBuffer.Capacity;
+                if (discardingTooLongFrame)
+                {
+                    discardingTooLongFrame = false;
+                    buffer.SkipBytes(num + capacity);
+
+
+                    return null;
+                }
+
+
+                IByteBuffer byteBuffer3;
+
+                byteBuffer3 = buffer.ReadSlice(num);
+                buffer.SkipBytes(capacity);
+
+                return byteBuffer3.Retain();
+            }
+            return null;
+        }
+
+        public RulePipePayloadParser Delimited(string delim)
+        {
+            return Result(Unpooled.CopiedBuffer(delim, Encoding.UTF8));
+        }
+
+        public RulePipePayloadParser Delimited(byte[] delim)
+        {
+            return Result(Unpooled.CopiedBuffer(delim));
         }
 
         public RulePipePayloadParser Result(string buffer)
@@ -31,16 +99,16 @@ namespace Surging.Core.Protocol.Tcp.RuleParser.Implementation
             return Result(Unpooled.CopiedBuffer(buffer, Encoding.UTF8));
         }
 
-        public RulePipePayloadParser Result(string buffer,string encodeName)
-        {
-            return Result(Unpooled.CopiedBuffer(buffer, Encoding.GetEncoding(encodeName)));
-        }
-
         public RulePipePayloadParser Result(byte[] buffer)
         {
             return Result(Unpooled.CopiedBuffer(buffer));
         }
 
+        public RulePipePayloadParser Result(string buffer, string encodeName)
+        {
+            return Result(Unpooled.CopiedBuffer(buffer, Encoding.GetEncoding(encodeName)));
+        }
+         
         public RulePipePayloadParser Fixed(int length)
         {
 
@@ -80,7 +148,7 @@ namespace Surging.Core.Protocol.Tcp.RuleParser.Implementation
                 return _fixedRecordLength[i];
             }
             _currentFixedRecordLength.Value = 0;
-            return _fixedRecordLength[0];
+            return default;
         }
 
         public void Build(IByteBuffer buffer)
@@ -101,29 +169,55 @@ namespace Surging.Core.Protocol.Tcp.RuleParser.Implementation
             }
         }
 
+        private static int IndexOf(IByteBuffer haystack, IByteBuffer needle)
+        {
+            for (int i = haystack.ReaderIndex; i < haystack.WriterIndex; i++)
+            {
+                int num = i;
+                int j;
+                for (j = 0; j < needle.Capacity && haystack.GetByte(num) == needle.GetByte(j); j++)
+                {
+                    num++;
+                    if (num == haystack.WriterIndex && j != needle.Capacity - 1)
+                    {
+                        return -1;
+                    }
+                }
 
+                if (j == needle.Capacity)
+                {
+                    return i - haystack.ReaderIndex;
+                }
+            }
+
+            return -1;
+        }
         public RulePipePayloadParser Complete()
         {
             _currentPipe.Value = 0;
             _currentFixedRecordLength.Value = 0;
             if (_result.Any())
             {
-                var buffer = Unpooled.Buffer();
+                var buffer = Unpooled.Buffer(_bufLen);
                 
                 foreach (var buf in _result)
-                { 
-
-                     buf.ReadBytes(buffer, buf.ReadableBytes);
-                 
-                    
+                {
+                    buf.ReadBytes(buffer, buf.ReadableBytes);
                 }
                 _result.Clear();
+
                 _bufferSubject.OnNext(buffer);
             }
             _bufferSubject.OnCompleted();
             return this;
 
         }
+
+        public List<IByteBuffer> GetResult()
+        {
+            return _result;
+        }
+
 
         public RulePipePayloadParser Handler(Action<IByteBuffer> handler)
         {
@@ -143,9 +237,9 @@ namespace Surging.Core.Protocol.Tcp.RuleParser.Implementation
                 {
                     engine.Invoke(propertyName, buffer);
                 }
-                catch(Exception ex)
+                catch (Exception)
                 {
-                    throw ex;
+                    throw;
                 }
             });
             return this;

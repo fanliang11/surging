@@ -5,6 +5,7 @@ using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 
 namespace Surging.Core.Codec.MessagePack.Messages
@@ -26,14 +27,14 @@ namespace Surging.Core.Codec.MessagePack.Messages
             var valueType = value.GetType();
             var code = Type.GetTypeCode(valueType);
 
-            if (code != TypeCode.Object && valueType.BaseType!=typeof(Enum))
+            if (code != TypeCode.Object && valueType.BaseType != typeof(Enum))
                 TypeName = valueType.FullName;
             else
                 TypeName = valueType.AssemblyQualifiedName;
 
             if (valueType == UtilityType.JObjectType || valueType == UtilityType.JArrayType)
                 Content = SerializerUtilitys.Serialize(value.ToString());
-            else if(valueType != typeof(CancellationToken))
+            else if (valueType != typeof(CancellationToken))
                 Content = SerializerUtilitys.Serialize(value);
         }
 
@@ -56,10 +57,15 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 return null;
 
             var typeName = Type.GetType(TypeName);
-            if (typeName == UtilityType.JObjectType || typeName == UtilityType.JArrayType)
+            if (typeName == UtilityType.JObjectType || typeName == UtilityType.JArrayType )
             {
                 var content = SerializerUtilitys.Deserialize<string>(Content);
                 return JsonConvert.DeserializeObject(content, typeName);
+            }
+            else if (typeName == null)
+            {
+                var content = SerializerUtilitys.Deserialize<string>(Content);
+                return content;
             }
             else
             {

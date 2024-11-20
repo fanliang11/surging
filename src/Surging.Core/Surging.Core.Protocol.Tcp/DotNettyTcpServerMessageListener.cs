@@ -21,6 +21,8 @@ using System.Net;
 using System.Text;
 using System.Linq.Expressions;
 using DotNetty.Common.Utilities;
+using Surging.Core.Protocol.Tcp.Runtime.Implementation;
+using System.Reactive.Linq;
 
 namespace Surging.Core.Protocol.Tcp
 {
@@ -29,17 +31,21 @@ namespace Surging.Core.Protocol.Tcp
 
         #region Field
         public event ReceivedDelegate Received;
-        private readonly TcpServerProperties _tcpServerProperties;
+        private readonly NetworkProperties _tcpServerProperties;
         private readonly ILogger _logger;
         private IChannel _channel;
         private readonly TcpRuleWorkflow _ruleWorkflow;
         private readonly RulesEngine.RulesEngine _engine;
+        private IEventLoopGroup _bossGroup;
+        private IEventLoopGroup _workerGroup;
+        private TcpServiceEntry _tcpServiceEntry;
         public string Id { get; set; }
         #endregion Field
 
         #region Constructor
-        public DotNettyTcpServerMessageListener(ILogger logger, string id, TcpServerProperties properties)
+        public DotNettyTcpServerMessageListener(ILogger logger, string id, ITcpServiceEntryProvider tcpServiceEntryProvider, NetworkProperties properties)
         {
+            _tcpServiceEntry = tcpServiceEntryProvider.GetEntry();
             _logger = logger; 
             Id = id;
             _tcpServerProperties= properties;
@@ -78,18 +84,16 @@ namespace Surging.Core.Protocol.Tcp
 
 
 
-        public void Shutdown()
+        public async void Shutdown()
         {
-            Task.Run(async () =>
-            {
-                await _channel.EventLoop.ShutdownGracefullyAsync();
-                await _channel.CloseAsync();
-            }).Wait();
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"Tcp服务主机已停止。"); 
+            await _channel.CloseAsync(); 
         }
 
         NetworkType INetwork.GetType()
         {
-            return NetworkType.TcpServer;
+            return NetworkType.Tcp;
         }
 
         public async Task StartAsync(EndPoint endPoint)
@@ -120,9 +124,10 @@ namespace Surging.Core.Protocol.Tcp
         .ChildHandler(new ActionChannelInitializer<IChannel>( channel =>
         {
             var pipeline = channel.Pipeline;
-           
-            pipeline.AddLast(new ConnectionChannelHandlerAdapter(_logger, ServiceLocator.GetService<IDeviceProvider>(), tcpServiceEntryProvider, _tcpServerProperties));
-             pipeline.AddLast(workerGroup1, "ServerHandler", new ServerHandler(_tcpServerProperties,_engine,_ruleWorkflow, _logger)
+            var tcpBehavior = _tcpServiceEntry.Behavior();
+            tcpBehavior.NetworkId.OnNext(_tcpServerProperties.Id);
+            pipeline.AddLast(new ConnectionChannelHandlerAdapter(_logger, ServiceLocator.GetService<IDeviceProvider>(), tcpServiceEntryProvider, tcpBehavior, _tcpServerProperties));
+             pipeline.AddLast(workerGroup1, $"{Id}_ServerHandler", new ServerHandler(_tcpServerProperties,_engine,_ruleWorkflow, tcpBehavior, _logger)
             );  
             switch (_tcpServerProperties.ParserType)
             {
@@ -156,7 +161,7 @@ namespace Surging.Core.Protocol.Tcp
         }))
              .Option(ChannelOption.SoBroadcast, true);
             try
-            {
+            { 
                 _channel = await bootstrap.BindAsync(_tcpServerProperties.CreateSocketAddress());
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"Tcp服务主机启动成功，监听地址：{_tcpServerProperties.Host}:{_tcpServerProperties.Port}。");
@@ -180,7 +185,8 @@ namespace Surging.Core.Protocol.Tcp
             if (_tcpServerProperties.ParserConfiguration!=null && _tcpServerProperties.ParserConfiguration.ContainsKey("script"))
             {
                 var configValue = _tcpServerProperties.ParserConfiguration["script"];
-                result = new TcpRuleWorkflow(configValue.ToString() ?? "");
+                if(configValue!=null)
+                result = new TcpRuleWorkflow(configValue.ToString() ?? ""); 
             }
             return result;
         }
@@ -188,14 +194,15 @@ namespace Surging.Core.Protocol.Tcp
         private class ServerHandler : ChannelHandlerAdapter
         {
 
-            private readonly TcpServerProperties _tcpServerProperties; 
+            private readonly NetworkProperties _tcpServerProperties; 
             private readonly ILogger _logger;
             private readonly RulesEngine.RulesEngine _engine;
             private readonly TcpRuleWorkflow _ruleWorkflow;
+            private readonly TcpBehavior _tcpBehavior;
 
-
-            public ServerHandler(TcpServerProperties tcpServerProperties, RulesEngine.RulesEngine engine, TcpRuleWorkflow ruleWorkflow,ILogger logger)
+            public ServerHandler(NetworkProperties tcpServerProperties, RulesEngine.RulesEngine engine, TcpRuleWorkflow ruleWorkflow, TcpBehavior tcpBehavior, ILogger logger)
             {
+                _tcpBehavior= tcpBehavior;
                 _tcpServerProperties = tcpServerProperties;
                 _engine = engine;
                 _ruleWorkflow = ruleWorkflow;
@@ -203,26 +210,40 @@ namespace Surging.Core.Protocol.Tcp
             }
 
             public override async void ChannelRead(IChannelHandlerContext ctx, object message)
-            {
-                var buffer = (IByteBuffer)message;    
-                var parser = await GetParser();
-                var tcpServiceEntryProvider = ServiceLocator.GetService<ITcpServiceEntryProvider>();
-                var entry = tcpServiceEntryProvider.GetEntry();
-                if (entry != null) { entry.Behavior.Parser = parser;
-                    entry.Behavior.Sender = new TcpServerMessageSender(ctx);
-                    entry.Behavior.Load(ctx.Channel.Id.AsLongText() ,_tcpServerProperties); }
-                if (_tcpServerProperties.ParserType == PayloadParserType.Script)
+            {                   var buffer = (IByteBuffer)message;
+                try
                 {
-                    if (_tcpServerProperties.ParserConfiguration != null && _tcpServerProperties.ParserConfiguration.ContainsKey("script"))
+
+                    var parser = await GetParser();
+                    var tcpServiceEntryProvider = ServiceLocator.GetService<ITcpServiceEntryProvider>();
+                    if (_tcpBehavior != null)
                     {
-                        parser.Build(buffer);
+                        _tcpBehavior.Parser = parser;
+                        _tcpBehavior.Sender = new TcpServerMessageSender(ctx);
+                        _tcpBehavior.Load(new  TcpClient(ctx.Channel), _tcpServerProperties);
                     }
+                    if (_tcpServerProperties.ParserType == PayloadParserType.Script)
+                    {
+                        if (_tcpServerProperties.ParserConfiguration != null && _tcpServerProperties.ParserConfiguration.ContainsKey("script"))
+                        {
+
+                            parser.Build(buffer);
+                        }
+                    }
+                    else
+                    {
+                        parser.Direct(buffer => buffer).Fixed(buffer.ReadableBytes).Handle(buffer);
+                    }
+
                 }
-                else
+                catch (Exception ex)
                 {
-                    parser.Direct(buffer => buffer).Fixed(buffer.ReadableBytes).Handle(buffer);
+                    _logger.LogError(ex.Message, ex);
                 }
-                ReferenceCountUtil.Release(buffer);
+                finally
+                {    
+                    ReferenceCountUtil.Release(buffer); 
+                }
                
             }
 
@@ -238,6 +259,8 @@ namespace Surging.Core.Protocol.Tcp
             {
                 var payloadParser = new RulePipePayloadParser();
                 var ruleResult = await _engine.ExecuteActionWorkflowAsync(_ruleWorkflow.WorkflowName, _ruleWorkflow.RuleName, new RuleParameter[] { new RuleParameter("parser", payloadParser) });
+                if (ruleResult.Exception!=null &&_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(ruleResult.Exception, ruleResult.Exception.Message);
                 return payloadParser;
             }
         }

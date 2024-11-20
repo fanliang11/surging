@@ -77,11 +77,11 @@ namespace Surging.Core.Nlog
                         _log.Info(message);
                         break;
                     case LogLevel.Warning:
-                        _log.Warn(message);
+                        _log.Warn(exception, message);
                         break;
                     default:
                         _log.Warn($"遇到未知日志级别{logLevel}");
-                        _log.Info(message, exception, null);
+                        _log.Info(message, exception,null);
                         break;
                 }
             }

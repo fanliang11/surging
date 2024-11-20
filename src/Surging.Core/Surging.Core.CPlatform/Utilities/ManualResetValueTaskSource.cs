@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace Surging.Core.CPlatform.Utilities
         private ManualResetValueTaskSourceLogic<T> _logic;
         private readonly Action _cancellationCallback;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ManualResetValueTaskSource(ContinuationOptions options = ContinuationOptions.None)
         {
             _logic = new ManualResetValueTaskSourceLogic<T>(this, options);
@@ -33,6 +35,8 @@ namespace Surging.Core.CPlatform.Utilities
 
         public short Version => _logic.Version;
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetResult(T result)
         {
             lock (_cancellationCallback)
@@ -47,6 +51,7 @@ namespace Surging.Core.CPlatform.Utilities
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetException(Exception error)
         {
             if (Monitor.TryEnter(_cancellationCallback))
@@ -76,7 +81,7 @@ namespace Surging.Core.CPlatform.Utilities
 
         ref ManualResetValueTaskSourceLogic<T> IStrongBox<ManualResetValueTaskSourceLogic<T>>.Value => ref _logic;
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ValueTask<T> AwaitValue(CancellationToken cancellation)
         {
             CancellationTokenRegistration? registration = cancellation == CancellationToken.None
@@ -110,7 +115,7 @@ namespace Surging.Core.CPlatform.Utilities
         private TResult _result;
         private ExceptionDispatchInfo _error;
         private CancellationTokenRegistration? _registration;
-
+         
         public ManualResetValueTaskSourceLogic(IStrongBox<ManualResetValueTaskSourceLogic<TResult>> parent, ContinuationOptions options)
         {
             _parent = parent ?? throw new ArgumentNullException(nameof(parent));
@@ -249,6 +254,7 @@ namespace Surging.Core.CPlatform.Utilities
             SignalCompletion();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetException(Exception error)
         {
             _error = ExceptionDispatchInfo.Capture(error);

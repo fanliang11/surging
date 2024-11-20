@@ -68,7 +68,7 @@ namespace Surging.Core.Stage
                 ApiGateWay.AppConfig.AuthorizationRoutePath = apiConfig.AuthorizationRoutePath;
                 ApiGateWay.AppConfig.TokenEndpointPath = apiConfig.TokenEndpointPath;
             }
-            context.Services.AddMvc().AddJsonOptions(options => {
+            context.Services.AddMvcCore().AddJsonOptions(options => {
                 options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
                 options.JsonSerializerOptions.Converters.Add(new DateTimeNullConverter());
                 if (AppConfig.Options.IsCamelCaseResolver)
@@ -91,7 +91,7 @@ namespace Surging.Core.Stage
                         setting.ContractResolver= new DefaultContractResolver();
                         return setting;
                     });
-                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                    options.JsonSerializerOptions.PropertyNamingPolicy  = null;
                 }
             });
           

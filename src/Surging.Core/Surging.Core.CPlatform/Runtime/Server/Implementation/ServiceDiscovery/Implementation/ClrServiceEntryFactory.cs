@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 using Surging.Core.CPlatform.Validation;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
 using System.Threading;
-using System.Runtime.CompilerServices;
-using Surging.Core.CPlatform.Messages;
-using Surging.Core.CPlatform.Exceptions;
 using System.Collections.Concurrent;
+using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Ioc;
+using System.Runtime.CompilerServices;
+using Surging.Core.CPlatform.Exceptions;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.Implementation
 {
@@ -33,7 +33,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
         private readonly ITypeConvertibleService _typeConvertibleService;
         private readonly IValidationProcessor _validationProcessor;
         private readonly ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>> _resultDictionary =
-      new ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>>();
+          new ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>>();
         #endregion Field
 
         #region Constructor
@@ -120,9 +120,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 RoutePath = serviceDescriptor.RoutePath,
                 Methods=httpMethods,
                 MethodName = method.Name,
-                Parameters = method.GetParameters(),
-                IsPermission = method.DeclaringType.GetCustomAttribute<BaseActionFilterAttribute>() != null || attributes.Any(p => p is BaseActionFilterAttribute),
                 Type = method.DeclaringType,
+                Parameters= method.GetParameters(),
+                IsPermission = method.DeclaringType.GetCustomAttribute<BaseActionFilterAttribute>() !=null || attributes.Any(p => p is BaseActionFilterAttribute),
                 Attributes = attributes,
                 Func = async (key, parameters) =>
              {
@@ -154,19 +154,19 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
-                 }
+                 } 
                  if (!isReactive)
                  {
                      var result = fastInvoker(instance, list.ToArray());
-                     return await Task.FromResult(result);
+                     return result;
                  }
                  else
                  {
                      var serviceBehavior = instance as IServiceBehavior;
-                     var callbackTask = RegisterResultCallbackAsync(serviceBehavior.MessageId, Task.Factory.CancellationToken);
-                     serviceBehavior.Received += MessageListener_Received;
-                     var result = fastInvoker(instance, list.ToArray());
-                     return await callbackTask;
+                      var callbackTask = RegisterResultCallbackAsync(serviceBehavior.MessageId, Task.Factory.CancellationToken);
+                      serviceBehavior.Received += MessageListener_Received;
+                     var result = fastInvoker(instance, list.ToArray()); 
+                     return  await callbackTask;
                  }
              }
             };
@@ -192,7 +192,6 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task MessageListener_Received(TransportMessage message)
         {
             ManualResetValueTaskSource<TransportMessage> task;

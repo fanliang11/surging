@@ -1,4 +1,6 @@
-﻿using DotNetty.Buffers;
+﻿
+
+using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Bootstrapping;
@@ -20,6 +22,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -169,16 +172,16 @@ namespace Surging.Core.DotNetty
             }
 
             #region Overrides of ChannelHandlerAdapter
-
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public override void ChannelInactive(IChannelHandlerContext context)
             {
                 _factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value);
             }
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public override void ChannelRead(IChannelHandlerContext context, object message)
             {
                 var transportMessage = message as TransportMessage;
-
                 var messageListener = context.Channel.GetAttribute(messageListenerKey).Get();
                 var messageSender = context.Channel.GetAttribute(messageSenderKey).Get();
                 messageListener.OnReceived(messageSender, transportMessage);

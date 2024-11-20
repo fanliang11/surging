@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,8 @@ using Surging.Core.CPlatform.Ids.Implementation;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Mqtt;
+using Surging.Core.CPlatform.Network;
+using Surging.Core.CPlatform.Protocol;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client;
@@ -39,6 +42,7 @@ using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Support.Implementation;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.CPlatform.Transport.Codec.Implementation;
+using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using Surging.Core.CPlatform.Validation;
 using Surging.Core.CPlatform.Validation.Implementation;
@@ -89,7 +93,6 @@ namespace Surging.Core.CPlatform
     {
         private static List<Assembly> _referenceAssembly = new List<Assembly>();
         private static List<AbstractModule> _modules = new List<AbstractModule>();
-
         /// <summary>
         /// 添加Json序列化支持。
         /// </summary>
@@ -425,11 +428,12 @@ namespace Surging.Core.CPlatform
         /// <returns>服务构建者。</returns>
         public static IServiceBuilder AddServiceRuntime(this IServiceBuilder builder)
         {
+            builder.Services.RegisterType<PayloadContext>().SingleInstance();
             builder.Services.RegisterType(typeof(DefaultServiceEntryLocate)).As(typeof(IServiceEntryLocate)).SingleInstance();
             builder.Services.RegisterType(typeof(DefaultServiceExecutor)).As(typeof(IServiceExecutor))
                 .Named<IServiceExecutor>(CommunicationProtocol.Tcp.ToString()).SingleInstance();
 
-            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().RegisterInstanceByConstraint().AddRuntime();
+            return builder.RegisterServices().RegisterRepositories().RegisterServiceBus().RegisterModules().RegisterProtocols().RegisterInstanceByConstraint().AddRuntime();
         }
 
         /// <summary>
@@ -463,10 +467,10 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(DefaultTypeConvertibleService)).As(typeof(ITypeConvertibleService)).SingleInstance();
             //注册权限过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IAuthorizationFilter)).SingleInstance();
-            services.RegisterType(typeof(ActionFilterAttribute)).As(typeof(IActionFilter)).SingleInstance();
-            services.RegisterType(typeof(ActionFilterAttribute)).As(typeof(IFilter)).SingleInstance();
             //注册基本过滤 
             services.RegisterType(typeof(AuthorizationAttribute)).As(typeof(IFilter)).SingleInstance();
+            services.RegisterType(typeof(ActionFilterAttribute)).As(typeof(IActionFilter)).SingleInstance();
+            services.RegisterType(typeof(ActionFilterAttribute)).As(typeof(IFilter)).SingleInstance();
             //注册默认校验处理器
             services.RegisterType(typeof(DefaultValidationProcessor)).As(typeof(IValidationProcessor)).SingleInstance();
             //注册服务器路由接口 
@@ -481,6 +485,7 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(HashAlgorithm)).As(typeof(IHashAlgorithm)).SingleInstance();
             //注册组件生命周期接口 
             services.RegisterType(typeof(ServiceEngineLifetime)).As(typeof(IServiceEngineLifetime)).SingleInstance();
+            services.RegisterType(typeof(NetworkManager)).As(typeof(INetworkManager)).SingleInstance();
             //注册服务心跳管理 
             services.RegisterType(typeof(DefaultServiceHeartbeatManager)).As(typeof(IServiceHeartbeatManager)).SingleInstance();
             return new ServiceBuilder(services)
@@ -526,20 +531,57 @@ namespace Surging.Core.CPlatform
                     builder = null;
                 }
             }).As<IServiceEntryProvider>().SingleInstance();
+
             builder.Services.RegisterType(typeof(DefaultServiceEntryManager)).As(typeof(IServiceEntryManager)).SingleInstance();
             return builder;
         }
 
-       /// <summary>
-       /// 添加微服务
-       /// </summary>
-       /// <param name="builder"></param>
-       /// <param name="option"></param>
+        /// <summary>
+        /// 添加微服务
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="option"></param>
         public static void AddMicroService(this ContainerBuilder builder, Action<IServiceBuilder> option)
         {
             option.Invoke(builder.AddCoreService());
         }
 
+        public static IServiceBuilder RegisterProtocols(this IServiceBuilder builder, params string[] virtualPaths)
+        {
+            try
+            {
+                var services = builder.Services;
+                services.RegisterType(typeof(ProtocolSupports)).As(typeof(IProtocolSupports)).SingleInstance();
+                services.Register(provider =>
+                {
+                    try
+                    {
+                        var assemblys = GetReferenceAssembly();
+                        var types = assemblys.SelectMany(i => i.ExportedTypes).ToArray(); 
+
+                        return new DefaultProtocolSupportProvider(provider.Resolve<IProtocolSupports>(),
+                            new ProtocolContext(virtualPaths, provider.Resolve<CPlatformContainer>()), 
+                            provider.Resolve<ILogger<DefaultProtocolSupportProvider>>(),
+                            types);
+                    }
+                    finally
+                    {
+                        builder = null;
+                    }
+                }).As<IProtocolSupportProvider>().SingleInstance();
+                return builder;
+            }
+            catch (Exception ex)
+            {
+                if (ex is System.Reflection.ReflectionTypeLoadException)
+                {
+                    var typeLoadException = ex as ReflectionTypeLoadException;
+                    var loaderExceptions = typeLoadException.LoaderExceptions;
+                    throw loaderExceptions[0];
+                }
+                throw ex;
+            }
+        }
         /// <summary>.
         /// 依赖注入业务模块程序集
         /// </summary>
@@ -554,7 +596,7 @@ namespace Surging.Core.CPlatform
                 foreach (var assembly in referenceAssemblies)
                 {
                     services.RegisterAssemblyTypes(assembly)
-                        //注入继承IServiceKey接口的所有接口
+                       //注入继承IServiceKey接口的所有接口
                        .Where(t => typeof(IServiceKey).GetTypeInfo().IsAssignableFrom(t) && t.IsInterface)
                        .AsImplementedInterfaces();
                     services.RegisterAssemblyTypes(assembly)
@@ -798,7 +840,7 @@ namespace Surging.Core.CPlatform
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.\\w*{0}",
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.*|^Grpc.\\w*|^Google.\\w*|^AspectCore.\\w*|^NETStandard.\\w*|^Serilog.\\w*|^Thrift.\\w*|^ARSoft.\\w*|^Jint.*|^Humanizer.*|^Polly.*|^Com.Ctrip.\\w*|^MongoDB.*|^Confluent.Kafka\\w*|^log4net.*|^NLog.*|^MessagePack.*|^RabbitMQ.\\w*|^RulesEngine.*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -820,7 +862,7 @@ namespace Surging.Core.CPlatform
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac.\\w*{0}",
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);

@@ -16,7 +16,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
         public void SetAttachment(string key, object value)
         {
             Check.NotNull(serviceProvider, "serviceProvider");
-            var htpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             htpContextAccessor.HttpContext.Items.Add(key,value);
         }
 
@@ -24,15 +24,19 @@ namespace Surging.Core.KestrelHttpServer.Internal
         public object GetAttachment(string key)
         {
             Check.NotNull(serviceProvider, "serviceProvider");
-            var htpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
-            htpContextAccessor.HttpContext.Items.TryGetValue(key, out object value);
-            return value;
+            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
+            if (htpContextAccessor.HttpContext != null)
+            {
+                htpContextAccessor.HttpContext.Items.TryGetValue(key, out object value);
+                return value;
+            }
+            return null;
         }
 
         public  void RemoveContextParameters(string key)
         {
             Check.NotNull(serviceProvider, "serviceProvider");
-            var htpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             if (htpContextAccessor.HttpContext.Items.ContainsKey(key))
                 htpContextAccessor.HttpContext.Items.Remove(key);
 
@@ -41,7 +45,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
         public Dictionary<String, Object> GetContextParameters()
         {
             Check.NotNull(serviceProvider, "serviceProvider");
-            var htpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             return htpContextAccessor.HttpContext.Items.ToDictionary(p => p.Key.ToString(), m => m.Value);
             
         }
@@ -50,7 +54,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
         public void SetContextParameters(IDictionary<object, object> contextParameters)
         {
             Check.NotNull(serviceProvider, "serviceProvider");
-            var htpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             htpContextAccessor.HttpContext.Items= contextParameters;
         }
 
@@ -70,7 +74,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
         public static void RemoveContext()
         {
             Check.NotNull(serviceProvider, "serviceProvider");
-            var htpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             htpContextAccessor.HttpContext.Items.Clear();
             
         }

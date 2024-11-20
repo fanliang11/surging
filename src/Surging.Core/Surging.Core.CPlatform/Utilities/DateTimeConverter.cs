@@ -12,6 +12,7 @@ namespace Surging.Core.CPlatform.Utilities
             return Convert.ToInt64((dateTime - start).TotalSeconds);
         }
          
+
         public static DateTime UnixTimestampToDateTime( long timestamp, DateTime? time=null)
         {
             var start = time ==null?new DateTime(1970, 1, 1, 0, 0, 0): new DateTime(1970, 1, 1, 0, 0, 0,time.Value.Kind);

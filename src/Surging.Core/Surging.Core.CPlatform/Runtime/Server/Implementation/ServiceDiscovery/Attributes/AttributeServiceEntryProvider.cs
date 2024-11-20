@@ -14,7 +14,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
     {
         #region Field
 
-        private readonly IEnumerable<Type> _types;
+        private readonly List<Type> _types;
         private readonly IClrServiceEntryFactory _clrServiceEntryFactory;
         private readonly ILogger<AttributeServiceEntryProvider> _logger;
         private readonly CPlatformContainer _serviceProvider;
@@ -25,7 +25,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
 
         public AttributeServiceEntryProvider(IEnumerable<Type> types, IClrServiceEntryFactory clrServiceEntryFactory, ILogger<AttributeServiceEntryProvider> logger ,CPlatformContainer serviceProvider)
         {
-            _types = types;
+            _types = types.ToList();
             _clrServiceEntryFactory = clrServiceEntryFactory;
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -82,6 +82,11 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                 return typeInfo.IsInterface && typeInfo.GetCustomAttribute<ServiceBundleAttribute>() != null && _serviceProvider.Current.IsRegistered(i);
             }).Distinct().ToArray();
             return services;
+        }
+
+        public void RegisterType(List<Type> types)
+        {
+            _types.AddRange( types );
         }
 
         #endregion Implementation of IServiceEntryProvider

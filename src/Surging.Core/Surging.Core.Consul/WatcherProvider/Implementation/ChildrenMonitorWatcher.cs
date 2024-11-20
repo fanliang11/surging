@@ -34,7 +34,6 @@ namespace Surging.Core.Consul.WatcherProvider
 
         protected override async Task ProcessImpl()
         {
-            RegisterWatch(this);
             var client =await _clientCall();
             var result = await client.GetChildrenAsync(_path);
             if (result != null)

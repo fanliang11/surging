@@ -21,7 +21,7 @@ namespace Surging.Core.System.MongoProvider.Repositories
 
         public MongoRepository(string connectionString)
         {
-            _collection = Util.GetCollectionFromConnectionString<T>(connectionString);
+            _collection = Util.GetCollectionFromConnectionString<T>(Util.GetDefaultConnectionString());
         }
 
         public IMongoCollection<T> Collection

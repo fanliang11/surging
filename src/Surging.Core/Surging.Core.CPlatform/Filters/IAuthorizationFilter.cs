@@ -10,6 +10,6 @@ namespace Surging.Core.CPlatform.Filters
 {
     public interface IAuthorizationFilter: IFilter
     {
-        void ExecuteAuthorizationFilterAsync(ServiceRouteContext serviceRouteContext,CancellationToken cancellationToken);
+        Task ExecuteAuthorizationFilterAsync(ServiceRouteContext serviceRouteContext,CancellationToken cancellationToken);
     }
 }

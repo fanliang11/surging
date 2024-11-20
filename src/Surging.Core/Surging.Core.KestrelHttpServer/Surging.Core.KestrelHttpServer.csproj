@@ -18,11 +18,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ServiceExceptionFilter.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.0" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Surging.Core.Codec.MessagePack\Surging.Core.Codec.MessagePack.csproj" />
     <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
     <ProjectReference Include="..\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
   </ItemGroup>

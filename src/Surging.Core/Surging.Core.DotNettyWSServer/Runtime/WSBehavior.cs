@@ -20,7 +20,7 @@ namespace Surging.Core.DotNettyWSServer.Runtime
         {
             add
             {
-                if (received == null)
+                if (value == null)
                 {
                     received += value;
                 }

@@ -16,7 +16,7 @@ namespace Surging.Core.Protocol.Tcp
     {
         #region Field
 
-        private readonly ITcpServiceEntryProvider _udpServiceEntryProvider;
+        private readonly ITcpServiceEntryProvider _tcpServiceEntryProvider;
         private readonly ILogger<TcpServiceExecutor> _logger;
 
         #endregion Field
@@ -26,7 +26,7 @@ namespace Surging.Core.Protocol.Tcp
         public TcpServiceExecutor(ITcpServiceEntryProvider dnsServiceEntryProvider,
             ILogger<TcpServiceExecutor> logger)
         {
-            _udpServiceEntryProvider = dnsServiceEntryProvider;
+            _tcpServiceEntryProvider = dnsServiceEntryProvider;
             _logger = logger;
         }
 
@@ -45,28 +45,28 @@ namespace Surging.Core.Protocol.Tcp
                 _logger.LogTrace("服务提供者接收到消息。");
 
 
-            byte[] udpMessage = null;
+            byte[] tcpMessage = null;
             try
             {
                 if (message.IsTcpDispatchMessage())
-                    udpMessage = message.GetContent<byte[]>();
+                    tcpMessage = message.GetContent<byte[]>();
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "将接收到的消息反序列化成 TransportMessage<byte[]> 时发送了错误。");
                 return;
             }
-            var entry = _udpServiceEntryProvider.GetEntry();
+            var entry = _tcpServiceEntryProvider.GetEntry();
             if (entry == null)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError($"未实现UdpBehavior实例。");
+                    _logger.LogError($"未实现tcpBehavior实例。");
                 return;
             }
-            if (udpMessage != null)
-                await LocalExecuteAsync(entry, udpMessage);
+            if (tcpMessage != null)
+                await LocalExecuteAsync(entry, tcpMessage);
 
-            await SendRemoteInvokeResult(sender, udpMessage);
+            await SendRemoteInvokeResult(sender, tcpMessage);
         }
 
         #endregion Implementation of IServiceExecutor

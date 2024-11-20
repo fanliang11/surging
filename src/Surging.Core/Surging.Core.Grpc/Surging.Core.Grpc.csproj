@@ -8,6 +8,7 @@
     <PackageReference Include="Google.Protobuf" Version="3.10.1" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <PackageReference Include="Grpc.Reflection" Version="2.24.0" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

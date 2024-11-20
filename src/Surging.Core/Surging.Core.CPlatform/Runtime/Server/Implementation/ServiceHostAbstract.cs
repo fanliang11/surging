@@ -2,6 +2,7 @@
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation
@@ -53,7 +54,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         #endregion Implementation of IServiceHost
 
         #region Private Method
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task MessageListener_Received(IMessageSender sender, TransportMessage message)
         {
             await _serviceExecutor.ExecuteAsync(sender, message);

@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="DotNetty.Codecs" Version="0.6.0" />
     <PackageReference Include="DotNetty.Handlers" Version="0.6.0" />
+    <PackageReference Include="DotNetty.Transport.Libuv" Version="0.6.0" />
     <PackageReference Include="Jint" Version="2.11.58" />
     <PackageReference Include="RulesEngine" Version="3.5.0" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />

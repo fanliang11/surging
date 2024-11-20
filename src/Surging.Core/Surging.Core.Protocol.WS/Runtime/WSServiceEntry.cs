@@ -1,4 +1,5 @@
-﻿using Surging.Core.Protocol.WS.Configurations;
+﻿using Surging.Core.Protocol.WS.Attributes;
+using Surging.Core.Protocol.WS.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,9 +11,12 @@ namespace Surging.Core.Protocol.WS.Runtime
     {
         public string Path { get; set; }
 
+        public Type Service { get; set; }
         public Type Type { get; set; }
 
+        public BehaviorContractAttribute BehaviorAttribute { get; set; }
         public  WebSocketBehavior Behavior { get; set; }
+         
 
         public  Func<WebSocketBehavior> FuncBehavior { get; set; }
     }

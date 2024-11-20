@@ -21,7 +21,7 @@ namespace Surging.Core.ServiceHosting.Extensions.Utils
         private readonly TimeSpan _TwoMonths = new TimeSpan(62, 0, 0, 0);
         private readonly TimeSpan _OneYear = new TimeSpan(365, 0, 0, 0);
         private readonly TimeSpan _TwoYears = new TimeSpan(730, 0, 0, 0);
-        public   TimeSpan GetTimeSpan(DateTime startTime, DateTime endTime)
+        public TimeSpan GetTimeSpan(DateTime startTime, DateTime endTime)
         {
             return endTime - startTime;
         }
@@ -182,7 +182,7 @@ namespace Surging.Core.ServiceHosting.Extensions.Utils
             System.Globalization.CultureInfo ciCurr = System.Globalization.CultureInfo.CurrentCulture;
             return ciCurr.Calendar.GetWeekOfYear(datetime, weekrule, firstDayOfWeek);
         }
-         
+
         public bool IsWeekDay(DateTime date)
         {
             return !IsWeekend(date);

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.Consul.Utilitys;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -14,8 +15,8 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
 {
     public class ClientWatchManager : IClientWatchManager
     {
-        internal  Dictionary<string, HashSet<Watcher>> dataWatches =
-            new Dictionary<string, HashSet<Watcher>>();
+        internal ConcurrentDictionary<string, HashSet<Watcher>> dataWatches =
+            new ConcurrentDictionary<string, HashSet<Watcher>>();
         private readonly Timer _timer;
         private readonly ILogger<ClientWatchManager> _logger;
 
@@ -29,7 +30,7 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
             }, null, timeSpan, timeSpan);
         }
 
-        public Dictionary<string, HashSet<Watcher>> DataWatches { get
+        public ConcurrentDictionary<string, HashSet<Watcher>> DataWatches { get
             {
                 return dataWatches;
             }
@@ -42,12 +43,10 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
         private HashSet<Watcher> Materialize()
         {
             HashSet<Watcher> result = new HashSet<Watcher>();
-            lock (dataWatches)
+
+            foreach (HashSet<Watcher> ws in dataWatches.Values)
             {
-                foreach (HashSet<Watcher> ws in dataWatches.Values)
-                {
-                    result.UnionWith(ws);
-                }
+                result.UnionWith(ws);
             }
             return result;
         }

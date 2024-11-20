@@ -26,19 +26,20 @@ namespace Surging.Core.CPlatform.Ioc
         }
 
         public string MessageId { get; } = Guid.NewGuid().ToString("N");
-        public async Task Write(object result, int statusCode = 200, string exceptionMessage = "")
+        public async Task Write(object result,int statusCode=200,  string exceptionMessage = "")
         {
             if (received == null)
                 return;
             var message = new TransportMessage(MessageId, new ReactiveResultMessage
             {
                 ExceptionMessage = exceptionMessage,
-                StatusCode = statusCode,
+                 StatusCode= statusCode,
                 Result = result
 
-            });
+            }) ; 
             await received(message);
         }
+
         public virtual T GetService<T>() where T : class
         {
             return ServiceLocator.GetService<T>();

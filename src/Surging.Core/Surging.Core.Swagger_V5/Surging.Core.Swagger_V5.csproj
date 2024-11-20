@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="SwaggerUI\node_modules\swagger-ui-dist\package\**" />
+    <EmbeddedResource Remove="SwaggerUI\node_modules\swagger-ui-dist\package\**" />
+    <None Remove="SwaggerUI\node_modules\swagger-ui-dist\package\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="SwaggerUI\index.html" />
     <None Remove="SwaggerUI\node_modules\swagger-ui-dist\absolute-path.js" />
     <None Remove="SwaggerUI\node_modules\swagger-ui-dist\favicon-16x16.png" />
@@ -33,8 +39,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="SwaggerUI\index.html" />
-    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\absolute-path.js" />
-    <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\favicon-16x16.png" />
     <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\favicon-32x32.png" />
     <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\index.html" />
     <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\index.js" />
@@ -54,6 +58,18 @@
     <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.css.map" />
     <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.js" />
     <EmbeddedResource Include="SwaggerUI\node_modules\swagger-ui-dist\swagger-ui.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="SwaggerUI\node_modules\swagger-ui-dist\favicon-16x16.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="SwaggerUI\node_modules\swagger-ui-dist\absolute-path.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="SwaggerGen\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -85,7 +85,7 @@ namespace Surging.Core.System.Intercept
                 }
                 return returnValue as T;
             }
-            catch
+            catch(Exception ex)
             {
                 returnValue = await getFromPersistence();
                 return returnValue as T;

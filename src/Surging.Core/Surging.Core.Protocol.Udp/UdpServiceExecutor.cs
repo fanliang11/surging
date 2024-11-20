@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reactive;
 
 namespace Surging.Core.Protocol.Udp
 {
@@ -61,11 +62,10 @@ namespace Surging.Core.Protocol.Udp
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError($"未实现UdpBehavior实例。");
                 return;
-            }
+            } 
             if (udpMessage != null)
-                await LocalExecuteAsync(entry, udpMessage);
+                await LocalExecuteAsync(entry, udpMessage, message.Id, sender);
            
-            await SendRemoteInvokeResult(sender, udpMessage);
         }
 
         #endregion Implementation of IServiceExecutor
@@ -73,18 +73,23 @@ namespace Surging.Core.Protocol.Udp
         #region Private Method
 
 
-        private async Task LocalExecuteAsync(UdpServiceEntry entry, byte [] bytes)
+        private async Task LocalExecuteAsync(UdpServiceEntry entry, byte [] bytes,string messageId, IMessageSender sender)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
-            try
-            { 
-                 await entry.Behavior.Dispatch(bytes);
-            }
-            catch (Exception exception)
+            entry.BehaviorSubject.Subscribe(udpBehavior =>
             {
-                if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
-            } 
+                try
+                {
+                    udpBehavior.MessageId = messageId;
+                    udpBehavior.Sender = sender as IUdpMessageSender;
+                    udpBehavior.Dispatch(bytes);
+                }
+                catch (Exception exception)
+                {
+                    if (_logger.IsEnabled(LogLevel.Error))
+                        _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
+                }
+            });
         }
 
         private async Task SendRemoteInvokeResult(IMessageSender sender, byte[] resultMessage)

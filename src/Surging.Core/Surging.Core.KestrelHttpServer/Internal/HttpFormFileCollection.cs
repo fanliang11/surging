@@ -1,9 +1,11 @@
-﻿using System;
+﻿using MessagePack;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Surging.Core.KestrelHttpServer.Internal
 {
+    [MessagePackObject]
     public class HttpFormFileCollection : List<HttpFormFile>
     {
         public HttpFormFile this[string name] => GetFile(name);

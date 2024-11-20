@@ -49,7 +49,7 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
 
             var schemaRepository = new SchemaRepository(documentName);
             var entries = _serviceEntryProvider.GetALLEntries();
-            var mapRoutePaths =   AppConfig.SwaggerConfig.Options?.MapRoutePaths;
+            var mapRoutePaths = AppConfig.SwaggerConfig.Options?.MapRoutePaths;
             if (mapRoutePaths != null)
             {
                 foreach (var path in mapRoutePaths)
@@ -64,36 +64,29 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
             }
             entries = entries
       .Where(apiDesc => _options.DocInclusionPredicateV2(documentName, apiDesc));
-            try
+
+
+            var swaggerDoc = new OpenApiDocument
             {
-
-                var swaggerDoc = new OpenApiDocument
+                Info = info,
+                Servers = GenerateServers(host, basePath),
+                Paths = GeneratePaths(entries, schemaRepository),
+                Components = new OpenApiComponents
                 {
-                    Info = info,
-                    Servers = GenerateServers(host, basePath),
-                    Paths = GeneratePaths(entries, schemaRepository),
-                    Components = new OpenApiComponents
-                    {
-                        Schemas = schemaRepository.Schemas,
-                        SecuritySchemes = new Dictionary<string, OpenApiSecurityScheme>(_options.SecuritySchemes)
-                    },
-                    SecurityRequirements = new List<OpenApiSecurityRequirement>(_options.SecurityRequirements)
-                };
+                    Schemas = schemaRepository.Schemas,
+                    SecuritySchemes = new Dictionary<string, OpenApiSecurityScheme>(_options.SecuritySchemes)
+                },
+                SecurityRequirements = new List<OpenApiSecurityRequirement>(_options.SecurityRequirements)
+            };
 
-                var filterContext = new DocumentFilterContext(applicableApiDescriptions, _schemaGenerator, schemaRepository);
-                foreach (var filter in _options.DocumentFilters)
-                {
-                    filter.Apply(swaggerDoc, filterContext);
-                }
-
-                swaggerDoc.Components.Schemas = new SortedDictionary<string, OpenApiSchema>(swaggerDoc.Components.Schemas, _options.SchemaComparer);
-
-                return swaggerDoc;
-            }
-            catch(Exception ex)
+            var filterContext = new DocumentFilterContext(applicableApiDescriptions, _schemaGenerator, schemaRepository);
+            foreach (var filter in _options.DocumentFilters)
             {
-                throw ex;
+                filter.Apply(swaggerDoc, filterContext);
             }
+
+            swaggerDoc.Components.Schemas = new SortedDictionary<string, OpenApiSchema>(swaggerDoc.Components.Schemas, _options.SchemaComparer);
+            return swaggerDoc;
         }
 
         private IList<OpenApiServer> GenerateServers(string host, string basePath)
@@ -198,9 +191,7 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
             var operations = new Dictionary<OperationType, OpenApiOperation>();
             
             foreach (var entry in apiDescriptions)
-            {
-                try
-                {
+            { 
                     var httpMethod = "";
                     var methodInfo = entry.Type.GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault();
                     var parameterInfo = methodInfo.GetParameters();
@@ -220,13 +211,7 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
                         operations.Add(OperationTypeMap[method.ToUpper()], GenerateOperation(entry, schemaRepository));
                     }
                     //var apiDescription = (group.Count() > 1) ? _options.ConflictingActionsResolver(group) : group.Single();
-
-                 
-                }
-                catch(Exception ex)
-                {
-                    throw ex;
-                }
+                     
             };
 
             return operations;
@@ -236,22 +221,22 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
         {
             try
             {
-                var operation = new OpenApiOperation
-                {
-                    Tags = GenerateOperationTags(entry),
-                    OperationId = _options.EntryOperationIdSelector(entry),
-                    Parameters = GenerateParameters(entry, schemaRepository),
-                    RequestBody = GenerateRequestBody(entry, schemaRepository),
-                    Responses = GenerateResponses(entry, schemaRepository),
-                    Deprecated = entry.Attributes.OfType<ObsoleteAttribute>().Any()
-                };
+                var operation = new OpenApiOperation();
 
+             
+
+                operation.Tags = GenerateOperationTags(entry);
+                    operation.OperationId = _options.EntryOperationIdSelector(entry);
+                operation.Parameters = GenerateParameters(entry, schemaRepository); 
                 var methodInfo = entry.Type.GetTypeInfo().DeclaredMethods.Where(p => p.Name == entry.MethodName).FirstOrDefault();
                 var filterContext = new OperationFilterContext(null, _schemaGenerator, schemaRepository, methodInfo,entry);
                 foreach (var filter in _options.OperationFilters)
                 {
                     filter.Apply(operation, filterContext);
                 }
+                operation.RequestBody = GenerateRequestBody(entry, schemaRepository);
+                operation.Responses = GenerateResponses(entry, schemaRepository);
+                operation.Deprecated = entry.Attributes.OfType<ObsoleteAttribute>().Any(); 
 
                 return operation;
             }

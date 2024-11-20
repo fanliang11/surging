@@ -207,6 +207,7 @@ namespace Surging.Core.Consul
                     option.EnableChildrenMonitor != null ? bool.Parse(option.EnableChildrenMonitor) :
                     config.EnableChildrenMonitor
                    );
+                config.NotifyMode = option.NotifyMode;
             }
             return config;
         }

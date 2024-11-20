@@ -33,6 +33,11 @@ namespace Surging.Core.CPlatform
             return _container.IsRegistered<T>();
         }
 
+        public bool IsRegistered(Type serviceType)
+        {
+            return _container.IsRegistered(serviceType);
+        }
+
         public bool IsRegisteredWithKey(string serviceKey,Type serviceType)
         {
             if(!string.IsNullOrEmpty(serviceKey))

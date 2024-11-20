@@ -6,7 +6,7 @@ using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.Protocol.WebService.Runtime;
-using Surging.Core.Protocol.WebService.Runtime.Implementation; 
+using Surging.Core.Protocol.WebService.Runtime.Implementation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.ServiceModel;
@@ -31,28 +31,28 @@ namespace Surging.Core.Protocol.WebService
             builder.Builder.UseRouting();
             builder.Builder.Use((context, next) => { context.Request.EnableBuffering(); return next(); });
             builder.Builder.UseEndpoints(endpoints =>
+            {
+                foreach (var webServiceEntry in webServiceEntries)
                 {
-                    foreach (var webServiceEntry in webServiceEntries)
+                    endpoints.UseSoapEndpoint(webServiceEntry.BaseType, $"/{webServiceEntry.Path}.asmx", new SoapEncoderOptions()
                     {
-                        endpoints.UseSoapEndpoint(webServiceEntry.BaseType, $"/{webServiceEntry.Path}.asmx", new SoapEncoderOptions()
+                        ReaderQuotas = new XmlDictionaryReaderQuotas()
                         {
-                            ReaderQuotas = new XmlDictionaryReaderQuotas()
-                            {
-                                MaxStringContentLength = int.MaxValue,
-                                MaxArrayLength = int.MaxValue,
-                                MaxDepth = int.MaxValue
-                            }
-                        }, SoapSerializer.XmlSerializer);
-                    }
-                });
+                            MaxStringContentLength = int.MaxValue,
+                            MaxArrayLength = int.MaxValue,
+                            MaxDepth = int.MaxValue
+                        }
+                    }, SoapSerializer.XmlSerializer);
+                }
+            });
 
         }
 
 
         public override void RegisterBuilder(ConfigurationContext context)
         {
-           context.Services.AddSoapServiceOperationTuner(new ServiceOperationTuner());
-        //  context.Services.AddSoapCore(); 
+            context.Services.AddSoapServiceOperationTuner(new ServiceOperationTuner());
+            //  context.Services.AddSoapCore(); 
         }
 
         protected async override void RegisterBuilder(ContainerBuilderWrapper builder)
@@ -62,7 +62,7 @@ namespace Surging.Core.Protocol.WebService
                 return new DefaultWebServiceEntryProvider(
                        provider.Resolve<IServiceEntryProvider>(),
                     provider.Resolve<ILogger<DefaultWebServiceEntryProvider>>(),
-                      provider.Resolve<CPlatformContainer>() 
+                      provider.Resolve<CPlatformContainer>()
                       );
             }).As(typeof(IWebServiceEntryProvider)).SingleInstance();
         }

@@ -21,8 +21,8 @@ namespace Surging.Core.KestrelHttpServer.Filters.Implementation
         private readonly IServiceEntryLocate _serviceEntryLocate;
         public HttpRequestFilterAttribute()
         {
-            _serviceRouteProvider = ServiceLocator.Current.Resolve<IServiceRouteProvider>(); ;
-            _serviceEntryLocate = ServiceLocator.Current.Resolve<IServiceEntryLocate>(); ;
+            _serviceRouteProvider = ServiceLocator.Current.Resolve<IServiceRouteProvider>(); 
+            _serviceEntryLocate = ServiceLocator.Current.Resolve<IServiceEntryLocate>();
         }
         public Task OnActionExecuted(ActionExecutedContext filterContext)
         {

@@ -19,7 +19,7 @@ namespace Surging.Core.Protocol.WebService.Runtime.Implementation
         private readonly IEnumerable<Type> _types;
         private readonly ILogger<DefaultWebServiceEntryProvider> _logger;
         private readonly CPlatformContainer _serviceProvider;
-        private List<WebServiceEntry> _webServiceEntries; 
+        private List<WebServiceEntry> _webServiceEntries;
 
         #endregion Field
 
@@ -31,8 +31,8 @@ namespace Surging.Core.Protocol.WebService.Runtime.Implementation
         {
             _types = serviceEntryProvider.GetTypes();
             _serviceEntryProvider = serviceEntryProvider;
-             _logger = logger;
-            _serviceProvider = serviceProvider; 
+            _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         #endregion Constructor
@@ -67,13 +67,13 @@ namespace Surging.Core.Protocol.WebService.Runtime.Implementation
         #endregion
 
 
-        public  List<WebServiceEntry> CreateServiceEntries(Type service)
+        public List<WebServiceEntry> CreateServiceEntries(Type service)
         {
             List<WebServiceEntry> result = new List<WebServiceEntry>();
             var routeTemplate = service.GetCustomAttribute<ServiceBundleAttribute>();
             var objInstance = _serviceProvider.GetInstances(service);
-            var behavior = objInstance as WebServiceBehavior; 
-             var path = RoutePatternParser.Parse(routeTemplate?.RouteTemplate, service.Name);
+            var behavior = objInstance as WebServiceBehavior;
+            var path = RoutePatternParser.Parse(routeTemplate?.RouteTemplate, service.Name);
             if (path.Length > 0 && path[0] != '/')
                 path = $"/{path}";
             if (behavior != null)

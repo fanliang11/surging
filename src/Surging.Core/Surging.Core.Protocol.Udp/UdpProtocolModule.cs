@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.Protocol.Udp.Runtime;
@@ -26,6 +27,7 @@ namespace Surging.Core.Protocol.Udp
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
+            builder.RegisterType(typeof(UdpNetworkProvider)).Named(NetworkType.Udp.ToString(), typeof(INetworkProvider<NetworkProperties>)).SingleInstance();
             builder.Register(provider =>
             {
                 return new DefaultUdpServiceEntryProvider(
@@ -36,7 +38,7 @@ namespace Surging.Core.Protocol.Udp
             }).As(typeof(IUdpServiceEntryProvider)).SingleInstance();
             builder.RegisterType(typeof(UdpServiceExecutor)).As(typeof(IServiceExecutor))
             .Named<IServiceExecutor>(CommunicationProtocol.Udp.ToString()).SingleInstance();
-            if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.Dns)
+            if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.Udp)
             {
                 RegisterDefaultProtocol(builder);
             }
@@ -51,7 +53,8 @@ namespace Surging.Core.Protocol.Udp
             builder.Register(provider =>
             {
                 return new DotNettyUdpServerMessageListener(provider.Resolve<ILogger<DotNettyUdpServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>()
+                      provider.Resolve<ITransportMessageCodecFactory>(),
+                       provider.Resolve<IUdpServiceEntryProvider>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -73,7 +76,8 @@ namespace Surging.Core.Protocol.Udp
             builder.Register(provider =>
             {
                 return new DotNettyUdpServerMessageListener(provider.Resolve<ILogger<DotNettyUdpServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>()
+                      provider.Resolve<ITransportMessageCodecFactory>(),
+                      provider.Resolve<IUdpServiceEntryProvider>()
                       );
             }).SingleInstance();
             builder.Register(provider =>

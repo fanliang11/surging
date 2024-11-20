@@ -95,6 +95,8 @@ namespace Surging.Core.Consul.Configurations
 
         public int LockDelay { get; set; } = 600;
 
+        public NotifyType NotifyMode { get; set; } = NotifyType.Heartbeat;
+
         public bool EnableChildrenMonitor { get; set; }
         /// <summary>
         /// 命令配置路径

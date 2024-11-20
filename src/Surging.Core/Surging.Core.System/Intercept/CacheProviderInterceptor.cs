@@ -70,7 +70,7 @@ namespace Surging.Core.System.Intercept
                 case Metadatas.CachingMethod.Get:
                     {
                         var retrunValue = await cacheProvider.GetFromCacheFirst(key, async () =>
-                        {
+                        { 
                             await invocation.Proceed();
                             return invocation.ReturnValue;
                         }, invocation.ReturnType, attribute.Time);
@@ -78,7 +78,7 @@ namespace Surging.Core.System.Intercept
                         break;
                     }
                 default:
-                    {
+                    { 
                         await invocation.Proceed();
                         var keys = attribute.CorrespondingKeys.Select(correspondingKey => string.Format(correspondingKey,keyVaules)).ToList();
                         keys.ForEach(cacheProvider.RemoveAsync);
@@ -96,7 +96,7 @@ namespace Surging.Core.System.Intercept
                 case Metadatas.CachingMethod.Get:
                     {
                         var retrunValue = await cacheProvider.GetFromCacheFirst(l2cacheProvider, l2Key,key, async () =>
-                        {
+                        { 
                             await invocation.Proceed();
                             return invocation.ReturnValue;
                         }, invocation.ReturnType, attribute.Time);
@@ -104,8 +104,8 @@ namespace Surging.Core.System.Intercept
                         break;
                     }
                 default:
-                    {
-                        await invocation.Proceed();
+                    { 
+                         await invocation.Proceed();
                         var keys = attribute.CorrespondingKeys.Select(correspondingKey => string.Format(correspondingKey, keyVaules)).ToList();
                         keys.ForEach(cacheProvider.RemoveAsync);
                         break;

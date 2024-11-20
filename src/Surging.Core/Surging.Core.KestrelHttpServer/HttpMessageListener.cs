@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json.Linq;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Template;
@@ -11,12 +12,14 @@ using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
+using Surging.Core.KestrelHttpServer.Interceptors;
+using Surging.Core.KestrelHttpServer.Interceptors.Implementation;
 using Surging.Core.KestrelHttpServer.Internal;
+using Surging.Core.KestrelHttpServer.Runtime;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -46,7 +49,7 @@ namespace Surging.Core.KestrelHttpServer
             await Received(sender, message);
         }
 
-        public async Task OnReceived(IMessageSender sender,string messageId, HttpContext context, IEnumerable<IActionFilter> actionFilters, ReplaySubject<HttpResultMessage<object>> subject)
+        public async Task OnReceived(IMessageSender sender,string messageId, HttpContext context, IEnumerable<IActionFilter> actionFilters)
         {
             var serviceRoute = RestContext.GetContext().GetAttachment("route") as ServiceRoute;
             RestContext.GetContext().RemoveContextParameters("route");
@@ -107,6 +110,11 @@ namespace Surging.Core.KestrelHttpServer
                     if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage },
                        sender,  messageId, actionFilters)) return;
                     httpMessage.Attachments = RestContext.GetContext().GetContextParameters();
+                    if(!string.IsNullOrEmpty(data) && bodyParams.Count==0)
+                    {
+                        httpMessage.Attachments.Add("requset.body", _serializer.Deserialize<string, object>(data));
+
+                    }
                     await Received(sender, new TransportMessage(messageId,httpMessage));
                 }
                 else
@@ -117,11 +125,8 @@ namespace Surging.Core.KestrelHttpServer
                     await Received(sender, new TransportMessage(messageId,httpMessage));
                 }
             }
-
-            subject.Subscribe(async (message) =>
-            {
-                await OnActionExecuted(context, httpMessage, message, actionFilters);
-            });
+          
+            await OnActionExecuted(context, httpMessage, actionFilters);
         }
 
         public async Task<bool> OnActionExecuting(ActionExecutingContext filterContext, IMessageSender sender, string messageId, IEnumerable<IActionFilter> filters)
@@ -138,15 +143,14 @@ namespace Surging.Core.KestrelHttpServer
             return true;
         }
 
-        public async Task OnActionExecuted(HttpContext context, HttpMessage message, HttpResultMessage<object> resultMessage, IEnumerable<IActionFilter> filters)
+        public async Task OnActionExecuted(HttpContext context, HttpMessage message, IEnumerable<IActionFilter> filters)
         {
             foreach (var fiter in filters)
             {
                 var filterContext = new ActionExecutedContext()
                 {
                     Context = context,
-                    ResultMessage = resultMessage,
-                    Message = message 
+                    Message = message
                 };
                 await fiter.OnActionExecuted(filterContext);
             }
@@ -174,6 +178,31 @@ namespace Surging.Core.KestrelHttpServer
                 }
             }
             return true;
+        }
+
+        public async Task<bool> OnHttpInterceptor(HttpContext context, HttpServerMessageSender sender, string networkId, string messageId,HttpServiceEntry httpServiceEntry, IEnumerable<IHttpInterceptor> interceptors)
+        {
+            var result = false;
+            foreach (var item in interceptors)
+            {
+                var path = HttpUtility.UrlDecode(GetRoutePath(context.Request.Path.ToString(),false));
+                var invocation = new HttpInvocation
+                {
+                    Path = path,
+                    Context = context,
+                    Entry = httpServiceEntry,
+                    NetworkId = networkId,
+                    Sender = sender,
+                };
+                if(!result)
+                result= await item.Intercept(invocation);
+                if (invocation.Result != null)
+                {
+                    await sender.SendAndFlushAsync(new TransportMessage(messageId, invocation.Result));
+                    return false;
+                }
+            }
+            return result;
         }
 
         public async Task<bool> OnException(HttpContext context, HttpServerMessageSender sender, string messageId, Exception exception, IEnumerable<IExceptionFilter> filters)
@@ -283,7 +312,7 @@ namespace Surging.Core.KestrelHttpServer
             return name;
         }
 
-        private string GetRoutePath(string path)
+        private string GetRoutePath(string path,bool isLower=true)
         {
             string routePath = "";
             var urlSpan = path.AsSpan();
@@ -295,9 +324,11 @@ namespace Surging.Core.KestrelHttpServer
             else
             {
                 if (len == -1)
-                    routePath = urlSpan.TrimStart("/").ToString().ToLower();
+                    routePath = urlSpan.TrimStart("/").ToString();
                 else
-                    routePath = urlSpan.Slice(0, len).TrimStart("/").ToString().ToLower();
+                    routePath = urlSpan.Slice(0, len).TrimStart("/").ToString();
+                if(isLower)
+                    routePath =routePath.ToLower();
             }
             return routePath;
         }

@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Messages;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Transport.Implementation

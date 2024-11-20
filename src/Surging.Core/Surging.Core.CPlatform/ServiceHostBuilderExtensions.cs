@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Protocol;
 
 namespace Surging.Core.CPlatform
 {
@@ -38,6 +39,10 @@ namespace Surging.Core.CPlatform
                 _ip = AppConfig.ServerOptions.Ip = AppConfig.ServerOptions.IpEndpoint?.Address.ToString() ?? _ip;
                 _ip = NetUtils.GetHostAddress(_ip);
                 mapper.Resolve<IModuleProvider>().Initialize();
+                await Task.Factory.StartNew(() =>
+                {
+                    mapper.Resolve<IProtocolSupportProvider>().Initialize();
+                }, TaskCreationOptions.LongRunning);
                 if (!AppConfig.ServerOptions.DisableServiceRegistration)
                 {
                     await mapper.Resolve<IServiceCommandManager>().SetServiceCommandsAsync();

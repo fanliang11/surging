@@ -43,8 +43,8 @@ namespace Surging.Core.DNS
                 return;
             _serverMessageListener = await _messageListenerFactory(endPoint);
             _serverMessageListener.Received += async (sender, message) =>
-            { 
-                  await  MessageListener.OnReceived(sender, message); 
+            {
+                 await  MessageListener.OnReceived(sender, message);
             };
         }
 
@@ -54,8 +54,8 @@ namespace Surging.Core.DNS
                 return;
             _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip),53));
             _serverMessageListener.Received += async (sender, message) =>
-            {
-                await MessageListener.OnReceived(sender, message); 
+            { 
+                  await  MessageListener.OnReceived(sender, message);
             };
         }
 

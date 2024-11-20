@@ -7,6 +7,7 @@ using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
@@ -15,6 +16,8 @@ using Surging.Core.KestrelHttpServer.Extensions;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using Surging.Core.KestrelHttpServer.Internal;
+using Surging.Core.KestrelHttpServer.Runtime;
+using Surging.Core.KestrelHttpServer.Runtime.Implementation;
 using System.Net;
 
 namespace Surging.Core.KestrelHttpServer
@@ -50,9 +53,11 @@ namespace Surging.Core.KestrelHttpServer
         {
             base.RegisterBuilder(builder);
             builder.AddFilter(typeof(ServiceExceptionFilter));
+            builder.RegisterType<DefaultHttpServiceEntryProvider>().As<IHttpServiceEntryProvider>().SingleInstance();
             builder.RegisterType<RestTransportDiagnosticProcessor>().As<ITracingDiagnosticProcessor>().SingleInstance();
             builder.RegisterType(typeof(HttpExecutor)).As(typeof(IServiceExecutor))
                 .Named<IServiceExecutor>(CommunicationProtocol.Http.ToString()).SingleInstance();
+            builder.RegisterType(typeof(HttpNetworkProvider)).Named(NetworkType.Http.ToString(), typeof(INetworkProvider<NetworkProperties>)).SingleInstance();
             if (CPlatform.AppConfig.ServerOptions.Protocol == CommunicationProtocol.Http)
             {
                 RegisterDefaultProtocol(builder);
@@ -73,6 +78,7 @@ namespace Surging.Core.KestrelHttpServer
                      provider.Resolve<IServiceEngineLifetime>(),
                      provider.Resolve<IModuleProvider>(),
                     provider.Resolve<IServiceRouteProvider>(),
+                    provider.Resolve<IHttpServiceEntryProvider>(),
                      provider.Resolve<CPlatformContainer>()
                       );
             }).SingleInstance();
@@ -100,6 +106,7 @@ namespace Surging.Core.KestrelHttpServer
                      provider.Resolve<IServiceEngineLifetime>(),
                        provider.Resolve<IModuleProvider>(),
                        provider.Resolve<IServiceRouteProvider>(),
+                           provider.Resolve<IHttpServiceEntryProvider>(),
                      provider.Resolve<CPlatformContainer>()
 
                       );

@@ -41,7 +41,7 @@ namespace Surging.Core.CPlatform.Support
         /// <summary>
         /// 执行超时时间
         /// </summary>
-        public int ExecutionTimeoutInMilliseconds { get; set; } = 1000;
+        public int ExecutionTimeoutInMilliseconds { get; set; } = 30000;
         /// <summary>
         /// 是否开启缓存
         /// </summary>
@@ -86,7 +86,7 @@ namespace Surging.Core.CPlatform.Support
         /// <summary>
         /// 信号量最大并发度
         /// </summary>
-        public int MaxConcurrentRequests { get; set; } = 200;
+        public int MaxConcurrentRequests { get; set; } = 2000000;
 
     }
 }

@@ -9,6 +9,7 @@ using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -97,6 +98,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async ValueTask<AddressModel> ResolverAddress(RemoteInvokeContext context,string item)
         {
             if (context == null)

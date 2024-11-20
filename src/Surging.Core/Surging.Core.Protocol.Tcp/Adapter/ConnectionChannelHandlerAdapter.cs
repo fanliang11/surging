@@ -17,11 +17,13 @@ namespace Surging.Core.Protocol.Tcp.Adapter
 		private readonly ILogger _logger;
 		private readonly IDeviceProvider _deviceProvider;
 		private readonly ITcpServiceEntryProvider _tcpServiceEntryProvider;
-		private readonly TcpServerProperties _tcpServerProperties;
-		public ConnectionChannelHandlerAdapter(ILogger logger, IDeviceProvider deviceProvider, ITcpServiceEntryProvider tcpServiceEntryProvider, TcpServerProperties tcpServerProperties)
+		private readonly NetworkProperties _tcpServerProperties;
+		private readonly TcpBehavior _tcpBehavior;
+		public ConnectionChannelHandlerAdapter(ILogger logger, IDeviceProvider deviceProvider, ITcpServiceEntryProvider tcpServiceEntryProvider, TcpBehavior tcpBehavior, NetworkProperties tcpServerProperties)
 		{
 			_logger = logger;
-			_deviceProvider = deviceProvider;
+            _tcpBehavior= tcpBehavior;
+            _deviceProvider = deviceProvider;
 			_tcpServiceEntryProvider = tcpServiceEntryProvider;
 			_tcpServerProperties= tcpServerProperties;
 
@@ -31,8 +33,7 @@ namespace Surging.Core.Protocol.Tcp.Adapter
         public override void ChannelActive(IChannelHandlerContext ctx)
 		{
 			_deviceProvider.Register(ctx);
-			var tcpEntry=_tcpServiceEntryProvider.GetEntry();
-			tcpEntry.Behavior.DeviceStatusProcess(DeviceStatus.Connected, ctx.Channel.Id.AsLongText(), _tcpServerProperties);
+            _tcpBehavior.DeviceStatusProcess(DeviceStatus.Connected, ctx.Channel.Id.AsLongText(), _tcpServerProperties);
 			if (_logger.IsEnabled(LogLevel.Information))
 				_logger.LogInformation("channel active:" + ctx.Channel.RemoteAddress);
 
@@ -42,7 +43,7 @@ namespace Surging.Core.Protocol.Tcp.Adapter
 		{
 			_deviceProvider.Unregister(ctx);
 			var tcpEntry = _tcpServiceEntryProvider.GetEntry();
-			tcpEntry.Behavior.DeviceStatusProcess(DeviceStatus.Closed, ctx.Channel.Id.AsLongText(), _tcpServerProperties);
+            _tcpBehavior.DeviceStatusProcess(DeviceStatus.Closed, ctx.Channel.Id.AsLongText(), _tcpServerProperties);
 			if (_logger.IsEnabled(LogLevel.Information))
 				_logger.LogInformation("channel inactive:" + ctx.Channel.RemoteAddress);
 		
@@ -53,7 +54,7 @@ namespace Surging.Core.Protocol.Tcp.Adapter
 		{
 			_deviceProvider.Unregister(ctx);
 			var tcpEntry = _tcpServiceEntryProvider.GetEntry();
-			tcpEntry.Behavior.DeviceStatusProcess(DeviceStatus.Abnormal, ctx.Channel.Id.AsLongText(), _tcpServerProperties);
+            _tcpBehavior.DeviceStatusProcess(DeviceStatus.Abnormal, ctx.Channel.Id.AsLongText(), _tcpServerProperties);
 			if (_logger.IsEnabled(LogLevel.Error))
 				_logger.LogError("channel exceptionCaught:" + ctx.Channel.RemoteAddress, exception);
 

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.Grpc.Runtime;
@@ -26,6 +27,7 @@ namespace Surging.Core.Grpc
                       provider.Resolve<CPlatformContainer>()
                       );
             }).As(typeof(IGrpcServiceEntryProvider)).SingleInstance();
+            builder.RegisterType(typeof(GrpcNetworkProvider)).Named(NetworkType.Grpc.ToString(), typeof(INetworkProvider<NetworkProperties>)).SingleInstance();
             if (AppConfig.ServerOptions.Protocol == CommunicationProtocol.WS)
             {
                 RegisterDefaultProtocol(builder);

@@ -26,6 +26,10 @@ namespace Surging.Core.CPlatform.Diagnostics
     {
         public Reference Reference { get; set; }
 
+        public UniqueId TraceId { get; set; }
+
+        public int ParentServiceId { get; set; }
+
         public UniqueId ParentSegmentId { get; set; }
 
         public int ParentSpanId { get; set; }

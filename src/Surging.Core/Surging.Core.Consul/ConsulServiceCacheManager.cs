@@ -37,7 +37,7 @@ namespace Surging.Core.Consul
             _serviceCacheFactory = serviceCacheFactory;
             _consulClientFactory = consulClientFactory;
             _logger = logger;
-            _manager = manager; 
+            _manager = manager;
             EnterCaches().Wait();
         }
 
@@ -66,7 +66,7 @@ namespace Surging.Core.Consul
         public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)
         {
             var serviceCaches = await GetCaches(caches.Select(p => $"{ _configInfo.CachePath}{p.CacheDescriptor.Id}"));
-          
+
             await RemoveCachesAsync(caches);
             await base.SetCachesAsync(caches);
         }
@@ -76,7 +76,7 @@ namespace Surging.Core.Consul
             await EnterCaches();
             return _serviceCaches;
         }
-        
+
         public override async Task RemveAddressAsync(IEnumerable<CacheEndpoint> endpoints)
         {
             var caches = await GetCachesAsync();
@@ -126,7 +126,7 @@ namespace Surging.Core.Consul
             return caches.ToArray();
         }
 
-                private async Task<ServiceCache[]> GetCaches(IEnumerable<byte[]> childrens)
+        private async Task<ServiceCache[]> GetCaches(IEnumerable<byte[]> childrens)
         {
             if (childrens == null) return new ServiceCache[0];
             childrens = childrens.ToArray();
@@ -155,7 +155,7 @@ namespace Surging.Core.Consul
             ServiceCache result = null;
             var client = await GetConsulClient();
             var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
-                 async (oldData, newData) => await NodeChange(oldData, newData),null);
+                 async (oldData, newData) => await NodeChange(oldData, newData), null);
             var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
             {
@@ -181,7 +181,7 @@ namespace Surging.Core.Consul
                 var clients = await _consulClientFactory.GetClients();
                 foreach (var client in clients)
                 {
-                    
+
                     var deletedCacheIds = caches.Select(i => i.CacheDescriptor.Id).ToArray();
                     foreach (var deletedCacheId in deletedCacheIds)
                     {
@@ -196,10 +196,10 @@ namespace Surging.Core.Consul
         {
             if (_serviceCaches != null && _serviceCaches.Length > 0)
                 return;
-            var client =await GetConsulClient();
-             var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CachePath,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
-                  (result) => ConvertPaths(result).Result);
+            var client = await GetConsulClient();
+            var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CachePath,
+               async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
+                 (result) => ConvertPaths(result).Result);
             if (client.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
             {
                 var response = await client.GetChildrenListAsync(_configInfo.CachePath);
@@ -280,6 +280,34 @@ namespace Surging.Core.Consul
             return client;
         }
 
+        public async Task NodeChange(byte[] newData)
+        {
+            var newCache = await GetCache(newData);
+            //得到旧缓存。
+            var oldCache = _serviceCaches.FirstOrDefault(i => i.CacheDescriptor.Id == newCache.CacheDescriptor.Id);
+            if (oldCache.Equals(newCache))
+                return;
+            lock (_serviceCaches)
+            {
+                //删除旧缓存，并添加上新的缓存。
+                _serviceCaches =
+                    _serviceCaches
+                        .Where(i => i.CacheDescriptor.Id != newCache.CacheDescriptor.Id)
+                        .Concat(new[] { newCache }).ToArray();
+            }
+
+            if (newCache == null)
+                //触发删除事件。
+                OnRemoved(new ServiceCacheEventArgs(oldCache));
+
+            else if (oldCache == null)
+                OnCreated(new ServiceCacheEventArgs(newCache));
+
+            else
+                //触发缓存变更事件。
+                OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+        }
+
         private async Task NodeChange(byte[] oldData, byte[] newData)
         {
             if (DataEquals(oldData, newData))
@@ -305,9 +333,60 @@ namespace Surging.Core.Consul
             else if (oldCache == null)
                 OnCreated(new ServiceCacheEventArgs(newCache));
 
-            else 
-            //触发缓存变更事件。
-            OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+            else
+                //触发缓存变更事件。
+                OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+        }
+
+
+        public async Task ChildrenChange(Dictionary<string, byte[]> newDatas)
+        {
+
+            var oldChildrens = _serviceCaches.Select(p => $"{_configInfo.CachePath}{p.CacheDescriptor.Id}").ToList();
+            var newChildrens = newDatas.Keys.ToList();
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"旧的节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的服务缓存节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的服务缓存节点：{string.Join(",", createdChildrens)}");
+
+
+            var newServiceCacheBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
+            var newServiceCaches = new List<ServiceCache>();
+            foreach (var newServiceCacheByte in newServiceCacheBytes)
+            {
+                newServiceCaches.Add(await GetCache(newServiceCacheByte));
+            }
+            var caches = _serviceCaches.ToArray();
+            lock (_serviceCaches)
+            {
+                _serviceCaches = _serviceCaches
+                    //删除无效的缓存节点。
+                    .Where(i => !deletedChildrens.Contains($"{_configInfo.CachePath}{i.CacheDescriptor.Id}"))
+                    //连接上新的缓存。
+                    .Concat(newServiceCaches)
+                    .ToArray();
+            }
+            //需要删除的缓存集合。
+            var deletedCaches = caches.Where(i => deletedChildrens.Contains($"{_configInfo.CachePath}{i.CacheDescriptor.Id}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedCaches.Select(cache => new ServiceCacheEventArgs(cache)).ToArray());
+
+            //触发缓存被创建事件。
+            OnCreated(newServiceCaches.Select(cache => new ServiceCacheEventArgs(cache)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("缓存数据更新成功。");
         }
 
         private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)

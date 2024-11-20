@@ -13,11 +13,11 @@ namespace Surging.Core.Protocol.WebService.Runtime
 {
     public abstract class WebServiceBehavior : IServiceBehavior
     {
-        private HeaderValue _headerValue ;
+        private HeaderValue _headerValue;
 
         public WebServiceBehavior()
         {
-            _headerValue = new HeaderValue(); 
+            _headerValue = new HeaderValue();
         }
 
         public HeaderValue HeaderValue
@@ -37,11 +37,11 @@ namespace Surging.Core.Protocol.WebService.Runtime
                 _received -= value;
             }
         }
-         
+
 
 
         public string MessageId { get; } = Guid.NewGuid().ToString("N");
-          
+
 
         public async Task Write(object result, int statusCode = 200, string exceptionMessage = "")
         {
@@ -135,11 +135,11 @@ namespace Surging.Core.Protocol.WebService.Runtime
             {
                 throw ex;
             }
-        } 
+        }
 
         public async Task<bool> ValidateAuthentication(string token)
         {
-           return await GetService<IAuthorizationServerProvider>().ValidateClientAuthentication(token);
+            return await GetService<IAuthorizationServerProvider>().ValidateClientAuthentication(token);
         }
 
         public void Publish(IntegrationEvent @event)

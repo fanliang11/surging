@@ -18,7 +18,7 @@ namespace Surging.Core.ServiceHosting.Extensions.Rules
         public SchedulerRuleWorkflow(string actionExpression) : this()
         {
             var str = Regex.Replace(actionExpression, @"(\.When\()[.\r|\n|\t|\s]*?(?=(function))", ".When(\"", RegexOptions.IgnoreCase);
-              str = Regex.Replace(str, @"(\.Skip\()[.\r|\n|\t|\s]*?(?=(function))", ".Skip(\"", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, @"(\.Skip\()[.\r|\n|\t|\s]*?(?=(function))", ".Skip(\"", RegexOptions.IgnoreCase);
             str = Regex.Replace(str, @"(})[.\r|\n|\t|\s]*?(?=(\)))", "}\"", RegexOptions.IgnoreCase);
             Context.Add("expression", str ?? "1 == 1");
         }

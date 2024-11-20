@@ -49,8 +49,8 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
             {
                 CorrespondingKeys = serviceInterceptItem[8].Split(",");
             }
-            if (serviceInterceptItem.Length > 9)
-                EnableStageCache = serviceInterceptItem[9] == "1" ? true : false;
+            if(serviceInterceptItem.Length>9)
+            EnableStageCache = serviceInterceptItem[9] == "1" ? true : false;
         }
         #endregion
 
@@ -73,21 +73,21 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
             set;
         } = "";
 
-        public string L2Key
+        public string L2Key 
         {
             get; set;
-        } = "";
+        }= "";
 
         public bool EnableL2Cache
         {
             get; set;
         }
 
-        public string Key { get; set; } = "";
+        public string Key { get; set; } = " ";
         /// <summary>
         /// 获取或设置缓存方式。
         /// </summary>
-        public CachingMethod Method { get; set; }
+        public CachingMethod Method { get; set; } 
 
         /// <summary>
         /// 获取或设置一个<see cref="Boolean"/>值，该值表示当缓存方式为Put时，是否强制将值写入缓存中。
@@ -112,7 +112,7 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadatas
                 .Force(Force, MetadataId)
                 .CacheTime(Time, MetadataId)
                 .CorrespondingKeys(CorrespondingKeys, MetadataId)
-                .EnableStageCache(EnableStageCache, MetadataId);
+                .EnableStageCache(EnableStageCache,MetadataId);
         }
 
         #endregion

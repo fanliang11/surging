@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
 {
@@ -139,24 +140,11 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
             return descriptor;
         }
 
-        public static ServiceDescriptor EnableStageCache(this ServiceDescriptor descriptor, bool enableStageCache, string metadataId)
-        {
-            var metadata = GetInterceptMetadata(descriptor, metadataId);
-            var iEnableL2Cache = Convert.ToInt32(enableStageCache).ToString();
-            if (string.IsNullOrEmpty(metadata.Item1))
-                metadata.Item1 = iEnableL2Cache;
-            else
-                metadata.Item1 += $"|{iEnableL2Cache}";
-            metadata.Item2[metadataId] = metadata.Item1;
-            descriptor.Metadatas["Intercept"] = metadata.Item2;
-            return descriptor;
-        }
 
-
-        public static ServiceCacheIntercept GetCacheIntercept(this ServiceDescriptor descriptor,string metadataId)
+        public static ServiceCacheIntercept GetCacheIntercept(this ServiceDescriptor descriptor, string metadataId)
         {
-          var metadata=  descriptor.GetMetadata<JObject>("Intercept",new JObject());
-           if( metadata.ContainsKey(metadataId))
+            var metadata = descriptor.GetMetadata<JObject>("Intercept", new JObject());
+            if (metadata != null && metadata.ContainsKey(metadataId))
             {
                 return new ServiceCacheIntercept(metadata[metadataId].ToString().Split("|"));
             }
@@ -176,8 +164,20 @@ namespace Surging.Core.ProxyGenerator.Interceptors.Implementation
         public static bool ExistIntercept(this ServiceDescriptor descriptor)
         {
             var metadata = descriptor.GetMetadata<JObject>("Intercept", null);
-         
             return metadata!=null;
+        }
+
+        public static ServiceDescriptor EnableStageCache(this ServiceDescriptor descriptor, bool enableStageCache, string metadataId)
+        {
+            var metadata = GetInterceptMetadata(descriptor, metadataId);
+            var iEnableL2Cache = Convert.ToInt32(enableStageCache).ToString();
+            if (string.IsNullOrEmpty(metadata.Item1))
+                metadata.Item1 = iEnableL2Cache;
+            else
+                metadata.Item1 += $"|{iEnableL2Cache}";
+            metadata.Item2[metadataId] = metadata.Item1;
+            descriptor.Metadatas["Intercept"] = metadata.Item2;
+            return descriptor;
         }
 
         private static (string,Dictionary<string, object>) GetInterceptMetadata( ServiceDescriptor descriptor, string metadataId)

@@ -24,6 +24,7 @@ namespace Surging.Core.CPlatform
                 builder.RegisterType(filter).As<IActionFilter>().SingleInstance();
             }
         }
+
        
     }
 }

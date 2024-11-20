@@ -22,6 +22,7 @@ using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.KestrelHttpServer.Internal;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
 namespace Surging.Core.KestrelHttpServer
@@ -107,12 +108,11 @@ namespace Surging.Core.KestrelHttpServer
         private async Task<HttpResultMessage<object>> RemoteExecuteAsync(HttpMessage httpMessage)
         {
             HttpResultMessage<object> resultMessage = new HttpResultMessage<object>();
-            try
-            {
-              var entity = await _serviceProxyProvider.Invoke<object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
+            try {
+               var  entity=await _serviceProxyProvider.Invoke<Object>(httpMessage.Parameters, httpMessage.RoutePath, httpMessage.ServiceKey);
                 if (entity != null && AppConfig.ServerOptions.EnableObjectConvert)
                     entity = JsonConvert.DeserializeObject(entity.ToString(), typeof(Object));
-                resultMessage.Entity = entity; 
+                resultMessage.Entity = entity;
                 resultMessage.IsSucceed = resultMessage.Entity != default;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
             }
@@ -138,8 +138,8 @@ namespace Surging.Core.KestrelHttpServer
                     resultMessage.Entity = result;
                 }
                 else
-                {
-                    task.Wait();
+                { 
+                        await task; 
                     var taskType = task.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)
                         resultMessage.Entity = taskType.GetProperty("Result").GetValue(task);
@@ -182,6 +182,7 @@ namespace Surging.Core.KestrelHttpServer
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception, "发送响应消息时候发生了异常。");
+                
             }
             finally
             {

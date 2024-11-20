@@ -94,6 +94,7 @@ namespace Surging.Core.ProxyGenerator
                 .RegisterRepositories()
                 .RegisterServiceBus()
                 .RegisterModules()
+                .RegisterProtocols()
                 .RegisterInstanceByConstraint()
                 .AddClientRuntime()
                 .AddClientProxy();

@@ -69,6 +69,24 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
             }
             return _wSServiceEntries;
         }
+
+        public void ChangeEntry(string path, Func<WebSocketSessionManager> client)
+
+        {
+            if (_wSServiceEntries == null)
+            {
+                GetEntries();
+            }
+            //_wSServiceEntries.ForEach(
+            var entry = _wSServiceEntries.Where(p => p.Path == path).FirstOrDefault();
+            entry.FuncBehavior = () =>
+            {
+                var behavior =GetWebSocketBehavior(entry.Service, _options?.Behavior, entry.BehaviorAttribute);
+                behavior.Client = client;
+                return behavior;
+            };
+
+        }
         #endregion
 
         public WSServiceEntry CreateServiceEntry(Type service)
@@ -85,7 +103,9 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
                 result = new WSServiceEntry
                 {
                     Behavior = behavior,
+                    Service = service,
                     Type = behavior.GetType(),
+                    BehaviorAttribute = behaviorContract,
                     Path = path,
                     FuncBehavior = () =>
                     {
@@ -110,6 +130,23 @@ namespace Surging.Core.Protocol.WS.Runtime.Implementation
                 wsBehavior.Protocol = contractAttribute.Protocol;
                 wsBehavior.EmitOnPing = contractAttribute.EmitOnPing;
             } 
+            return wsBehavior;
+        }
+
+        private WebSocketBehavior GetWebSocketBehavior(WebSocketBehavior wsBehavior, BehaviorOption option, BehaviorContractAttribute contractAttribute)
+        { 
+            if (option != null)
+            {
+                wsBehavior.IgnoreExtensions = option.IgnoreExtensions;
+                wsBehavior.Protocol = option.Protocol;
+                wsBehavior.EmitOnPing = option.EmitOnPing;
+            }
+            if (contractAttribute != null)
+            {
+                wsBehavior.IgnoreExtensions = contractAttribute.IgnoreExtensions;
+                wsBehavior.Protocol = contractAttribute.Protocol;
+                wsBehavior.EmitOnPing = contractAttribute.EmitOnPing;
+            }
             return wsBehavior;
         }
     }

@@ -32,11 +32,11 @@ namespace Surging.Core.Protocol.Tcp
     /// </summary>
     public class DotNettyTcpServerMessageSender : DotNettyTcpMessageSender, IMessageSender
     {
-        private readonly IChannelHandlerContext _context;
+        private readonly IChannel _channel;
 
-        public DotNettyTcpServerMessageSender(IChannelHandlerContext context) : base()
+        public DotNettyTcpServerMessageSender(IChannel channel) : base()
         {
-            _context = context;
+            _channel = channel;
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Surging.Core.Protocol.Tcp
         public async Task SendAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            await _context.WriteAsync(buffer);
+            await _channel.WriteAsync(buffer);
         }
 
         /// <summary>
@@ -57,9 +57,8 @@ namespace Surging.Core.Protocol.Tcp
         /// <returns>一个任务。</returns>
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            if (_context.Channel.RemoteAddress != null)
-                await _context.WriteAndFlushAsync(buffer);
+            var buffer = GetByteBuffer(message); 
+            await _channel.WriteAndFlushAsync(buffer);
         }
 
         

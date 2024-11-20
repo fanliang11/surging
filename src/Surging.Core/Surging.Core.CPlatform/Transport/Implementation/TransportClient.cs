@@ -164,7 +164,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
                 await _serviceExecutor.ExecuteAsync(sender, message);
         }
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WirteDiagnosticBefore(TransportMessage message)
         {
             if (!AppConfig.ServerOptions.DisableDiagnostic)
@@ -186,6 +186,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             RpcContext.GetContext().SetContextParameters(parameters);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WirteDiagnosticAfter(TransportMessage message)
         {
             if (!AppConfig.ServerOptions.DisableDiagnostic)
@@ -200,6 +201,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WirteDiagnosticError(TransportMessage message)
         {
             if (!AppConfig.ServerOptions.DisableDiagnostic)

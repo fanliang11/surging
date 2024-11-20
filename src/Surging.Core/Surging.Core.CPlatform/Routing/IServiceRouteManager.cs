@@ -53,6 +53,8 @@ namespace Surging.Core.CPlatform.Routing
         /// </summary>
         /// <returns>一个任务。</returns>
         Task ClearAsync();
+
+        void ClearRoute();
     }
 
     /// <summary>

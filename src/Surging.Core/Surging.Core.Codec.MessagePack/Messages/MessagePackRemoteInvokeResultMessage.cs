@@ -8,7 +8,6 @@ namespace Surging.Core.Codec.MessagePack.Messages
     public class MessagePackRemoteInvokeResultMessage
     {
         #region Constructor
-
         public MessagePackRemoteInvokeResultMessage(RemoteInvokeResultMessage message)
         {
             ExceptionMessage = message.ExceptionMessage;

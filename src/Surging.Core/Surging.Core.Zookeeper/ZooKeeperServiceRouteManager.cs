@@ -141,6 +141,11 @@ namespace Surging.Core.Zookeeper
             }
         }
 
+        public override void ClearRoute()
+        {
+            _routes = null;
+        }
+
         public override async Task RemveAddressAsync(IEnumerable<AddressModel> Address)
         {
             var routes = await GetRoutesAsync();

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Net.Http.Headers;
 using System.IO;
 using Surging.Core.KestrelHttpServer.Internal;
+using Surging.Core.KestrelHttpServer.Abstractions;
 
 namespace Surging.Core.KestrelHttpServer
 {
@@ -37,6 +38,20 @@ namespace Surging.Core.KestrelHttpServer
             this.FileDownloadName = fileDownloadName;
         }
 
+        public FileContentResult(byte[] fileContents, string contentType, string fileDownloadName, DispositionHeader contentDispositionHeader)
+ : this(fileContents,  contentType, fileDownloadName)
+        {
+            if (fileContents == null)
+            {
+                throw new ArgumentNullException(nameof(fileContents));
+            }
+            if (fileDownloadName == null)
+            {
+                throw new ArgumentNullException(nameof(fileDownloadName));
+            }
+            this.ContentDispositionHeader = contentDispositionHeader;
+        }
+
         public FileContentResult(byte[] fileContents, MediaTypeHeaderValue contentType)
             : base(contentType?.ToString())
         {
@@ -47,7 +62,9 @@ namespace Surging.Core.KestrelHttpServer
 
             FileContents = fileContents;
         }
-        
+
+        protected DispositionHeader ContentDispositionHeader { get; set; } = DispositionHeader.attachment;
+
         public byte[] FileContents
         {
             get => _fileContents;
@@ -71,7 +88,7 @@ namespace Surging.Core.KestrelHttpServer
 
             try
             {
-                var contentDisposition = new ContentDispositionHeaderValue("attachment");
+                var contentDisposition = new ContentDispositionHeaderValue(ContentDispositionHeader.ToString());
                 contentDisposition.SetHttpFileName(FileDownloadName);
                 var httpResponse = context.HttpContext.Response;
 

@@ -83,6 +83,33 @@ namespace Surging.Core.Consul
             return _serviceCommands;
         }
 
+        public void NodeChange(byte[] newData)
+        {
+            var newCommand = GetServiceCommand(newData);
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+            if (oldCommand.Equals(newCommand))
+                return;
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+
+            if (newCommand == null)
+                //触发删除事件。
+                OnRemoved(new ServiceCommandEventArgs(oldCommand));
+
+            else if (oldCommand == null)
+                OnCreated(new ServiceCommandEventArgs(newCommand));
+            else
+                //触发服务命令变更事件。
+                OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+         
+
         public void NodeChange(byte[] oldData, byte[] newData)
         {
             if (DataEquals(oldData, newData))
@@ -336,6 +363,58 @@ namespace Surging.Core.Consul
                     return false;
             }
             return true;
+        }
+
+        public void ChildrenChange(Dictionary<string, byte[]> newDatas)
+        {
+
+            var oldChildrens = _serviceCommands.Select(p => $"{_configInfo.CommandPath}{p.ServiceId}").ToList();
+            var newChildrens = newDatas.Keys.ToList();
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"最新的服务命令节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"旧的服务命令节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的服务命令节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的服务命令节点：{string.Join(",", createdChildrens)}");
+
+            //获取新增的路由信息。
+            var newCommandBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
+            var newServiceCommands = new List<ServiceCommandDescriptor>();
+            foreach (var newCommandByte in newCommandBytes)
+            {
+                newServiceCommands.Add(GetServiceCommand(newCommandByte));
+            }
+            var serviceCommands = _serviceCommands.ToArray();
+            lock (_serviceCommands)
+            {
+                #region 节点变更操作
+                _serviceCommands = _serviceCommands
+                       //删除无效的节点路由。
+                       .Where(i => !deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}"))
+                    //连接上新的路由。
+                    .Concat(newServiceCommands)
+                    .ToArray();
+                #endregion
+            }
+            //需要删除的服务命令集合。
+            var deletedRoutes = serviceCommands.Where(i => deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedRoutes.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            //触发服务命令被创建事件。
+            OnCreated(newServiceCommands.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("服务命令数据更新成功。");
         }
 
         public async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
