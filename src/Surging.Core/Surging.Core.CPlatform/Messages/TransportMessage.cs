@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.CPlatform.Messages
 {
@@ -11,7 +12,7 @@ namespace Surging.Core.CPlatform.Messages
         public TransportMessage()
         {
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransportMessage(object content)
         {
             if (content == null)
@@ -21,6 +22,18 @@ namespace Surging.Core.CPlatform.Messages
             ContentType = content.GetType().FullName;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TransportMessage(string id, object content)
+        {
+            if (content == null)
+                throw new ArgumentNullException(nameof(content));
+
+            Id = id; 
+            Content = content;
+            ContentType = content.GetType().FullName;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TransportMessage(object content, string fullName)
         {
             if (content == null)
@@ -49,25 +62,35 @@ namespace Surging.Core.CPlatform.Messages
         /// 是否调用消息。
         /// </summary>
         /// <returns>如果是则返回true，否则返回false。</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvokeMessage()
         {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeMessageTypeName || ContentType == "RemoteInvokeMessage";
         }
 
         /// <summary>
         /// 是否是调用结果消息。
         /// </summary>
         /// <returns>如果是则返回true，否则返回false。</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsInvokeResultMessage()
         {
-            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName;
+            return ContentType == MessagePackTransportMessageType.remoteInvokeResultMessageTypeName || ContentType == "RemoteInvokeResultMessage";
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsHttpMessage()
         {
             return ContentType == MessagePackTransportMessageType.httpMessageTypeName;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsReactiveMessage()
+        {
+            return ContentType == MessagePackTransportMessageType.reactiveResultMessageTypeName;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsHttpResultMessage()
         {
             return ContentType == MessagePackTransportMessageType.httpResultMessageTypeName;
@@ -77,7 +100,8 @@ namespace Surging.Core.CPlatform.Messages
         /// 获取内容。
         /// </summary>
         /// <typeparam name="T">内容类型。</typeparam>
-        /// <returns>内容实例。</returns>
+        /// <returns>内容实例。</returns> 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetContent<T>()
         {
             return (T)Content;
@@ -87,7 +111,7 @@ namespace Surging.Core.CPlatform.Messages
         /// 创建一个调用传输消息。
         /// </summary>
         /// <param name="invokeMessage">调用实例。</param>
-        /// <returns>调用传输消息。</returns>
+        /// <returns>调用传输消息。</returns>  
         public static TransportMessage CreateInvokeMessage(RemoteInvokeMessage invokeMessage)
         {
             return new TransportMessage(invokeMessage, MessagePackTransportMessageType.remoteInvokeMessageTypeName)
@@ -101,7 +125,7 @@ namespace Surging.Core.CPlatform.Messages
         /// </summary>
         /// <param name="id">消息Id。</param>
         /// <param name="invokeResultMessage">调用结果实例。</param>
-        /// <returns>调用结果传输消息。</returns>
+        /// <returns>调用结果传输消息。</returns>  
         public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
         {
             return new TransportMessage(invokeResultMessage, MessagePackTransportMessageType.remoteInvokeResultMessageTypeName)

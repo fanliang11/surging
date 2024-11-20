@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Surging.Core.Consul.WatcherProvider.Implementation
 {
@@ -16,23 +17,22 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
             this.clientPath = clientPath;
         }
 
-        protected abstract Dictionary<string, HashSet<Watcher>> GetWatches();
+        protected abstract ConcurrentDictionary<string, HashSet<Watcher>> GetWatches();
 
         public void Register()
         {
             var watches = GetWatches();
-            lock (watches)
+
+            HashSet<Watcher> watchers;
+            watches.TryGetValue(clientPath, out watchers);
+            if (watchers == null)
             {
-                HashSet<Watcher> watchers;
-                watches.TryGetValue(clientPath, out watchers);
-                if (watchers == null)
-                {
-                    watchers = new HashSet<Watcher>();
-                    watches[clientPath] = watchers;
-                }
-               if (!watchers.Any(p => p.GetType() == watcher.GetType()))
-                watchers.Add(watcher);
+                watchers = new HashSet<Watcher>();
+                watches[clientPath] = watchers;
             }
+            if (!watchers.Any(p => p.GetType() == watcher.GetType()))
+                watchers.Add(watcher);
+
         }
     }
 }

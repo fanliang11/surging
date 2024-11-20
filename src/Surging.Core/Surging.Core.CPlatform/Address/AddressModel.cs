@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Net;
 
 namespace Surging.Core.CPlatform.Address
@@ -13,8 +14,15 @@ namespace Surging.Core.CPlatform.Address
         /// </summary>
         /// <returns></returns>
         public abstract EndPoint CreateEndPoint();
-        
+
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public decimal ProcessorTime { get; set; }
+
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName="Wt")]
+        public int Weight { get; set; }
+
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "Tp")]
+        public long Timestamp { get; set; }
         /// <summary>
         /// 重写后的标识。
         /// </summary>

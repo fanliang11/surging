@@ -4,6 +4,7 @@ using Polly.Retry;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
+using Surging.Core.CPlatform.EventBus;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,13 +18,15 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
     {
         private readonly IConnectionFactory _connectionFactory;
         private readonly ILogger<DefaultRabbitMQPersistentConnection> _logger;
-
         IConnection _connection;
         bool _disposed;
 
         object sync_root = new object();
 
-        public DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFactory, ILogger<DefaultRabbitMQPersistentConnection> logger)
+        public event EventHandler<ShutdownEventArgs> OnRabbitConnectionShutdown;
+
+        public DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFactory,
+            ILogger<DefaultRabbitMQPersistentConnection> logger)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -81,6 +84,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 {
                     _connection = _connectionFactory
                           .CreateConnection();
+             
                 });
 
                 if (IsConnected)
@@ -124,7 +128,7 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             if (_disposed) return;
 
             _logger.LogWarning("A RabbitMQ connection is on shutdown. Trying to re-connect...");
-
+            OnRabbitConnectionShutdown(sender, reason);
             TryConnect();
         }
     }

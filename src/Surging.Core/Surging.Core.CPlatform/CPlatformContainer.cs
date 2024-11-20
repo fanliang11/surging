@@ -4,6 +4,9 @@ using System;
 
 namespace Surging.Core.CPlatform
 {
+    /// <summary>
+    /// 平台容器
+    /// </summary>
     public class CPlatformContainer
     {
         private  IComponentContext _container;
@@ -28,6 +31,11 @@ namespace Surging.Core.CPlatform
         public bool IsRegistered<T>()
         {
             return _container.IsRegistered<T>();
+        }
+
+        public bool IsRegistered(Type serviceType)
+        {
+            return _container.IsRegistered(serviceType);
         }
 
         public bool IsRegisteredWithKey(string serviceKey,Type serviceType)
@@ -62,6 +70,11 @@ namespace Surging.Core.CPlatform
         public T GetInstances<T>(Type type) where T : class
         {
             return _container.Resolve(type) as T;
+        }
+
+        public object GetInstancePerLifetimeScope(string name, Type type)
+        {
+           return string.IsNullOrEmpty(name) ? GetInstances(type) : _container.ResolveKeyed(name, type);
         }
 
         public object GetInstances(string name,Type type)  

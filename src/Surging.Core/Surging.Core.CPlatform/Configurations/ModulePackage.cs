@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Surging.Core.CPlatform.Configurations
+﻿namespace Surging.Core.CPlatform.Configurations
 {
     public class ModulePackage
     {

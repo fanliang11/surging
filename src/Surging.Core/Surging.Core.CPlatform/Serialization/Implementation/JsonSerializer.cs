@@ -28,7 +28,14 @@ namespace Surging.Core.CPlatform.Serialization.Implementation
         /// <returns>一个对象实例。</returns>
         public object Deserialize(string content, Type type)
         {
-            return JsonConvert.DeserializeObject(content, type);
+            try
+            {
+                return JsonConvert.DeserializeObject(content, type);
+            }
+            catch
+            {
+                return default;
+            }
         }
 
         #endregion Implementation of ISerializer<string>

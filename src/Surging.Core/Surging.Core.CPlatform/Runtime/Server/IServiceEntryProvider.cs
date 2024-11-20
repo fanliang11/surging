@@ -14,6 +14,10 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// <returns>服务条目集合。</returns>
         IEnumerable<ServiceEntry> GetEntries();
 
+        IEnumerable<ServiceEntry> GetALLEntries();
+
+        void RegisterType(List<Type> types);
+
         IEnumerable<Type> GetTypes();
     }
 }
