@@ -36,9 +36,7 @@ namespace Surging.Core.KestrelHttpServer
         private readonly IAuthorizationFilter _authorizationFilter;
         private readonly CPlatformContainer _serviceProvider;
         private readonly ITypeConvertibleService _typeConvertibleService;
-        private readonly IServiceProxyProvider _serviceProxyProvider;
-        private readonly ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>> _concurrent =
-        new ConcurrentDictionary<string, ValueTuple<FastInvokeHandler, object, MethodInfo>>();
+        private readonly IServiceProxyProvider _serviceProxyProvider; 
         private readonly DiagnosticListener _diagnosticListener;
         #endregion Field
 
@@ -138,7 +136,8 @@ namespace Surging.Core.KestrelHttpServer
                     resultMessage.Entity = result;
                 }
                 else
-                { 
+                {
+                    if (!task.IsCompletedSuccessfully)
                         await task; 
                     var taskType = task.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)

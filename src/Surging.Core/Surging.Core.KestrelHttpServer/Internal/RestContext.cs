@@ -14,16 +14,22 @@ namespace Surging.Core.KestrelHttpServer.Internal
      
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetAttachment(string key, object value)
-        {
-            Check.NotNull(serviceProvider, "serviceProvider");
+        { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             htpContextAccessor.HttpContext.Items.Add(key,value);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Clear()
+        {
+            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
+            htpContextAccessor.HttpContext.Items.Clear();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object GetAttachment(string key)
-        {
-            Check.NotNull(serviceProvider, "serviceProvider");
+        { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             if (htpContextAccessor.HttpContext != null)
             {
@@ -34,8 +40,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
         }
 
         public  void RemoveContextParameters(string key)
-        {
-            Check.NotNull(serviceProvider, "serviceProvider");
+        { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             if (htpContextAccessor.HttpContext.Items.ContainsKey(key))
                 htpContextAccessor.HttpContext.Items.Remove(key);
@@ -43,8 +48,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
         }
 
         public Dictionary<String, Object> GetContextParameters()
-        {
-            Check.NotNull(serviceProvider, "serviceProvider");
+        { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             return htpContextAccessor.HttpContext.Items.ToDictionary(p => p.Key.ToString(), m => m.Value);
             
@@ -52,17 +56,14 @@ namespace Surging.Core.KestrelHttpServer.Internal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetContextParameters(IDictionary<object, object> contextParameters)
-        {
-            Check.NotNull(serviceProvider, "serviceProvider");
+        { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             htpContextAccessor.HttpContext.Items= contextParameters;
         }
-
-        private static IServiceProvider serviceProvider;
+         
 
         internal void Initialize(IServiceProvider provider)
-        {
-            serviceProvider= provider;
+        { 
         }
 
         public static RestContext GetContext()
@@ -72,8 +73,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
         }
 
         public static void RemoveContext()
-        {
-            Check.NotNull(serviceProvider, "serviceProvider");
+        { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             htpContextAccessor.HttpContext.Items.Clear();
             

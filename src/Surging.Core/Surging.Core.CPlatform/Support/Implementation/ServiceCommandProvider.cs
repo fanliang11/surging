@@ -63,6 +63,12 @@ namespace Surging.Core.CPlatform.Support.Implementation
             return result;
         }
 
+        private void ServiceCommandManager_Changed(object sender, ServiceCommandChangedEventArgs e)
+        {
+            ServiceCommand value;
+            _serviceCommand.AddOrUpdate(e.Command.ServiceId, p=>e.Command,(k,v)=>e.Command);
+        }
+
         private void ServiceCommandManager_Removed(object sender, ServiceCommandEventArgs e)
         {
             ServiceCommand value;

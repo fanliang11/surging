@@ -6,6 +6,7 @@ using Surging.Core.Protocol.Mqtt.Internal.Messages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -79,8 +80,8 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Channel
         }
         
         public void AddTopic(params string[] topics)
-        {
-            Topics.AddRange(topics);
+        { 
+            Topics.AddRange(topics.Except(Topics));
         }
     }
 }

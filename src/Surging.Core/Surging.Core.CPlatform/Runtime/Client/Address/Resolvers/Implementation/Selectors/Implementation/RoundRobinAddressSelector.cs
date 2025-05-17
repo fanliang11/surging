@@ -127,7 +127,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         {
             #region Field
 
-            private   AddressModel[] _address;
+            private AddressModel[] _address;
 
             private readonly ConcurrentDictionary<string, Lazy<WeightedRoundRobin>> _concurrent =
                 new ConcurrentDictionary<string, Lazy<WeightedRoundRobin>>();
@@ -148,7 +148,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             {
                 int totalWeight = 0;
                 long maxCurrent = long.MinValue;
-                var now = DateTimeConverter.DateTimeToUnixTimestamp(DateTime.Now); 
+                var now = DateTimeConverter.DateTimeToUnixTimestamp(DateTime.Now);
                 AddressModel selectedAddr = null;
                 WeightedRoundRobin selectedWRR = null;
                 foreach (var address in _address)
@@ -179,12 +179,12 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 
                 if (_address.Count() != _concurrent.Count())
                 {
-                   var concurrentsToRemove = _concurrent.Where(p => (now - p.Value.Value.GetLastUpdate())*1000 > RECYCLE_PERIOD).ToList();
+                    var concurrentsToRemove = _concurrent.Where(p => (now - p.Value.Value.GetLastUpdate()) * 1000 > RECYCLE_PERIOD).ToList();
                     concurrentsToRemove.ForEach(concurrent => _concurrent.TryRemove(concurrent.Key, out Lazy<WeightedRoundRobin> obj));
                 }
                 if (selectedAddr != null)
                 {
-                    selectedWRR.Sel(totalWeight);
+                    selectedWRR.Sel(totalWeight);  
                     return selectedAddr;
                 }
                 return _address[0];
@@ -192,7 +192,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 
             public void SetAddresses(AddressModel[] addresses)
             {
-                _address= addresses;
+                _address = addresses;
             }
             #endregion Public Method
         }

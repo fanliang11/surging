@@ -112,7 +112,7 @@ namespace Surging.Core.Consul
 
         public void NodeChange(byte[] oldData, byte[] newData)
         {
-            if (DataEquals(oldData, newData))
+            if (oldData != null && DataEquals(oldData, newData))
                 return;
 
             var newCommand = GetServiceCommand(newData);
@@ -137,6 +137,19 @@ namespace Surging.Core.Consul
             else
                 //触发服务命令变更事件。
                 OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+
+        public override ValueTask AddNodeMonitorWatcher(string serviceId)
+        { 
+            var path = $"{_configInfo.CommandPath}{serviceId}"; 
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+                (oldData, newData) => NodeChange(oldData, newData), tmpPath =>
+                {
+                    var index = tmpPath.LastIndexOf("/");
+                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                });
+            watcher.SetCurrentData(null);
+            return ValueTask.CompletedTask;
         }
 
         public void NodeChange(ServiceCommandDescriptor newCommand)
@@ -210,7 +223,7 @@ namespace Surging.Core.Consul
 
         private ServiceCommandDescriptor[] GetServiceCommandDatas(string[] commands)
         {
-            List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>();
+            List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>(commands.Length);
             foreach (var command in commands)
             {
                 var serviceCommand = GetServiceCommandData(command);
@@ -340,7 +353,7 @@ namespace Surging.Core.Consul
         /// <returns>返回路径集合</returns>
         private string[] ConvertPaths(string[] datas)
         {
-            List<string> paths = new List<string>();
+            List<string> paths = new List<string>(datas.Length);
             foreach (var data in datas)
             {
                 var result = GetServiceCommandData(data);
@@ -388,7 +401,7 @@ namespace Surging.Core.Consul
 
             //获取新增的路由信息。
             var newCommandBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
-            var newServiceCommands = new List<ServiceCommandDescriptor>();
+            var newServiceCommands = new List<ServiceCommandDescriptor>(newCommandBytes.Count);
             foreach (var newCommandByte in newCommandBytes)
             {
                 newServiceCommands.Add(GetServiceCommand(newCommandByte));

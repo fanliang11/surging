@@ -94,7 +94,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 httpMethods.AddRange(attribute.HttpMethods);
                 if (attribute.IsRegisterMetadata)
-                    httpMethod.AppendJoin(',',attribute.HttpMethods).Append(",");
+                    httpMethod.AppendJoin(',', attribute.HttpMethods).Append(",");
             }
             if (httpMethod.Length > 0)
             {
@@ -118,13 +118,13 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 Descriptor = serviceDescriptor,
                 RoutePath = serviceDescriptor.RoutePath,
-                Methods=httpMethods,
+                Methods = httpMethods,
                 MethodName = method.Name,
                 Type = method.DeclaringType,
-                Parameters= method.GetParameters(),
-                IsPermission = method.DeclaringType.GetCustomAttribute<BaseActionFilterAttribute>() !=null || attributes.Any(p => p is BaseActionFilterAttribute),
+                Parameters = method.GetParameters(),
+                IsPermission = method.DeclaringType.GetCustomAttribute<BaseActionFilterAttribute>() != null || attributes.Any(p => p is BaseActionFilterAttribute),
                 Attributes = attributes,
-                Func = async (key, parameters) =>
+                Func = (key, parameters) =>
              {
                  object instance = null;
                  if (AppConfig.ServerOptions.IsModulePerLifetimeScope)
@@ -141,75 +141,25 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
                          list.Add(parameterInfo.DefaultValue);
                          continue;
                      }
-                     else if(parameterInfo.ParameterType == typeof(CancellationToken))
+                     else if (parameterInfo.ParameterType == typeof(CancellationToken))
                      {
                          list.Add(new CancellationToken());
                          continue;
                      }
                      var value = parameters[parameterInfo.Name];
 
-                     if(methodValidateAttribute !=null)
-                     _validationProcessor.Validate(parameterInfo, value);
+                     if (methodValidateAttribute != null)
+                         _validationProcessor.Validate(parameterInfo, value);
 
                      var parameterType = parameterInfo.ParameterType;
                      var parameter = _typeConvertibleService.Convert(value, parameterType);
                      list.Add(parameter);
-                 } 
-                 if (!isReactive)
-                 {
-                     var result = fastInvoker(instance, list.ToArray());
-                     return result;
                  }
-                 else
-                 {
-                     var serviceBehavior = instance as IServiceBehavior;
-                      var callbackTask = RegisterResultCallbackAsync(serviceBehavior.MessageId, Task.Factory.CancellationToken);
-                      serviceBehavior.Received += MessageListener_Received;
-                     var result = fastInvoker(instance, list.ToArray()); 
-                     return  await callbackTask;
-                 }
+                 var result = fastInvoker(instance, list.ToArray());
+                 return Task.FromResult(result);
+
              }
             };
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private async Task<object> RegisterResultCallbackAsync(string id, CancellationToken cancellationToken)
-        {
-
-            var task = new ManualResetValueTaskSource<TransportMessage>();
-            _resultDictionary.TryAdd(id, task);
-            try
-            {
-                var result = await task.AwaitValue(cancellationToken);
-                return result.GetContent<ReactiveResultMessage>()?.Result;
-            }
-            finally
-            {
-                //删除回调任务
-                ManualResetValueTaskSource<TransportMessage> value;
-                _resultDictionary.TryRemove(id, out value);
-                value.SetCanceled();
-            }
-        }
-
-        private async Task MessageListener_Received(TransportMessage message)
-        {
-            ManualResetValueTaskSource<TransportMessage> task;
-            if (!_resultDictionary.TryGetValue(message.Id, out task))
-                return;
-
-            if (message.IsReactiveMessage())
-            {
-                var content = message.GetContent<ReactiveResultMessage>();
-                if (!string.IsNullOrEmpty(content.ExceptionMessage))
-                {
-                    task.SetException(new CPlatformCommunicationException(content.ExceptionMessage, content.StatusCode));
-                }
-                else
-                {
-                    task.SetResult(message);
-                }
-            }
         }
 
         private FastInvokeHandler GetHandler(string key, MethodInfo method)

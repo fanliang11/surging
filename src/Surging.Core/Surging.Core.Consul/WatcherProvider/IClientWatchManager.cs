@@ -7,6 +7,6 @@ namespace Surging.Core.Consul.WatcherProvider
 {
     public interface IClientWatchManager
     {
-        ConcurrentDictionary<string, HashSet<Watcher>> DataWatches { get; set; }
+        Dictionary<string, HashSet<Watcher>> DataWatches { get; set; }
     }
 }

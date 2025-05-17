@@ -74,6 +74,19 @@ namespace Surging.Core.Consul
             }
         }
 
+        public override ValueTask AddNodeMonitorWatcher(string serviceId) 
+        { 
+            var path = $"{_configInfo.RoutePath}{serviceId}"; 
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+                async (oldData, newData) => await NodeChange(oldData, newData), tmpPath =>
+                {
+                    var index = tmpPath.LastIndexOf("/");
+                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                });
+            watcher.SetCurrentData(null); 
+            return ValueTask.CompletedTask;
+        }
+
         public override void ClearRoute()
         {
             _routes = null;
@@ -376,7 +389,7 @@ namespace Surging.Core.Consul
         /// <returns>返回路径集合</returns>
         private async Task<string[]> ConvertPaths(string[] datas)
         {
-            List<string> paths = new List<string>();
+            List<string> paths = new List<string>(datas.Length);
             foreach (var data in datas)
             {
                 var result = await GetRouteData(data);
@@ -409,7 +422,7 @@ namespace Surging.Core.Consul
 
         private async Task NodeChange(byte[] oldData, byte[] newData)
         {
-            if (DataEquals(oldData, newData))
+            if (oldData!=null && DataEquals(oldData, newData))
                 return;
 
             var newRoute = await GetRoute(newData);
@@ -451,7 +464,7 @@ namespace Surging.Core.Consul
 
             //获取新增的路由信息。
             var newRouteBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
-            var newRoutes = new List<ServiceRoute>();
+            var newRoutes = new List<ServiceRoute>(newRouteBytes.Count);
             foreach (var newRouteByte in newRouteBytes)
             {
                 newRoutes.Add(await GetRoute(newRouteByte));

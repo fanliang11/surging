@@ -8,11 +8,11 @@ using System.Xml.Linq;
 
 namespace Surging.Core.DeviceGateway.Runtime.Device.Message.Function
 {
-    internal class FunctionInvokeMessage : RespondDeviceMessage<IDeviceMessageReply>
+    public class FunctionInvokeMessage : RespondDeviceMessage<IDeviceMessageReply>
     {
-        public override MessageType MessageType { get; set; } = MessageType.INVOKE_FUNCTION;
+        public override MessageType MessageType { get; set; } = MessageType.CALL_FUNCTION;
 
-        private List<FunctionParameter> Inputs { get; set; } = new List<FunctionParameter>();
+        public List<FunctionParameter> Inputs { get;  set; } = new List<FunctionParameter>();
         public string FunctionId { get; set; }
 
         

@@ -1,7 +1,9 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Codecs;
+using DotNetty.Common;
 using DotNetty.Common.Concurrency;
 using DotNetty.Common.Utilities;
+using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -70,29 +72,31 @@ namespace Surging.Core.DotNetty
             IEventLoopGroup eventExecutor = new MultithreadEventLoopGroup();
             if (AppConfig.ServerOptions.Libuv)
             {
+                ResourceLeakDetector.Level = ResourceLeakDetector.DetectionLevel.Disabled;
                 var dispatcher = new DispatcherEventLoopGroup();
                 bossGroup = dispatcher;
-                workerGroup = new WorkerEventLoopGroup(dispatcher);
+                workerGroup = new WorkerEventLoopGroup(dispatcher, AppConfig.ServerOptions.EventLoopCount);
                 var dispatcherExecutor = new DispatcherEventLoopGroup();
-                eventExecutor = new WorkerEventLoopGroup(dispatcherExecutor);
+                eventExecutor = new WorkerEventLoopGroup(dispatcherExecutor, AppConfig.ServerOptions.EventLoopCount);
                 bootstrap.Channel<TcpServerChannel>();
             }
             else
             {
                 bossGroup = new MultithreadEventLoopGroup(1);
-                workerGroup = new MultithreadEventLoopGroup();
+                workerGroup = new MultithreadEventLoopGroup(AppConfig.ServerOptions.EventLoopCount);
                 bootstrap.Channel<TcpServerSocketChannel>();
             }
             bootstrap
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
-            .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default) 
+            .ChildOption(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
+            .ChildOption(ChannelOption.TcpNodelay, true)
             .ChildOption(ChannelOption.SoReuseaddr,true)
             .Group(bossGroup, workerGroup)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
             {
                 var pipeline = channel.Pipeline;
-                pipeline.AddLast(new LengthFieldPrepender(4));
-                pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
+                pipeline.AddLast(new LengthFieldPrepender2(4));
+                pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 4, 0, 4));
                 pipeline.AddLast(eventExecutor, "HandlerAdapter", new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
                 pipeline.AddLast(eventExecutor, "ServerHandler", new ServerHandler(async (contenxt, message) =>
                 {
@@ -149,9 +153,10 @@ namespace Surging.Core.DotNetty
 
             #region Overrides of ChannelHandlerAdapter
             [MethodImpl(MethodImplOptions.NoInlining)]
+
             public override void ChannelRead(IChannelHandlerContext context, object message)
             {
-                var transportMessage = (TransportMessage)message;
+                var transportMessage = message as TransportMessage;
                 _readAction(context, transportMessage);
             }
 

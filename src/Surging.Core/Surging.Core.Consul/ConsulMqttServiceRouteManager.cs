@@ -193,7 +193,7 @@ namespace Surging.Core.Consul
 
         private async Task<MqttServiceRoute[]> GetRouteDatas(string[] routes)
         {
-            List<MqttServiceRoute> serviceRoutes = new List<MqttServiceRoute>();
+            List<MqttServiceRoute> serviceRoutes = new List<MqttServiceRoute>(routes.Length);
             foreach (var route in routes)
             {
                 var serviceRoute = await GetRouteData(route);
@@ -316,7 +316,7 @@ namespace Surging.Core.Consul
         /// <returns>返回路径集合</returns>
         private async Task<string[]> ConvertPaths(string[] datas)
         {
-            List<string> topics = new List<string>();
+            List<string> topics = new List<string>(datas.Length);
             foreach (var data in datas)
             {
                 var result = await GetRouteData(data);
@@ -371,7 +371,7 @@ namespace Surging.Core.Consul
 
             //获取新增的路由信息。
             var newRouteBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
-            var newRoutes = new List<MqttServiceRoute>();
+            var newRoutes = new List<MqttServiceRoute>(newRouteBytes.Count());
             foreach (var newRouteByte in newRouteBytes)
             {
                 newRoutes.Add(await GetRoute(newRouteByte));

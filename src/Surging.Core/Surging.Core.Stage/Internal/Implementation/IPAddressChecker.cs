@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Net;
+using System.Collections.Generic; 
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Routing;
 using Surging.Core.CPlatform.Utilities;
-using Microsoft.AspNetCore.Components;
+using System.Net;
 
 namespace Surging.Core.Stage.Internal.Implementation
 {
@@ -98,7 +95,7 @@ namespace Surging.Core.Stage.Internal.Implementation
                 var addresses = ipAddresses.Where(p => p.AsSpan().IndexOf("/") > 0);
                 foreach (var ipAddress in addresses)
                 {
-                    IPNetwork ipnetwork = IPNetwork.Parse(ipAddress);
+                     var ipnetwork = IPNetwork2.Parse(ipAddress);
                     var ipNetworkSegment = new IPNetworkSegment
                     {
                         Cidr = ipnetwork.Cidr,

@@ -20,7 +20,7 @@ using Metadatas=Surging.Core.ProxyGenerator.Interceptors.Implementation.Metadata
 
 namespace Surging.IModuleServices.Common
 {
-    [ServiceBundle("api/{Service}/{Method}")]
+    [ServiceBundle("api/{Service}/{Method}")] 
     //[ServiceBundle("api/{Service}")]
     //[ServiceBundle("api/{Service}/{Method}/test")]
     //[ServiceBundle("api/{Service}/{Method}/test",false)]
@@ -39,7 +39,7 @@ namespace Surging.IModuleServices.Common
         /// <param name="id">用户编号</param>
         /// <returns></returns>
         [ServiceRoute("{id}")]
-        Task<string> GetUserName([Validate] [Range(1, 10, ErrorMessage = "只能为1到10")] int id);
+        Task<string> GetUserName( int id);
 
         /// <summary>
         /// 判断是否存在
@@ -58,7 +58,7 @@ namespace Surging.IModuleServices.Common
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
         [Permission]
-        [HttpPost(true),HttpPut(true)]
+        [HttpPost(true),HttpPut(true)] 
         Task<IdentityUser> Save(IdentityUser requestData);
 
         /// <summary>
@@ -67,9 +67,9 @@ namespace Surging.IModuleServices.Common
         /// <param name="userName">用户名</param>
         /// <returns></returns>
         [Authorization(AuthType = AuthorizationType.JWT)]
-        [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = false)]
+        [Command(Strategy = StrategyType.Injection, ShuntStrategy = AddressSelectorMode.HashAlgorithm, ExecutionTimeoutInMilliseconds = 1500, BreakerRequestVolumeThreshold = 3, Injection = @"return 1;", RequestCacheEnabled = true)]
         [InterceptMethod(CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = SectionType.ddlCache, L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = CacheTargetType.Redis, Time = 480)]
-        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = "ddlCache", L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = Metadatas.CacheTargetType.Redis, Time = 480,EnableStageCache =true)]
+        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetUserId_{0}", CacheSectionType = "ddlCache", L2Key= "GetUserId_{0}",  EnableL2Cache = true, Mode = Metadatas.CacheTargetType.Redis, Time = 480, EnableStageCache =true)]
        [Metadatas.ServiceLogIntercept()]
         [ServiceRoute("{userName}")]
         Task<int> GetUserId(string userName);
@@ -114,8 +114,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// 测试List参数调用
         /// </summary>
         /// <param name="users">用户列表</param>
-        /// <returns>返回是否成功</returns>
-        Task<bool> Get(List<UserModel> users);
+        /// <returns>返回是否成功</returns>        Task<bool> Get(List<UserModel> users);
 
         /// <summary>
         /// 测试无参数调用
@@ -187,7 +186,6 @@ new Surging.IModuleServices.Common.Models.UserModel
 
         [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Remove, "GetUser_{0}_{1}", CacheSectionType ="ddlCache", Mode = Metadatas.CacheTargetType.Redis)]
         public Task<bool> RemoveUser(UserModel user);
-
 
         [Reactive]
         public Task<int> ReactiveTest(int value);

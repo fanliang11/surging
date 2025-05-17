@@ -106,6 +106,26 @@ namespace Surging.Core.DeviceGateway.Runtime.Device.Message
             }
         }
 
+        public void FromJson(JsonElement jsonObject)
+        {
+
+            if (Timestamp == 0)
+            {
+                Timestamp = Utility.CurrentTimeMillis();
+            }
+           var headers= jsonObject.GetProperty(Encoding.UTF8.GetBytes( "headers"));
+            if (headers.ValueKind!=JsonValueKind.Null)
+            {
+                foreach (var item in headers.EnumerateObject())
+                {
+                    Headers.AddOrUpdate(item.Name, item.Value, (m, n) =>
+                    {
+                        return item.Value;
+                    });
+                }
+            }
+        }
+
         public IDeviceMessage AddHeader(string header, object value)
         {
             if (header == null) Headers = new ConcurrentDictionary<string, object>();

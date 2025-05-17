@@ -21,6 +21,7 @@ namespace Surging.Tools.Cli.Utilities
 
         public static bool IsRegistered<T>(string key)
         {
+
             return Current.IsRegisteredWithKey<T>(key);
         }
 

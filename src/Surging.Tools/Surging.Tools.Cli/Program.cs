@@ -19,11 +19,12 @@ namespace Surging.Tools.Cli
     class Program
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly CommandLineApplication _curlCommand;
-
+       // private readonly CommandLineApplication _curlCommand;
+        private readonly CommandLineApplication _toolCommand;
         public Program()
         {
-            _curlCommand = new CommandLineApplication<CurlCommand>();
+           // _curlCommand = new CommandLineApplication<CurlCommand>();
+            _toolCommand = new CommandLineApplication<ToolCommand>();
             _serviceProvider = ConfigureServices();
            
         }
@@ -38,7 +39,8 @@ namespace Surging.Tools.Cli
         private int Execute(string[] args)
         {
             var app = new CommandLineApplication<Program>(); 
-            app.AddSubcommand(_curlCommand);
+           // app.AddSubcommand(_curlCommand);
+            app.AddSubcommand(_toolCommand);
             app.Conventions
                 .UseDefaultConventions()
                 .UseConstructorInjection(_serviceProvider);
@@ -60,7 +62,6 @@ namespace Surging.Tools.Cli
         private  IServiceProvider ConfigureServices()
         {
             var serviceCollection = new ServiceCollection();
-             serviceCollection.AddHttpClient();
             serviceCollection.AddSingleton<IConsole>(PhysicalConsole.Singleton);
             var builder = new ContainerBuilder();
             builder.Populate(serviceCollection);
@@ -73,8 +74,10 @@ namespace Surging.Tools.Cli
             builder.RegisterType<MessagePackTransportMessageCodecFactory>().As<ITransportMessageCodecFactory>().SingleInstance();
             builder.RegisterType<DotNettyMessageClientSender>().Named<IMessageSender>("netty").SingleInstance();
             builder.RegisterType<ThriftMessageClientSender>().Named<IMessageSender>("thrift").SingleInstance();
+            builder.RegisterType<GCAllModuleProvider>().Named<IGCModuleProvider>(GCModuleType.ALL.ToString().ToLower()).SingleInstance();
+            builder.RegisterType<GCNettyModuleProvider>().Named<IGCModuleProvider>(GCModuleType.Netty.ToString().ToLower()).SingleInstance();
             builder.RegisterType<MessageListener>().As<IMessageListener>().SingleInstance();
-            builder.Register(provider=> _curlCommand).As<CommandLineApplication>().SingleInstance();
+           // builder.Register(provider=> _curlCommand).As<CommandLineApplication>().SingleInstance();
             ServiceLocator.Current = builder.Build();
             return serviceCollection.BuildServiceProvider();
         }

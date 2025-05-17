@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
      <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
      <PackageId>测试模块</PackageId>
      <Description>测试</Description>
@@ -27,7 +27,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MessagePack" Version="2.2.85" />
+    <PackageReference Include="MessagePack" Version="3.1.3" />
     <PackageReference Include="protobuf-net" Version="2.4.0" />
   </ItemGroup>
 

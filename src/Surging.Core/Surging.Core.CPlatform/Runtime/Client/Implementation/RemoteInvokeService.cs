@@ -1,10 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Autofac.Core;
+using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Address;
 using Surging.Core.CPlatform.Exceptions;
 using Surging.Core.CPlatform.HashAlgorithms;
 using Surging.Core.CPlatform.Messages;
+using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Client.Address.Resolvers;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
+using Surging.Core.CPlatform.Support;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
@@ -23,14 +26,16 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
         private readonly IAddressResolver _addressResolver;
         private readonly ITransportClientFactory _transportClientFactory;
         private readonly ILogger<RemoteInvokeService> _logger;
-        private readonly IHealthCheckService _healthCheckService;
+        private readonly IHealthCheckService _healthCheckService; 
+        private readonly IServiceMonitorWatcher _serviceMonitorWatcher;
 
-        public RemoteInvokeService(IHashAlgorithm hashAlgorithm,IAddressResolver addressResolver, ITransportClientFactory transportClientFactory, ILogger<RemoteInvokeService> logger, IHealthCheckService healthCheckService)
-        {
+        public RemoteInvokeService(IHashAlgorithm hashAlgorithm,IAddressResolver addressResolver, ITransportClientFactory transportClientFactory, ILogger<RemoteInvokeService> logger, IHealthCheckService healthCheckService,IServiceMonitorWatcher serviceMonitor)
+        { 
             _addressResolver = addressResolver;
             _transportClientFactory = transportClientFactory;
             _logger = logger;
             _healthCheckService = healthCheckService;
+            _serviceMonitorWatcher = serviceMonitor;
         }
 
         #region Implementation of IRemoteInvokeService
@@ -115,7 +120,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.Implementation
             var vt =  _addressResolver.Resolver(invokeMessage.ServiceId, item);
             var address = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             if (address == null)
+            {
+                 await _serviceMonitorWatcher.AddNodeMonitorWatcher(invokeMessage.ServiceId);
                 throw new CPlatformException($"无法解析服务Id：{invokeMessage.ServiceId}的地址信息。");
+            }
             return address;
         }
 

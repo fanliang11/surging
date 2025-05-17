@@ -24,7 +24,7 @@ namespace Surging.Core.CPlatform.DependencyResolution
         /// <param name="resolver">IOC对象容器</param>
         /// <param name="key">键</param>
         /// <returns>返回<see cref="T"/>实例</returns>
-        public static T GetService<T>(this IDependencyResolver resolver, object key)
+        public static T GetService<T>(this IDependencyResolver resolver, string key)
         {
             Check.NotNull(resolver, "resolver");
 
@@ -63,7 +63,7 @@ namespace Surging.Core.CPlatform.DependencyResolution
         /// <param name="resolver">IOC对象容器</param>
         /// <param name="key">键</param>
         /// <returns>返回<see cref="T"/>实例</returns>
-        public static IEnumerable<T> GetServices<T>(this IDependencyResolver resolver, object key)
+        public static IEnumerable<T> GetServices<T>(this IDependencyResolver resolver, string key)
         {
             Check.NotNull(resolver, "resolver");
             return resolver.GetServices(typeof(T), key).OfType<T>();
@@ -108,7 +108,7 @@ namespace Surging.Core.CPlatform.DependencyResolution
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
         internal static IEnumerable<object> GetServiceAsServices(this IDependencyResolver resolver, Type type,
-            object key)
+            string key)
         {
             DebugCheck.NotNull(resolver);
 

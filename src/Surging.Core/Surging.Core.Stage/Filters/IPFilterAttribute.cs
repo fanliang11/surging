@@ -16,12 +16,10 @@ using System.Threading.Tasks;
 namespace Surging.Core.Stage.Filters
 {
     public class IPFilterAttribute : IActionFilter
-    {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+    { 
         private readonly IIPChecker _ipChecker;
-        public IPFilterAttribute(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
+        public IPFilterAttribute()
+        { 
             _ipChecker = ServiceLocator.GetService<IIPChecker>();
         }
         public  Task OnActionExecuted(ActionExecutedContext filterContext)
@@ -31,7 +29,7 @@ namespace Surging.Core.Stage.Filters
 
         public Task OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var address = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress;
+            var address = ServiceLocator.GetService<IHttpContextAccessor>().HttpContext.Connection.RemoteIpAddress;
             RestContext.GetContext().SetAttachment("RemoteIpAddress", address.ToString());
             if (_ipChecker.IsBlackIp(address,filterContext.Message.RoutePath))
             {

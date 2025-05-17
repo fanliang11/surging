@@ -55,7 +55,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             if (_logger.IsEnabled(LogLevel.Trace))
                 _logger.LogTrace("服务提供者接收到消息。");
 
-            if (!message.IsInvokeMessage())
+            if (message==null && !message.IsInvokeMessage())
                 return;
           
             RemoteInvokeMessage remoteInvokeMessage;
@@ -136,7 +136,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                await ExecFilterSync(entry, remoteInvokeMessage, resultMessage);
                 if (string.IsNullOrEmpty(resultMessage.ExceptionMessage))
                 {
-                    var result = await entry.Func(remoteInvokeMessage.ServiceKey, remoteInvokeMessage.Parameters);
+                    var result =await  entry.Func(remoteInvokeMessage.ServiceKey, remoteInvokeMessage.Parameters);
                     var task = result as Task;
 
                     if (task == null)
@@ -154,7 +154,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
                     if (remoteInvokeMessage.DecodeJOject)
                     {
-                        resultMessage.Result = JsonConvert.SerializeObject(resultMessage.Result);
+                        resultMessage.Result = System.Text.Json.JsonSerializer.Serialize(resultMessage.Result);
                     }
                 }
             }

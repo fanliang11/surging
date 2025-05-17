@@ -20,8 +20,9 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             _clientsessionMessages.TryGetValue(deviceId, out ConcurrentQueue<SessionMessage> sessionMessages);
             _clientsessionMessages.AddOrUpdate(deviceId, sessionMessages, (id, message) =>
             {
+                if (message == null) message = new ConcurrentQueue<SessionMessage>();
                 message.Enqueue(sessionMessage);
-                return sessionMessages;
+                return message;
             });
         }
     }

@@ -23,7 +23,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Implementation
                 var authRequest = request as DefaultAuthRequest;  
                 var username = authRequest.UserName; 
                 var password = authRequest.Password;
-                String[] arr = username.Split("&");
+                String[] arr = username.Split("|");
                 if (arr.Length <= 1)
                 {
                     return Observable.Return(AuthenticationResult.Failure(StatusCode.CUSTOM_ERROR, "用户名格式错误"));
@@ -40,7 +40,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Implementation
                     {
                         var secureId = p.GetValue("secureId").Convert<string>();
                         var secureKey = p.GetValue("secureKey").Convert<string>();
-                        var encryptStr = $"{username}&{secureKey}".GetMd5Hash();
+                        var encryptStr = $"{username}|{secureKey}".GetMd5Hash();
                         if (requestSecureId.Equals(secureId) && encryptStr.Equals(password))
                         {
                             result= result.Publish(AuthenticationResult.Success(deviceOperation.GetDeviceId()));

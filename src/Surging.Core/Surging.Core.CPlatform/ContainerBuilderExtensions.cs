@@ -488,6 +488,7 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(NetworkManager)).As(typeof(INetworkManager)).SingleInstance();
             //注册服务心跳管理 
             services.RegisterType(typeof(DefaultServiceHeartbeatManager)).As(typeof(IServiceHeartbeatManager)).SingleInstance();
+            services.RegisterType(typeof(ServiceMonitorWatcher)).As(typeof(IServiceMonitorWatcher)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()
                 .UseJsonCodec();
@@ -840,7 +841,7 @@ namespace Surging.Core.CPlatform
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.*|^Grpc.\\w*|^Google.\\w*|^AspectCore.\\w*|^NETStandard.\\w*|^Serilog.\\w*|^Thrift.\\w*|^ARSoft.\\w*|^Jint.*|^Humanizer.*|^Polly.*|^Com.Ctrip.\\w*|^MongoDB.*|^Confluent.Kafka\\w*|^log4net.*|^NLog.*|^MessagePack.*|^RabbitMQ.\\w*|^RulesEngine.*{0}",
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^CoAP.NET.*|^SoapCore.*|^Thrift.*|^DnsClient.*|^protobuf-net.*|^WebSocketCore.*|^Serilog.*|^Kayak.DataAccess.DeviceData.*|^SQLitePCLRaw.\\w*|^netstandard.*|^mscorlib.*|^Pipelines.Sockets.Unofficial.*|^System.*|^WindowsBase.*|^FastExpressionCompiler.*|^FluentValidation.*|^Newtonsoft.Json.*|^DotNetty.\\w*|^runtime.\\w*|^ZooKeeperNetEx\\w*|^StackExchange.Redis\\w*|^Consul\\w*|^Newtonsoft.Json.\\w*|^Autofac.*|^Grpc.\\w*|^Google.\\w*|^AspectCore.\\w*|^NETStandard.\\w*|^Serilog.\\w*|^Thrift.\\w*|^ARSoft.\\w*|^Jint.*|^Humanizer.*|^Polly.*|^Com.Ctrip.\\w*|^MongoDB.*|^Confluent.Kafka\\w*|^log4net.*|^NLog.*|^MessagePack.*|^RabbitMQ.\\w*|^RulesEngine.*|^SuperSocket.*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -862,7 +863,7 @@ namespace Surging.Core.CPlatform
         {
             var notRelatedFile = AppConfig.ServerOptions.NotRelatedAssemblyFiles;
             var relatedFile = AppConfig.ServerOptions.RelatedAssemblyFiles;
-            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac\\w*{0}",
+            var pattern = string.Format("^Microsoft.\\w*|^System.\\w*|^Netty.\\w*|^Autofac\\w*|^SuperSocket.\\w*{0}",
                string.IsNullOrEmpty(notRelatedFile) ? "" : $"|{notRelatedFile}");
             Regex notRelatedRegex = new Regex(pattern, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);
             Regex relatedRegex = new Regex(relatedFile, RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase);

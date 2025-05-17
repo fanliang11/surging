@@ -252,7 +252,7 @@ namespace Surging.Core.Consul
 
         private async Task<ServiceCache[]> GetCacheDatas(string[] caches)
         {
-            List<ServiceCache> serviceCaches = new List<ServiceCache>();
+            List<ServiceCache> serviceCaches = new List<ServiceCache>(caches.Length);
             foreach (var cache in caches)
             {
                 var serviceCache = await GetCacheData(cache);
@@ -263,7 +263,7 @@ namespace Surging.Core.Consul
 
         private async Task<string[]> ConvertPaths(string[] datas)
         {
-            List<string> paths = new List<string>();
+            List<string> paths = new List<string>(datas.Length);
             foreach (var data in datas)
             {
                 var result = await GetCacheData(data);
@@ -362,7 +362,7 @@ namespace Surging.Core.Consul
 
 
             var newServiceCacheBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
-            var newServiceCaches = new List<ServiceCache>();
+            var newServiceCaches = new List<ServiceCache>(newServiceCacheBytes.Count);
             foreach (var newServiceCacheByte in newServiceCacheBytes)
             {
                 newServiceCaches.Add(await GetCache(newServiceCacheByte));

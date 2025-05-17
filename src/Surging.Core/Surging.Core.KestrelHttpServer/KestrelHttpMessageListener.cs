@@ -123,8 +123,15 @@ namespace Surging.Core.KestrelHttpServer
                 _host = hostBuilder.Build();
                 _lifetime.ServiceEngineStarted.Register(async () =>
                 {
-                    if(port!=null && address !=null)
-                    await _host.RunAsync();
+                    try
+                    {
+                        if (port != null && address != null)
+                            await _host.RunAsync();
+                    }
+                    catch
+                    {
+                        _logger.LogError($"http服务主机启动失败，监听地址：{address}:{port}。 ");
+                    }
                 });
 
             }

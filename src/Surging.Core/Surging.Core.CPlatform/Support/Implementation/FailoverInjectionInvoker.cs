@@ -31,7 +31,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 {
                     var entries = _serviceEntryManager.GetEntries().ToList();
                     var entry = entries.Where(p => p.Descriptor.Id == serviceId).FirstOrDefault();
-                    await entry.Func(serviceKey, parameters);
+                     entry.Func(serviceKey, parameters);
                 }
             }
         }

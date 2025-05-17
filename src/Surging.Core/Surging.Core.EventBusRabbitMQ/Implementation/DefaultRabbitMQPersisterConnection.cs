@@ -74,8 +74,9 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
             {
                 var policy = RetryPolicy.Handle<SocketException>()
                     .Or<BrokerUnreachableException>()
-                    .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                    .WaitAndRetry(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                     {
+                      if(_logger.IsEnabled(LogLevel.Warning))
                         _logger.LogWarning(ex.ToString());
                     }
                 );

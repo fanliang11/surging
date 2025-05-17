@@ -9,6 +9,7 @@ namespace Surging.Core.CPlatform.Configurations.Watch
 {
     public class ConfigurationWatchManager: IConfigurationWatchManager
     {
+        private ReaderWriterLockSlim cacheLock = new ReaderWriterLockSlim();
         internal   HashSet<ConfigurationWatch> dataWatches =
             new  HashSet<ConfigurationWatch>();
         private readonly Timer _timer;
@@ -38,10 +39,15 @@ namespace Surging.Core.CPlatform.Configurations.Watch
 
         public void Register(ConfigurationWatch watch)
         {
-            lock (dataWatches)
+            cacheLock.EnterReadLock();
+            try
+            { 
+                if (!dataWatches.Contains(watch))
+                    dataWatches.Add(watch);
+            }
+            finally
             {
-               if( !dataWatches.Contains(watch))
-                dataWatches.Add(watch);
+                cacheLock.ExitReadLock();
             }
         }
 

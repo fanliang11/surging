@@ -81,8 +81,9 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
                 return null;
             }
             _serviceHeartbeatManager.AddWhitelist(serviceId);
-            var address = new List<AddressModel>();
-            foreach (var addressModel in serviceRoute.Address)
+            var addresses = serviceRoute.Address;
+            var address = new List<AddressModel>(addresses.Count());
+            foreach (var addressModel in addresses)
             {
                 _healthCheckService.Monitor(addressModel);
                 var task = _healthCheckService.IsHealth(addressModel);

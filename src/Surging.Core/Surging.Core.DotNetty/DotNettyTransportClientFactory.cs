@@ -3,6 +3,7 @@
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
+using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
@@ -67,10 +68,10 @@ namespace Surging.Core.DotNetty
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
             {
                 var pipeline = c.Pipeline;
-                pipeline.AddLast(new LengthFieldPrepender(4));
-                pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
+                pipeline.AddLast(new LengthFieldPrepender2(4));
+                pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 4, 0, 4));
                 pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
-                pipeline.AddLast(new DefaultChannelHandler(this));
+                pipeline.AddLast(new DefaultChannelHandler(this,_logger));
             }));
         }
 
@@ -145,30 +146,29 @@ namespace Surging.Core.DotNetty
             var bootstrap = new Bootstrap();
             if (AppConfig.ServerOptions.Libuv)
             {
-                group = new EventLoopGroup();
-                bootstrap.Channel<TcpServerChannel>();
+                group = new EventLoopGroup(AppConfig.ServerOptions.EventLoopCount); 
             }
             else
             {
-                group = new MultithreadEventLoopGroup();
-                bootstrap.Channel<TcpServerSocketChannel>();
+                group = new MultithreadEventLoopGroup(AppConfig.ServerOptions.EventLoopCount); 
             }
             bootstrap
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
-                .Option(ChannelOption.Allocator,new UnpooledByteBufferAllocator(false,false))
+                .Option(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
                 .Group(group);
 
             return bootstrap;
         }
 
-        protected class DefaultChannelHandler : ChannelHandlerAdapter
+        protected class DefaultChannelHandler :  ChannelHandlerAdapter
         {
             private readonly DotNettyTransportClientFactory _factory;
-
-            public DefaultChannelHandler(DotNettyTransportClientFactory factory)
+            private readonly ILogger _logger;
+            public DefaultChannelHandler(DotNettyTransportClientFactory factory, ILogger logger)
             {
                 this._factory = factory;
+                this._logger = logger;
             }
 
             #region Overrides of ChannelHandlerAdapter
@@ -176,15 +176,35 @@ namespace Surging.Core.DotNetty
             public override void ChannelInactive(IChannelHandlerContext context)
             {
                 _factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value);
+                context.CloseAsync();
+            }
+
+             [MethodImpl(MethodImplOptions.NoInlining)]
+             public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();
+
+            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
+            {
+                // Close the connection when an exception is raised.
+                _factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value);
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
+                context.CloseAsync();
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public override void ChannelRead(IChannelHandlerContext context, object message)
             {
-                var transportMessage = message as TransportMessage;
-                var messageListener = context.Channel.GetAttribute(messageListenerKey).Get();
-                var messageSender = context.Channel.GetAttribute(messageSenderKey).Get();
-                messageListener.OnReceived(messageSender, transportMessage);
+                try
+                {
+                    var transportMessage = message as TransportMessage;
+                    var messageListener = context.Channel.GetAttribute(messageListenerKey).Get();
+                    var messageSender = context.Channel.GetAttribute(messageSenderKey).Get();
+                    messageListener.OnReceived(messageSender, transportMessage);
+                }
+                finally  
+                {
+                    message = null;
+                }
             }
 
             #endregion Overrides of ChannelHandlerAdapter

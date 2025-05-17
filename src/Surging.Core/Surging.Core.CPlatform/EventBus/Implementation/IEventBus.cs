@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Surging.Core.CPlatform.EventBus.Implementation
 {
-   public interface IEventBus
+   public interface IEventBus: IDisposable
     {
         void Subscribe<T, TH>(Func<TH> handler)
             where TH : IIntegrationEventHandler<T>;

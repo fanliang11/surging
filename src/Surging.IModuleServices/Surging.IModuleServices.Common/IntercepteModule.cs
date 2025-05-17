@@ -24,7 +24,7 @@ namespace Surging.IModuleServices.Common
             base.RegisterBuilder(builder); 
             builder.AddClientIntercepted(typeof(CacheProviderInterceptor));
             builder.AddFilter(typeof(PermissionAttribute));
-            //builder.AddClientIntercepted(typeof(LogProviderInterceptor));
+           //builder.AddClientIntercepted(typeof(LogProviderInterceptor));
         }
     }
 }

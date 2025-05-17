@@ -40,7 +40,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public virtual void RegisterBuilder(ConfigurationContext context)
         {
-            context.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            context.Services.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
             context.Services.AddFilters(typeof(HttpRequestFilterAttribute));
             context.Services.AddFilters(typeof(CustomerExceptionFilterAttribute));
         }

@@ -5,18 +5,22 @@ using Surging.Core.Consul.Utilitys;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Surging.Core.Consul.WatcherProvider.Implementation
 {
     public class ClientWatchManager : IClientWatchManager
     {
-        internal ConcurrentDictionary<string, HashSet<Watcher>> dataWatches =
-            new ConcurrentDictionary<string, HashSet<Watcher>>();
+        internal Dictionary<string, HashSet<Watcher>> dataWatches =
+            new Dictionary<string, HashSet<Watcher>>();
         private readonly Timer _timer;
         private readonly ILogger<ClientWatchManager> _logger;
 
@@ -30,7 +34,7 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
             }, null, timeSpan, timeSpan);
         }
 
-        public ConcurrentDictionary<string, HashSet<Watcher>> DataWatches { get
+        public Dictionary<string, HashSet<Watcher>> DataWatches { get
             {
                 return dataWatches;
             }
@@ -43,7 +47,6 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
         private HashSet<Watcher> Materialize()
         {
             HashSet<Watcher> result = new HashSet<Watcher>();
-
             foreach (HashSet<Watcher> ws in dataWatches.Values)
             {
                 result.UnionWith(ws);

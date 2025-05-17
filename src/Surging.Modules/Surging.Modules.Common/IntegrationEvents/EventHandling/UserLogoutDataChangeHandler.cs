@@ -19,6 +19,7 @@ namespace Surging.Modules.Common.IntegrationEvents.EventHandling
         }
         public async Task Handle(LogoutEvent @event)
         {
+
             Console.WriteLine($"消费1。");
             await _userService.Update(int.Parse(@event.UserId), new UserModel()
             {

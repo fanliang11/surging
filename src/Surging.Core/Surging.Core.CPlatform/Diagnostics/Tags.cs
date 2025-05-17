@@ -20,7 +20,7 @@ namespace Surging.Core.CPlatform.Diagnostics
 {
     public static class Tags
     {
-        public static readonly string RPC_METHOD = "rpc.method"; 
+        public static readonly string RPC_METHOD = "rpc.method";
         public static readonly string RPC_PARAMETERS = "rpc.parameters";
         public static readonly string RPC_LOCAL_ADDRESS = "rpc.local.address";
         public static readonly string REST_METHOD = "rest.method";

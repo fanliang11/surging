@@ -4,8 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Surging.Apm.Skywalking.Abstractions.Common.Tracing;
-using Surging.Apm.Skywalking.Abstractions.Tracing;
+
 using Surging.Core.Caching.Configurations;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Transport.Implementation;
@@ -80,39 +79,39 @@ namespace Surging.Services.Client
             var  tracingContext =  ServiceLocator.GetService<ITracingContext>();
             Task.Run(async () =>
             {
-                RpcContext.GetContext().SetAttachment("xid",124);
+                //RpcContext.GetContext().SetAttachment("xid",124);
 
-                var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
+               var userProxy = serviceProxyFactory.CreateProxy<IUserService>("User");
 
-                var asyncProxy = serviceProxyFactory.CreateProxy<IAsyncService>();
-                var result= await  asyncProxy.AddAsync(1, 2);
-                var user = userProxy.GetUser(new UserModel {
-                    UserId = 1,
-                    Name = "fanly",
-                    Age=120,
-                     Sex=0
-                }).GetAwaiter().GetResult();
-                var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
-                var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
-                var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
-                userProxy.Try().GetAwaiter().GetResult();
-                var v1 = userProxy.GetUserLastSignInTime(1).Result;
-                var things = userProxy.GetAllThings().Result;
-                var apiResult = userProxy.GetApiResult().GetAwaiter().GetResult();
-                userProxy.PublishThroughEventBusAsync(new UserEvent
-                {
-                    UserId = 1,
-                    Name = "fanly"
-                }).Wait();
+                //var asyncProxy = serviceProxyFactory.CreateProxy<IAsyncService>();
+                //var result= await  asyncProxy.AddAsync(1, 2);
+                //var user = userProxy.GetUser(new UserModel {
+                //    UserId = 1,
+                //    Name = "fanly",
+                //    Age=120,
+                //     Sex=0
+                //}).GetAwaiter().GetResult();
+                //var e = userProxy.SetSex(Sex.Woman).GetAwaiter().GetResult();
+                //var v = userProxy.GetUserId("fanly").GetAwaiter().GetResult();
+                //var fa = userProxy.GetUserName(1).GetAwaiter().GetResult();
+                //userProxy.Try().GetAwaiter().GetResult();
+                //var v1 = userProxy.GetUserLastSignInTime(1).Result;
+                //var things = userProxy.GetAllThings().Result;
+                //var apiResult = userProxy.GetApiResult().GetAwaiter().GetResult();
+                //userProxy.PublishThroughEventBusAsync(new UserEvent
+                //{
+                //    UserId = 1,
+                //    Name = "fanly"
+                //}).Wait();
 
-                userProxy.PublishThroughEventBusAsync(new UserEvent
-                {
-                    UserId = 1,
-                    Name = "fanly"
-                }).Wait();
+                //userProxy.PublishThroughEventBusAsync(new UserEvent
+                //{
+                //    UserId = 1,
+                //    Name = "fanly"
+                //}).Wait();
 
-                var r = await userProxy.GetDictionary();
-                var serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
+                //var r = await userProxy.GetDictionary();
+                //var serviceProxyProvider = ServiceLocator.GetService<IServiceProxyProvider>();
 
                 do
                 {
@@ -123,7 +122,8 @@ namespace Surging.Services.Client
                     for (var i = 0; i < 10000; i++)
                     {
                         //var a = userProxy.GetDictionary().Result;
-                        var a = await userProxy.GetDictionary();
+                        //var a = await userProxy.GetDictionary();
+                        var a = await userProxy.ReactiveTest(2);
                         //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();

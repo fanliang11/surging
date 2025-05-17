@@ -25,10 +25,12 @@ namespace Surging.Core.EventBusRabbitMQ
             new ServiceRouteWatch(serviceProvider.GetInstances<CPlatformContainer>(), () =>
             {
                 var subscriptionAdapt = serviceProvider.GetInstances<ISubscriptionAdapt>();
-                serviceProvider.GetInstances<IEventBus>().OnShutdown += (sender, args) =>
+                var eventBus = serviceProvider.GetInstances<IEventBus>();
+                eventBus.OnShutdown += (sender, args) =>
                  {
                      subscriptionAdapt.Unsubscribe();
                  };
+                eventBus.Dispose();
                 serviceProvider.GetInstances<ISubscriptionAdapt>().SubscribeAt();
             });
         }

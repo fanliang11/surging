@@ -67,7 +67,7 @@ namespace Surging.Core.CPlatform.Module
 
         public static IRegistrationBuilder<TTo, LightweightAdapterActivatorData, DynamicRegistrationStyle> RegisterAdapter<TFrom, TTo>(this ContainerBuilderWrapper builder, Func<TFrom, TTo> adapter)
         {
-            return builder.ContainerBuilder.RegisterAdapter<TFrom, TTo>(adapter);
+            return builder.ContainerBuilder.RegisterAdapter<TFrom, TTo>(adapter).SingleInstance();
         }
 
         public static IRegistrationBuilder<object, OpenGenericDecoratorActivatorData, DynamicRegistrationStyle> RegisterGenericDecorator(this ContainerBuilderWrapper builder, Type decoratorType, Type decoratedServiceType, object fromKey, object toKey = null)

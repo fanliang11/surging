@@ -26,7 +26,7 @@ namespace Surging.Tools.Cli.Commands
         [Required(ErrorMessage = "The Address is required.")]
         public string Address { get; }
 
-        [Option("-X|--request", "http method", CommandOptionType.SingleValue)] 
+        [Option("-X|--request", "http method", CommandOptionType.SingleValue)]
         public string Method { get; } = "GET";
 
 
@@ -86,12 +86,12 @@ namespace Surging.Tools.Cli.Commands
                 }
                 console.ForegroundColor = ConsoleColor.White;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 console.ForegroundColor = ConsoleColor.Red;
                 console.WriteLine(ex.Message);
                 console.WriteLine(ex.StackTrace);
-                console.ForegroundColor = ConsoleColor.White; 
+                console.ForegroundColor = ConsoleColor.White;
             }
         }
     }

@@ -39,7 +39,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Implementation
 
         public  IObservable<IProtocolSupport> Create(ProtocolSupportProperties  properties)
         {
-            var support = new ComplexProtocolSupport();
+            var support = new ComplexProtocolSupport(1);
             support.Id = properties.Id;
             support.Name = properties.Name;
             support.Description = properties.Description;

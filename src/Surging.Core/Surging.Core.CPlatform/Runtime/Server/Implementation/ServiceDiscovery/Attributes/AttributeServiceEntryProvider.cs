@@ -47,7 +47,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 _logger.LogInformation($"发现了以下服务：{string.Join(",", services.Select(i => i.ToString()))}。");
             }
-            var entries = new List<ServiceEntry>();
+            var entries = new List<ServiceEntry>(services.Count());
             foreach (var service in services)
             {
                 entries.AddRange( _clrServiceEntryFactory.CreateServiceEntry(service));
@@ -66,7 +66,7 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation.ServiceDiscovery.
             {
                 _logger.LogInformation($"发现了以下服务：{string.Join(",", services.Select(i => i.ToString()))}。");
             }
-            var entries = new List<ServiceEntry>();
+            var entries = new List<ServiceEntry>(services.Count());
             foreach (var service in services)
             {
                 entries.AddRange(_clrServiceEntryFactory.CreateServiceEntry(service));

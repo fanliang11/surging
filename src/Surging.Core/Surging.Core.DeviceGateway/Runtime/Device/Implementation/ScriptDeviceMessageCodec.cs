@@ -22,6 +22,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ReadPropertyMessage = Surging.Core.DeviceGateway.Runtime.Device.Message.Property.ReadPropertyMessage;
 
 namespace Surging.Core.DeviceGateway.Runtime.Device.Implementation
 {

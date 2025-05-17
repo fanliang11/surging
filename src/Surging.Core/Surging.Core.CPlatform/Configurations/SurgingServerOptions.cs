@@ -16,6 +16,7 @@ namespace Surging.Core.CPlatform.Configurations
         public string WanIp { get; set; }
 
         public bool IsModulePerLifetimeScope { get; set; }
+         
 
         public double WatchInterval { get; set; } = 20d;
 
@@ -24,6 +25,10 @@ namespace Surging.Core.CPlatform.Configurations
         public bool Libuv { get; set; } = false;
 
         public DockerDeployMode DockerDeployMode { get; set; } = DockerDeployMode.Standard;
+
+        public HttpResultContract HttpResultContract { get; set; } = HttpResultContract.Gateway;
+
+        public int EventLoopCount { get; set; } = 4;
 
         public int SoBacklog { get; set; } = 8192;
 
@@ -35,7 +40,7 @@ namespace Surging.Core.CPlatform.Configurations
 
         public bool EnableObjectConvert { get; set; } = true;
 
-        public List<ModulePackage> Packages { get; set; } = new List<ModulePackage>();
+        public List<ModulePackage> Packages { get; set; } = new List<ModulePackage>(1);
 
         public CommunicationProtocol Protocol { get; set; }
         public string RootPath { get; set; }

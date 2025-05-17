@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using MessagePack.Formatters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,10 +7,11 @@ using System.Text;
 namespace Surging.Core.KestrelHttpServer.Internal
 {
     [MessagePackObject]
+    [MessagePackFormatter(typeof(GenericCollectionFormatter<HttpFormFile, HttpFormFileCollection>))]
     public class HttpFormFileCollection : List<HttpFormFile>
-    {
+    { 
         public HttpFormFile this[string name] => GetFile(name);
-
+         
         public HttpFormFile GetFile(string name)
         {
             foreach (var file in this)
@@ -22,7 +24,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
 
             return null;
         }
-
+         
         public IReadOnlyList<HttpFormFile> GetFiles(string name)
         {
             var files = new List<HttpFormFile>();

@@ -13,6 +13,7 @@ using Surging.Core.Protocol.WS.Runtime;
 using Surging.Core.Protocol.WS.Runtime.Implementation;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace Surging.Core.Protocol.WS
@@ -71,7 +72,9 @@ namespace Surging.Core.Protocol.WS
                 var messageListener = provider.Resolve<DefaultWSServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var ipEndPoint = endPoint as IPEndPoint;
+                    if (ipEndPoint.Port > 0)
+                        await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, null);
 
@@ -92,7 +95,9 @@ namespace Surging.Core.Protocol.WS
                 var messageListener = provider.Resolve<DefaultWSServerMessageListener>();
                 return new WSServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var ipEndPoint = endPoint as IPEndPoint;
+                    if (ipEndPoint.Port > 0)
+                        await messageListener.StartAsync(endPoint);
                     return messageListener;
                 });
 

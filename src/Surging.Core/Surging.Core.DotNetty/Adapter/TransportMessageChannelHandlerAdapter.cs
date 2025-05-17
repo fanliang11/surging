@@ -26,14 +26,15 @@ namespace Surging.Core.DotNetty.Adapter
             var buffer = (IByteBuffer)message;
             try
             {
-                var data = new byte[buffer.ReadableBytes];
+                Span<byte> data = stackalloc byte[buffer.ReadableBytes];
                 buffer.ReadBytes(data);
-                var transportMessage = _transportMessageDecoder.Decode(data);
+                var transportMessage = _transportMessageDecoder.Decode(data.ToArray());
                 context.FireChannelRead(transportMessage);
             }
             finally
             {
                 ReferenceCountUtil.Release(buffer);
+                message = null;
             }
         }
 

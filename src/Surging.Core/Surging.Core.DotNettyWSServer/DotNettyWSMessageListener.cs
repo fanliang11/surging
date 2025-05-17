@@ -21,6 +21,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Surging.Core.DotNettyWSServer
 {
@@ -48,7 +49,8 @@ namespace Surging.Core.DotNettyWSServer
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
 
-
+            var ipEndPoint = endPoint as IPEndPoint;
+            var host = $"ws://{ipEndPoint.Address}:{ipEndPoint.Port}";
             IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
             IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
@@ -80,8 +82,10 @@ namespace Surging.Core.DotNettyWSServer
                 pipeline.AddLast("HttpAggregator", new HttpObjectAggregator(65535));
                 _wSServiceEntries.ForEach(p =>
                 {
-                    pipeline.AddLast("WsProtocolHandler",
+                    pipeline.AddLast($"WsProtocolHandler{p.Path}",
                     new WebSocketServerProtocolHandler(p.Path, p.Behavior.Protocol, true));
+                    pipeline.AddLast("WsProtocolHandler",
+                  new WebSocketServerHandler(_logger,new WebSocketServerHandshakerFactory($"host{p.Path}",null,false)));
                 });
             
                 pipeline.AddLast("WSBinaryDecoder", new WebSocketFrameDecoder());
@@ -131,7 +135,7 @@ namespace Surging.Core.DotNettyWSServer
 
         public class WebSocketFrameDecoder : MessageToMessageDecoder<WebSocketFrame> {
 
-            protected override void Decode(IChannelHandlerContext ctx, WebSocketFrame msg, List<Object> output)
+            protected override void Decode(IChannelHandlerContext ctx, WebSocketFrame msg, List<System.Object> output)
             {
                 var buff = msg.Content;
                 byte[] messageBytes = new byte[buff.ReadableBytes];
@@ -145,13 +149,88 @@ namespace Surging.Core.DotNettyWSServer
         public class WebSocketFramePrepender : MessageToMessageDecoder<IByteBuffer>
         {
 
-            protected override void Decode(IChannelHandlerContext ctx, IByteBuffer msg, List<Object> output)
+            protected override void Decode(IChannelHandlerContext ctx, IByteBuffer msg, List<System.Object> output)
             {
                 WebSocketFrame webSocketFrame = new BinaryWebSocketFrame(msg);
                 output.Add(webSocketFrame);
             }
         }
  
+
+        public class WebSocketServerHandler : SimpleChannelInboundHandler<System.Object>
+        {
+            private WebSocketServerHandshaker handshaker;
+            private readonly ILogger _logger;
+            private readonly WebSocketServerHandshakerFactory _wsFactory;
+
+            public WebSocketServerHandler(ILogger logger, WebSocketServerHandshakerFactory wsFactory)
+            {
+                _logger = logger;
+                //ws://localhost:81/websocket
+                _wsFactory = wsFactory;
+            }
+
+            protected override void ChannelRead0(IChannelHandlerContext ctx, System.Object msg)
+            {
+                if (msg is IFullHttpRequest) {
+                    HandleHttpRequest(ctx, (IFullHttpRequest)msg);
+                } else if (msg is WebSocketFrame) {
+                    HandleWebSocketFrame(ctx, (WebSocketFrame)msg);
+                }
+            }
+
+            private void HandleHttpRequest(IChannelHandlerContext ctx, IFullHttpRequest req)
+            {
+                if (!req.Result.IsSuccess)
+                {
+                    SendHttpResponse(ctx, req, new DefaultFullHttpResponse(DotNetty.Codecs.Http.HttpVersion.Http11, HttpResponseStatus.BadRequest));
+                    return;
+                }
+                 
+                handshaker = _wsFactory.NewHandshaker(req);
+                if (handshaker == null)
+                {
+                    WebSocketServerHandshakerFactory.SendUnsupportedVersionResponse(ctx.Channel);
+                }
+                else
+                {
+                    handshaker.Handshake(ctx.Channel, req, req.Headers, ctx.NewPromise());
+                }
+            }
+
+                private void HandleWebSocketFrame(IChannelHandlerContext ctx, WebSocketFrame frame)
+                {
+                    if (frame is TextWebSocketFrame) {
+                        var request = ((TextWebSocketFrame)frame).Text;
+                        ctx.Channel.WriteAndFlushAsync(new TextWebSocketFrame("Server received: " + request));
+                    } else if (frame is CloseWebSocketFrame) {
+                        handshaker.CloseAsync(ctx.Channel, (CloseWebSocketFrame)frame.Retain());
+                    } else if (frame is PingWebSocketFrame) {
+                        ctx.Channel.WriteAsync(new PongWebSocketFrame((IByteBuffer)frame.Content.Retain()));
+                    }
+                }
+
+                private static void SendHttpResponse(IChannelHandlerContext ctx, IFullHttpRequest req, DefaultFullHttpResponse res)
+                {
+                    if (res.Status.Code != 200)
+                    {
+                        var  buf = res.Content;
+                        buf.WriteBytes(Encoding.UTF8.GetBytes( $"Failure:{res.Status.ToString()}"));
+                    }
+                     ctx.Channel.WriteAndFlushAsync(res);
+                     
+                }
+
+                public override void  ExceptionCaught(IChannelHandlerContext context, Exception exception)
+                {
+                    context.CloseAsync();//客户端主动断开需要应答，否则socket变成CLOSE_WAIT状态导致socket资源耗尽
+                    if (_logger.IsEnabled(LogLevel.Error))
+                        _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
+                }
+              
+
+
+        }
 
         private class ServerHandler : SimpleChannelInboundHandler<TextWebSocketFrame>
         {

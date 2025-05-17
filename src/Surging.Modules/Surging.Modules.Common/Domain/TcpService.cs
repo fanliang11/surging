@@ -1,5 +1,8 @@
 ﻿using DotNetty.Buffers;
+using Surging.Core.CPlatform.Network;
 using Surging.Core.Protocol.Tcp.Runtime;
+using Surging.Core.Protocol.Tcp.Runtime.Implementation;
+using Surging.Core.Protocol.Udp.Messages;
 using Surging.IModuleServices.Common;
 using System;
 using System.Collections.Generic;
@@ -16,17 +19,9 @@ namespace Surging.Modules.Common.Domain
         {
             _deviceProvider = deviceProvider;
         }
+         
 
-        public override void Load(string clientId, TcpServerProperties tcpServerProperties)
-        {
-            var deviceStatus = _deviceProvider.IsConnected(clientId);
-            this.Parser.HandlePayload().Subscribe(buffer => ParserBuffer(buffer));
-        }
-
-        public override void DeviceStatusProcess(DeviceStatus status, string clientId, TcpServerProperties tcpServerProperties)
-        {
-            //throw new NotImplementedException();
-        }
+        
 
         public async Task ParserBuffer(IByteBuffer buffer)
         {
@@ -37,16 +32,24 @@ namespace Surging.Modules.Common.Domain
                     Encoding.GetEncoding("gb2312")));
             }
 
-            //  var str= buffer.ReadString(buffer.ReadableBytes, Encoding.GetEncoding("gb2312"));
-
+            // var str= buffer.ReadString(buffer.ReadableBytes, Encoding.UTF8);
+            
             var byteBuffer=  Unpooled.Buffer();
             byteBuffer.WriteString("\r\n", Encoding.UTF8); 
-            byteBuffer.WriteString("processing complete", Encoding.UTF8);
+            byteBuffer.WriteString("处理完成", Encoding.GetEncoding("gb2312"));
             await Sender.SendAndFlushAsync(byteBuffer);
             buffer.Release();
-            //  await Sender.SendAndFlushAsync("message received",Encoding.UTF8);
+            //  await Sender.SendAndFlushAsync("消息已接收",Encoding.GetEncoding("gb2312"));
             this.Parser.Close(); 
         }
 
+        public override void Load(TcpClient client, NetworkProperties tcpServerProperties)
+        { 
+            this.Parser.HandlePayload().Subscribe(async buffer => await ParserBuffer(buffer));
+        }
+
+        public override void DeviceStatusProcess(DeviceStatus status, string clientId, NetworkProperties tcpServerProperties)
+        {
+        }
     }
 }

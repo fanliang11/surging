@@ -61,8 +61,9 @@ new ConcurrentDictionary<string, ServiceCache>();
                 }
             }
 
-            var address = new List<CacheEndpoint>();
-            foreach (var addressModel in descriptor.CacheEndpoint)
+            var addressModels = descriptor.CacheEndpoint;
+            var address = new List<CacheEndpoint>(addressModels.Count());
+            foreach (var addressModel in addressModels)
             {
                 _healthCheckService.Monitor(addressModel, cacheId);
                 if (!await _healthCheckService.IsHealth(addressModel, cacheId))

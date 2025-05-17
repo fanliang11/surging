@@ -91,6 +91,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             var mqttPubAckMessage = new PubAckPacket() {
                 PacketId = messageId
             };
+            if(channel.IsWritable && channel!=null)
            await channel.WriteAndFlushAsync(mqttPubAckMessage);
         }
 

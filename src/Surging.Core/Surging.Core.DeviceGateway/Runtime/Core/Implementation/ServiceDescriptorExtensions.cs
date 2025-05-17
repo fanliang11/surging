@@ -53,5 +53,17 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Implementation
             descriptor.Metadatas["Example"] = example;
             return descriptor;
         }
+
+        public static ServiceDescriptor UpStream(this ServiceDescriptor descriptor, bool  isUp)
+        {
+            descriptor.Metadatas["UpStream"] = isUp;
+            return descriptor;
+        }
+
+        public static ServiceDescriptor DownStream(this ServiceDescriptor descriptor, bool isDown)
+        {
+            descriptor.Metadatas["DownStream"] = isDown;
+            return descriptor;
+        }
     }
 }

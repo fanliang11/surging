@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.HashAlgorithms;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
@@ -76,10 +77,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
 
             public AddressEntry(IEnumerable<AddressModel> address)
             {
-                _address = address.OrderBy(p=>p.ProcessorTime).ToArray();
+                _address = address.OrderBy(p => p.ProcessorTime).ToArray();
                 _maxIndex = _address.Length - 1;
             }
-            
+
             #endregion Constructor
 
             #region Public Method

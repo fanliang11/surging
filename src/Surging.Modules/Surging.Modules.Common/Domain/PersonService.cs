@@ -17,7 +17,6 @@ using Surging.Core.Common;
 using Surging.Core.Thrift.Attributes;
 using static ThriftCore.Calculator;
 using System.Reactive.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Subjects;
 
 namespace Surging.Modules.Common.Domain
@@ -174,21 +173,34 @@ namespace Surging.Modules.Common.Domain
         {
             return Task.FromResult(true);
         }
+
         public Task<int> ReactiveTest(int value)
         {
-            ISubject<int> subject = new ReplaySubject<int>();
-            var result = 0;
-            var exception = new Exception("");
-            subject.Subscribe((temperature) => result = temperature, temperature => exception = temperature, async () => await Write(result, default, exception.Message));
 
-            GetGenerateObservable().Subscribe(subject);
+            // 定义事件流
+            var sequence = GetGenerateObservable();
+            // 对事件流进行筛选
+            sequence = sequence.Where(a => a < 23);
+
+            // 注册观察者
+            ISubject<int> subject = new ReplaySubject<int>();
+            subject.Subscribe(async (temperature) => await Write(temperature));
+
+            // 触发
+            sequence.Subscribe();
             return Task.FromResult<int>(default);
         }
         #endregion Implementation of IUserService
 
         private static IObservable<int> GetGenerateObservable()
         {
-            return Observable.Return(30, ThreadPoolScheduler.Instance);
+            // 类似for循环
+            return Observable.Generate(
+                1,              // 初始值
+                x => x < 10,    // 循环停止条件
+                x => x + 1,     // 循环一次+1
+                x => x + 20     // 循环中执行的操作
+            );
         }
     }
 }

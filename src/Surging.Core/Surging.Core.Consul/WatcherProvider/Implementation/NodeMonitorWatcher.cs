@@ -2,6 +2,7 @@
 using Surging.Core.Consul.Utilitys;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,6 +44,10 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
                 _action(_currentData, result);
                 this.SetCurrentData(result);
             }
+            else
+            {
+                UnRegisterWatch();
+            }
         }
 
         private void RegisterWatch(Watcher watcher = null)
@@ -56,7 +61,21 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
             {
                 wcb = new ChildWatchRegistration(_manager, this, _path);
             }
-            wcb.Register();
+            wcb.Register(); 
+        }
+
+        private void UnRegisterWatch(Watcher watcher = null)
+        {
+            ChildWatchRegistration wcb = null;
+            if (watcher != null)
+            {
+                wcb = new ChildWatchRegistration(_manager, watcher, _path);
+            }
+            else
+            {
+                wcb = new ChildWatchRegistration(_manager, this, _path);
+            } 
+            wcb.UnRegister();
         }
     }
 }

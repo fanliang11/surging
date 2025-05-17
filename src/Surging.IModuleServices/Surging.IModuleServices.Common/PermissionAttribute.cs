@@ -24,8 +24,8 @@ namespace Surging.IModuleServices.Common
         public override Task OnActionExecutingAsync(ServiceRouteContext actionExecutedContext, CancellationToken cancellationToken)
         {
             var payload= RpcContext.GetContext().GetAttachment("payload");
-            var model= _serializer.Deserialize(payload.ToString().Trim('"').Replace("\\",""),typeof(UserModel));
-            //  actionExecutedContext.ResultMessage.ExceptionMessage = "no permission";
+            var model= _serializer.Deserialize(payload?.ToString().Trim('"').Replace("\\",""),typeof(UserModel));
+          //  actionExecutedContext.ResultMessage.ExceptionMessage = "权限不足";
             return Task.FromResult(model);
         }
     }

@@ -13,12 +13,11 @@ using Surging.Core.ProxyGenerator;
 using Surging.Core.Thrift.Attributes;
 using Surging.IModuleServices.Common;
 using Surging.IModuleServices.Common.Models;
-using Surging.IModuleServices.User;
+using Surging.IModuleServices.Manager;
 using Surging.Modules.Common.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -32,7 +31,7 @@ namespace Surging.Modules.Common.Domain
         #region Implementation of IUserService
         private readonly UserRepository _repository;
         private readonly ILogger<UserService> _logger;
-        public UserService(UserRepository repository,ILogger<UserService> logger)
+        public UserService(UserRepository repository, ILogger<UserService> logger)
         {
             this._repository = repository;
             _logger = logger;
@@ -89,7 +88,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<bool> GetDictionary()
         {
-            _logger.LogError("测试");
+           // _logger.LogError("测试");
             return Task.FromResult<bool>(true);
         }
 
@@ -122,6 +121,7 @@ namespace Surging.Modules.Common.Domain
 
         public Task<IdentityUser> Save(IdentityUser requestData)
         {
+            var payload = RpcContext.GetContext().GetAttachment("payload");
             return Task.FromResult(requestData);
         }
 
@@ -181,21 +181,31 @@ namespace Surging.Modules.Common.Domain
         {
             return Task.FromResult(true);
         }
+
         public Task<int> ReactiveTest(int value)
-        { 
+        {
+            // 注册观察者
             ISubject<int> subject = new ReplaySubject<int>();
             var result = 0;
             var exception = new Exception("");
-            subject.Subscribe((temperature) => result = temperature, temperature => exception = temperature, async () => await Write(result, default, exception.Message));
-             
-            GetGenerateObservable().Subscribe(subject);
+            subject.Subscribe( (temperature) => result=temperature, temperature=> exception=temperature, async ()=>await Write(result,default,exception.Message));
+
+            // 触发
+            GetGenerateObservable().Where(a => a < 23).Subscribe(subject);
             return Task.FromResult<int>(default);
         }
         #endregion Implementation of IUserService
 
         private static IObservable<int> GetGenerateObservable()
-        { 
-            return Observable.Return(30, ThreadPoolScheduler.Instance);
+        {
+
+            // 类似for循环
+            return Observable.Generate(
+                1,              // 初始值
+                x => x < 10,    // 循环停止条件
+                x => x + 1,     // 循环一次+1
+                x => x + 20     // 循环中执行的操作
+            );
         }
     }
 }

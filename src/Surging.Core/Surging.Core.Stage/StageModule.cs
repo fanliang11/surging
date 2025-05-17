@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.KestrelHttpServer;
 using Surging.Core.KestrelHttpServer.Extensions;
 using Surging.Core.KestrelHttpServer.Filters;
@@ -20,6 +21,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using DateTimeConverter = Surging.Core.KestrelHttpServer.Internal.DateTimeConverter;
 
 namespace Surging.Core.Stage
 {
@@ -81,6 +83,7 @@ namespace Surging.Core.Stage
                         return setting;
                     });
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    JsonOption.SerializeOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 }
                 else
                 {

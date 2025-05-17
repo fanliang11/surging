@@ -255,6 +255,11 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             await EntryRoutes(_filePath);
         }
 
+        public override ValueTask AddNodeMonitorWatcher(string serviceId)
+        {
+            return ValueTask.CompletedTask;
+        }
+
         #endregion Private Method
     }
 }

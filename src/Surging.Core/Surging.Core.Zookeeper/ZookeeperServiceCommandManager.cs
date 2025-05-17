@@ -95,6 +95,19 @@ namespace Surging.Core.Zookeeper
             }
         }
 
+        public override async ValueTask AddNodeMonitorWatcher(string serviceId)
+        {
+            var zooKeeper = await GetZooKeeper();
+            var path = $"{_configInfo.CommandPath}{serviceId}";
+            var watcher = new NodeMonitorWatcher(GetZooKeeper, path,
+                  (oldData, newData) =>  NodeChange(oldData, newData));
+            if (await zooKeeper.Item2.existsAsync(path) != null)
+            {
+                var data = (await zooKeeper.Item2.getDataAsync(path, watcher)).Data;
+                watcher.SetCurrentData(data);
+            }
+        }
+
         /// <summary>
         /// 设置服务命令。
         /// </summary>

@@ -12,6 +12,7 @@ using Surging.Core.Zookeeper.WatcherProvider;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -397,5 +398,17 @@ namespace Surging.Core.Zookeeper
             return zooKeeper;
         }
 
+        public override async ValueTask AddNodeMonitorWatcher(string serviceId)
+        {
+            var zooKeeper = await GetZooKeeper();
+            var path = $"{_configInfo.RoutePath}{serviceId}";
+            var watcher = new NodeMonitorWatcher(GetZooKeeper, path,
+                 async (oldData, newData) => await NodeChange(oldData, newData));
+            if (await zooKeeper.Item2.existsAsync(path) != null)
+            {
+                var data = (await zooKeeper.Item2.getDataAsync(path, watcher)).Data;
+                watcher.SetCurrentData(data);
+            } 
+        }
     }
 }

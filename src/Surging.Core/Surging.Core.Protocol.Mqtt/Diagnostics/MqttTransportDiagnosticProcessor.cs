@@ -48,7 +48,7 @@ namespace Surging.Core.Protocol.Mqtt.Diagnostics
                 context.TraceId = ConvertUniqueId(eventData);
             context.Span.AddLog(LogEvent.Message($"Worker running at: {DateTime.Now}"));
             context.Span.SpanLayer = SpanLayer.RPC_FRAMEWORK;
-            context.Span.AddTag(Tags.MQTT_CLIENT_ID, eventData.TraceId.ToString());
+            context.Span.AddTag(Tags.MQTT_CLIENT_ID, eventData.TraceId??Guid.NewGuid().ToString());
             context.Span.AddTag(Tags.MQTT_METHOD, eventData.Method.ToString());
             context.Span.AddTag(Tags.REST_PARAMETERS, _serializer.Serialize(message.Parameters));
             context.Span.AddTag(Tags.MQTT_BROKER_ADDRESS, NetUtils.GetHostAddress().ToString());

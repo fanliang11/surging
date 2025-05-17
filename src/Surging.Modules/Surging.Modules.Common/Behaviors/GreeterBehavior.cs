@@ -15,7 +15,7 @@ namespace Surging.Modules.Common.Behaviors
         {
             add
             {
-                if (received == null)
+                if (value == null)
                 {
                     received += value;
                 }

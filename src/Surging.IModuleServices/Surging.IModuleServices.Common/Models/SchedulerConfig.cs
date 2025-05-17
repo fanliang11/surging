@@ -8,10 +8,11 @@ namespace Surging.IModuleServices.Common.Models
 {
     public class SchedulerConfig
     {
-         
+
         public string Script { get; set; }
 
 
         public bool IsPersistence { get; set; }
     }
 }
+

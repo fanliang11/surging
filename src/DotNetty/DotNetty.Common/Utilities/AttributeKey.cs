@@ -1,0 +1,76 @@
+﻿/*
+ * Copyright 2012 The Netty Project
+ *
+ * The Netty Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * Copyright (c) The DotNetty Project (Microsoft). All rights reserved.
+ *
+ *   https://github.com/azure/dotnetty
+ *
+ * Licensed under the MIT license. See LICENSE file in the project root for full license information.
+ *
+ * Copyright (c) 2020 The Dotnetty-Span-Fork Project (cuteant@outlook.com) All rights reserved.
+ *
+ *   https://github.com/cuteant/dotnetty-span-fork
+ *
+ * Licensed under the MIT license. See LICENSE file in the project root for full license information.
+ */
+
+namespace DotNetty.Common.Utilities
+{
+    using System;
+
+    internal static class AttributeKey
+    {
+        // Keep the instance of AttributeConstantPool out of generic classes, to make it an really singleton for different generic types.
+        // see https://github.com/Azure/DotNetty/issues/498
+        public static readonly ConstantPool Pool = new AttributeConstantPool();
+
+        sealed class AttributeConstantPool : ConstantPool
+        {
+            protected override IConstant NewConstant<TValue>(int id, string name) => new AttributeKey<TValue>(id, name);
+        };
+    }
+
+    /// <summary>
+    ///     Key which can be used to access <seealso cref="Attribute" /> out of the <see cref="IAttributeMap" />. Be aware that
+    ///     it is not be possible to have multiple keys with the same name.
+    /// </summary>
+    /// <typeparam name="T">
+    ///     the type of the <see cref="Attribute" /> which can be accessed via this <see cref="AttributeKey{T}" />.
+    /// </typeparam>
+    public sealed class AttributeKey<T> : AbstractConstant<AttributeKey<T>>
+    {
+        public static readonly ConstantPool Pool = AttributeKey.Pool;
+
+        /// <summary>Returns the singleton instance of the {@link AttributeKey} which has the specified <c>name</c>.</summary>
+        public static AttributeKey<T> ValueOf(string name) => (AttributeKey<T>)Pool.ValueOf<T>(name);
+
+        /// <summary>Returns <c>true</c> if a <see cref="AttributeKey{T}" /> exists for the given <c>name</c>.</summary>
+        public static bool Exists(string name) => Pool.Exists(name);
+
+        /// <summary>
+        ///     Creates a new <see cref="AttributeKey{T}" /> for the given <c>name</c> or fail with an
+        ///     <see cref="ArgumentException" /> if a <see cref="AttributeKey{T}" /> for the given <c>name</c> exists.
+        /// </summary>
+        public static AttributeKey<T> NewInstance(string name) => (AttributeKey<T>)Pool.NewInstance<T>(name);
+
+        public static AttributeKey<T> ValueOf(Type firstNameComponent, string secondNameComponent)
+            => (AttributeKey<T>)Pool.ValueOf<T>(firstNameComponent, secondNameComponent);
+
+        internal AttributeKey(int id, string name)
+            : base(id, name)
+        {
+        }
+    }
+}

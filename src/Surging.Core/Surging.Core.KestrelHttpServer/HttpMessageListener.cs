@@ -10,6 +10,7 @@ using Surging.Core.CPlatform.Routing.Template;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.CPlatform.Utilities;
 using Surging.Core.KestrelHttpServer.Filters;
 using Surging.Core.KestrelHttpServer.Filters.Implementation;
 using Surging.Core.KestrelHttpServer.Interceptors;
@@ -21,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -36,7 +38,7 @@ namespace Surging.Core.KestrelHttpServer
         private readonly string[] _serviceKeys = {  "serviceKey", "servicekey"};
 
         public HttpMessageListener(ILogger<HttpMessageListener> logger, ISerializer<string> serializer, IServiceRouteProvider serviceRouteProvider)
-        {
+        { 
             _logger = logger;
             _serializer = serializer;
             _serviceRouteProvider = serviceRouteProvider;
@@ -51,6 +53,7 @@ namespace Surging.Core.KestrelHttpServer
 
         public async Task OnReceived(IMessageSender sender,string messageId, HttpContext context, IEnumerable<IActionFilter> actionFilters)
         {
+        
             var serviceRoute = RestContext.GetContext().GetAttachment("route") as ServiceRoute;
             RestContext.GetContext().RemoveContextParameters("route");
             var path = (RestContext.GetContext().GetAttachment("path")
@@ -103,8 +106,8 @@ namespace Surging.Core.KestrelHttpServer
                 StreamReader streamReader = new StreamReader(context.Request.Body);
                 var data = await streamReader.ReadToEndAsync();
                 if (context.Request.Method == "POST")
-                {
-                    var bodyParams = _serializer.Deserialize<string, IDictionary<string, object>>(data) ?? new Dictionary<string, object>();
+                { 
+                    var bodyParams = System.Text.Json.JsonSerializer.Deserialize<IDictionary<string, object>>(data, JsonOption.SerializeOptions) ?? new Dictionary<string, object>();
                     foreach (var param in bodyParams)
                         httpMessage.Parameters.Add(param.Key, param.Value);
                     if (!await OnActionExecuting(new ActionExecutingContext { Context = context, Route = serviceRoute, Message = httpMessage },
@@ -112,7 +115,7 @@ namespace Surging.Core.KestrelHttpServer
                     httpMessage.Attachments = RestContext.GetContext().GetContextParameters();
                     if(!string.IsNullOrEmpty(data) && bodyParams.Count==0)
                     {
-                        httpMessage.Attachments.Add("requset.body", _serializer.Deserialize<string, object>(data));
+                        httpMessage.Attachments.Add("requset.body", System.Text.Json.JsonSerializer.Deserialize<object>(data, JsonOption.SerializeOptions));
 
                     }
                     await Received(sender, new TransportMessage(messageId,httpMessage));

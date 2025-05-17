@@ -20,7 +20,14 @@ namespace Surging.Core.Codec.MessagePack.Utilities
 
         public static byte[] Serialize<T>(T instance)
         {
-            return MessagePackSerializer.Serialize(instance);
+            try
+            {
+                return MessagePackSerializer.Serialize(instance);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public static byte[] Serialize(object instance, Type type)

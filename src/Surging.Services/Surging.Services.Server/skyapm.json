@@ -15,7 +15,7 @@
     },
     "Transport": {
       "Interval": 3000,
-      "ProtocolVersion": "v6",
+      "ProtocolVersion": "v8",
       "QueueSize": 30000,
       "BatchSize": 3000,
       "gRPC": {

@@ -7,7 +7,7 @@
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
     "Libuv": true,
-    "Protocol": "${Protocol}|Tcp", //Http¡¢Tcp¡¢None
+    "Protocol": "${Protocol}|Tcp", //Httpï¿½ï¿½Tcpï¿½ï¿½None
     "RootPath": "${RootPath}|d:\\microsurging",
     "Ports": {
       "HttpPort": "${HttpPort}|180"
@@ -16,7 +16,7 @@
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|ThriftModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;ServiceProxyModule;EventBusRabbitMQModule;SkywalkingModule;"
+        "Using": "${UseEngineParts}|DotNettyModule;NLogModule;MessagePackModule;ConsulModule;HttpProtocolModule;ServiceProxyModule;EventBusRabbitMQModule;SkywalkingModule;"
       }
     ]
   },

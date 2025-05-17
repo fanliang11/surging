@@ -23,22 +23,17 @@ namespace Surging.Core.CPlatform.Utilities
             DynamicMethod dynamicMethod = new DynamicMethod(string.Empty, typeof(object), new Type[] { typeof(object), typeof(object[]) }, methodInfo.DeclaringType.Module);
             ILGenerator il = dynamicMethod.GetILGenerator();
             ParameterInfo[] ps = methodInfo.GetParameters();
-            Type[] paramTypes = new Type[ps.Length];
+            Type[] paramTypes = new Type[ps.Length];  
+            LocalBuilder[] locals = new LocalBuilder[paramTypes.Length];
             for (int i = 0; i < paramTypes.Length; i++)
             {
                 if (ps[i].ParameterType.IsByRef)
                     paramTypes[i] = ps[i].ParameterType.GetElementType();
                 else
                     paramTypes[i] = ps[i].ParameterType;
-            }
-            LocalBuilder[] locals = new LocalBuilder[paramTypes.Length];
-
-            for (int i = 0; i < paramTypes.Length; i++)
-            {
+          
                 locals[i] = il.DeclareLocal(paramTypes[i], true);
-            }
-            for (int i = 0; i < paramTypes.Length; i++)
-            {
+            
                 il.Emit(OpCodes.Ldarg_1);
                 EmitFastInt(il, i);
                 il.Emit(OpCodes.Ldelem_Ref);

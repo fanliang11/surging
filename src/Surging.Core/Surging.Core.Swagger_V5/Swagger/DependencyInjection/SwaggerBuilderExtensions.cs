@@ -23,6 +23,11 @@ namespace Surging.Core.Swagger_V5.Builder
             return app.UseMiddleware<SwaggerMiddleware>(options);
         }
 
+        public static IApplicationBuilder UseSwagger2(this IApplicationBuilder app, SwaggerOptions options)
+        {
+            return app.UseMiddleware<SwaggerMiddleware>(options);
+        }
+
         /// <summary>
         /// Register the Swagger middleware with optional setup action for DI-injected options
         /// </summary>

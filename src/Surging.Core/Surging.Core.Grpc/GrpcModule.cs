@@ -7,6 +7,7 @@ using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.Grpc.Runtime;
 using Surging.Core.Grpc.Runtime.Implementation;
+using System.Net;
 
 namespace Surging.Core.Grpc
 {
@@ -53,7 +54,9 @@ namespace Surging.Core.Grpc
                 var messageListener = provider.Resolve<GrpcServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var ipEndPoint = endPoint as IPEndPoint;
+                    if (ipEndPoint.Port > 0)
+                        await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, null);
 
@@ -73,7 +76,9 @@ namespace Surging.Core.Grpc
                 var messageListener = provider.Resolve<GrpcServerMessageListener>();
                 return new GrpcServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var ipEndPoint = endPoint as IPEndPoint;
+                    if (ipEndPoint.Port > 0)
+                        await messageListener.StartAsync(endPoint);
                     return messageListener;
                 });
 

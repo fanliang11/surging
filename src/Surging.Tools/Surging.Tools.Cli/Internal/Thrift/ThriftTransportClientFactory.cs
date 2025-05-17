@@ -30,16 +30,16 @@ namespace Surging.Tools.Cli.Internal.Thrift
         {
             try
             { 
-                        var ipEndPoint = endPoint as IPEndPoint;
-                        var transport = new TSocketTransport(ipEndPoint.Address.ToString(), ipEndPoint.Port);
-                        var tran = new TFramedTransport(transport);
-                        var protocol = new TBinaryProtocol(tran);
-                        var mp = new TMultiplexedProtocol(protocol, "thrift.surging");
-                        var messageListener = new MessageListener();
-                        var messageSender = new ThriftMessageClientSender(_transportMessageEncoder, protocol);
-                        var result = new TThriftClient(protocol, messageSender, messageListener, new ChannelHandler(_transportMessageDecoder, messageListener, messageSender), _app);
-                        await result.OpenTransportAsync();
-                        return result; 
+                var ipEndPoint = endPoint as IPEndPoint;
+                var transport = new TSocketTransport(ipEndPoint.Address.ToString(), ipEndPoint.Port);
+                var tran = new TFramedTransport(transport);
+                var protocol = new TBinaryProtocol(tran);
+                var mp = new TMultiplexedProtocol(protocol, "thrift.surging");
+                var messageListener = new MessageListener();
+                var messageSender = new ThriftMessageClientSender(_transportMessageEncoder, protocol);
+                var result = new TThriftClient(protocol, messageSender, messageListener, new ChannelHandler(_transportMessageDecoder, messageListener, messageSender), _app);
+                await result.OpenTransportAsync();
+                return result; 
             }
             catch
             { 

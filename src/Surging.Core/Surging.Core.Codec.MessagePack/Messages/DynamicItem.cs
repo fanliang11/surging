@@ -14,7 +14,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
     public class DynamicItem
     {
         #region Constructor
-
+        [SerializationConstructor]
         public DynamicItem()
         { }
 
@@ -32,7 +32,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
             else
                 TypeName = valueType.AssemblyQualifiedName;
 
-            if (valueType == UtilityType.JObjectType || valueType == UtilityType.JArrayType)
+            if (valueType == UtilityType.JObjectType || valueType == UtilityType.JArrayType || valueType == UtilityType.JsonEl)
                 Content = SerializerUtilitys.Serialize(value.ToString());
             else if (valueType != typeof(CancellationToken))
                 Content = SerializerUtilitys.Serialize(value);
@@ -57,10 +57,10 @@ namespace Surging.Core.Codec.MessagePack.Messages
                 return null;
 
             var typeName = Type.GetType(TypeName);
-            if (typeName == UtilityType.JObjectType || typeName == UtilityType.JArrayType )
+            if (typeName == UtilityType.JObjectType || typeName == UtilityType.JArrayType || typeName == UtilityType.JsonEl)
             {
                 var content = SerializerUtilitys.Deserialize<string>(Content);
-                return JsonConvert.DeserializeObject(content, typeName);
+                return System.Text.Json.JsonSerializer.Deserialize(content, UtilityType.JsonEl);
             }
             else if (typeName == null)
             {

@@ -112,14 +112,14 @@ namespace Surging.Core.Protocol.Tcp
             IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
             IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var tcpServiceEntryProvider = ServiceLocator.GetService<ITcpServiceEntryProvider>();
-            var workerGroup1 = new SingleThreadEventLoop();
+            var workerGroup1 = new MultithreadEventLoopGroup();
 
             var bootstrap = new ServerBootstrap();
             bootstrap
             .Channel<TcpServerSocketChannel>()
             .ChildOption(ChannelOption.SoKeepalive, true)
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
-            .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
+            .ChildOption(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
             .Group(bossGroup, workerGroup)
         .ChildHandler(new ActionChannelInitializer<IChannel>( channel =>
         {
@@ -142,7 +142,7 @@ namespace Surging.Core.Protocol.Tcp
                         if (_tcpServerProperties.ParserConfiguration != null && _tcpServerProperties.ParserConfiguration.ContainsKey("size"))
                         {
                             var configValue = _tcpServerProperties.ParserConfiguration["size"];
-                            pipeline.AddLast(new FixedLengthFrameDecoder(int.Parse(configValue.ToString() ?? "0")));
+                            pipeline.AddLast(new Codecs.FixedLengthFrameDecoder(int.Parse(configValue.ToString() ?? "0")));
                         }
                     }
                     break;

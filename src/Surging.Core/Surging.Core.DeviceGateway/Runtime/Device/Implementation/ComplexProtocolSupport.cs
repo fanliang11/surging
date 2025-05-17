@@ -14,7 +14,12 @@ namespace Surging.Core.DeviceGateway.Runtime.Device.Implementation
 {
     public class ComplexProtocolSupport : ProtocolSupport
     { 
-        private readonly ConcurrentDictionary<string, IObservable<DeviceMessageCodec>> _messageCodecSupports = new ConcurrentDictionary<string, IObservable<DeviceMessageCodec>>();
+        private readonly ConcurrentDictionary<string, IObservable<DeviceMessageCodec>> _messageCodecSupports ;
+
+        public ComplexProtocolSupport(int capacity)
+        {
+            _messageCodecSupports =new  ConcurrentDictionary<string, IObservable<DeviceMessageCodec>>(Environment.ProcessorCount,capacity);
+        }
 
         public override void AddMessageCodecSupport(MessageTransport transportType, Func<IObservable<DeviceMessageCodec>> messageCodec)
         {

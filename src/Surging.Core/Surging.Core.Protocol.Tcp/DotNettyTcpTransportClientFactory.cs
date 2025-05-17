@@ -126,25 +126,31 @@ namespace Surging.Core.Protocol.Tcp
         private static Bootstrap GetBootstrap()
         {
             IEventLoopGroup group;
-
-            var bootstrap = new Bootstrap();
-            if (AppConfig.ServerOptions.Libuv)
+            try
             {
-                group = new EventLoopGroup();
-                bootstrap.Channel<TcpServerChannel>();
-            }
-            else
-            {
-                group = new MultithreadEventLoopGroup();
-                bootstrap.Channel<TcpServerSocketChannel>();
-            }
-            bootstrap
-                .Channel<TcpSocketChannel>()
-                .Option(ChannelOption.TcpNodelay, true)
-                .Option(ChannelOption.Allocator, new UnpooledByteBufferAllocator(false, false))
-                .Group(group);
+                var bootstrap = new Bootstrap();
+                if (AppConfig.ServerOptions.Libuv)
+                {
+                    group = new EventLoopGroup();
+                    bootstrap.Channel<TcpServerChannel>();
+                }
+                else
+                {
+                    group = new MultithreadEventLoopGroup();
+                    bootstrap.Channel<TcpServerSocketChannel>();
+                }
+                bootstrap
+                    .Channel<TcpSocketChannel>()
+                    .Option(ChannelOption.TcpNodelay, true)
+                    .Option(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
+                    .Group(group);
 
-            return bootstrap;
+                return bootstrap;
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
         }
 
         public async Task StartAsync()

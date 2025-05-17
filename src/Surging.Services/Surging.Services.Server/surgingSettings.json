@@ -2,35 +2,35 @@
   "Surging": {
     "Ip": "${Surging_Server_IP}|127.0.0.1",
     "WatchInterval": 30,
-    "Port": "${Surging_Server_Port}|99",
+    "Port": "${Surging_Server_Port}|82",
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
     "WanIp": "${WanIp}|192.168.249.103",
-    "DockerDeployMode": "${DockerDeployMode}|Standard",
+    "DockerDeployMode": "${DockerDeployMode}|Swarm",
     "Libuv": true,
     "SoBacklog": 100,
     "Weight": 20,
-    "EnableObjectConvert": false,
+    "EnableObjectConvert": true,
     "MaxConcurrentRequests": 20,
     "DisconnTimeInterval": 30,
     "ExecutionTimeoutInMilliseconds": 1000,
     "Protocol": "${Protocol}|None", //Http、Tcp、None
-    "RootPath": "${RootPath}|D:\\userapp",
+    "RootPath": "${RootPath}|",
     "WebRootPath": "${WebRootPath}|D:\\UserApp\\wwwroot",
     "IsModulePerLifetimeScope": false,
     "ReloadOnChange": false,
     "Ports": {
-      "HttpPort": "${HttpPort}|289",
-      "WSPort": "${WSPort}|962",
-      "MQTTPort": "${MQTTPort}|972",
-      "GrpcPort": "${GrpcPort}|952"
+      "HttpPort": "${HttpPort}|28",
+      "WSPort": "${WSPort}|96",
+      "MQTTPort": "${MQTTPort}|97",
+      "GrpcPort": "${GrpcPort}|95"
     },
     "RequestCacheEnabled": false,
     "Packages": [
       {
         "TypeName": "EnginePartModule",
-        "Using": "${UseEngineParts}|ServiceProxyModule;DotNettyModule;SerilogModule;NLogModule;MessagePackModule;TcpProtocolModule;ConsulModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;ServiceHostModule;GrpcModule;ApolloModule;"
+        "Using": "${UseEngineParts}|ServiceProxyModule;ProtokollwandlerModule;DotNettyModule;WebServiceModule;SerilogModule;NLogModule;ConsulModule;TcpProtocolModule;MessagePackModule;WSProtocolModule;MqttProtocolModule;EventBusRabbitMQModule;CachingModule;KestrelHttpModule;SwaggerModule;ApiGeteWayModule;SkywalkingModule;KestrelNLogModule;GrpcModule;ApolloModule;LiveStreamModule;"
       }
     ]
   }, //如果引用多个同类型的组件，需要配置Packages，如果是自定义按需引用，无需配置Packages
@@ -39,10 +39,11 @@
     "SessionTimeout": "${Register_SessionTimeout}|50",
     "RoutePath": "${Register_RoutePath}",
     "ReloadOnChange": true,
-    "EnableChildrenMonitor": false
+    "EnableChildrenMonitor": false,
+    "NotifyMode": "Watch"
   },
   "Stage": {
-    "EnableHttps": true, // 不设置ports，默认httpsPort:443
+    "EnableHttps": false, // 不设置ports，默认httpsPort:443
     "CertificateFileName": "${CertificateFileName}|",
     "CertificateLocation": "${CertificateLocation}|pfxs",
     "CertificatePassword": "${CertificatePassword}|",
@@ -53,7 +54,7 @@
       "AuthorizationRoutePath": "api/user/authentication",
       "AuthorizationServiceKey": "User",
       "TokenEndpointPath": "api/oauth2/token",
-      "CacheMode": "MemoryCache" //MemoryCache or  gateway.Redis save token
+      "CacheMode": "ddlCache.Redis" //MemoryCache or  gateway.Redis save token
     },
     "AccessPolicy": {
       "Origins": [ "http://127.0.0.1:1927", "http://localhost:927" ],
@@ -75,6 +76,17 @@
     "HttpsPort": "${StageHttpsPorts}|449,446",
     "HttpPorts": "${StageHttpPorts}|285,282,283"
   },
+  "TransferContract": [
+    {
+      "Name": "webservice",
+      "Endpoint": "http://localhost:56398"
+    },
+    {
+      "Name": "restservice",
+      "Type": "Rest",
+      "Endpoint": "http://localhost:53023"
+    }
+  ],
   "Dns": {
     "RootDnsAddress": "192.168.1.1",
     "QueryTimeout": 1000
@@ -121,6 +133,17 @@
       "IgnoreExtensions": true,
       "EmitOnPing": false
     }
+  },
+  "LiveStream": {
+    "RtmpPort": 76, //rtmp 端口
+    "HttpFlvPort": 8080, //HttpFlv 端口
+    "RtspPort": 46,
+    "RtpPort": 47,
+    "SaveRtspFilePath": "\\video",
+    "EnableLog": true, //是否启用log
+    "EnableHttpFlv": true,
+    "RouteTemplate": "live1", //直播服务路由规则名称，可以根据规则设置，比如集群节点2，可以设置live2, 集群节点3，可以设置live3
+    "ClusterNode": 2 //集群节点数里，会根据routetemplate 转推流
   },
   "EventBus": {
     "EventBusConnection": "${EventBusConnection}|localhost",

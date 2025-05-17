@@ -1,7 +1,4 @@
 ﻿[*.cs]
 
-# CS8601: 引用类型赋值可能为 null。
-dotnet_diagnostic.CS8601.severity = none
-
-# CS8618: 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
-dotnet_diagnostic.CS8618.severity = none
+# IDE0058: 永远不会使用表达式值
+csharp_style_unused_value_expression_statement_preference = unused_local_variable:silent

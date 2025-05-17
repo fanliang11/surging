@@ -8,27 +8,27 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DeviceGateway.Runtime.Device.Message.Function
 {
-    internal class FunctionInvokeMessageReply : CommonDeviceMessageReply<FunctionInvokeMessageReply>
+    public class FunctionInvokeMessageReply : CommonDeviceMessageReply<FunctionInvokeMessageReply>
     {
-        public override MessageType MessageType { get; set; } = MessageType.INVOKE_FUNCTION_REPLY;
+        public override MessageType MessageType { get; set; } = MessageType.CALL_FUNCTION_REPLY;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        private string FunctionId { get; set; }
+        public string FunctionId { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        private object Output { get; set; }
+        public object Outputs { get; set; }
 
         public void FromJson(JsonObject jsonObject)
         {
            base.FromJson(jsonObject);
             this.FunctionId = jsonObject["functionId"].GetValue<string>();
-            this.Output = jsonObject["output"].GetValue<object>();
+            this.Outputs = jsonObject["output"].GetValue<object>();
         }
 
 
         public FunctionInvokeMessageReply Success(Object output)
         {
-            this.Output = output;
+            this.Outputs = output;
             IsSuccess = true;
             return this;
                     
@@ -40,7 +40,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Device.Message.Function
                                                          object output)
         { 
             FunctionId=functionId;
-            Output=output;
+            Outputs=output;
             IsSuccess=true;
             DeviceId=deviceId;
             MessageId=messageId;

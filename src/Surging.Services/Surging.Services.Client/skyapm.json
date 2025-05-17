@@ -3,7 +3,7 @@
     "ServiceName": "Surging.Services.Client",
     "Namespace": "",
     "HeaderVersions": [
-      "sw6"
+      "sw8"
     ],
     "Sampling": {
       "SamplePer3Secs": -1,
@@ -15,7 +15,7 @@
     },
     "Transport": {
       "Interval": 3000,
-      "ProtocolVersion": "v6",
+      "ProtocolVersion": "v8",
       "QueueSize": 30000,
       "BatchSize": 3000,
       "gRPC": {

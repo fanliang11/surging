@@ -15,7 +15,7 @@ namespace Surging.Core.Consul.WatcherProvider.Implementation
             this.watchManager = watchManager;
         }
 
-        protected override ConcurrentDictionary<string, HashSet<Watcher>> GetWatches()
+        protected override Dictionary<string, HashSet<Watcher>> GetWatches()
         {
             return watchManager.DataWatches;
         }

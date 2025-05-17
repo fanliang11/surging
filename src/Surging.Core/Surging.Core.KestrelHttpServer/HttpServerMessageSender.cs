@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Surging.Core.CPlatform.Configurations;
 using Surging.Core.CPlatform.Diagnostics;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
+using Surging.Core.KestrelHttpServer.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,36 +35,54 @@ namespace Surging.Core.KestrelHttpServer
         }
 
         public async Task SendAndFlushAsync(TransportMessage message)
-        { 
-            var httpMessage = message.GetContent<HttpResultMessage<Object>>();
-            var actionResult= httpMessage.Entity as IActionResult;
-            WirteDiagnostic(message);
-            if (actionResult == null)
+        {
+            try
             {
-                var text = _serializer.Serialize(message.Content);
-                var data = Encoding.UTF8.GetBytes(text);
-                var contentLength = data.Length;
-                _context.Response.Headers.Add("Content-Type", "application/json;charset=utf-8");
-                _context.Response.Headers.Add("Content-Length", contentLength.ToString());
-                await _context.Response.WriteAsync(text);
-            }
-            else
-            {
-                await actionResult.ExecuteResultAsync(new ActionContext
+                var httpMessage = message.GetContent<HttpResultMessage<Object>>();
+                var actionResult = httpMessage.Entity as IActionResult;
+                WirteDiagnostic(message);
+                if (actionResult == null)
                 {
-                    HttpContext = _context,
-                    Message = message
-                });
+                    var text = "";
+                    if (CPlatform.AppConfig.ServerOptions.HttpResultContract == HttpResultContract.Service)
+                        text = _serializer.Serialize(httpMessage.Entity);
+                    else
+                        text = _serializer.Serialize(message.Content);
+                    var data = Encoding.UTF8.GetBytes(text);
+                    var contentLength = data.Length;
+                    _context.Response.Headers.Add("Content-Type", "application/json;charset=utf-8");
+                    _context.Response.Headers.Add("Content-Length", contentLength.ToString());
+                    await _context.Response.WriteAsync(text);
+                }
+                else
+                {
+                    await actionResult.ExecuteResultAsync(new ActionContext
+                    {
+                        HttpContext = _context,
+                        Message = message
+                    });
+                }
+            }
+            finally
+            {
+                RestContext.GetContext().Clear();
             }
         }
 
-        public async Task SendAndFlushAsync(string payload, Dictionary<string,string> headers)
+        public async Task SendAndFlushAsync(string payload, Dictionary<string, string> headers)
         {
-            foreach (var header in headers)
+            try
             {
-                _context.Response.Headers.Add(header.Key,header.Value);
+                foreach (var header in headers)
+                {
+                    _context.Response.Headers.Add(header.Key, header.Value);
+                }
+                await _context.Response.WriteAsync(payload);
             }
-            await _context.Response.WriteAsync(payload);
+            finally
+            {
+                RestContext.GetContext().Clear();
+            }
         }
 
         public async Task SendAsync(TransportMessage message)

@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.Caching;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
+using Surging.Core.Configuration.Apollo.Configurations;
+using Surging.Core.Configuration.Apollo.Extensions;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
@@ -49,11 +51,13 @@ namespace Surging.Services.Server
                         Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
                 .UseServer(options => { })
+                .UseProxy()
                 .UseConsoleLifetime()
                 .Configure(build =>
                 build.AddCacheFile("${cachepath}|cacheSettings.json", basePath: AppContext.BaseDirectory, optional: false, reloadOnChange: true))
                   .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
+                     .Configure(build => build.UseApollo(apollo => apollo.AddNamespaceSurgingApollo("surgingSettings")))
                 .UseStartup<Startup>()
                 .Build();
 

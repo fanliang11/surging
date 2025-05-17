@@ -65,10 +65,11 @@ namespace Surging.Core.CPlatform.Routing.Template
 
         private static List<string> GetParameters(string text)
         {
-            var matchVale = new List<string>();
             string Reg = @"(?<={)[^{}]*(?=})";
-            string key = string.Empty;
-            foreach (Match m in Regex.Matches(text, Reg))
+            string key = string.Empty; 
+            var matches = Regex.Matches(text, Reg);
+            var matchVale = new List<string>(matches.Count);
+            foreach (Match m in matches)
             {
                 matchVale.Add(m.Value);
             }

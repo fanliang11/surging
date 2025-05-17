@@ -45,7 +45,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
                 MqttChannels.TryGetValue(deviceId, out MqttChannel mqttChannel);
                 if (mqttChannel != null)
                 {
-                    mqttChannel.SessionStatus = SessionStatus.CLOSE;
+                    mqttChannel.SessionStatus = SessionStatus.CLOSE; 
                     await mqttChannel.Close();
                     mqttChannel.Channel = null;
                 }
@@ -336,8 +336,8 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Services.Implementation
             foreach (var topic in topics)
             {
                 Topics.TryGetValue(topic, out IEnumerable<MqttChannel> comparisonValue);
-                var newValue = comparisonValue.Where(p => p != mqttChannel);
-                Topics.TryUpdate(topic, newValue, comparisonValue);
+                 var newValue = comparisonValue.Where(p => p.ClientId != mqttChannel.ClientId).ToList();
+               var result= Topics.AddOrUpdate(topic, newValue, (k,v)=> newValue);
             }
             return topics;
         }

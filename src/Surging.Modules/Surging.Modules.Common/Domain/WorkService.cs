@@ -22,7 +22,7 @@ namespace Surging.Modules.Common.Domain
         private readonly Queue<Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>> _queue = new Queue<Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>>();
         private readonly ConcurrentDictionary<string, DateTime> _keyValuePairs = new ConcurrentDictionary<string, DateTime>();
         private readonly IServiceProxyProvider _serviceProxyProvider;
-        private AtomicLong _atomic=new AtomicLong(1);
+        private AtomicLong _atomic = new AtomicLong(1);
         private const int EXECSIZE = 1;
         private CancellationToken _token;
 
@@ -44,11 +44,11 @@ namespace Surging.Modules.Common.Domain
             var ruleWorkflow = GetSchedulerRuleWorkflow(script);
             var messageId = Guid.NewGuid().ToString();
             _keyValuePairs.AddOrUpdate(messageId, DateTime.Now, (key, value) => DateTime.Now);
-            _queue.Enqueue(new Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>(new Message() { MessageId= messageId,Config=new SchedulerConfig() {  IsPersistence=true} }, GetRuleEngine(ruleWorkflow), ruleWorkflow));
+            _queue.Enqueue(new Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>(new Message() { MessageId = messageId, Config = new SchedulerConfig() { IsPersistence = true } }, GetRuleEngine(ruleWorkflow), ruleWorkflow));
 
         }
 
-        public  Task<bool> AddWork(Message message)
+        public Task<bool> AddWork(Message message)
         {
             var ruleWorkflow = GetSchedulerRuleWorkflow(message.Config.Script);
             _keyValuePairs.AddOrUpdate(message.MessageId, DateTime.Now, (key, value) => DateTime.Now);
@@ -56,12 +56,12 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult(true);
         }
 
-        protected override async  Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             try
             {
                 _token = stoppingToken;
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now); 
+                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 _queue.TryDequeue(out Tuple<Message, RulesEngine.RulesEngine, SchedulerRuleWorkflow>? message);
                 if (message != null)
                 {
@@ -77,7 +77,8 @@ namespace Surging.Modules.Common.Domain
 
                 }
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 _logger.LogError("WorkService execute error, message：{message} ,trace info:{trace} ", ex.Message, ex.StackTrace);
             }
         }
@@ -85,7 +86,7 @@ namespace Surging.Modules.Common.Domain
         public async Task StartAsync()
         {
             if (_token.IsCancellationRequested)
-            { 
+            {
                 await base.StartAsync(_token);
             }
         }
@@ -94,7 +95,7 @@ namespace Surging.Modules.Common.Domain
         {
             if (!_token.IsCancellationRequested)
             {
-               await  base.StopAsync(_token);
+                await base.StopAsync(_token);
             }
         }
 
@@ -106,7 +107,7 @@ namespace Surging.Modules.Common.Domain
                 {
                     if (temperature)
                     {
-                       await  ExecuteByPlanAsyn(message);
+                        await ExecuteByPlanAsyn(message);
                         _logger.LogInformation("Worker exec at: {time}", DateTimeOffset.Now);
 
                     }

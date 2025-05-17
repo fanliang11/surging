@@ -11,14 +11,15 @@ using System.Threading.Tasks;
 namespace Surging.Core.DeviceGateway.Runtime.Device
 {
     public interface IDeviceMessageReply: IDeviceMessage,IMessage
-    {
-      
-
+    { 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         string Code { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         string Message { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string MessageId { get; set; }
 
         bool IsSuccess { get; set; }
 

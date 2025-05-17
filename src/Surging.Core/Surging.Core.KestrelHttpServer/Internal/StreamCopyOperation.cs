@@ -55,8 +55,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
 
         public static async Task CopyToAsync(Stream source, Stream destination, long? count, int bufferSize, CancellationToken cancel)
         {
-            long? bytesRemaining = count;
-
+            long? bytesRemaining = count; 
             var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
             try
             {

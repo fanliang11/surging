@@ -8,6 +8,7 @@ using Surging.Core.CPlatform.Mqtt;
 using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
+using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.Protocol.Mqtt.Diagnostics;
 using Surging.Core.Protocol.Mqtt.Implementation;
@@ -18,6 +19,7 @@ using Surging.Core.Protocol.Mqtt.Internal.Services;
 using Surging.Core.Protocol.Mqtt.Internal.Services.Implementation;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace Surging.Core.Protocol.Mqtt
@@ -36,6 +38,7 @@ namespace Surging.Core.Protocol.Mqtt
         protected override void RegisterBuilder(ContainerBuilderWrapper builder)
         {
             base.RegisterBuilder(builder);
+            builder.RegisterType<MqttMessageSender>().As<IMqttMessageSender>().SingleInstance();
             builder.RegisterType<MqttTransportDiagnosticProcessor>().As<ITracingDiagnosticProcessor>().SingleInstance();
             builder.RegisterType(typeof(DefaultMqttServiceFactory)).As(typeof(IMqttServiceFactory)).SingleInstance();
             builder.RegisterType(typeof(DefaultMqttBrokerEntryManager)).As(typeof(IMqttBrokerEntryManger)).SingleInstance();
@@ -91,7 +94,9 @@ namespace Surging.Core.Protocol.Mqtt
                 var messageListener = provider.Resolve<DotNettyMqttServerMessageListener>();
                 return new DefaultServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var ipEndPoint = endPoint as IPEndPoint;
+                    if (ipEndPoint.Port > 0)
+                        await messageListener.StartAsync(endPoint);
                     return messageListener;
                 }, null);
 
@@ -113,7 +118,9 @@ namespace Surging.Core.Protocol.Mqtt
                 var messageListener = provider.Resolve<DotNettyMqttServerMessageListener>();
                 return new MqttServiceHost(async endPoint =>
                 {
-                    await messageListener.StartAsync(endPoint);
+                    var ipEndPoint = endPoint as IPEndPoint;
+                    if (ipEndPoint.Port > 0)
+                        await messageListener.StartAsync(endPoint);
                     return messageListener;
                 });
 
