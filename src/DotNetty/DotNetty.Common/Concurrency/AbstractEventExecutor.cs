@@ -30,6 +30,7 @@ namespace DotNetty.Common.Concurrency
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using DotNetty.Common.Internal.Logging;
@@ -273,6 +274,7 @@ namespace DotNetty.Common.Concurrency
         /// Try to execute the given <see cref="IRunnable"/> and just log if it throws a <see cref="Exception"/>.
         /// </summary>
         /// <param name="task"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static void SafeExecute(IRunnable task)
         {
             try

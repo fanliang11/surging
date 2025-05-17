@@ -75,6 +75,7 @@ namespace DotNetty.Transport.Channels
         public virtual void Write(IChannelHandlerContext context, object message, IPromise promise) => context.WriteAsync(message, promise);
 
         [Skip]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Flush(IChannelHandlerContext context) => context.Flush();
 
         [Skip]

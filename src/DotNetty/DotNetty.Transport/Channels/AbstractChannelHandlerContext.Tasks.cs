@@ -23,6 +23,7 @@
 namespace DotNetty.Transport.Channels
 {
     using System.Net;
+    using System.Runtime.CompilerServices;
     using DotNetty.Common;
     using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal;
@@ -257,6 +258,7 @@ namespace DotNetty.Transport.Channels
                 _handle = handle;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Run()
             {
                 try

@@ -30,6 +30,7 @@ namespace DotNetty.Transport.Channels
 {
     using System;
     using System.Net;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using DotNetty.Buffers;
@@ -254,6 +255,7 @@ namespace DotNetty.Transport.Channels
 
         public Task DeregisterAsync(IPromise promise) => _pipeline.DeregisterAsync(promise);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IChannel Flush()
         {
             _ = _pipeline.Flush();

@@ -441,6 +441,7 @@ namespace DotNetty.Transport.Channels
             return this;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void InvokeChannelRead(AbstractChannelHandlerContext next, object msg)
         {
             if (msg is null) { ThrowHelper.ThrowArgumentNullException(DotNetty.Transport.ExceptionArgument.msg); }
@@ -482,6 +483,7 @@ namespace DotNetty.Transport.Channels
             return this;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void InvokeChannelReadComplete(AbstractChannelHandlerContext next)
         {
             IEventExecutor nextExecutor = next.Executor;
@@ -767,7 +769,7 @@ namespace DotNetty.Transport.Channels
                 _ = DeregisterAsync(promise);
             }
         }
-
+         
         public IChannelHandlerContext Read()
         {
             AbstractChannelHandlerContext next = FindContextOutbound(SkipFlags.Read);
@@ -784,6 +786,7 @@ namespace DotNetty.Transport.Channels
             return this;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void InvokeRead()
         {
             if (InvokeHandler)
@@ -811,6 +814,7 @@ namespace DotNetty.Transport.Channels
             return promise.Task;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void InvokeWrite(object msg, IPromise promise)
         {
             if (InvokeHandler)
@@ -824,6 +828,7 @@ namespace DotNetty.Transport.Channels
 
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void InvokeWrite0(object msg, IPromise promise)
         {
             try
@@ -836,6 +841,7 @@ namespace DotNetty.Transport.Channels
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IChannelHandlerContext Flush()
         {
             AbstractChannelHandlerContext next = FindContextOutbound(SkipFlags.Flush);
@@ -852,6 +858,7 @@ namespace DotNetty.Transport.Channels
             return this;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void InvokeFlush()
         {
             if (InvokeHandler)
@@ -864,6 +871,7 @@ namespace DotNetty.Transport.Channels
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void InvokeFlush0()
         {
             try
@@ -972,6 +980,7 @@ namespace DotNetty.Transport.Channels
             return ctx;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         AbstractChannelHandlerContext FindContextOutbound(int mask)
         {
             AbstractChannelHandlerContext ctx = this;

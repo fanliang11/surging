@@ -95,6 +95,7 @@ namespace DotNetty.Transport.Channels
             return new CompatibleConcurrentQueue<IRunnable>();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void Run()
         {
             while (true)

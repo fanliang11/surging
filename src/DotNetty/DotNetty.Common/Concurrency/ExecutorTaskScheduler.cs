@@ -29,6 +29,7 @@
 namespace DotNetty.Common.Concurrency
 {
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
 
     public sealed class ExecutorTaskScheduler : TaskScheduler
@@ -41,6 +42,7 @@ namespace DotNetty.Common.Concurrency
             _executor = executor;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void QueueTask(Task task)
         {
             if (_started)
@@ -81,6 +83,7 @@ namespace DotNetty.Common.Concurrency
                 _task = task;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Run() => _scheduler.TryExecuteTask(_task);
         }
     }

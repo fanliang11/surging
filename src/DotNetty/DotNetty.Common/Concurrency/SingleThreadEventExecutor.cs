@@ -307,6 +307,7 @@ namespace DotNetty.Common.Concurrency
 
         #region -- Utilities --
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual long GetTimeFromStart()
         {
             return PreciseTime.NanoTime();

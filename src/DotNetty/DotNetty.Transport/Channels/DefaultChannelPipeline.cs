@@ -1256,6 +1256,7 @@ namespace DotNetty.Transport.Channels
             public void Write(IChannelHandlerContext ctx, object message, IPromise promise) => ctx.WriteAsync(message, promise);
 
             [Skip]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Flush(IChannelHandlerContext context) => context.Flush();
 
             [Skip]

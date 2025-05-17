@@ -33,6 +33,7 @@ namespace DotNetty.Transport.Channels
     using System.IO;
     using System.Net;
     using System.Net.Sockets;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using DotNetty.Common.Concurrency;
@@ -75,6 +76,7 @@ namespace DotNetty.Transport.Channels
             public ChannelOutboundBuffer OutboundBuffer => Volatile.Read(ref v_outboundBuffer);
 
             [Conditional("DEBUG")]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void AssertEventLoop() => Debug.Assert(SharedConstants.False >= (uint)Volatile.Read(ref _channel.v_registered) || Volatile.Read(ref _channel.v_eventLoop).InEventLoop);
 
             public Task RegisterAsync(IEventLoop eventLoop)
@@ -581,7 +583,7 @@ namespace DotNetty.Transport.Channels
                 outboundBuffer.AddFlush();
                 Flush0();
             }
-
+             
             protected virtual void Flush0()
             {
                 if (_inFlush0)

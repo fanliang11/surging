@@ -65,7 +65,7 @@ namespace Surging.Core.KestrelHttpServer
             }
             finally
             {
-                RestContext.GetContext().Clear();
+                RestContext.RemoveContext();
             }
         }
 
@@ -81,7 +81,7 @@ namespace Surging.Core.KestrelHttpServer
             }
             finally
             {
-                RestContext.GetContext().Clear();
+                RestContext.RemoveContext();
             }
         }
 

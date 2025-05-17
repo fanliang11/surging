@@ -24,6 +24,7 @@ namespace DotNetty.Transport.Channels.Sockets
 {
     using System;
     using System.Net.Sockets;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
 
     partial class AbstractSocketChannel<TChannel, TUnsafe>
@@ -38,6 +39,7 @@ namespace DotNetty.Transport.Channels.Sockets
 
         private static void OnConnectCompletedSync(object u, object e) => ((ISocketChannelUnsafe)u).FinishConnect((SocketChannelAsyncOperation<TChannel, TUnsafe>)e);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void OnReadCompletedSync(object u, object e) => ((ISocketChannelUnsafe)u).FinishRead((SocketChannelAsyncOperation<TChannel, TUnsafe>)e);
 
         private static void OnWriteCompletedSync(object u, object e) => ((ISocketChannelUnsafe)u).FinishWrite((SocketChannelAsyncOperation<TChannel, TUnsafe>)e);

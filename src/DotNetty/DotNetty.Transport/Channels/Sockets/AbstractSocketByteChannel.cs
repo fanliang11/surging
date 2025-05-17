@@ -80,6 +80,7 @@ namespace DotNetty.Transport.Channels.Sockets
                     socketChannelConfiguration.AllowHalfClosure;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void ScheduleSocketRead()
         {
             var operation = ReadOperation;

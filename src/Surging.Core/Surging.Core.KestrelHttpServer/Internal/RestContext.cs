@@ -19,13 +19,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             htpContextAccessor.HttpContext.Items.Add(key,value);
         }
 
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Clear()
-        {
-            var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
-            htpContextAccessor.HttpContext.Items.Clear();
-        }
+ 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object GetAttachment(string key)
@@ -39,6 +33,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
             return null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public  void RemoveContextParameters(string key)
         { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
@@ -47,6 +42,7 @@ namespace Surging.Core.KestrelHttpServer.Internal
 
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Dictionary<String, Object> GetContextParameters()
         { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
@@ -66,19 +62,19 @@ namespace Surging.Core.KestrelHttpServer.Internal
         { 
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static RestContext GetContext()
         {
 
             return new RestContext();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveContext()
         { 
             var htpContextAccessor = ServiceLocator.GetService<IHttpContextAccessor>();
             htpContextAccessor.HttpContext.Items.Clear();
-            
-        }
-
-   
+            htpContextAccessor.HttpContext = null; 
+        } 
     }
 }

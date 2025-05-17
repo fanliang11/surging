@@ -27,8 +27,8 @@ namespace Surging.Core.CPlatform.Transport.Implementation
         private readonly ILogger _logger;
         private readonly IServiceExecutor _serviceExecutor;
 
-        private readonly ConcurrentDictionary<string, ManualResetValueTaskSource2<TransportMessage>> _resultDictionary =
-            new ConcurrentDictionary<string, ManualResetValueTaskSource2<TransportMessage>>();
+        private readonly ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>> _resultDictionary =
+            new ConcurrentDictionary<string, ManualResetValueTaskSource<TransportMessage>>();
         private readonly DiagnosticListener _diagnosticListener;
 
         #endregion Field
@@ -122,18 +122,19 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备获取Id为：{id}的响应内容。");
 
-            var task = new ManualResetValueTaskSource2<TransportMessage>();
+            var task = new ManualResetValueTaskSource<TransportMessage>();
             _resultDictionary.TryAdd(id, task);
             try
             {
-                var valueTask =  task.GetTask();
-                var result = valueTask.IsCompletedSuccessfully ? valueTask.Result :await valueTask.AsTask().WaitAsync(cancellationToken);
+                //var valueTask =  task.GetTask();
+                //var result = valueTask.IsCompletedSuccessfully ? valueTask.Result :await valueTask.AsTask().WaitAsync(cancellationToken);
+                var result =await task.AwaitValue(cancellationToken);
                 return result.GetContent<RemoteInvokeResultMessage>();
             }
             finally
             {
                 //删除回调任务
-                ManualResetValueTaskSource2<TransportMessage> value;
+                ManualResetValueTaskSource<TransportMessage> value;
                 _resultDictionary.TryRemove(id, out value);
                 value.Reset();
             }
@@ -144,7 +145,7 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             if (_logger.IsEnabled(LogLevel.Trace))
                 _logger.LogTrace("服务消费者接收到消息。");
 
-            ManualResetValueTaskSource2<TransportMessage> task;
+            ManualResetValueTaskSource<TransportMessage> task;
             if (!_resultDictionary.TryGetValue(message.Id, out task))
                 return;
 

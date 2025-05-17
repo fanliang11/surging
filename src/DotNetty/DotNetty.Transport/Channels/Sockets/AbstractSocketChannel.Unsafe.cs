@@ -25,6 +25,7 @@ namespace DotNetty.Transport.Channels.Sockets
     using System;
     using System.Diagnostics;
     using System.Net;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
@@ -173,6 +174,7 @@ namespace DotNetty.Transport.Channels.Sockets
 
             public abstract void FinishRead(SocketChannelAsyncOperation<TChannel, TUnsafe> operation);
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             protected sealed override void Flush0()
             {
                 // Flush immediately only when there's no pending flush.
