@@ -6,7 +6,8 @@
     "MappingIp": "${Mapping_ip}",
     "MappingPort": "${Mapping_Port}",
     "Token": "true",
-    "Libuv": true,
+    "Libuv": false,
+    "DisableDiagnostic": true,
     "Protocol": "${Protocol}|Tcp", //Http��Tcp��None
     "RootPath": "${RootPath}|d:\\microsurging",
     "Ports": {

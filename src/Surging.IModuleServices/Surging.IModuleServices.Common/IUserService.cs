@@ -120,7 +120,7 @@ new Surging.IModuleServices.Common.Models.UserModel
         /// 测试无参数调用
         /// </summary>
         /// <returns>返回是否成功</returns>
-        [Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetDictionary", L2Key = "GetDictionary", EnableL2Cache = true, CacheSectionType = "ddlCache", Mode = Metadatas.CacheTargetType.Redis, Time = 480, EnableStageCache = true)]
+        //[Metadatas.ServiceCacheIntercept(Metadatas.CachingMethod.Get, Key = "GetDictionary", L2Key = "GetDictionary", EnableL2Cache = true, CacheSectionType = "ddlCache", Mode = Metadatas.CacheTargetType.Redis, Time = 480, EnableStageCache = true)]
         Task<bool> GetDictionary();
 
        /// <summary>

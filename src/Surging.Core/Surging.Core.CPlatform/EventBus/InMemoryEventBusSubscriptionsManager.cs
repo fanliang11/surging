@@ -29,13 +29,17 @@ namespace Surging.Core.CPlatform.EventBus
             where TH : IIntegrationEventHandler<T>
         {
             var key = GetEventKey<T>();
-            if (!HasSubscriptionsForEvent<T>())
+            if (!_consumers.ContainsKey(handler))
             {
-                _handlers.Add(key, new List<Delegate>());
+                if (!HasSubscriptionsForEvent<T>())
+                {
+                    _handlers.Add(key, new List<Delegate>());
+                }
+                _handlers[key].Add(handler);
+
+                _consumers.Add(handler, consumerName);
+                _eventTypes.Add(typeof(T));
             }
-            _handlers[key].Add(handler);
-            _consumers.Add(handler, consumerName);
-            _eventTypes.Add(typeof(T));
         }
 
         public void RemoveSubscription<T, TH>()

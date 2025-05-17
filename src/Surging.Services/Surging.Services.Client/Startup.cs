@@ -76,7 +76,6 @@ namespace Surging.Services.Client
         /// <param name="serviceProxyFactory"></param>
         public static void Test(IServiceProxyFactory serviceProxyFactory)
         {
-            var  tracingContext =  ServiceLocator.GetService<ITracingContext>();
             Task.Run(async () =>
             {
                 //RpcContext.GetContext().SetAttachment("xid",124);
@@ -121,9 +120,9 @@ namespace Surging.Services.Client
                     var watch = Stopwatch.StartNew();
                     for (var i = 0; i < 10000; i++)
                     {
-                        //var a = userProxy.GetDictionary().Result;
+                         var a =await userProxy.GetDictionary();
                         //var a = await userProxy.GetDictionary();
-                        var a = await userProxy.ReactiveTest(2);
+                       // var a = await userProxy.ReactiveTest(2);
                         //var result = serviceProxyProvider.Invoke<object>(new Dictionary<string, object>(), "api/user/GetDictionary", "User").Result;
                     }
                     watch.Stop();
