@@ -20,8 +20,8 @@ namespace Surging.Core.CPlatform.DependencyResolution
     {
         #region 字段
         private static readonly ServiceResolver _defaultInstance = new ServiceResolver();
-       private readonly ConcurrentDictionary<ValueTuple<string, string>, object> _initializers =
-      new ConcurrentDictionary<ValueTuple<string, string>, object>(Environment.ProcessorCount, 230);
+        private readonly ConcurrentDictionary<ValueTuple<string, string>, WeakReference<object>> _initializers =
+       new ConcurrentDictionary<ValueTuple<string, string>, WeakReference<object>>(Environment.ProcessorCount, 230);
 
         #endregion
 
@@ -40,19 +40,18 @@ namespace Surging.Core.CPlatform.DependencyResolution
             DebugCheck.NotNull(value);
             // DebugCheck.NotNull(key);
 
-            _initializers.TryAdd(ValueTuple.Create(value.GetType().FullName, key), value);
+            _initializers.TryAdd(ValueTuple.Create(value.GetType().FullName, key), new WeakReference<object>(value));
             var interFaces = value.GetType().GetTypeInfo().GetInterfaces();
             foreach (var interFace in interFaces)
             {
-                _initializers.TryAdd(ValueTuple.Create(interFace.FullName, key), value);
+                _initializers.TryAdd(ValueTuple.Create(interFace.FullName, key), new WeakReference<object>(value));
             }
         }
 
-        
-        public virtual void Register(string key, object value,Type type)
+        public virtual void Register(string key, object value, Type type)
         {
             DebugCheck.NotNull(value);
-            _initializers.TryAdd(ValueTuple.Create(type?.FullName, key), value);
+            _initializers.TryAdd(ValueTuple.Create(type?.FullName, key), new WeakReference<object>(value));
         }
 
         /// <summary>
@@ -79,9 +78,20 @@ namespace Surging.Core.CPlatform.DependencyResolution
         /// </remarks>
         public virtual object GetService(Type type, string key)
         {
-            object result;
-             _initializers.TryGetValue(ValueTuple.Create(type?.FullName,  key),out result);
-            return result;
+            object result = null;
+            var valueTuple = ValueTuple.Create(type?.FullName, key);
+            _initializers.TryGetValue(valueTuple, out WeakReference<object> weekRef);
+            try
+            {
+                if (weekRef != null)
+                    weekRef.TryGetTarget(out result);
+                return result;
+            }
+            finally
+            {
+                if (result == null || weekRef == null)
+                    _initializers.Remove(valueTuple, out WeakReference<object> weekRef1);
+            }
         }
 
         /// <summary>
@@ -99,8 +109,6 @@ namespace Surging.Core.CPlatform.DependencyResolution
             return this.GetServiceAsServices(type, key);
         }
         #endregion
-
-
     }
-
 }
+
