@@ -18,10 +18,9 @@ namespace Surging.Core.Caching.DependencyResolution
     {
         #region 字段
         private static readonly ServiceResolver _defaultInstance = new ServiceResolver();
-        private readonly ConcurrentDictionary<Tuple<Type, string>, object> _initializers =
-            new ConcurrentDictionary<Tuple<Type, string>, object>();
+        private readonly ConcurrentDictionary<ValueTuple<string, string>, object> _initializers =
+            new ConcurrentDictionary<ValueTuple<string, string>, object>();
         #endregion
-
         #region 公共方法
         /// <summary>
         /// 注册对象添加到IOC容器
@@ -37,12 +36,18 @@ namespace Surging.Core.Caching.DependencyResolution
             DebugCheck.NotNull(value);
             // DebugCheck.NotNull(key);
 
-            _initializers.GetOrAdd(Tuple.Create(value.GetType(), key), value);
+            _initializers.TryAdd(ValueTuple.Create(value.GetType().FullName, key), value);
             var interFaces = value.GetType().GetTypeInfo().GetInterfaces();
             foreach (var interFace in interFaces)
             {
-                _initializers.GetOrAdd(Tuple.Create(interFace, key), value);
+                _initializers.TryAdd(ValueTuple.Create(interFace.FullName, key), value);
             }
+        }
+
+        public virtual void Register(string key, object value, Type type)
+        {
+            DebugCheck.NotNull(value);
+            _initializers.TryAdd(ValueTuple.Create(type?.FullName, key), value);
         }
 
         /// <summary>
@@ -67,10 +72,10 @@ namespace Surging.Core.Caching.DependencyResolution
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public virtual object GetService(Type type, object key)
+        public virtual object GetService(Type type, string key)
         {
             object result;
-            _initializers.TryGetValue(Tuple.Create(type, key == null ? null : key.ToString()), out result);
+            _initializers.TryGetValue(ValueTuple.Create(type?.FullName, key == null ? null : key), out result);
             return result;
         }
 
@@ -84,7 +89,7 @@ namespace Surging.Core.Caching.DependencyResolution
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public IEnumerable<object> GetServices(Type type, object key)
+        public IEnumerable<object> GetServices(Type type, string key)
         {
             return this.GetServiceAsServices(type, key);
         }

@@ -36,13 +36,6 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>开启缓存</label>
-        <div class="col-sm-9 control-sm">
-            @Html.RadioButtonFor(p => p.RequestCacheEnabled, true, new { name = "RequestCacheEnabled" }) <label>是</label>
-            @Html.RadioButtonFor(p => p.RequestCacheEnabled, false, new { name = "RequestCacheEnabled" }) <label>否</label>
-        </div>
-    </div>
-    <div class="form-group">
         <label class="col-sm-2 control-label no-padding-right"><span class="red">*</span>错误率</label>
         <div class="col-sm-9">
             @Html.TextBoxFor(p => p.BreakeErrorThresholdPercentage, new { autocomplete = "off", placeholder = "错误率", @class = "form-control" })

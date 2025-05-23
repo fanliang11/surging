@@ -26,6 +26,7 @@ namespace Surging.Core.CPlatform.Support.Attributes
                 BreakerRequestVolumeThreshold = AppConfig.ServerOptions.BreakerRequestVolumeThreshold;
                 MaxConcurrentRequests = AppConfig.ServerOptions.MaxConcurrentRequests;
                 FallBackName = AppConfig.ServerOptions.FallBackName;
+                ShuntStrategy = AppConfig.ServerOptions.ShuntStrategy;
             }
         }
         /// <summary>

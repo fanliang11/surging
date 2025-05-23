@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0058: 永远不会使用表达式值
+csharp_style_unused_value_expression_statement_preference = unused_local_variable:silent

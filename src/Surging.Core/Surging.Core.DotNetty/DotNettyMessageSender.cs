@@ -1,9 +1,11 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
@@ -59,7 +61,7 @@ namespace Surging.Core.DotNetty
         /// 发送消息。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
@@ -70,11 +72,11 @@ namespace Surging.Core.DotNetty
         /// 发送消息并清空缓冲区。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
-            await _channel.WriteAndFlushAsync(buffer);
+             await _channel.WriteAndFlushAsync(buffer);
         }
 
         #endregion Implementation of IMessageSender
@@ -98,7 +100,7 @@ namespace Surging.Core.DotNetty
         /// 发送消息。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);
@@ -109,7 +111,7 @@ namespace Surging.Core.DotNetty
         /// 发送消息并清空缓冲区。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
             var buffer = GetByteBuffer(message);

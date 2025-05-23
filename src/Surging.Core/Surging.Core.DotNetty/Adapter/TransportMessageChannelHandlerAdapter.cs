@@ -1,10 +1,10 @@
 ﻿using DotNetty.Buffers;
-using DotNetty.Codecs.Http;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Surging.Core.DotNetty.Adapter
@@ -13,6 +13,7 @@ namespace Surging.Core.DotNetty.Adapter
     {
         private readonly ITransportMessageDecoder _transportMessageDecoder;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public TransportMessageChannelHandlerAdapter(ITransportMessageDecoder transportMessageDecoder)
         {
             _transportMessageDecoder = transportMessageDecoder;
@@ -23,11 +24,18 @@ namespace Surging.Core.DotNetty.Adapter
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
             var buffer = (IByteBuffer)message;
-             var data = new byte[buffer.ReadableBytes];
-             buffer.ReadBytes(data);
-             var transportMessage = _transportMessageDecoder.Decode(data);
-             context.FireChannelRead(transportMessage);
-             ReferenceCountUtil.Release(buffer); 
+            try
+            {
+                Span<byte> data = stackalloc byte[buffer.ReadableBytes];
+                buffer.ReadBytes(data);
+                var transportMessage = _transportMessageDecoder.Decode(data.ToArray());
+                context.FireChannelRead(transportMessage);
+            }
+            finally
+            {
+                ReferenceCountUtil.Release(buffer);
+                message = null;
+            }
         }
 
         #endregion Overrides of ChannelHandlerAdapter

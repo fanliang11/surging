@@ -16,12 +16,13 @@ using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider.Implementation;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Implementation;
+using Surging.Core.CPlatform.Runtime.Client;
+using Surging.Core.Consul.Internal;
 
 namespace Surging.Core.Consul
 {
     public class ConsulServiceCommandManager : ServiceCommandManagerBase, IDisposable
     {
-        private readonly ConsulClient _consul;
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly ILogger<ConsulServiceCommandManager> _logger;
@@ -29,43 +30,47 @@ namespace Surging.Core.Consul
         private ServiceCommandDescriptor[] _serviceCommands;
         private readonly ISerializer<string> _stringSerializer;
         private readonly IServiceRouteManager _serviceRouteManager;
+        private readonly IServiceHeartbeatManager _serviceHeartbeatManager;
+        private readonly IConsulClientProvider _consulClientFactory;
 
         public ConsulServiceCommandManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
         ISerializer<string> stringSerializer, IServiceRouteManager serviceRouteManager, IClientWatchManager manager, IServiceEntryManager serviceEntryManager,
-            ILogger<ConsulServiceCommandManager> logger, bool enableChildrenMonitor = false) : base(stringSerializer, serviceEntryManager)
+            ILogger<ConsulServiceCommandManager> logger,
+            IServiceHeartbeatManager serviceHeartbeatManager, IConsulClientProvider consulClientFactory) : base(stringSerializer, serviceEntryManager)
         {
             _configInfo = configInfo;
             _serializer = serializer;
             _logger = logger;
+            _consulClientFactory = consulClientFactory;
             _stringSerializer = stringSerializer;
             _manager = manager;
             _serviceRouteManager = serviceRouteManager;
-            _consul = new ConsulClient(config =>
-            {
-                config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-
-            }, null, h => { h.UseProxy = false; h.Proxy = null; });
-             EnterServiceCommands().Wait();
+            _serviceHeartbeatManager = serviceHeartbeatManager;
+            EnterServiceCommands().Wait();
             _serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
         public override async Task ClearAsync()
         {
-            var queryResult = await _consul.KV.List(_configInfo.CommandPath);
-
-            var response = queryResult.Response;
-            if (response != null)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                foreach (var result in response)
+                //根据前缀获取consul结果
+                var queryResult = await client.KV.List(_configInfo.CommandPath);
+                var response = queryResult.Response;
+                if (response != null)
                 {
-                    await _consul.KV.DeleteCAS(result);
+                    //删除操作
+                    foreach (var result in response)
+                    {
+                        await client.KV.DeleteCAS(result);
+                    }
                 }
             }
         }
 
         public void Dispose()
         {
-            _consul.Dispose();
         }
 
         /// <summary>
@@ -78,9 +83,36 @@ namespace Surging.Core.Consul
             return _serviceCommands;
         }
 
+        public void NodeChange(byte[] newData)
+        {
+            var newCommand = GetServiceCommand(newData);
+            var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
+            if (oldCommand.Equals(newCommand))
+                return;
+            lock (_serviceCommands)
+            {
+                //删除旧服务命令，并添加上新的服务命令。
+                _serviceCommands =
+                    _serviceCommands
+                        .Where(i => i.ServiceId != newCommand.ServiceId)
+                        .Concat(new[] { newCommand }).ToArray();
+            }
+
+            if (newCommand == null)
+                //触发删除事件。
+                OnRemoved(new ServiceCommandEventArgs(oldCommand));
+
+            else if (oldCommand == null)
+                OnCreated(new ServiceCommandEventArgs(newCommand));
+            else
+                //触发服务命令变更事件。
+                OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+         
+
         public void NodeChange(byte[] oldData, byte[] newData)
         {
-            if (DataEquals(oldData, newData))
+            if (oldData != null && DataEquals(oldData, newData))
                 return;
 
             var newCommand = GetServiceCommand(newData);
@@ -103,12 +135,25 @@ namespace Surging.Core.Consul
             else if (oldCommand == null)
                 OnCreated(new ServiceCommandEventArgs(newCommand));
             else
-            //触发服务命令变更事件。
-            OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+                //触发服务命令变更事件。
+                OnChanged(new ServiceCommandChangedEventArgs(newCommand, oldCommand));
+        }
+
+        public override ValueTask AddNodeMonitorWatcher(string serviceId)
+        { 
+            var path = $"{_configInfo.CommandPath}{serviceId}"; 
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+                (oldData, newData) => NodeChange(oldData, newData), tmpPath =>
+                {
+                    var index = tmpPath.LastIndexOf("/");
+                    return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                });
+            watcher.SetCurrentData(null);
+            return ValueTask.CompletedTask;
         }
 
         public void NodeChange(ServiceCommandDescriptor newCommand)
-        { 
+        {
             //得到旧的服务命令。
             var oldCommand = _serviceCommands.FirstOrDefault(i => i.ServiceId == newCommand.ServiceId);
 
@@ -126,33 +171,43 @@ namespace Surging.Core.Consul
 
         public override async Task SetServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
-            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
-                _logger.LogInformation("准备添加服务命令。");
-            foreach (var serviceCommand in serviceCommands)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                var nodeData = _serializer.Serialize(serviceCommand);
-                var keyValuePair = new KVPair($"{_configInfo.CommandPath}{serviceCommand.ServiceId}") { Value = nodeData };
-                var isSuccess=  await _consul.KV.Put(keyValuePair);
-                if (isSuccess.Response)
-                    NodeChange(serviceCommand);
-            } 
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                    _logger.LogInformation("准备添加服务命令。");
+                foreach (var serviceCommand in serviceCommands)
+                {
+                    var nodeData = _serializer.Serialize(serviceCommand);
+                    var keyValuePair = new KVPair($"{_configInfo.CommandPath}{serviceCommand.ServiceId}") { Value = nodeData };
+                    var isSuccess = await client.KV.Put(keyValuePair);
+                    if (isSuccess.Response)
+                        NodeChange(serviceCommand);
+                }
+            }
         }
 
         protected override async Task InitServiceCommandsAsync(IEnumerable<ServiceCommandDescriptor> serviceCommands)
         {
-            var commands = await GetServiceCommands(serviceCommands.Select(p => $"{ _configInfo.CommandPath}{ p.ServiceId}"));
+            var client = await GetConsulClient();
+            var response = await client.GetChildrenListAsync(_configInfo.CommandPath);
+            var commands = await GetServiceCommands(response);  //传参数到方法中  
             if (commands.Count() == 0 || _configInfo.ReloadOnChange)
-            { 
+            {
                 await SetServiceCommandsAsync(serviceCommands);
             }
         }
 
         private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
-        { 
-              _consul.KV.Delete($"{_configInfo.CommandPath}{e.Route.ServiceDescriptor.Id}").Wait();
+        {
+            var clients = _consulClientFactory.GetClients().Result;
+            foreach (var client in clients)
+            {
+                client.KV.Delete($"{_configInfo.CommandPath}{e.Route.ServiceDescriptor.Id}").Wait();
+            }
         }
 
-      
+
 
         private ServiceCommandDescriptor GetServiceCommand(byte[] data)
         {
@@ -168,7 +223,7 @@ namespace Surging.Core.Consul
 
         private ServiceCommandDescriptor[] GetServiceCommandDatas(string[] commands)
         {
-            List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>();
+            List<ServiceCommandDescriptor> serviceCommands = new List<ServiceCommandDescriptor>(commands.Length);
             foreach (var command in commands)
             {
                 var serviceCommand = GetServiceCommandData(command);
@@ -189,12 +244,17 @@ namespace Surging.Core.Consul
         private async Task<ServiceCommandDescriptor> GetServiceCommand(string path)
         {
             ServiceCommandDescriptor result = null;
-            var watcher = new NodeMonitorWatcher(_consul, _manager, path,
-                  (oldData, newData) => NodeChange(oldData, newData));
-            var queryResult = await _consul.KV.Keys(path);
+            var client = await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+              (oldData, newData) => NodeChange(oldData, newData), tmpPath =>
+              {
+                  var index = tmpPath.LastIndexOf("/");
+                  return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+              });
+            var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
             {
-                var data = (await _consul.GetDataAsync(path));
+                var data = (await client.GetDataAsync(path));
                 if (data != null)
                 {
                     watcher.SetCurrentData(data);
@@ -225,20 +285,58 @@ namespace Surging.Core.Consul
             return serviceCommands.ToArray();
         }
 
+        private Task<ServiceCommandDescriptor[]> GetServiceCommands(IEnumerable<byte[]> childrens)
+        {
+            if (childrens == null) return Task.FromResult(new ServiceCommandDescriptor[0]);
+            childrens = childrens.ToArray();
+            var serviceCommands = new List<ServiceCommandDescriptor>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取服务命令信息。");
+
+                var serviceCommand = GetServiceCommand(children);
+                if (serviceCommand != null)
+                {
+                    serviceCommands.Add(serviceCommand);
+                    var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, $"{ _configInfo.CommandPath}{ serviceCommand.ServiceId}",
+                   (oldData, newData) => NodeChange(oldData, newData), tmpPath =>
+                   {
+                       var index = tmpPath.LastIndexOf("/");
+                       return _serviceHeartbeatManager.ExistsWhitelist(tmpPath.Substring(index + 1));
+                   });
+                    watcher.SetCurrentData(children);
+                }
+            }
+            return Task.FromResult(serviceCommands.ToArray());
+        }
+
+        private async ValueTask<ConsulClient> GetConsulClient()
+        {
+            var client = await _consulClientFactory.GetClient();
+            return client;
+        }
+
         private async Task EnterServiceCommands()
         {
             if (_serviceCommands != null)
-                return;  
-               var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CommandPath,
+                return;
+            Action<string[]> action = null;
+            var client = await GetConsulClient();
+            if (_configInfo.EnableChildrenMonitor)
+            {
+                var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CommandPath,
                 async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
                        (result) => ConvertPaths(result));
-            if (_consul.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
+                action = currentData => watcher.SetCurrentData(currentData);
+            }
+            if (client.KV.Keys(_configInfo.CommandPath).Result.Response?.Count() > 0)
             {
-                var result = await _consul.GetChildrenAsync(_configInfo.CommandPath);
-                var keys = await _consul.KV.Keys(_configInfo.CommandPath);
-                var childrens = result; 
-                watcher.SetCurrentData(ConvertPaths(childrens).Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
-                _serviceCommands = await GetServiceCommands(keys.Response);
+                var response = await client.GetChildrenListAsync(_configInfo.CommandPath);
+                _serviceCommands = await GetServiceCommands(response);
+                var serviceIds = _serviceCommands.Select(p => p.ServiceId).ToArray();
+                action?.Invoke(serviceIds.Select(key => $"{_configInfo.CommandPath}{key}").ToArray());
             }
             else
             {
@@ -255,7 +353,7 @@ namespace Surging.Core.Consul
         /// <returns>返回路径集合</returns>
         private string[] ConvertPaths(string[] datas)
         {
-            List<string> paths = new List<string>();
+            List<string> paths = new List<string>(datas.Length);
             foreach (var data in datas)
             {
                 var result = GetServiceCommandData(data);
@@ -280,6 +378,58 @@ namespace Surging.Core.Consul
             return true;
         }
 
+        public void ChildrenChange(Dictionary<string, byte[]> newDatas)
+        {
+
+            var oldChildrens = _serviceCommands.Select(p => $"{_configInfo.CommandPath}{p.ServiceId}").ToList();
+            var newChildrens = newDatas.Keys.ToList();
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"最新的服务命令节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"旧的服务命令节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的服务命令节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的服务命令节点：{string.Join(",", createdChildrens)}");
+
+            //获取新增的路由信息。
+            var newCommandBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
+            var newServiceCommands = new List<ServiceCommandDescriptor>(newCommandBytes.Count);
+            foreach (var newCommandByte in newCommandBytes)
+            {
+                newServiceCommands.Add(GetServiceCommand(newCommandByte));
+            }
+            var serviceCommands = _serviceCommands.ToArray();
+            lock (_serviceCommands)
+            {
+                #region 节点变更操作
+                _serviceCommands = _serviceCommands
+                       //删除无效的节点路由。
+                       .Where(i => !deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}"))
+                    //连接上新的路由。
+                    .Concat(newServiceCommands)
+                    .ToArray();
+                #endregion
+            }
+            //需要删除的服务命令集合。
+            var deletedRoutes = serviceCommands.Where(i => deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedRoutes.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            //触发服务命令被创建事件。
+            OnCreated(newServiceCommands.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("服务命令数据更新成功。");
+        }
+
         public async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
         {
             if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
@@ -300,27 +450,27 @@ namespace Surging.Core.Consul
 
             //获取新增的服务命令信息。
             var newCommands = (await GetServiceCommands(createdChildrens)).ToArray();
-           
-                var serviceCommands = _serviceCommands.ToArray();
-                lock (_serviceCommands)
-                {
-                    _serviceCommands = _serviceCommands
-                        //删除无效的节点服务命令。
-                        .Where(i => !deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}"))
-                        //连接上新的服务命令。
-                        .Concat(newCommands)
-                        .ToArray();
-                }
-                //需要删除的服务命令集合。
-                var deletedRoutes = serviceCommands.Where(i => deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}")).ToArray();
-                //触发删除事件。
-                OnRemoved(deletedRoutes.Select(command => new ServiceCommandEventArgs(command)).ToArray());
 
-                //触发服务命令被创建事件。
-                OnCreated(newCommands.Select(command => new ServiceCommandEventArgs(command)).ToArray());
-
-                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
-                    _logger.LogInformation("服务命令数据更新成功。");
+            var serviceCommands = _serviceCommands.ToArray();
+            lock (_serviceCommands)
+            {
+                _serviceCommands = _serviceCommands
+                    //删除无效的节点服务命令。
+                    .Where(i => !deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}"))
+                    //连接上新的服务命令。
+                    .Concat(newCommands)
+                    .ToArray();
             }
+            //需要删除的服务命令集合。
+            var deletedRoutes = serviceCommands.Where(i => deletedChildrens.Contains($"{_configInfo.CommandPath}{i.ServiceId}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedRoutes.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            //触发服务命令被创建事件。
+            OnCreated(newCommands.Select(command => new ServiceCommandEventArgs(command)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("服务命令数据更新成功。");
+        }
     }
 }

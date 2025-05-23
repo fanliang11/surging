@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using ConstructorInvoker = Surging.Core.ProxyGenerator.FastReflection.ConstructorInvoker;
 
 namespace Surging.Core.ProxyGenerator.Utilitys
 {

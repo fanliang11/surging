@@ -4,6 +4,7 @@ using System;
 using Autofac;
 using Surging.Core.CPlatform.EventBus.Events;
 using Surging.Core.CPlatform.EventBus.Implementation;
+using Surging.Core.CPlatform.DependencyResolution;
 
 namespace Surging.Core.ProxyGenerator
 {
@@ -12,58 +13,117 @@ namespace Surging.Core.ProxyGenerator
         [Obsolete("This method is Obsolete, use GetService")]
         public T CreateProxy<T>(string key) where T : class
         {
-            return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
+           // return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
+            var result = ServiceResolver.Current.GetService<T>(key);
+            if (result == null)
+            {
+                result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
+                ServiceResolver.Current.Register(key, result);
+
+            }
+            return result;
         }
 
         [Obsolete("This method is Obsolete, use GetService")]
         public object CreateProxy(Type type)
         {
-            return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(type);
+            var result = ServiceResolver.Current.GetService(type);
+            if (result == null)
+            {
+                result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(type);
+                ServiceResolver.Current.Register(null, result);
+
+            }
+            return result;
         }
 
         [Obsolete("This method is Obsolete, use GetService")]
         public object CreateProxy(string key, Type type)
         {
-            return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key, type);
+            var result = ServiceResolver.Current.GetService(type,key);
+            if (result == null)
+            {
+                result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key,type);
+                ServiceResolver.Current.Register(key, result);
+            }
+            return result;
         }
 
         [Obsolete("This method is Obsolete, use GetService")]
         public T CreateProxy<T>() where T : class
         {
-            return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
+            var result = ServiceResolver.Current.GetService<T>();
+            if (result == null)
+            {
+                result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
+                ServiceResolver.Current.Register(null,result);
+            }
+            return result;
         }
 
         public override T GetService<T>(string key) 
         {
-           if( ServiceLocator.Current.IsRegisteredWithKey<T>(key))
-                 return  base.GetService<T>(key); 
-            else 
-                 return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
+            if (ServiceLocator.Current.IsRegisteredWithKey<T>(key))
+                return base.GetService<T>(key);
+            else
+            {
+                var result = ServiceResolver.Current.GetService<T>(key);
+                if (result == null)
+                {
+                    result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>(key);
+                    ServiceResolver.Current.Register(key, result);
+                }
+                return result;
+            }
         }
 
         public override T GetService<T>()
         {
             if (ServiceLocator.Current.IsRegistered<T>())
                 return base.GetService<T>();
-            else 
-              return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
+            else
+            {
+                var result = ServiceResolver.Current.GetService<T>();
+                if (result == null)
+                {
+                    result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy<T>();
+                    ServiceResolver.Current.Register(null, result);
+                }
+                return result;
+            }
 
         }
 
         public override object GetService(Type type)
         {
             if (ServiceLocator.Current.IsRegistered(type))
-               return base.GetService(type);
-             else
-                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(type);
+                return base.GetService(type);
+            else
+            {
+                var result = ServiceResolver.Current.GetService(type);
+                if (result == null)
+                {
+                    result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(type);
+                    ServiceResolver.Current.Register(null, result); 
+                }
+                return result;
+            }
         }
 
         public override object GetService(string key, Type type)
         {
-            if (ServiceLocator.Current.IsRegisteredWithKey(key,type))
-                return base.GetService(key,type);
+            if (ServiceLocator.Current.IsRegisteredWithKey(key, type))
+                return base.GetService(key, type);
             else
-                return ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key,type);
+            {
+                var result = ServiceResolver.Current.GetService(type, key);
+                if (result == null)
+                {
+                    result = ServiceLocator.GetService<IServiceProxyFactory>().CreateProxy(key, type);
+                    ServiceResolver.Current.Register(key, result);
+                }
+                return result;
+            }
            
         }
 
