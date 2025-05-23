@@ -28,6 +28,7 @@ namespace DotNetty.Buffers
     using System;
     using System.Collections.Generic;
     using DotNetty.Common;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal;
     using DotNetty.Common.Internal.Logging;
     using DotNetty.Common.Utilities;
@@ -46,10 +47,11 @@ namespace DotNetty.Buffers
         public static readonly int DefaultNormalCacheSize;
 
         static readonly int DefaultMaxCachedBufferCapacity;
-        static readonly int DefaultCacheTrimInterval;
-
+        static readonly int DefaultCacheTrimInterval; 
+        private static readonly long DefaultCacheTrimIntervalMillis;
+        private static readonly bool DefaultUseCacheForAllThreads;
         const int MinPageSize = 4096;
-        const int MaxChunkSize = (int)(((long)int.MaxValue + 1) / 2);
+        const int MaxChunkSize = (int)(((long)int.MaxValue + 1) / 2);  
 
         static PooledByteBufferAllocator()
         {
@@ -97,7 +99,30 @@ namespace DotNetty.Buffers
             DefaultTinyCacheSize = SystemPropertyUtil.GetInt("io.netty.allocator.tinyCacheSize", 512);
             DefaultSmallCacheSize = SystemPropertyUtil.GetInt("io.netty.allocator.smallCacheSize", 256);
             DefaultNormalCacheSize = SystemPropertyUtil.GetInt("io.netty.allocator.normalCacheSize", 64);
+            if (SystemPropertyUtil.Contains("io.netty.allocation.cacheTrimIntervalMillis"))
+            {
+                Logger.Warn("-Dio.netty.allocation.cacheTrimIntervalMillis is deprecated," +
+                        " use -Dio.netty.allocator.cacheTrimIntervalMillis");
 
+                if (SystemPropertyUtil.Contains("io.netty.allocator.cacheTrimIntervalMillis"))
+                {
+                    // Both system properties are specified. Use the non-deprecated one.
+                    DefaultCacheTrimIntervalMillis = SystemPropertyUtil.GetLong(
+                            "io.netty.allocator.cacheTrimIntervalMillis", 0);
+                }
+                else
+                {
+                    DefaultCacheTrimIntervalMillis = SystemPropertyUtil.GetLong(
+                            "io.netty.allocation.cacheTrimIntervalMillis", 0);
+                }
+            }
+            else
+            {
+                DefaultCacheTrimIntervalMillis = SystemPropertyUtil.GetLong(
+                        "io.netty.allocator.cacheTrimIntervalMillis", 0);
+            }
+            DefaultUseCacheForAllThreads = SystemPropertyUtil.GetBoolean(
+        "io.netty.allocator.useCacheForAllThreads", false);
             // 32 kb is the default maximum capacity of the cached buffer. Similar to what is explained in
             // 'Scalable memory allocation using jemalloc'
             DefaultMaxCachedBufferCapacity = SystemPropertyUtil.GetInt("io.netty.allocator.maxCachedBufferCapacity", 32 * 1024);
@@ -129,6 +154,8 @@ namespace DotNetty.Buffers
                 Logger.Debug("-Dio.netty.allocator.chunkSize: {}", DefaultPageSize << DefaultMaxOrder);
                 Logger.Debug("-Dio.netty.allocator.tinyCacheSize: {}", DefaultTinyCacheSize);
                 Logger.Debug("-Dio.netty.allocator.smallCacheSize: {}", DefaultSmallCacheSize);
+                Logger.Debug("-Dio.netty.allocator.cacheTrimIntervalMillis: {}", DefaultCacheTrimIntervalMillis);
+                Logger.Debug("-Dio.netty.allocator.useCacheForAllThreads: {}", DefaultUseCacheForAllThreads);
                 Logger.Debug("-Dio.netty.allocator.normalCacheSize: {}", DefaultNormalCacheSize);
                 Logger.Debug("-Dio.netty.allocator.maxCachedBufferCapacity: {}", DefaultMaxCachedBufferCapacity);
                 Logger.Debug("-Dio.netty.allocator.cacheTrimInterval: {}", DefaultCacheTrimInterval);
@@ -144,6 +171,8 @@ namespace DotNetty.Buffers
         private readonly int _tinyCacheSize;
         private readonly int _smallCacheSize;
         private readonly int _normalCacheSize;
+        private readonly bool _useCacheForAllThreads;
+        private readonly IRunnable trimTask;
         private readonly IReadOnlyList<IPoolArenaMetric> _heapArenaMetrics;
         private readonly IReadOnlyList<IPoolArenaMetric> _directArenaMetrics;
         private readonly PoolThreadLocalCache _threadCache;
@@ -155,35 +184,42 @@ namespace DotNetty.Buffers
         }
 
         public unsafe PooledByteBufferAllocator(bool preferDirect)
-            : this(preferDirect, DefaultNumHeapArena, DefaultNumDirectArena, DefaultPageSize, DefaultMaxOrder)
+            : this(preferDirect, DefaultNumHeapArena, DefaultNumDirectArena, DefaultPageSize, DefaultMaxOrder, DefaultUseCacheForAllThreads)
         {
         }
 
-        public PooledByteBufferAllocator(int nHeapArena, int nDirectArena, int pageSize, int maxOrder)
-            : this(false, nHeapArena, nDirectArena, pageSize, maxOrder)
+        public PooledByteBufferAllocator(int nHeapArena, int nDirectArena, int pageSize, int maxOrder, bool useCacheForAllThreads)
+            : this(false, nHeapArena, nDirectArena, pageSize, maxOrder,useCacheForAllThreads)
         {
         }
 
-        public unsafe PooledByteBufferAllocator(bool preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder)
+        public unsafe PooledByteBufferAllocator(bool preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder, bool useCacheForAllThreads)
             : this(preferDirect, nHeapArena, nDirectArena, pageSize, maxOrder,
-                DefaultTinyCacheSize, DefaultSmallCacheSize, DefaultNormalCacheSize)
+                DefaultTinyCacheSize, DefaultSmallCacheSize, DefaultNormalCacheSize, useCacheForAllThreads, DefaultCacheTrimIntervalMillis)
         {
         }
 
         public PooledByteBufferAllocator(int nHeapArena, int nDirectArena, int pageSize, int maxOrder,
-            int tinyCacheSize, int smallCacheSize, int normalCacheSize)
-            : this(false, nHeapArena, nDirectArena, pageSize, maxOrder, tinyCacheSize, smallCacheSize, normalCacheSize)
+            int tinyCacheSize, int smallCacheSize, int normalCacheSize, bool useCacheForAllThreads)
+            : this(false, nHeapArena, nDirectArena, pageSize, maxOrder, tinyCacheSize, smallCacheSize, normalCacheSize, useCacheForAllThreads, DefaultCacheTrimIntervalMillis)
+        { }
+
+        public PooledByteBufferAllocator(int nHeapArena, int nDirectArena, int pageSize, int maxOrder,
+    int tinyCacheSize, int smallCacheSize, int normalCacheSize)
+    : this(false, nHeapArena, nDirectArena, pageSize, maxOrder, tinyCacheSize, smallCacheSize, normalCacheSize, DefaultUseCacheForAllThreads, DefaultCacheTrimIntervalMillis)
         { }
 
         public unsafe PooledByteBufferAllocator(bool preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder,
-            int tinyCacheSize, int smallCacheSize, int normalCacheSize)
+            int tinyCacheSize, int smallCacheSize, int normalCacheSize, bool defaultUseCacheForAllThreads, long defaultCacheTrimIntervalMillis)
             : base(preferDirect)
         {
             if ((uint)nHeapArena > SharedConstants.TooBigOrNegative) { ThrowHelper.ThrowArgumentException_PositiveOrZero(nHeapArena, ExceptionArgument.nHeapArena); }
             if ((uint)nDirectArena > SharedConstants.TooBigOrNegative) { ThrowHelper.ThrowArgumentException_PositiveOrZero(nHeapArena, ExceptionArgument.nDirectArena); }
 
             _threadCache = new PoolThreadLocalCache(this);
+            _useCacheForAllThreads = defaultUseCacheForAllThreads;
             _tinyCacheSize = tinyCacheSize;
+            trimTask = new ActionTrimTask(() => this.TrimCurrentThreadCache());
             _smallCacheSize = smallCacheSize;
             _normalCacheSize = normalCacheSize;
             _chunkSize = ValidateAndCalculateChunkSize(pageSize, maxOrder);
@@ -230,6 +266,17 @@ namespace DotNetty.Buffers
         }
 
         static PoolArena<T>[] NewArenaArray<T>(int size) => new PoolArena<T>[size];
+
+        public bool TrimCurrentThreadCache()
+        {
+            var cache = _threadCache.Value;
+            if (cache != null)
+            {
+                cache.Trim();
+                return true;
+            }
+            return false;
+        }
 
         static int ValidateAndCalculatePageShifts(int pageSize)
         {
@@ -297,7 +344,17 @@ namespace DotNetty.Buffers
 
         public override bool IsDirectBufferPooled => _directArenas is object;
 
-        sealed class PoolThreadLocalCache : FastThreadLocal<PoolThreadCache<byte[]>>
+
+        sealed class ActionTrimTask : IRunnable
+        {
+            readonly Action _action; 
+            public ActionTrimTask(Action action)
+            {
+                _action = action;
+            }
+            public void Run() => _action();
+        }
+    sealed class PoolThreadLocalCache : FastThreadLocal<PoolThreadCache<byte[]>>
         {
             readonly PooledByteBufferAllocator _owner;
 
@@ -312,11 +369,28 @@ namespace DotNetty.Buffers
                 {
                     PoolArena<byte[]> heapArena = LeastUsedArena(_owner._heapArenas);
                     PoolArena<byte[]> directArena = LeastUsedArena(_owner._directArenas);
-
-                    return new PoolThreadCache<byte[]>(
+                    ExecutionEnvironment.TryGetCurrentExecutor(out IEventExecutor eventExecutor);
+                    PoolThreadCache<byte[]> cache = null;
+                    if (_owner._useCacheForAllThreads ||
+                      // The Thread is used by an EventExecutor, let's use the cache as the chances are good that we
+                      // will allocate a lot!
+                      eventExecutor != null)
+                    {
+                        cache = new PoolThreadCache<byte[]>(
                             heapArena, directArena,
                             _owner._tinyCacheSize, _owner._smallCacheSize, _owner._normalCacheSize,
                             DefaultMaxCachedBufferCapacity, DefaultCacheTrimInterval);
+
+                        if (DefaultCacheTrimIntervalMillis > 0)
+                        {
+                            if (eventExecutor != null)
+                            {
+                                eventExecutor.ScheduleAtFixedRateAsync(_owner.trimTask,TimeSpan.FromMilliseconds( DefaultCacheTrimIntervalMillis),
+                                       TimeSpan.FromMilliseconds(DefaultCacheTrimIntervalMillis));
+                            }
+                        }
+                    }
+                    return cache;
                 }
             }
 

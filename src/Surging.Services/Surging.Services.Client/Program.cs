@@ -35,6 +35,13 @@ namespace Surging.Services.Client
         private static DateTime begintime;
         static void Main(string[] args)
         {
+            Environment.SetEnvironmentVariable("io.netty.allocator.maxOrder", "5");
+            Environment.SetEnvironmentVariable("io.netty.allocator.numDirectArenas", "0");
+            Environment.SetEnvironmentVariable("io.netty.allocator.type", "unpooled");
+            Environment.SetEnvironmentVariable("io.netty.allocator.numHeapArenas", "0");
+            Environment.SetEnvironmentVariable("io.netty.leakDetection.level", "disabled");
+            Environment.SetEnvironmentVariable("io.netty.allocator.cacheTrimIntervalMillis", "600000");
+            Environment.SetEnvironmentVariable("io.netty.allocator.useCacheForAllThreads", "true");
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var host = new ServiceHostBuilder()
                 .RegisterServices(builder =>
