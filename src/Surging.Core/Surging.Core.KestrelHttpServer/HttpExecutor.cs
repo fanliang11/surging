@@ -163,6 +163,10 @@ namespace Surging.Core.KestrelHttpServer
                 resultMessage.Message = "执行发生了错误。";
                 resultMessage.StatusCode = exception.HResult;
             }
+            finally
+            {
+                RpcContext.RemoveContext();
+            }
             return resultMessage;
         }
 

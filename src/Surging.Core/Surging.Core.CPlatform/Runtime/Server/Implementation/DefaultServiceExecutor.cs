@@ -188,6 +188,10 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception,"发送响应消息时候发生了异常。" );
             }
+            finally
+            {
+                RpcContext.RemoveContext();
+            }
         } 
 
         private static string GetExceptionMessage(Exception exception)
