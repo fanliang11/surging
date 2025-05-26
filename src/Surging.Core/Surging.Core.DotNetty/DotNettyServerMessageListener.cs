@@ -104,7 +104,7 @@ namespace Surging.Core.DotNetty
                     if (message.IsInvokeMessage())
                     {
                         var invokeMessage = message.GetContent<RemoteInvokeMessage>();
-                        if (invokeMessage.ServiceId != "client.checkService")
+                        if (invokeMessage.ServiceId == "client.checkService")
                         {
                             await sender.SendAndFlushAsync(TransportMessage.CreateInvokeResultMessage(message.Id, new RemoteInvokeResultMessage()));
                             return;
