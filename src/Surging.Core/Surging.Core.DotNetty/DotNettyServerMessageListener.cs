@@ -65,7 +65,7 @@ namespace Surging.Core.DotNetty
         public async Task StartAsync(EndPoint endPoint)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。"); 
+                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
             IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
             IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
@@ -90,7 +90,7 @@ namespace Surging.Core.DotNetty
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
             .ChildOption(ChannelOption.TcpNodelay, true)
-            .ChildOption(ChannelOption.SoReuseaddr,true)
+            .ChildOption(ChannelOption.SoReuseaddr, true)
             .Group(bossGroup, workerGroup)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
             {
@@ -101,8 +101,17 @@ namespace Surging.Core.DotNetty
                 pipeline.AddLast(eventExecutor, "ServerHandler", new ServerHandler(async (contenxt, message) =>
                 {
                     var sender = new DotNettyServerMessageSender(_transportMessageEncoder, contenxt);
+                    if (message.IsInvokeMessage())
+                    {
+                        var invokeMessage = message.GetContent<RemoteInvokeMessage>();
+                        if (invokeMessage.ServiceId != "client.checkService")
+                        {
+                            await sender.SendAndFlushAsync(TransportMessage.CreateInvokeResultMessage(message.Id, new RemoteInvokeResultMessage()));
+                            return;
+                        }
+                    }
                     await OnReceived(sender, message);
-                },  _logger));
+                }, _logger));
             }));
             try
             {
@@ -144,8 +153,8 @@ namespace Surging.Core.DotNetty
         {
             private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
             private readonly ILogger _logger;
-            
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction,  ILogger logger)
+
+            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
             {
                 _readAction = readAction;
                 _logger = logger;
@@ -171,7 +180,7 @@ namespace Surging.Core.DotNetty
             {
                 context.CloseAsync();//客户端主动断开需要应答，否则socket变成CLOSE_WAIT状态导致socket资源耗尽
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError(exception,$"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
+                    _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
             }
 
             #endregion Overrides of ChannelHandlerAdapter
