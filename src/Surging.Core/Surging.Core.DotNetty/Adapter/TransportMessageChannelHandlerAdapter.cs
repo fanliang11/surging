@@ -14,13 +14,11 @@ namespace Surging.Core.DotNetty.Adapter
     class TransportMessageChannelHandlerAdapter : ChannelHandlerAdapter
     {
         private readonly ITransportMessageDecoder _transportMessageDecoder;
-        private readonly ILogger _logger;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public TransportMessageChannelHandlerAdapter(ITransportMessageDecoder transportMessageDecoder, ILogger logger)
+        public TransportMessageChannelHandlerAdapter(ITransportMessageDecoder transportMessageDecoder)
         {
             _transportMessageDecoder = transportMessageDecoder;
-            _logger = logger;
         }
 
         #region Overrides of ChannelHandlerAdapter
@@ -40,26 +38,6 @@ namespace Surging.Core.DotNetty.Adapter
                 ReferenceCountUtil.Release(buffer);
                 message = null;
             }
-        }
-
-
-        public override void UserEventTriggered(IChannelHandlerContext context, object evt)
-        {
-            if (evt is IdleStateEvent)
-            {
-                var @event = (IdleStateEvent)evt;
-                if (@event.State == IdleState.AllIdle)
-                {
-                    if (_logger.IsEnabled(LogLevel.Debug))
-                        _logger.LogDebug("close inactive channel");
-                    context.Channel.CloseAsync();
-                }
-            }
-            else
-            {
-                base.UserEventTriggered(context, evt);
-            }
-
         }
 
         #endregion Overrides of ChannelHandlerAdapter
