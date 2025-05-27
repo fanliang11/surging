@@ -115,6 +115,18 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
             return isHealth;
         }
 
+        public async ValueTask<bool> MonitorHealth(AddressModel address)
+        {
+            var ipAddress = address as IpAddressModel;
+            MonitorEntry entry;
+            var getResult = !_dictionary.TryGetValue(new ValueTuple<string, int>(ipAddress.Ip, ipAddress.Port), out entry);
+            var isHealth = getResult ? (await _isService(address.CreateEndPoint()) ? await CheckService(address.CreateEndPoint(), _timeout) : await Check(address.CreateEndPoint(), _timeout)) : entry.Health;
+            if (getResult)
+                Monitor(address);
+            OnChanged(new HealthCheckEventArgs(address, isHealth));
+            return isHealth;
+        }
+
         /// <summary>
         /// 标记一个地址为失败的。
         /// </summary>
