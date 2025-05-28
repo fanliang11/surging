@@ -128,7 +128,7 @@ namespace DotNetty.Codecs
             PromiseCombiner combiner = new PromiseCombiner(ctx.Executor);
             for (int i = 0; i < output.Count; i++)
             {
-                combiner.Add(ctx.WriteAsync(output[i]));
+                combiner.Add(ctx.WriteAndFlushAsync(output[i]));
             }
             combiner.Finish(promise);
         }
