@@ -630,7 +630,6 @@ namespace DotNetty.Codecs
             int newBytes = input.ReadableBytes;
             int totalBytes = oldBytes + newBytes;
             IByteBuffer newCumulation = alloc.Buffer(alloc.CalculateNewCapacity(totalBytes, int.MaxValue));
-            IByteBuffer toRelease = newCumulation;
             try
             {
                 // This avoids redundant checks and stack depth compared to calling writeBytes(...)
@@ -638,12 +637,11 @@ namespace DotNetty.Codecs
                     .SetBytes(oldBytes, input, input.ReaderIndex, newBytes)
                     .SetWriterIndex(totalBytes);
                 _ = input.SetReaderIndex(input.WriterIndex);
-                toRelease = oldCumulation;
                 return newCumulation;
             }
             finally
             {
-                _ = toRelease.Release();
+                _ = oldCumulation.Release();//fanly update 
             }
         }
 
