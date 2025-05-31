@@ -96,7 +96,10 @@ namespace Surging.Core.DotNetty
             {
                 var pipeline = channel.Pipeline;
                 pipeline.AddLast(new LengthFieldPrepender2(4));
-                pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 4, 0, 4));
+                /* best settings for multiplexing */
+                // pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 4, 0, 4)); //Video stream push  
+                //pipeline.AddLast(new LengthFieldBasedFrameDecoder2(1024*1024*50, 0, 4, 0, 4)); //big data  50m-200m
+                // pipeline.AddLast(new LengthFieldBasedFrameDecoder2(1024*1024*4, 0, 4, 0, 4)); //small data 4m 
                 pipeline.AddLast(eventExecutor, "HandlerAdapter", new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
                 pipeline.AddLast(eventExecutor, "ServerHandler", new ServerHandler(async (contenxt, message) =>
                 {

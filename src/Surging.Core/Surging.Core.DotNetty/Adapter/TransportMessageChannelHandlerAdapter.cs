@@ -35,8 +35,7 @@ namespace Surging.Core.DotNetty.Adapter
             }
             finally
             {
-                ReferenceCountUtil.Release(buffer);
-                HandlerRemoved(context);
+                ReferenceCountUtil.Release(buffer); 
                 message = null;
             }
         }
