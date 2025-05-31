@@ -869,6 +869,7 @@ namespace WebSocketCore.Server
       _websocket.SendAsync (stream, length, completed);
     }
 
-    #endregion
-  }
+    public Func<WebSocketSessionManager> Client { get; set; }
+        #endregion
+    }
 }

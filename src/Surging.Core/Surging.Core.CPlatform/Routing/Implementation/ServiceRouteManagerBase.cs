@@ -153,5 +153,9 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             foreach (var arg in args)
                 _removed(this, arg);
         }
+
+        public abstract void ClearRoute();
+
+        public abstract ValueTask AddNodeMonitorWatcher(string serviceId);
     }
 }

@@ -22,7 +22,7 @@ namespace Surging.Core.CPlatform.Module
         {
             return builder.ContainerBuilder.Register<T>(@delegate);
         }
-
+        
         public static void RegisterModule(this ContainerBuilderWrapper builder, IModule module)
         {
             builder.ContainerBuilder.RegisterModule(module);
@@ -50,6 +50,11 @@ namespace Surging.Core.CPlatform.Module
             return builder.ContainerBuilder.RegisterType(implementationType);
         }
 
+        public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterTypes(this ContainerBuilderWrapper builder, params Type [] implementationTypes)
+        {
+            return builder.ContainerBuilder.RegisterTypes(implementationTypes);
+        }
+
         public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterAssemblyTypes(this ContainerBuilderWrapper builder, params Assembly[] assemblies)
         {
             return builder.ContainerBuilder.RegisterAssemblyTypes(assemblies);
@@ -62,7 +67,7 @@ namespace Surging.Core.CPlatform.Module
 
         public static IRegistrationBuilder<TTo, LightweightAdapterActivatorData, DynamicRegistrationStyle> RegisterAdapter<TFrom, TTo>(this ContainerBuilderWrapper builder, Func<TFrom, TTo> adapter)
         {
-            return builder.ContainerBuilder.RegisterAdapter<TFrom, TTo>(adapter);
+            return builder.ContainerBuilder.RegisterAdapter<TFrom, TTo>(adapter).SingleInstance();
         }
 
         public static IRegistrationBuilder<object, OpenGenericDecoratorActivatorData, DynamicRegistrationStyle> RegisterGenericDecorator(this ContainerBuilderWrapper builder, Type decoratorType, Type decoratedServiceType, object fromKey, object toKey = null)

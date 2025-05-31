@@ -8,9 +8,10 @@ namespace Surging.Core.Log4net
    public class Log4netModule : EnginePartModule
     {
         private string log4NetConfigFile = "${LogPath}|log4net.config";
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            var serviceProvider = context.ServiceProvoider;
+            base.Initialize(context);
             var section = CPlatform.AppConfig.GetSection("Logging");
             log4NetConfigFile = EnvironmentHelper.GetEnvironmentVariable(log4NetConfigFile);
             serviceProvider.GetInstances<ILoggerFactory>().AddProvider(new Log4NetProvider(log4NetConfigFile));

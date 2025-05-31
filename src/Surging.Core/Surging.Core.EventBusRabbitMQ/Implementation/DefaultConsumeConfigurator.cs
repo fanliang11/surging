@@ -46,13 +46,48 @@ namespace Surging.Core.EventBusRabbitMQ.Implementation
                 }
             }
         }
-        
+
+        public void Unconfigure(List<Type> consumers)
+        {
+            foreach (var consumer in consumers)
+            {
+                if (consumer.GetTypeInfo().IsGenericType)
+                {
+                    continue;
+                }
+                var consumerType = consumer.GetInterfaces()
+                    .Where(
+                        d =>
+                            d.GetTypeInfo().IsGenericType &&
+                            d.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>))
+                    .Select(d => d.GetGenericArguments().Single())
+                    .First();
+                try
+                {
+                    var type = consumer;
+                    this.FastInvoke(new[] { consumerType, consumer },
+                        x => x.RemoveConsumer<object, IIntegrationEventHandler<object>>());
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        }
+
         protected void ConsumerTo<TEvent,TConsumer>()
             where TConsumer : IIntegrationEventHandler<TEvent>
             where TEvent : class
         {
             _eventBus.Subscribe<TEvent, TConsumer>
               (() => (TConsumer)_container.GetInstances(typeof(TConsumer)));
+        }
+
+        protected void RemoveConsumer<TEvent, TConsumer>()
+         where TConsumer : IIntegrationEventHandler<TEvent>
+         where TEvent : class
+        {
+            _eventBus.Unsubscribe<TEvent, TConsumer>();
         }
     }
 }

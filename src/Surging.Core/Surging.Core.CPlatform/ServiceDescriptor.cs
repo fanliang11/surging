@@ -1,4 +1,5 @@
-﻿using Surging.Core.CPlatform.Filters.Implementation;
+﻿using Newtonsoft.Json;
+using Surging.Core.CPlatform.Filters.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,6 @@ namespace Surging.Core.CPlatform
         public static ServiceDescriptor GroupName(this ServiceDescriptor descriptor, string groupName)
         {
             descriptor.Metadatas["GroupName"] = groupName;
-
             return descriptor;
         }
 
@@ -80,6 +80,17 @@ namespace Surging.Core.CPlatform
             return descriptor.GetMetadata("EnableAuthorization", false);
         }
 
+        public static ServiceDescriptor HttpMethod(this ServiceDescriptor descriptor, string httpMethod)
+        {
+            descriptor.Metadatas["HttpMethod"] = httpMethod;
+            return descriptor;
+        }
+         
+        public static string HttpMethod(this ServiceDescriptor descriptor)
+        {
+            return descriptor.GetMetadata("httpMethod", "");
+        }
+
         /// <summary>
         /// 设置是否禁用外网访问
         /// </summary>
@@ -109,8 +120,9 @@ namespace Surging.Core.CPlatform
         /// <returns>服务描述符。</returns>
         public static string AuthType(this ServiceDescriptor descriptor)
         {
-            return descriptor.GetMetadata("AuthType", AuthorizationType.AppSecret.ToString());
+            return descriptor.GetMetadata("AuthType", "");
         }
+        
 
         /// <summary>
         /// 设置授权类型
@@ -198,7 +210,7 @@ namespace Surging.Core.CPlatform
 
         /// <summary>
         /// 元数据。
-        /// </summary>
+        /// </summary> 
         public IDictionary<string, object> Metadatas { get; set; }
 
         /// <summary>
