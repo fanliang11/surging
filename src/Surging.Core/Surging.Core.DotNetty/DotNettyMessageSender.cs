@@ -64,8 +64,8 @@ namespace Surging.Core.DotNetty
         /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _channel.WriteAndFlushAsync(buffer);
+            //var buffer = GetByteBuffer(message);
+            await _channel.WriteAndFlushAsync(message);
         }
 
         /// <summary>
@@ -75,8 +75,8 @@ namespace Surging.Core.DotNetty
         /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-             await _channel.WriteAndFlushAsync(buffer);
+            //var buffer = GetByteBuffer(message);
+             await _channel.WriteAndFlushAsync(message);
         }
 
         #endregion Implementation of IMessageSender
@@ -103,8 +103,8 @@ namespace Surging.Core.DotNetty
         /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _context.WriteAsync(buffer);
+            //var buffer = GetByteBuffer(message);
+            await _context.WriteAsync(message);
         }
 
         /// <summary>
@@ -114,8 +114,8 @@ namespace Surging.Core.DotNetty
         /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _context.WriteAndFlushAsync(buffer);
+            //var buffer = GetByteBuffer(message);
+            await _context.WriteAndFlushAsync(message);
         }
 
         #endregion Implementation of IMessageSender
