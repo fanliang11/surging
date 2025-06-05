@@ -1,17 +1,14 @@
 ﻿using DotNetty.Buffers;
-using DotNetty.Common.Utilities;
-using DotNetty.Handlers.Timeout;
+using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
-using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Surging.Core.DotNetty.Adapter
 {
-    class TransportMessageChannelHandlerAdapter : ChannelHandlerAdapter
+    class TransportMessageChannelHandlerAdapter : ByteToMessageDecoder
     {
         private readonly ITransportMessageDecoder _transportMessageDecoder;
 
@@ -22,23 +19,20 @@ namespace Surging.Core.DotNetty.Adapter
         }
 
         #region Overrides of ChannelHandlerAdapter
-
-        public override void ChannelRead(IChannelHandlerContext context, object message)
+         
+        protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)
         {
-            var buffer = (IByteBuffer)message;
-            try
-            {
-                Span<byte> data = stackalloc byte[buffer.ReadableBytes];
-                buffer.ReadBytes(data);
-                var transportMessage = _transportMessageDecoder.Decode(data.ToArray());
-                context.FireChannelRead(transportMessage);
-            }
-            finally
-            {
-                ReferenceCountUtil.Release(buffer); 
-                message = null;
-            }
+            Span<byte> data = stackalloc byte[input.ReadableBytes];
+            input.ReadBytes(data);
+            var transportMessage = _transportMessageDecoder.Decode(data.ToArray());
+            output.Add(transportMessage);
         }
+
+        protected override void DecodeLast(IChannelHandlerContext context, IByteBuffer input, List<object> output)
+        {
+            base.HandlerRemoved(context);
+        }
+
 
         #endregion Overrides of ChannelHandlerAdapter
     }

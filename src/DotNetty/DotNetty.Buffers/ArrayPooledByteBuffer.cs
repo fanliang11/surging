@@ -126,6 +126,7 @@ namespace DotNetty.Buffers
 
             SetArray(newArray, MaxCapacity);
             FreeArray(oldArray);
+            FreeArray(newArray);//fanly update
             return this;
         }
 
