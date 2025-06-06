@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,16 +23,29 @@ namespace Surging.Core.CPlatform.Utilities
             using (cancellationToken.Register(
                         s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
                 if (task != await Task.WhenAny(task, tcs.Task))
-                    throw new OperationCanceledException("请求超时", cancellationToken);
+                    throw new TimeoutException();
             return await task;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static async Task<T> WithCancellation<T>(
-    this Task<T> task, int requestTimeout)
+    this Task<T> task, CancellationTokenSource cts, int requestTimeout)
         {
-            if (task != await Task.WhenAny(task, Task.Delay(requestTimeout)))
-                throw new OperationCanceledException("请求超时");
-            return await task;
+            var timeoutTask = Task.Delay(requestTimeout,cts.Token);
+            Task completedTask = await Task.WhenAny(task, timeoutTask);
+            if (completedTask == timeoutTask)
+            {
+                throw new TimeoutException();
+            }
+            cts.Cancel();
+            cts.Dispose();
+            return await task; // 返回原始任务的结果
+            //if (task == await Task.WhenAny(task, Task.Delay(requestTimeout, cts.Token)))
+            //{
+            //    cts.Cancel();
+            //    return await task;
+            //}
+            //throw new TimeoutException();
         }
     }
 }

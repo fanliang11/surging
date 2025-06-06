@@ -28,16 +28,17 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
         }
 
-        public override ValueTask<ServiceCommand> GetCommand(string serviceId)
+        public override async  ValueTask<ServiceCommand> GetCommand(string serviceId)
         {
             var result = _serviceCommand.GetValueOrDefault(serviceId);
             if (result == null)
             {
-                return new ValueTask<ServiceCommand>(GetCommandAsync(serviceId));
+                var task = GetCommandAsync(serviceId);
+                return task.IsCompletedSuccessfully ? task.Result : await task;
             }
             else
             {
-                return new ValueTask<ServiceCommand>(result);
+                return result;
             }
         }
 
@@ -60,6 +61,12 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
             _serviceCommand.AddOrUpdate(serviceId, result, (s, r) => result);
             return result;
+        }
+
+        private void ServiceCommandManager_Changed(object sender, ServiceCommandChangedEventArgs e)
+        {
+            ServiceCommand value;
+            _serviceCommand.AddOrUpdate(e.Command.ServiceId, p=>e.Command,(k,v)=>e.Command);
         }
 
         private void ServiceCommandManager_Removed(object sender, ServiceCommandEventArgs e)

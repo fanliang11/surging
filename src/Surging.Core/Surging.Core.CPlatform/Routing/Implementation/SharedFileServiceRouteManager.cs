@@ -75,6 +75,10 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             return _routes;
         }
 
+        public override void ClearRoute()
+        {
+            _routes = null;
+        }
         /// <summary>
         ///     清空所有的服务路由。
         /// </summary>
@@ -249,6 +253,11 @@ namespace Surging.Core.CPlatform.Routing.Implementation
             }
 
             await EntryRoutes(_filePath);
+        }
+
+        public override ValueTask AddNodeMonitorWatcher(string serviceId)
+        {
+            return ValueTask.CompletedTask;
         }
 
         #endregion Private Method

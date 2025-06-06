@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jint" Version="2.11.58" />
+    <PackageReference Include="RulesEngine" Version="3.5.0" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\DotNetty\DotNetty.Codecs\DotNetty.Codecs.csproj" />
+    <ProjectReference Include="..\..\DotNetty\DotNetty.Handlers\DotNetty.Handlers.csproj" />
+    <ProjectReference Include="..\..\DotNetty\DotNetty.Transport.Libuv\DotNetty.Transport.Libuv.csproj" />
+    <ProjectReference Include="..\Surging.Core.CPlatform\Surging.Core.CPlatform.csproj" />
+    <ProjectReference Include="..\Surging.Core.ProxyGenerator\Surging.Core.ProxyGenerator.csproj" />
+  </ItemGroup>
+
+</Project>
