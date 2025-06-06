@@ -15,6 +15,7 @@ namespace Surging.Core.DotNetty.Adapter
         [MethodImpl(MethodImplOptions.NoInlining)]
         public TransportMessageChannelHandlerAdapter(ITransportMessageDecoder transportMessageDecoder)
         {
+            SetCumulator(ByteToMessageDecoder.CompositionCumulation);
             _transportMessageDecoder = transportMessageDecoder;
         }
 
