@@ -64,6 +64,7 @@ namespace Surging.Core.Consul
                         await client.KV.DeleteCAS(result);
                     }
                 }
+                client.Dispose();
             }
         }
 
@@ -153,6 +154,7 @@ namespace Surging.Core.Consul
                     var keyValuePair = new KVPair($"{_configInfo.MqttRoutePath}{serviceRoute.MqttDescriptor.Topic}") { Value = nodeData };
                     await client.KV.Put(keyValuePair);
                 }
+                client.Dispose();
             }
         }
 
@@ -176,6 +178,7 @@ namespace Surging.Core.Consul
                             await client.KV.Delete($"{_configInfo.MqttRoutePath}{deletedRouteTopic}");
                     }
                 }
+                client.Dispose();
             }
         }
 
@@ -256,6 +259,7 @@ namespace Surging.Core.Consul
                     result = await GetRoute(data);
                 }
             }
+            client.Dispose();
             return result;
         }
 
@@ -286,6 +290,7 @@ namespace Surging.Core.Consul
                     _logger.LogWarning($"无法获取路由信息，因为节点：{_configInfo.MqttRoutePath}，不存在。");
                 _routes = new MqttServiceRoute[0];
             }
+            client.Dispose();
         }
          
 
