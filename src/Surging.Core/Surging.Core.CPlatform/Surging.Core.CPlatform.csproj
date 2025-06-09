@@ -43,6 +43,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\DotNetty\DotNetty.Buffers\DotNetty.Buffers.csproj" />
+    <ProjectReference Include="..\..\DotNetty\DotNetty.Transport.Libuv\DotNetty.Transport.Libuv.csproj" />
+    <ProjectReference Include="..\..\DotNetty\DotNetty.Transport\DotNetty.Transport.csproj" />
     <ProjectReference Include="..\Surging.Core.ServiceHosting\Surging.Core.ServiceHosting.csproj" />
   </ItemGroup>
 

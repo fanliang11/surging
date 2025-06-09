@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Network;
 using System;
 using System.Collections.Concurrent;
@@ -15,14 +16,16 @@ namespace Surging.Core.Protocol.Tcp.Runtime.Implementation
         private   readonly ILogger<TcpNetworkProvider> _logger;
         private readonly ITcpServiceEntryProvider _provider;
         private readonly ConcurrentDictionary<string, DotNettyTcpServerMessageListener> _hosts = new ConcurrentDictionary<string, DotNettyTcpServerMessageListener>();
-        public TcpNetworkProvider(ILogger<TcpNetworkProvider> logger, ITcpServiceEntryProvider provider)
+        private readonly IEventExecutorProvider _eventExecutorProvider;
+        public TcpNetworkProvider(ILogger<TcpNetworkProvider> logger, IEventExecutorProvider eventExecutorProvider,ITcpServiceEntryProvider provider)
         {
             _logger = logger;
+            _eventExecutorProvider = eventExecutorProvider;
             _provider = provider;
         }
         public INetwork CreateNetwork(NetworkProperties properties)
         {
-            var tcpServer = _hosts.GetOrAdd(properties.Id, p=>new DotNettyTcpServerMessageListener(_logger, properties.Id, _provider, properties));
+            var tcpServer = _hosts.GetOrAdd(properties.Id, p=>new DotNettyTcpServerMessageListener(_logger, _eventExecutorProvider, properties.Id, _provider, properties));
             return tcpServer;
         }
 
@@ -53,7 +56,7 @@ namespace Surging.Core.Protocol.Tcp.Runtime.Implementation
 
         public INetwork CreateNetwork(NetworkProperties properties, ISubject<NetworkLogMessage> subject)
         {
-            var tcpServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyTcpServerMessageListener(new TcpLogger(subject, properties.Id), properties.Id, _provider, properties));
+            var tcpServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyTcpServerMessageListener(new TcpLogger(subject, properties.Id), _eventExecutorProvider, properties.Id, _provider, properties));
             return tcpServer;
         }
     }

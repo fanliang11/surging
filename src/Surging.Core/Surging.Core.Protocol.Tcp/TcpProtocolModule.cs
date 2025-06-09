@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -88,7 +89,8 @@ namespace Surging.Core.Protocol.Tcp
             builder.Register(provider =>
             {
                 return new DotNettyTcpServerMessageListener(provider.Resolve<ILogger<DotNettyTcpServerMessageListener>>(),
-                     "default", provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
+                   provider.Resolve<IEventExecutorProvider>(),
+                    "default", provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -109,7 +111,8 @@ namespace Surging.Core.Protocol.Tcp
             builder.Register(provider =>
             {
                 return new DotNettyTcpServerMessageListener(provider.Resolve<ILogger<DotNettyTcpServerMessageListener>>(),
-                      "default", provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
+                                      provider.Resolve<IEventExecutorProvider>(),
+                    "default", provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
                       );
             }).SingleInstance();
             builder.Register(provider =>

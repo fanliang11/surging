@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Network;
 using Surging.Core.Protocol.Mqtt.Internal.Services;
 using System;
@@ -16,23 +17,26 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
         private readonly ILogger<DotNettyMqttServerMessageListener> _logger;
         private readonly IChannelService _channelService;
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
+        private readonly IEventExecutorProvider _eventExecutorProvider; 
         private readonly ConcurrentDictionary<string, INetwork> _hosts = new ConcurrentDictionary<string, INetwork>();
-        public MqttNetworkProvider(ILogger<DotNettyMqttServerMessageListener> logger, 
+        public MqttNetworkProvider(ILogger<DotNettyMqttServerMessageListener> logger,
+            IEventExecutorProvider eventExecutorProvider,
             IChannelService channelService,
             IMqttBehaviorProvider mqttBehaviorProvider) {
             _logger = logger;
-            _channelService=channelService;
+            _eventExecutorProvider = eventExecutorProvider;
+            _channelService =channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
         }
         public INetwork CreateNetwork(NetworkProperties properties)
         {
-            var mqttServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyMqttServerMessageListener(_logger, _channelService, _mqttBehaviorProvider, properties));
+            var mqttServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyMqttServerMessageListener(_logger, _eventExecutorProvider, _channelService, _mqttBehaviorProvider, properties));
             return mqttServer;
         }
 
         public INetwork CreateNetwork(NetworkProperties properties, ISubject<NetworkLogMessage> subject)
         {
-            var mqttServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyMqttServerMessageListener(new MqttLogger(subject,properties.Id), _channelService, _mqttBehaviorProvider, properties));
+            var mqttServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyMqttServerMessageListener(new MqttLogger(subject,properties.Id), _eventExecutorProvider, _channelService, _mqttBehaviorProvider, properties));
             return mqttServer;
         }
 

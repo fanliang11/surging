@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.DependencyResolution;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
@@ -35,7 +36,8 @@ namespace Surging.Core.DotNetty
                 if (provider.IsRegistered(typeof(IServiceExecutor)))
                     serviceExecutor = provider.Resolve<IServiceExecutor>();
                 return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
-                      provider.Resolve<IHealthCheckService>(),
+                    provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<IHealthCheckService>(),
                     provider.Resolve<ILogger<DotNettyTransportClientFactory>>(),
                     serviceExecutor);
             }).As(typeof(ITransportClientFactory)).SingleInstance();

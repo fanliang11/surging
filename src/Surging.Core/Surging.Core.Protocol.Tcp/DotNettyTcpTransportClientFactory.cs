@@ -21,6 +21,7 @@ using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.Protocol.Tcp.Runtime.Implementation;
 using Surging.Core.CPlatform.Network;
 using System.Net.Http.Headers;
+using Surging.Core.CPlatform.EventExecutor;
 
 namespace Surging.Core.Protocol.Tcp
 {
@@ -36,23 +37,24 @@ namespace Surging.Core.Protocol.Tcp
         private static readonly AttributeKey<IMessageSender> messageSenderKey = AttributeKey<IMessageSender>.ValueOf(typeof(DotNettyTcpTransportClientFactory), nameof(IMessageSender));
         private static readonly AttributeKey<IMessageListener> messageListenerKey = AttributeKey<IMessageListener>.ValueOf(typeof(DotNettyTcpTransportClientFactory), nameof(IMessageListener));
         private static readonly AttributeKey<EndPoint> origEndPointKey = AttributeKey<EndPoint>.ValueOf(typeof(DotNettyTcpTransportClientFactory), nameof(EndPoint));
-
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         public string Id { get; set; }
 
         #endregion Field
 
         #region Constructor
 
-        public DotNettyTcpTransportClientFactory(ILogger<DotNettyTcpTransportClientFactory> logger)
-            : this(logger,new NetworkProperties())
+        public DotNettyTcpTransportClientFactory(ILogger<DotNettyTcpTransportClientFactory> logger, IEventExecutorProvider eventExecutorProvider)
+            : this(logger, eventExecutorProvider,new NetworkProperties())
         {
         }
 
-        public DotNettyTcpTransportClientFactory(ILogger<DotNettyTcpTransportClientFactory> logger, NetworkProperties networkProperties)
+        public DotNettyTcpTransportClientFactory(ILogger<DotNettyTcpTransportClientFactory> logger, IEventExecutorProvider eventExecutorProvider, NetworkProperties networkProperties)
         {
+            _eventExecutorProvider = eventExecutorProvider;
             _networkProperties = networkProperties;
             _logger = logger;
-            _bootstrap = GetBootstrap();
+            _bootstrap = GetBootstrap(_eventExecutorProvider.GetWorkEventExecutor());
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
             {
                 var pipeline = c.Pipeline;
@@ -123,22 +125,11 @@ namespace Surging.Core.Protocol.Tcp
 
         #endregion Implementation of IDisposable
 
-        private static Bootstrap GetBootstrap()
-        {
-            IEventLoopGroup group;
+        private static Bootstrap GetBootstrap(IEventLoopGroup group)
+        { 
             try
             {
-                var bootstrap = new Bootstrap();
-                if (AppConfig.ServerOptions.Libuv)
-                {
-                    group = new EventLoopGroup();
-                    bootstrap.Channel<TcpServerChannel>();
-                }
-                else
-                {
-                    group = new MultithreadEventLoopGroup();
-                    bootstrap.Channel<TcpServerSocketChannel>();
-                }
+                var bootstrap = new Bootstrap(); 
                 bootstrap
                     .Channel<TcpSocketChannel>()
                     .Option(ChannelOption.TcpNodelay, true)

@@ -11,6 +11,8 @@ using Surging.Core.CPlatform.Convertibles.Implementation;
 using Surging.Core.CPlatform.Engines;
 using Surging.Core.CPlatform.Engines.Implementation;
 using Surging.Core.CPlatform.EventBus.Events;
+using Surging.Core.CPlatform.EventExecutor.Implementation;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Filters;
 using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.HashAlgorithms;
@@ -488,6 +490,7 @@ namespace Surging.Core.CPlatform
             services.RegisterType(typeof(NetworkManager)).As(typeof(INetworkManager)).SingleInstance();
             //注册服务心跳管理 
             services.RegisterType(typeof(DefaultServiceHeartbeatManager)).As(typeof(IServiceHeartbeatManager)).SingleInstance();
+            services.RegisterType(typeof(DefaultEventExecutorProvider)).As(typeof(IEventExecutorProvider)).SingleInstance();
             services.RegisterType(typeof(ServiceMonitorWatcher)).As(typeof(IServiceMonitorWatcher)).SingleInstance();
             return new ServiceBuilder(services)
                 .AddJsonSerialization()

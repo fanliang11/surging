@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -53,7 +54,8 @@ namespace Surging.Core.Protocol.Udp
             builder.Register(provider =>
             {
                 return new DotNettyUdpServerMessageListener(provider.Resolve<ILogger<DotNettyUdpServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>(),
+                    provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<ITransportMessageCodecFactory>(),
                        provider.Resolve<IUdpServiceEntryProvider>()
                       );
             }).SingleInstance();
@@ -76,7 +78,8 @@ namespace Surging.Core.Protocol.Udp
             builder.Register(provider =>
             {
                 return new DotNettyUdpServerMessageListener(provider.Resolve<ILogger<DotNettyUdpServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>(),
+                    provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<ITransportMessageCodecFactory>(),
                       provider.Resolve<IUdpServiceEntryProvider>()
                       );
             }).SingleInstance();

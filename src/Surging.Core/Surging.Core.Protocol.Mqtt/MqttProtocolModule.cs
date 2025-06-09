@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Diagnostics;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Ids;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Mqtt;
@@ -84,7 +85,8 @@ namespace Surging.Core.Protocol.Mqtt
             builder.Register(provider =>
             {
                 return new DotNettyMqttServerMessageListener(provider.Resolve<ILogger<DotNettyMqttServerMessageListener>>(),
-                      provider.Resolve<IChannelService>(),
+                    provider.Resolve<IEventExecutorProvider>(), 
+                    provider.Resolve<IChannelService>(),
                       provider.Resolve<IMqttBehaviorProvider>()
                       );
             }).SingleInstance();
@@ -109,7 +111,8 @@ namespace Surging.Core.Protocol.Mqtt
             builder.Register(provider =>
             {
                 return new DotNettyMqttServerMessageListener(provider.Resolve<ILogger<DotNettyMqttServerMessageListener>>(),
-                     provider.Resolve<IChannelService>(),
+                       provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<IChannelService>(),
                      provider.Resolve<IMqttBehaviorProvider>()
                      );
             }).SingleInstance();

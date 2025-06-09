@@ -23,6 +23,7 @@ using System.Linq.Expressions;
 using DotNetty.Common.Utilities;
 using Surging.Core.Protocol.Tcp.Runtime.Implementation;
 using System.Reactive.Linq;
+using Surging.Core.CPlatform.EventExecutor;
 
 namespace Surging.Core.Protocol.Tcp
 {
@@ -39,12 +40,14 @@ namespace Surging.Core.Protocol.Tcp
         private IEventLoopGroup _bossGroup;
         private IEventLoopGroup _workerGroup;
         private TcpServiceEntry _tcpServiceEntry;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         public string Id { get; set; }
         #endregion Field
 
         #region Constructor
-        public DotNettyTcpServerMessageListener(ILogger logger, string id, ITcpServiceEntryProvider tcpServiceEntryProvider, NetworkProperties properties)
+        public DotNettyTcpServerMessageListener(ILogger logger, IEventExecutorProvider eventExecutorProvider,  string id, ITcpServiceEntryProvider tcpServiceEntryProvider, NetworkProperties properties)
         {
+            _eventExecutorProvider = eventExecutorProvider;
             _tcpServiceEntry = tcpServiceEntryProvider.GetEntry();
             _logger = logger; 
             Id = id;
@@ -109,8 +112,8 @@ namespace Surging.Core.Protocol.Tcp
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{_tcpServerProperties.Host}:{_tcpServerProperties.Port}。");
 
-            IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
-            IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
+            var bossGroup = _eventExecutorProvider.GetSingleEventExecutor();
+            var workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var tcpServiceEntryProvider = ServiceLocator.GetService<ITcpServiceEntryProvider>();
             var workerGroup1 = new MultithreadEventLoopGroup();
 

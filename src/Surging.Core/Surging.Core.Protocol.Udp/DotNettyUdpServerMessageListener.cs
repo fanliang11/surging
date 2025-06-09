@@ -4,6 +4,7 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Serialization;
@@ -31,6 +32,7 @@ namespace Surging.Core.Protocol.Udp
         private readonly ISerializer<string> _serializer;
         private readonly NetworkProperties _networkProperties;
         private UdpServiceEntry _udpServiceEntry;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         public string Id { get;set; }
 
         public event ReceivedDelegate Received;
@@ -38,14 +40,17 @@ namespace Surging.Core.Protocol.Udp
         #endregion Field
 
         #region Constructor
-        public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger
-           , ITransportMessageCodecFactory codecFactory, IUdpServiceEntryProvider udpServiceEntryProvider) :this(logger, codecFactory, new NetworkProperties(), udpServiceEntryProvider) { 
+        public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger,
+            IEventExecutorProvider eventExecutorProvider
+           , ITransportMessageCodecFactory codecFactory, IUdpServiceEntryProvider udpServiceEntryProvider) :this(logger, eventExecutorProvider, codecFactory, new NetworkProperties(), udpServiceEntryProvider) { 
         
         }
-        public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger
+        public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger,
+              IEventExecutorProvider eventExecutorProvider
             , ITransportMessageCodecFactory codecFactory, NetworkProperties networkProperties, IUdpServiceEntryProvider udpServiceEntryProvider)
         {
             _udpServiceEntry = udpServiceEntryProvider.GetEntry();
+            _eventExecutorProvider = eventExecutorProvider;
             Id =networkProperties?.Id;
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
@@ -60,7 +65,7 @@ namespace Surging.Core.Protocol.Udp
             IMessageSender sender=null;
             object isMulticast=null; 
             _networkProperties.ParserConfiguration?.TryGetValue("isMulticast", out  isMulticast);
-            var group = new MultithreadEventLoopGroup();
+            var group = _eventExecutorProvider.GetShakeEventExecutor();
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(group)

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
@@ -29,6 +30,7 @@ namespace Surging.Core.DotNetty
                 if (provider.IsRegistered(typeof(IServiceExecutor)))
                     serviceExecutor = provider.Resolve<IServiceExecutor>();
                 return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
+                        provider.Resolve<IEventExecutorProvider>(),
                     provider.Resolve<IHealthCheckService>(),
                      provider.Resolve<ILogger<DotNettyTransportClientFactory>>(),
                     serviceExecutor);

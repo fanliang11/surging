@@ -9,6 +9,7 @@ using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Diagnostics;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Serialization;
@@ -42,6 +43,7 @@ namespace Surging.Core.Protocol.Mqtt
         private readonly IMqttBehaviorProvider _mqttBehaviorProvider;
         private readonly DiagnosticListener _diagnosticListener;
         private readonly NetworkProperties _properties;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         public string Id { get; set; }
         #endregion Field
 
@@ -49,16 +51,19 @@ namespace Surging.Core.Protocol.Mqtt
 
         #region Constructor
         public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger,
-       IChannelService channelService,
-       IMqttBehaviorProvider mqttBehaviorProvider):this(logger, channelService, mqttBehaviorProvider, new NetworkProperties())
+      IEventExecutorProvider eventExecutorProvider,
+            IChannelService channelService,
+       IMqttBehaviorProvider mqttBehaviorProvider):this(logger, eventExecutorProvider, channelService, mqttBehaviorProvider, new NetworkProperties())
         {
 
         }
-        public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger, 
+        public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger,
+                IEventExecutorProvider eventExecutorProvider,
             IChannelService channelService,
             IMqttBehaviorProvider mqttBehaviorProvider,
              NetworkProperties properties)
         {
+            _eventExecutorProvider = eventExecutorProvider;
             Id = properties?.Id;
             _logger = logger;
             _channelService = channelService;
@@ -84,22 +89,10 @@ namespace Surging.Core.Protocol.Mqtt
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动Mqtt服务主机，监听地址：{endPoint}。");
-            IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
-            IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
+            IEventLoopGroup bossGroup = _eventExecutorProvider.GetSingleEventExecutor();
+            IEventLoopGroup workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
-            if (AppConfig.ServerOptions.Libuv)
-            {
-                var dispatcher = new DispatcherEventLoopGroup();
-                bossGroup = dispatcher;
-                workerGroup = new WorkerEventLoopGroup(dispatcher,4);
-                bootstrap.Channel<TcpServerChannel>();
-            }
-            else
-            {
-                bossGroup = new MultithreadEventLoopGroup(1);
-                workerGroup = new MultithreadEventLoopGroup(4);
-                bootstrap.Channel<TcpServerSocketChannel>();
-            }
+            
             bootstrap
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)

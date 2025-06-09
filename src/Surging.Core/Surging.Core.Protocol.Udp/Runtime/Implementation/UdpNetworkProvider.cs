@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Network;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Transport;
@@ -20,16 +21,18 @@ namespace Surging.Core.Protocol.Udp.Runtime.Implementation
         private readonly ILogger<DotNettyUdpServerMessageListener> _logger;
         private readonly ITransportMessageCodecFactory _codecFactory;
         private readonly IUdpServiceEntryProvider _provider;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         private readonly ConcurrentDictionary<string, DotNettyUdpServerMessageListener> _hosts = new ConcurrentDictionary<string, DotNettyUdpServerMessageListener>();
-        public UdpNetworkProvider(ILogger<DotNettyUdpServerMessageListener> logger, ITransportMessageCodecFactory codecFactory, IUdpServiceEntryProvider provider)
+        public UdpNetworkProvider(ILogger<DotNettyUdpServerMessageListener> logger, IEventExecutorProvider eventExecutorProvider, ITransportMessageCodecFactory codecFactory, IUdpServiceEntryProvider provider)
         {
             _logger = logger;
+            _eventExecutorProvider = eventExecutorProvider;
             _codecFactory = codecFactory;
             _provider = provider;
         }
         public  INetwork CreateNetwork(NetworkProperties properties)
         {
-            IMessageListener updServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyUdpServerMessageListener(_logger, _codecFactory, properties, _provider));
+            IMessageListener updServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyUdpServerMessageListener(_logger, _eventExecutorProvider, _codecFactory, properties, _provider));
           var serviceExecutor= ServiceLocator.GetService<IServiceExecutor>(CommunicationProtocol.Udp.ToString());
             UdpServiceHost udpServiceHost = new UdpServiceHost(p => Task.FromResult(updServer), serviceExecutor);
              udpServiceHost.StartAsync(null).Wait();
@@ -63,7 +66,7 @@ namespace Surging.Core.Protocol.Udp.Runtime.Implementation
 
         public INetwork CreateNetwork(NetworkProperties properties, ISubject<NetworkLogMessage> subject)
         {
-            IMessageListener updServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyUdpServerMessageListener(new UdpLogger(subject, properties.Id), _codecFactory, properties, _provider));
+            IMessageListener updServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyUdpServerMessageListener(new UdpLogger(subject, properties.Id), _eventExecutorProvider, _codecFactory, properties, _provider));
             var serviceExecutor = ServiceLocator.GetService<IServiceExecutor>(CommunicationProtocol.Udp.ToString());
             UdpServiceHost udpServiceHost = new UdpServiceHost(p => Task.FromResult(updServer), serviceExecutor);
             udpServiceHost.StartAsync(null).Wait();

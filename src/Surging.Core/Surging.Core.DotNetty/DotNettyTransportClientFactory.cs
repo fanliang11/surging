@@ -11,6 +11,7 @@ using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Address;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform.Runtime.Server;
@@ -43,7 +44,7 @@ namespace Surging.Core.DotNetty
         private readonly IHealthCheckService _healthCheckService;
         private readonly ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>> _clients = new ConcurrentDictionary<EndPoint, Lazy<Task<ITransportClient>>>();
         private readonly Bootstrap _bootstrap;
-
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         private static readonly AttributeKey<IMessageSender> messageSenderKey = AttributeKey<IMessageSender>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageSender));
         private static readonly AttributeKey<IMessageListener> messageListenerKey = AttributeKey<IMessageListener>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(IMessageListener));
         private static readonly AttributeKey<EndPoint> origEndPointKey = AttributeKey<EndPoint>.ValueOf(typeof(DotNettyTransportClientFactory), nameof(EndPoint));
@@ -52,29 +53,26 @@ namespace Surging.Core.DotNetty
 
         #region Constructor
 
-        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger)
-            : this(codecFactory, healthCheckService, logger, null)
+        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory,IEventExecutorProvider eventExecutorProvider, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger)
+            : this(codecFactory, eventExecutorProvider,  healthCheckService, logger, null)
         {
         }
 
-        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger, IServiceExecutor serviceExecutor)
+        public DotNettyTransportClientFactory(ITransportMessageCodecFactory codecFactory, IEventExecutorProvider eventExecutorProvider, IHealthCheckService healthCheckService, ILogger<DotNettyTransportClientFactory> logger, IServiceExecutor serviceExecutor)
         {
+            _eventExecutorProvider = eventExecutorProvider;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
             _logger = logger;
             _healthCheckService = healthCheckService;
             _serviceExecutor = serviceExecutor;
-            _bootstrap = GetBootstrap();
+            _bootstrap = GetBootstrap(eventExecutorProvider.GetWorkEventExecutor());
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
             {
                 var pipeline = c.Pipeline;
-                pipeline.AddLast(new LengthFieldPrepender2(4));
-                /* best settings for multiplexing */
-                // pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 4, 0, 4)); //Video stream push  
-                //pipeline.AddLast(new LengthFieldBasedFrameDecoder2(1024*1024*50, 0, 4, 0, 4)); //big data  50m-200m
-                // pipeline.AddLast(new LengthFieldBasedFrameDecoder2(1024*1024*4, 0, 4, 0, 4)); //small data 4m 
+                pipeline.AddLast(new LengthFieldPrepender2(2));
+                pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 2, 0, 2));
                 pipeline.AddLast(new TransportMessageHandlerEncoder(_transportMessageEncoder));
-                pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 4, 0, 4));
                 pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
                 pipeline.AddLast(new DefaultChannelHandler(this,_logger));
             }));
@@ -144,19 +142,9 @@ namespace Surging.Core.DotNetty
 
         #endregion Implementation of IDisposable
 
-        private static Bootstrap GetBootstrap()
-        {
-            IEventLoopGroup group;
-            
-            var bootstrap = new Bootstrap();
-            if (AppConfig.ServerOptions.Libuv)
-            {
-                group = new EventLoopGroup(AppConfig.ServerOptions.EventLoopCount); 
-            }
-            else
-            {
-                group = new MultithreadEventLoopGroup(AppConfig.ServerOptions.EventLoopCount); 
-            }
+        private static Bootstrap GetBootstrap(IEventLoopGroup group)
+        {  
+            var bootstrap = new Bootstrap(); 
             bootstrap
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
