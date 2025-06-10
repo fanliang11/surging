@@ -66,7 +66,6 @@ namespace Surging.Core.Consul
                         await client.KV.DeleteCAS(result);
                     }
                 }
-                client.Dispose();
             }
         }
 
@@ -96,7 +95,6 @@ namespace Surging.Core.Consul
                     var keyValuePair = new KVPair($"{_configInfo.SubscriberPath}{serviceSubscriber.ServiceDescriptor.Id}") { Value = nodeData };
                     await client.KV.Put(keyValuePair);
                 }
-                client.Dispose();
             }
         }
 
@@ -147,7 +145,6 @@ namespace Surging.Core.Consul
                     _logger.LogWarning($"无法获取订阅者信息，因为节点：{_configInfo.SubscriberPath}，不存在。");
                 _subscribers = new ServiceSubscriber[0];
             }
-            client.Dispose();
         }
 
         private async Task<ServiceSubscriber> GetSubscriber(string path)
@@ -163,7 +160,6 @@ namespace Surging.Core.Consul
                     result = await GetSubscriber(data);
                 }
             }
-            client.Dispose();
             return result;
         }
 

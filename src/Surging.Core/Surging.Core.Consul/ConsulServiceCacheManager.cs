@@ -56,7 +56,6 @@ namespace Surging.Core.Consul
                         await client.KV.DeleteCAS(result);
                     }
                 }
-                client.Dispose();
             }
         }
 
@@ -106,7 +105,6 @@ namespace Surging.Core.Consul
                     var keyValuePair = new KVPair($"{_configInfo.CachePath}{cacheDescriptor.CacheDescriptor.Id}") { Value = nodeData };
                     await client.KV.Put(keyValuePair);
                 }
-                client.Dispose();
             }
         }
 
@@ -168,7 +166,6 @@ namespace Surging.Core.Consul
                     result = await GetCache(data);
                 }
             }
-            client.Dispose();
             return result;
         }
 
@@ -191,7 +188,6 @@ namespace Surging.Core.Consul
                         var nodePath = $"{path}{deletedCacheId}";
                         await client.KV.Delete(nodePath);
                     }
-                    client.Dispose();
                 }
             }
         }
@@ -217,7 +213,6 @@ namespace Surging.Core.Consul
                     _logger.LogWarning($"无法获取缓存信息，因为节点：{_configInfo.CachePath}，不存在。");
                 _serviceCaches = new ServiceCache[0];
             }
-            client.Dispose();
         }
 
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)

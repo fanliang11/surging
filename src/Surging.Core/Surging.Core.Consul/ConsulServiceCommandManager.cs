@@ -66,7 +66,6 @@ namespace Surging.Core.Consul
                         await client.KV.DeleteCAS(result);
                     }
                 }
-                client?.Dispose();
             }
         }
 
@@ -185,7 +184,6 @@ namespace Surging.Core.Consul
                     if (isSuccess.Response)
                         NodeChange(serviceCommand);
                 }
-                client.Dispose();
             }
         }
 
@@ -198,7 +196,6 @@ namespace Surging.Core.Consul
             {
                 await SetServiceCommandsAsync(serviceCommands);
             }
-            client.Dispose();
         }
 
         private void ServiceRouteManager_Removed(object sender, ServiceRouteEventArgs e)
@@ -207,7 +204,6 @@ namespace Surging.Core.Consul
             foreach (var client in clients)
             {
                 client.KV.Delete($"{_configInfo.CommandPath}{e.Route.ServiceDescriptor.Id}").Wait();
-                client.Dispose();
             }
         }
 
@@ -265,7 +261,6 @@ namespace Surging.Core.Consul
                     result = GetServiceCommand(data);
                 }
             }
-            client.Dispose();
             return result;
         }
 
@@ -349,7 +344,6 @@ namespace Surging.Core.Consul
                     _logger.LogWarning($"无法获取服务命令信息，因为节点：{_configInfo.CommandPath}，不存在。");
                 _serviceCommands = new ServiceCommandDescriptor[0];
             }
-            client.Dispose();
         }
 
         /// <summary>

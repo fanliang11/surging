@@ -26,8 +26,8 @@ namespace Surging.Core.Consul.Internal.Implementation
         private readonly ILogger<DefaultConsulClientProvider> _logger;
         private readonly ConcurrentDictionary<string, IAddressSelector> _addressSelectors = new
             ConcurrentDictionary<string, IAddressSelector>();
-        //private readonly ConcurrentDictionary<string, ConsulClient> _consulClients = new
-        //    ConcurrentDictionary<string, ConsulClient>();
+        private readonly ConcurrentDictionary<string, ConsulClient> _consulClients = new
+            ConcurrentDictionary<string, ConsulClient>();
 
         public DefaultConsulClientProvider(ConfigInfo config, IHealthCheckService healthCheckService, IConsulAddressSelector consulAddressSelector,
             ILogger<DefaultConsulClientProvider> logger)
@@ -69,11 +69,10 @@ namespace Surging.Core.Consul.Internal.Implementation
             if (addr != null)
             {
                 var ipAddress = addr as IpAddressModel;
-                result = new ConsulClient(config =>
+                result = _consulClients.GetOrAdd(ipAddress.ToString(), new ConsulClient(config =>
                   {
                       config.Address = new Uri($"http://{ipAddress.Ip}:{ipAddress.Port}");
-
-                  }, null, h => { h.UseProxy = false; h.Proxy = null; });
+                  }, null, h => { h.UseProxy = false; h.Proxy = null; }));
             }
             return result;
         }
@@ -86,10 +85,10 @@ namespace Surging.Core.Consul.Internal.Implementation
                 var ipAddress = address as IpAddressModel;
                 if (await _healthCheckService.IsHealth(address))
                 {
-                    result.Add(new ConsulClient(config =>
+                    result.Add(_consulClients.GetOrAdd(ipAddress.ToString(), new ConsulClient(config =>
                     {
                         config.Address = new Uri($"http://{ipAddress.Ip}:{ipAddress.Port}");
-                    }, null, h => { h.UseProxy = false; h.Proxy = null; }));
+                    }, null, h => { h.UseProxy = false; h.Proxy = null; })));
 
                 }
             }

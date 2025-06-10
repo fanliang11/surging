@@ -71,7 +71,6 @@ namespace Surging.Core.Consul
                         await client.KV.DeleteCAS(result);
                     }
                 }
-                client.Dispose();
             }
         }
 
@@ -110,12 +109,11 @@ namespace Surging.Core.Consul
         public override async Task SetRoutesAsync(IEnumerable<ServiceRoute> routes)
         {
             // var locks = await CreateLock();
-             await _consulClientProvider.Check();
-                var hostAddr = NetUtils.GetHostAddress();
-                var client = await GetConsulClient();
             try
             {
-   
+                await _consulClientProvider.Check();
+                var hostAddr = NetUtils.GetHostAddress();
+                var client = await GetConsulClient();
                 var response = await client.GetChildrenListAsync(_configInfo.RoutePath);
                 var serviceRoutes = await GetRoutes(response);
                 foreach (var route in routes)
@@ -142,7 +140,6 @@ namespace Surging.Core.Consul
             }
             finally
             {
-                client.Dispose();
                 //locks.ForEach(p => p.Release());
             }
         }
@@ -175,7 +172,6 @@ namespace Surging.Core.Consul
                     var keyValuePair = new KVPair($"{_configInfo.RoutePath}{serviceRoute.ServiceDescriptor.Id}") { Value = nodeData };
                     await client.KV.Put(keyValuePair);
                 }
-                client.Dispose();
             }
         }
 
@@ -199,7 +195,6 @@ namespace Surging.Core.Consul
                             await client.KV.Delete($"{_configInfo.RoutePath}{deletedRouteId}");
                     }
                 }
-                client?.Dispose();
             }
         }
 
@@ -228,7 +223,7 @@ namespace Surging.Core.Consul
                          new CancellationTokenSource(TimeSpan.FromSeconds(_configInfo.LockDelay)).Token);
                     result.Add(distributedLock);
                 }
-                client?.Dispose();
+
             }
             return result;
         }
@@ -331,7 +326,6 @@ namespace Surging.Core.Consul
                     result = await GetRoute(data);
                 }
             }
-            client.Dispose();
             return result;
         }
 
@@ -372,7 +366,6 @@ namespace Surging.Core.Consul
                     _logger.LogWarning($"无法获取路由信息，因为节点：{_configInfo.RoutePath}，不存在。");
                 _routes = new ServiceRoute[0];
             }
-            client.Dispose();
         }
 
         private static bool DataEquals(IReadOnlyList<byte> data1, IReadOnlyList<byte> data2)
