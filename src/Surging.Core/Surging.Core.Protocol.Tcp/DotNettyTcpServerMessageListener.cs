@@ -112,7 +112,7 @@ namespace Surging.Core.Protocol.Tcp
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{_tcpServerProperties.Host}:{_tcpServerProperties.Port}。");
 
-            var bossGroup = _eventExecutorProvider.GetSingleEventExecutor();
+            var bossGroup = _eventExecutorProvider.GetBossEventExecutor();
             var workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var tcpServiceEntryProvider = ServiceLocator.GetService<ITcpServiceEntryProvider>();
             var workerGroup1 = new MultithreadEventLoopGroup();

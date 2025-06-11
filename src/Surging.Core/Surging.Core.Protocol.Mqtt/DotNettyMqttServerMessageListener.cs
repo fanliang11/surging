@@ -89,10 +89,17 @@ namespace Surging.Core.Protocol.Mqtt
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动Mqtt服务主机，监听地址：{endPoint}。");
-            IEventLoopGroup bossGroup = _eventExecutorProvider.GetSingleEventExecutor();
+            IEventLoopGroup bossGroup = _eventExecutorProvider.GetBossEventExecutor();
             IEventLoopGroup workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
-            
+            if (AppConfig.ServerOptions.Libuv)
+            {
+                bootstrap.Channel<TcpServerChannel>();
+            }
+            else
+            {
+                bootstrap.Channel<TcpServerSocketChannel>();
+            }
             bootstrap
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)

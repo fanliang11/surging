@@ -65,7 +65,7 @@ namespace Surging.Core.Protocol.Udp
             IMessageSender sender=null;
             object isMulticast=null; 
             _networkProperties.ParserConfiguration?.TryGetValue("isMulticast", out  isMulticast);
-            var group = _eventExecutorProvider.GetShakeEventExecutor();
+            var group = _eventExecutorProvider.GetBossEventExecutor();
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(group)
