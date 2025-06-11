@@ -44,5 +44,10 @@ namespace Surging.Core.Codec.MessagePack.Utilities
         {
             return data == null ? default(T) : MessagePackSerializer.Deserialize<T>(data);
         }
+
+        public static T Deserialize<T>(Memory<byte> data)
+        {
+            return data.IsEmpty ? default(T) : MessagePackSerializer.Deserialize<T>(data);
+        }
     }
 }

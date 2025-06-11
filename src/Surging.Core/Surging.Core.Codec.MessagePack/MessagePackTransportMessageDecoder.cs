@@ -19,6 +19,12 @@ namespace Surging.Core.Codec.MessagePack
             return message.GetTransportMessage();
         }
 
+        public TransportMessage Decode(Memory<byte> data)
+        {
+            var message = SerializerUtilitys.Deserialize<MessagePackTransportMessage>(data);
+            return message.GetTransportMessage();
+        }
+
         #endregion Implementation of ITransportMessageDecoder
     }
 }

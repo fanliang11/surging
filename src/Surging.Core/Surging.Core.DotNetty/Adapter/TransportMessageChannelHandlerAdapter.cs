@@ -1,39 +1,44 @@
 ﻿using DotNetty.Buffers;
-using DotNetty.Codecs;
+using DotNetty.Common.Utilities;
+using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Channels;
+using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Surging.Core.DotNetty.Adapter
 {
-    class TransportMessageChannelHandlerAdapter : ByteToMessageDecoder
+    class TransportMessageChannelHandlerAdapter : ChannelHandlerAdapter
     {
         private readonly ITransportMessageDecoder _transportMessageDecoder;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public TransportMessageChannelHandlerAdapter(ITransportMessageDecoder transportMessageDecoder)
         {
-            SetCumulator(ByteToMessageDecoder.CompositionCumulation);
             _transportMessageDecoder = transportMessageDecoder;
         }
 
         #region Overrides of ChannelHandlerAdapter
-         
-        protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)
-        {
-            Span<byte> data = stackalloc byte[input.ReadableBytes];
-            input.ReadBytes(data);
-            var transportMessage = _transportMessageDecoder.Decode(data.ToArray());
-            output.Add(transportMessage);
-        }
 
-        protected override void DecodeLast(IChannelHandlerContext context, IByteBuffer input, List<object> output)
+        public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            base.HandlerRemoved(context);
+            var buffer = (IByteBuffer)message;
+            var data = new Memory<byte>(new byte[buffer.ReadableBytes]);
+            try
+            {
+                buffer.ReadBytes(data);
+                var transportMessage = _transportMessageDecoder.Decode(data);
+                context.FireChannelRead(transportMessage);
+            }
+            finally
+            {
+                ReferenceCountUtil.Release(buffer);
+                message = null;
+            }
         }
-
 
         #endregion Overrides of ChannelHandlerAdapter
     }
