@@ -172,5 +172,8 @@ namespace Surging.Core.CPlatform.Support.Implementation
             }
             return result;
         }
+
+        public abstract ValueTask AddNodeMonitorWatcher(string serviceId);
+        
     }
 }

@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Text.Json;
 
 namespace Surging.Core.Caching.RedisCache
 {
@@ -102,11 +103,10 @@ namespace Surging.Core.Caching.RedisCache
             {
                 return null;
             }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
+             
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                binaryFormatter.Serialize(memoryStream, o);
+                JsonSerializer.Serialize(memoryStream, o);
                 byte[] objectDataAsStream = memoryStream.ToArray();
                 return objectDataAsStream;
             }
@@ -118,11 +118,10 @@ namespace Surging.Core.Caching.RedisCache
             {
                 return default(T);
             }
-
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
+             
             using (MemoryStream memoryStream = new MemoryStream(stream))
             {
-                T result = (T)binaryFormatter.Deserialize(memoryStream);
+                T result = JsonSerializer.Deserialize<T>(memoryStream);
                 return result;
             }
         }

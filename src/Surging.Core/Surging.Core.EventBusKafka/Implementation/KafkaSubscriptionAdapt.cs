@@ -21,6 +21,11 @@ namespace Surging.Core.EventBusKafka.Implementation
             _consumeConfigurator.Configure(GetQueueConsumers());
         }
 
+        public void Unsubscribe()
+        {
+            _consumeConfigurator.Unconfigure(GetQueueConsumers());
+        }
+
         #region 私有方法
         private List<Type> GetQueueConsumers()
         {

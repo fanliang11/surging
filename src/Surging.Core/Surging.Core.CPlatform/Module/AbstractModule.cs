@@ -10,29 +10,47 @@ using System.Text.RegularExpressions;
 
 namespace Surging.Core.CPlatform.Module
 {
-    public abstract class AbstractModule : Autofac.Module
+    public abstract class AbstractModule : Autofac.Module,IDisposable
     {
         #region 实例属性
-
+        /// <summary>
+        /// 容器创建包装属性
+        /// </summary>
         public ContainerBuilderWrapper Builder { get; set; }
    
+        /// <summary>
+        /// 唯一标识guid
+        /// </summary>
         public Guid Identifier { get; set; }
 
-
+        /// <summary>
+        /// 模块名
+        /// </summary>
         public string ModuleName { get; set; }
 
-
+        /// <summary>
+        /// 类型名
+        /// </summary>
         public string TypeName { get; set; }
 
     
-
+        /// <summary>
+        /// 标题
+        /// </summary>
         public string Title { get; set; }
-
+        /// <summary>
+        /// 是否可用（控制模块是否加载）
+        /// </summary>
         public bool Enable { get; set; } = true;
 
-
+        /// <summary>
+        /// 描述
+        /// </summary>
         public string Description { get; set; }
         
+        /// <summary>
+        /// 组件
+        /// </summary>
         public List<Component> Components { get; set; }
 
         #endregion
@@ -47,19 +65,26 @@ namespace Surging.Core.CPlatform.Module
 
         #region 实例方法
 
-        public virtual void Initialize(CPlatformContainer serviceProvider)
+        public virtual void Initialize(AppModuleContext serviceProvider)
         {
+            Dispose();
         }
-        
+        /// <summary>
+        /// 重写autofac load方法 
+        /// 判断组件是否可用，并注册模块组件
+        /// </summary>
+        /// <param name="builder"></param>
         protected override  void Load(ContainerBuilder builder)
         {
             try
             {
                 base.Load(builder);
                 Builder = new ContainerBuilderWrapper(builder);
-                if (Enable)
+                if (Enable)//如果可用 
                 {
+                    //注册创建容器
                     RegisterBuilder(Builder);
+                    //注册组件
                     RegisterComponents(Builder);
                     
                 }
@@ -82,13 +107,19 @@ namespace Surging.Core.CPlatform.Module
             {
                 Components.ForEach(component =>
                 {
+                    //服务类型
                     Type serviceType = Type.GetType(component.ServiceType, true);
+                    //实现类型
                     Type implementType = Type.GetType(component.ImplementType, true);
+                    //组件生命周期
                     switch (component.LifetimeScope)
                     {
+                        //依赖创建
                         case LifetimeScope.InstancePerDependency:
+                            //如果是泛型
                             if (serviceType.GetTypeInfo().IsGenericType || implementType.GetTypeInfo().IsGenericType)
                             {
+                                //注册泛型
                                 builder.RegisterGeneric(implementType).As(serviceType).InstancePerDependency();
                             }
                             else
@@ -96,7 +127,7 @@ namespace Surging.Core.CPlatform.Module
                                 builder.RegisterType(implementType).As(serviceType).InstancePerDependency();
                             }
                             break;
-                        case LifetimeScope.SingleInstance:
+                        case LifetimeScope.SingleInstance://单例
                             if (serviceType.GetTypeInfo().IsGenericType || implementType.GetTypeInfo().IsGenericType)
                             {
                                 builder.RegisterGeneric(implementType).As(serviceType).SingleInstance();
@@ -106,7 +137,7 @@ namespace Surging.Core.CPlatform.Module
                                 builder.RegisterType(implementType).As(serviceType).SingleInstance();
                             }
                             break;
-                        default:
+                        default://默认依赖创建
                             if (serviceType.GetTypeInfo().IsGenericType || implementType.GetTypeInfo().IsGenericType)
                             {
                                 builder.RegisterGeneric(implementType).As(serviceType).InstancePerDependency();
@@ -121,7 +152,9 @@ namespace Surging.Core.CPlatform.Module
                 });
             }
         }
-        
+        /// <summary>
+        /// 验证模块
+        /// </summary>
         public virtual void ValidateModule()
         {
             if (this.Identifier == Guid.Empty || string.IsNullOrEmpty(this.ModuleName) || string.IsNullOrEmpty(this.TypeName)
@@ -157,6 +190,10 @@ namespace Surging.Core.CPlatform.Module
                 sb.AppendLine(c.ToString());
             });
             return sb.ToString();
+        }
+
+        public virtual void Dispose()
+        {
         }
 
         #endregion

@@ -1,0 +1,7 @@
+- name: 开发者文档
+  href: docs/index
+  homepage: docs/index.md
+
+- name: 博文
+  href: docs/blogs/index
+  homepage: docs/blogs/index.md 

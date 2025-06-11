@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Serialization;
-using Surging.Core.System;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
-    public class ServiceCacheProvider : ServiceBase, IServiceCacheProvider
+    /// <summary>
+    /// 服务缓存提供者
+    /// </summary>
+    public class ServiceCacheProvider : IServiceCacheProvider
     {
         private readonly ISerializer<string> _serializer;
         public ServiceCacheProvider(ISerializer<string> serializer)
@@ -18,22 +21,22 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
         }
         public async Task<IEnumerable<CacheDescriptor>> GetServiceDescriptorAsync()
         {
-            return await GetService<IServiceCacheManager>().GetCacheDescriptorAsync();
+            return await ServiceLocator.GetService<IServiceCacheManager>().GetCacheDescriptorAsync();
         }
 
         public async Task<IEnumerable<CacheEndpoint>> GetCacheEndpointAsync(string cacheId)
         {
-            return await GetService<IServiceCacheManager>().GetCacheEndpointAsync(cacheId);
+            return await ServiceLocator.GetService<IServiceCacheManager>().GetCacheEndpointAsync(cacheId);
         }
 
         public async Task<CacheEndpoint> GetCacheEndpointAsync(string cacheId, string endpoint)
         {
-            return await GetService<IServiceCacheManager>().GetCacheEndpointAsync(cacheId, endpoint);
+            return await ServiceLocator.GetService<IServiceCacheManager>().GetCacheEndpointAsync(cacheId, endpoint);
         }
 
         public async Task SetCacheEndpointByEndpoint(string cacheId, string endpoint, CacheEndpoint cacheEndpoint)
         {
-            var model = await GetService<IServiceCacheManager>().GetAsync(cacheId);
+            var model = await ServiceLocator.GetService<IServiceCacheManager>().GetAsync(cacheId);
 
             var cacheEndpoints = model.CacheEndpoint.Where(p => p.ToString() != cacheEndpoint.ToString()).ToList();
             cacheEndpoints.Add(cacheEndpoint);
@@ -48,13 +51,13 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
                 }) ?? Enumerable.Empty<CacheEndpointDescriptor>(),
                 CacheDescriptor = cache.CacheDescriptor
             });
-            await GetService<IServiceCacheManager>().SetCachesAsync(descriptors);
+            await ServiceLocator.GetService<IServiceCacheManager>().SetCachesAsync(descriptors);
         }
 
 
         public async Task DelCacheEndpointAsync(string cacheId, string endpoint)
         {
-            var model = await GetService<IServiceCacheManager>().GetAsync(cacheId);
+            var model = await ServiceLocator.GetService<IServiceCacheManager>().GetAsync(cacheId);
             var cacheEndpoints = model.CacheEndpoint.Where(p => p.ToString() != endpoint).ToList();
             model.CacheEndpoint = cacheEndpoints;
             var caches = new ServiceCache[] { model };
@@ -67,7 +70,7 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
                 }) ?? Enumerable.Empty<CacheEndpointDescriptor>(),
                 CacheDescriptor = cache.CacheDescriptor
             });
-            await GetService<IServiceCacheManager>().SetCachesAsync(descriptors);
+            await ServiceLocator.GetService<IServiceCacheManager>().SetCachesAsync(descriptors);
         }
     }
 }
