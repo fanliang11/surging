@@ -10,6 +10,7 @@ using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
@@ -29,18 +30,19 @@ namespace Surging.Core.DotNetty
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private IChannel _channel;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
 
         #endregion Field
 
         #region Constructor
 
-        public DotNettyServerMessageListener(ILogger<DotNettyServerMessageListener> logger, ITransportMessageCodecFactory codecFactory)
+        public DotNettyServerMessageListener(ILogger<DotNettyServerMessageListener> logger, IEventExecutorProvider eventExecutorProvider, ITransportMessageCodecFactory codecFactory)
         {
             _logger = logger;
+            _eventExecutorProvider = eventExecutorProvider;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
         }
-
         #endregion Constructor
 
         #region Implementation of IMessageListener
@@ -66,24 +68,20 @@ namespace Surging.Core.DotNetty
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
-            IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
-            IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
+            IEventLoopGroup bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+            IEventLoopGroup workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
-            IEventLoopGroup eventExecutor = new MultithreadEventLoopGroup();
+            IEventLoopGroup eventExecutor = _eventExecutorProvider.GetWorkEventExecutor();
             if (AppConfig.ServerOptions.Libuv)
             {
-                ResourceLeakDetector.Level = ResourceLeakDetector.DetectionLevel.Disabled;
-                var dispatcher = new DispatcherEventLoopGroup();
-                bossGroup = dispatcher;
-                workerGroup = new WorkerEventLoopGroup(dispatcher, AppConfig.ServerOptions.EventLoopCount);
-                var dispatcherExecutor = new DispatcherEventLoopGroup();
-                eventExecutor = new WorkerEventLoopGroup(dispatcherExecutor, AppConfig.ServerOptions.EventLoopCount);
+                bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+                workerGroup = _eventExecutorProvider.GetWorkEventExecutor();
                 bootstrap.Channel<TcpServerChannel>();
             }
             else
             {
-                bossGroup = new MultithreadEventLoopGroup(1);
-                workerGroup = new MultithreadEventLoopGroup(AppConfig.ServerOptions.EventLoopCount);
+                bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+                workerGroup = _eventExecutorProvider.GetWorkEventExecutor();
                 bootstrap.Channel<TcpServerSocketChannel>();
             }
             bootstrap

@@ -25,6 +25,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         private readonly IServiceRouteManager _serviceRouteManager;
         private readonly int _timeout = 30000;
         private readonly Timer _timer;
+        private ITransportClientFactory _transportClientFactory = null;
         private EventHandler<HealthCheckEventArgs> _removed;
 
         private EventHandler<HealthCheckEventArgs> _changed;
@@ -205,9 +206,10 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
 
         private async Task<bool> CheckService(EndPoint address, int timeout)
         {
-            var transportClientFactory = ServiceLocator.GetService<ITransportClientFactory>();
+            if (_transportClientFactory == null)
+                _transportClientFactory = ServiceLocator.GetService<ITransportClientFactory>();
             bool isHealth = false;
-            var client = await transportClientFactory.CreateClientAsync(address);
+            var client = await _transportClientFactory.CreateClientAsync(address);
             try
             {
                 using (var cts = new CancellationTokenSource())

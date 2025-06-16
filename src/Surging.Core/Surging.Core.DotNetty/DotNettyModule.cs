@@ -34,7 +34,7 @@ namespace Surging.Core.DotNetty
             {
                 IServiceExecutor serviceExecutor = null;
                 if (provider.IsRegistered(typeof(IServiceExecutor)))
-                    serviceExecutor = provider.Resolve<IServiceExecutor>();
+                    serviceExecutor = provider.ResolveNamed<IServiceExecutor>(CommunicationProtocol.Tcp.ToString());
                 return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
                     provider.Resolve<IEventExecutorProvider>(),
                     provider.Resolve<IHealthCheckService>(),
@@ -53,7 +53,8 @@ namespace Surging.Core.DotNetty
             builder.Register(provider =>
             {
                 return new DotNettyServerMessageListener(provider.Resolve<ILogger<DotNettyServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>());
+                    provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<ITransportMessageCodecFactory>());
             }).SingleInstance();
             builder.Register(provider =>
             {
