@@ -13,9 +13,9 @@ namespace Surging.Core.System.MongoProvider
         /// <summary>
         ///  Function module initialization,trigger when the module starts loading
         /// </summary>
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>

@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Surging.Core.CPlatform.Exceptions;
 using static Surging.Core.CPlatform.Utilities.FastInvoke;
 
 namespace Surging.Core.Protocol.Http
@@ -137,6 +138,14 @@ namespace Surging.Core.Protocol.Http
                 resultMessage.IsSucceed = resultMessage.Entity != null;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
             }
+            catch (ValidateException validateException)
+            {
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(validateException, "执行本地逻辑时候发生了错误。", validateException);
+
+                resultMessage.Message = validateException.Message;
+                resultMessage.StatusCode = validateException.HResult;
+            }
             catch (Exception ex)
             {
                 if (_logger.IsEnabled(LogLevel.Error))
@@ -167,6 +176,14 @@ namespace Surging.Core.Protocol.Http
                 }
                 resultMessage.IsSucceed = resultMessage.Entity != null;
                 resultMessage.StatusCode = resultMessage.IsSucceed ? (int)StatusCode.Success : (int)StatusCode.RequestError;
+            }
+            catch (ValidateException validateException)
+            {
+                if (_logger.IsEnabled(LogLevel.Error))
+                    _logger.LogError(validateException, "执行本地逻辑时候发生了错误。", validateException);
+
+                resultMessage.Message = validateException.Message;
+                resultMessage.StatusCode = validateException.HResult;
             }
             catch (Exception exception)
             {

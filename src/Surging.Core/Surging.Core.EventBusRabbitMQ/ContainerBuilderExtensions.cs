@@ -49,6 +49,7 @@ namespace Surging.Core.EventBusRabbitMQ
                 AppConfig.MessageTTL = option.MessageTTL;
                 AppConfig.RetryCount = option.RetryCount;
                 AppConfig.FailCount = option.FailCount;
+                AppConfig.PrefetchCount = option.PrefetchCount;
                 return new DefaultRabbitMQPersistentConnection(factory, logger);
             }).As<IRabbitMQPersistentConnection>();
             return builder;

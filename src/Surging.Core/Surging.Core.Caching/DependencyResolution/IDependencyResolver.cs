@@ -23,7 +23,7 @@ namespace Surging.Core.Caching.DependencyResolution
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        object GetService(Type type, object key);
+        object GetService(Type type, string key);
 
         /// <summary>
         /// 通过KEY和TYPE获取实例对象集合
@@ -35,6 +35,6 @@ namespace Surging.Core.Caching.DependencyResolution
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        IEnumerable<object> GetServices(Type type, object key);
+        IEnumerable<object> GetServices(Type type, string key);
     }
 }

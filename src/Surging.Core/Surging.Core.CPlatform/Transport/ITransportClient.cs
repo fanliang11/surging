@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Messages;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Transport
@@ -13,6 +14,6 @@ namespace Surging.Core.CPlatform.Transport
         /// </summary>
         /// <param name="message">远程调用消息模型。</param>
         /// <returns>远程调用消息的传输消息。</returns>
-        Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message);
+        Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message, CancellationToken cancellationToken);
     }
 }

@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net472;net5.0;net6.0;</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+    <RootNamespace>DotNetty.Buffers</RootNamespace>
+    <AssemblyName>SpanNetty.Buffers</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+   <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetty.Common\DotNetty.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Internal\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Internal\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>
