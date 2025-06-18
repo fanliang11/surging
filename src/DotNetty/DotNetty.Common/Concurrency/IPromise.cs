@@ -30,6 +30,8 @@ namespace DotNetty.Common.Concurrency
     {
         Task Task { get; }
 
+        ValueTask ValueTask { get; }
+
         bool IsVoid { get; }
 
         bool IsCompleted { get; }

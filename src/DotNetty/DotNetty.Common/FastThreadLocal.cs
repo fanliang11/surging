@@ -30,6 +30,7 @@ namespace DotNetty.Common
 {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using System.Threading;
 
     public abstract class FastThreadLocal
     {
@@ -115,7 +116,6 @@ namespace DotNetty.Common
         where T : class
     {
         private readonly int _index;
-
         /// <summary>
         ///     Returns the number of thread local variables bound to the current thread.
         /// </summary>

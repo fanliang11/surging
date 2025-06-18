@@ -25,8 +25,10 @@ namespace DotNetty.Codecs
     using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using DotNetty.Buffers;
     using DotNetty.Common;
+    using DotNetty.Common.Utilities;
     using DotNetty.Transport.Channels;
     using DotNetty.Transport.Channels.Sockets;
 
@@ -112,7 +114,7 @@ namespace DotNetty.Codecs
                 {
                     // We must release in in all cases as otherwise it may produce a leak if writeBytes(...) throw
                     // for whatever release (for example because of OutOfMemoryError)
-                    _ = input.Release();
+                    _ = input.Release(); 
                 }
             }
         }
@@ -328,9 +330,10 @@ namespace DotNetty.Codecs
                 {
                     try
                     {
+                        int size = output.Count;
                         if (_cumulation is object && !_cumulation.IsReadable())
                         {
-                            _numReads = 0;
+                            _numReads = 0; 
                             _ = _cumulation.Release();
                             _cumulation = null;
                         }
@@ -342,7 +345,7 @@ namespace DotNetty.Codecs
                             DiscardSomeReadBytes();
                         }
 
-                        int size = output.Count;
+         
                         _firedChannelRead |= (uint)size > 0u;
                         FireChannelRead(context, output, size);
                     }

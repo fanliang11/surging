@@ -36,7 +36,7 @@ namespace DotNetty.Common
 
         static readonly ThreadLocalPool<ThreadLocalObjectList> Pool = new ThreadLocalPool<ThreadLocalObjectList>(handle => new ThreadLocalObjectList(handle));
 
-        readonly ThreadLocalPool.Handle returnHandle;
+          ThreadLocalPool.Handle returnHandle;
 
         ThreadLocalObjectList(ThreadLocalPool.Handle returnHandle)
         {

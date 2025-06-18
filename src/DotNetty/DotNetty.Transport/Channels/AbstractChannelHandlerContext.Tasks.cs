@@ -302,10 +302,12 @@ namespace DotNetty.Transport.Channels
             void Recycle()
             {
                 // Set to null so the GC can collect them directly
-                _ctx = null;
+                _ctx = null; 
                 _msg = null;
-                _promise = null;
+                _promise = null; 
                 _handle.Release(this);
+                //_handle = null;//fanly update
+                
             }
         }
 

@@ -36,7 +36,7 @@ namespace DotNetty.Transport.Channels
         private readonly IChannel _channel;
         // Will be null if we should not propagate exceptions through the pipeline on failure case.
         private readonly bool _fireException;
-        private readonly Lazy<Task> _task;
+        private readonly Lazy<ManualResetValueTaskSource<int>> _task;
 
         static VoidChannelPromise()
         {
@@ -53,14 +53,20 @@ namespace DotNetty.Transport.Channels
             if (channel is null) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.channel); }
             _channel = channel;
             _fireException = fireException;
-            _task = new Lazy<Task>(
+            _task = new Lazy<ManualResetValueTaskSource<int>>(
 #if NET
                 static
 #endif
-                () => TaskUtil.FromException(Error), LazyThreadSafetyMode.ExecutionAndPublication);
+                () => {
+
+                    var result = new ManualResetValueTaskSource<int>();
+                    result.SetException(Error);
+                    return result;
+
+                } , LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
-        public Task Task => _task.Value;
+        public ValueTask ValueTask => _task.Value.AwaitVoid(CancellationToken.None);
 
         public bool IsVoid => true;
 
@@ -71,6 +77,9 @@ namespace DotNetty.Transport.Channels
         public bool IsFaulted => false;
 
         public bool IsCanceled => false;
+         
+
+        Task IPromise.Task => ValueTask.AsTask();
 
         public bool TryComplete() => false;
 
@@ -125,7 +134,7 @@ namespace DotNetty.Transport.Channels
 
         public IPromise Unvoid()
         {
-            var promise = new DefaultPromise();
+            var promise = new DefaultValueTaskPromise();
             if (_fireException)
             {
                 _ = promise.Task.ContinueWith(FireExceptionOnFailureAction, _channel, TaskContinuationOptions.ExecuteSynchronously);

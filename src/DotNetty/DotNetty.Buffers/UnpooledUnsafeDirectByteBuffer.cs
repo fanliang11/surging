@@ -130,10 +130,10 @@ namespace DotNetty.Buffers
                 TrimIndicesToCapacity(newCapacity);
                 bytesToCopy = newCapacity;
             }
-            byte[] oldBuffer = _buffer;
+            byte[] oldBuffer = _buffer; 
             byte[] newBuffer = AllocateDirect(newCapacity);
             PlatformDependent.CopyMemory(oldBuffer, 0, newBuffer, 0, bytesToCopy);
-            SetByteBuffer(newBuffer, true);
+            SetByteBuffer(newBuffer, true); 
             return this;
         }
 

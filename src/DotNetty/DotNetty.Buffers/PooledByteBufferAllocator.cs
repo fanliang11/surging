@@ -371,7 +371,7 @@ namespace DotNetty.Buffers
                     PoolArena<byte[]> directArena = LeastUsedArena(_owner._directArenas);
                     ExecutionEnvironment.TryGetCurrentExecutor(out IEventExecutor eventExecutor);
                     PoolThreadCache<byte[]> cache = null;
-                    if (_owner._useCacheForAllThreads ||
+                    if (_owner._useCacheForAllThreads || 
                       // The Thread is used by an EventExecutor, let's use the cache as the chances are good that we
                       // will allocate a lot!
                       eventExecutor != null)

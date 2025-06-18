@@ -258,26 +258,26 @@ namespace DotNetty.Transport.Channels.Pool
                 return DoAcquireAsync(null);
             }
 
-            var promise = new TaskCompletionSource<IChannel>();
+            var promise = new ManualResetValueTaskSource<IChannel>();
             _executor.Execute(Acquire0, promise);
-            return new ValueTask<IChannel>(promise.Task);
+            return promise.AwaitValue(CancellationToken.None);
         }
 
         async void Acquire0(object state)
         {
-            var promise = (TaskCompletionSource<IChannel>)state;
+            var promise = (ManualResetValueTaskSource<IChannel>)state;
             try
             {
                 var result = await DoAcquireAsync(promise);
-                _ = promise.TrySetResult(result);
+                _ = promise.SetResult(result);
             }
             catch (Exception ex)
             {
-                _ = promise.TrySetException(ex);
+                  promise.SetException(ex);
             }
         }
 
-        ValueTask<IChannel> DoAcquireAsync(TaskCompletionSource<IChannel> promise)
+        ValueTask<IChannel> DoAcquireAsync(ManualResetValueTaskSource<IChannel> promise)
         {
             Debug.Assert(_executor.InEventLoop);
 
@@ -299,7 +299,7 @@ namespace DotNetty.Transport.Channels.Pool
                 }
                 else
                 {
-                    promise  = promise?? new TaskCompletionSource<IChannel>();
+                    promise  = promise?? new ManualResetValueTaskSource<IChannel>();
                     var task = new AcquireTask(this, promise);
                     if (_pendingAcquireQueue.TryEnqueue(task))
                     {
@@ -315,7 +315,7 @@ namespace DotNetty.Transport.Channels.Pool
                         return ThrowHelper.FromInvalidOperationException_TooManyOutstandingAcquireOperations();
                     }
 
-                    return new ValueTask<IChannel>(promise.Task);
+                    return promise.AwaitValue(CancellationToken.None);
                 }
             }
         }
@@ -342,15 +342,15 @@ namespace DotNetty.Transport.Channels.Pool
 
         async void Release0(object channel, object promise)
         {
-            var tsc = promise as TaskCompletionSource<bool>;
+            var tsc = promise as ManualResetValueTaskSource<bool>;
             try
             {
                 var result = await DoReleaseAsync((IChannel)channel);
-                _ = tsc.TrySetResult(result);
+                _ = tsc.SetResult(result);
             }
             catch (Exception ex)
             {
-                _ = tsc.TrySetException(ex);
+                tsc.SetException(ex);
             }
         }
 
@@ -460,7 +460,7 @@ namespace DotNetty.Transport.Channels.Pool
             while (_pendingAcquireQueue.TryDequeue(out AcquireTask task))
             {
                 task.TimeoutTask?.Cancel();
-                _ = task.Promise.TrySetException(ThrowHelper.GetClosedChannelException());
+                 task.Promise.SetException(ThrowHelper.GetClosedChannelException());
             }
 
             Interlocked.Exchange(ref v_acquiredChannelCount, 0);
@@ -474,7 +474,7 @@ namespace DotNetty.Transport.Channels.Pool
 
         void OnTimeoutNew(AcquireTask task) => task.AcquireAsync();
 
-        void OnTimeoutFail(AcquireTask task) => task.Promise.TrySetException(TimeoutException);
+        void OnTimeoutFail(AcquireTask task) => task.Promise.SetException(TimeoutException);
 
         sealed class TimeoutTask : IRunnable
         {
@@ -509,13 +509,13 @@ namespace DotNetty.Transport.Channels.Pool
         {
             private readonly FixedChannelPool _pool;
 
-            public readonly TaskCompletionSource<IChannel> Promise;
+            public readonly ManualResetValueTaskSource<IChannel> Promise;
             public readonly PreciseTimeSpan ExpireTime;
             public IScheduledTask TimeoutTask;
 
             private bool _acquired;
 
-            public AcquireTask(FixedChannelPool pool, TaskCompletionSource<IChannel> promise)
+            public AcquireTask(FixedChannelPool pool, ManualResetValueTaskSource<IChannel> promise)
             {
                 _pool = pool;
                 Promise = promise;
@@ -532,8 +532,8 @@ namespace DotNetty.Transport.Channels.Pool
                 {
                     if (promise is object)
                     {
-                        _ = promise.TrySetException(PoolClosedOnAcquireException);
-                        return new ValueTask<IChannel>(promise.Task);
+                        promise.SetException(PoolClosedOnAcquireException);
+                        return promise.AwaitValue(CancellationToken.None);
                     }
                     else
                     {
@@ -553,8 +553,8 @@ namespace DotNetty.Transport.Channels.Pool
                         var channel = future.Result;
                         if (promise is object)
                         {
-                            _ = promise.TrySetResult(channel);
-                            return new ValueTask<IChannel>(promise.Task);
+                            _ = promise.SetResult(channel);
+                            return  promise.AwaitValue(CancellationToken.None);
                         }
                         else
                         {
@@ -569,8 +569,8 @@ namespace DotNetty.Transport.Channels.Pool
 
                     if (promise is object)
                     {
-                        _ = promise.TrySetException(ex);
-                        return new ValueTask<IChannel>(promise.Task);
+                         promise.SetException(ex);
+                        return promise.AwaitValue(CancellationToken.None);
                     }
                     else
                     {
@@ -579,7 +579,7 @@ namespace DotNetty.Transport.Channels.Pool
                 }
 
                 //at this point 'future' is a real Task
-                promise  = promise ?? new TaskCompletionSource<IChannel>();
+                promise  = promise ?? new ManualResetValueTaskSource<IChannel>();
                 future
                     .AsTask()
                     .ContinueWith(
@@ -594,20 +594,20 @@ namespace DotNetty.Transport.Channels.Pool
                                 // Since the pool is closed, we have no choice but to close the channel
                                 _ = t.Result.CloseAsync();
                             }
-                            _ = promise.TrySetException(PoolClosedOnAcquireException);
+                              promise.SetException(PoolClosedOnAcquireException);
                         }
                         else if (t.IsSuccess())
                         {
-                            _ = promise.TrySetResult(future.Result);
+                            _ = promise.SetResult(future.Result);
                         }
                         else
                         {
                             ResumeQueue();
-                            _ = promise.TrySetException(t.Exception);
+                            promise.SetException(t.Exception);
                         }
                     });
 
-                return new ValueTask<IChannel>(promise.Task);
+                return promise.AwaitValue(CancellationToken.None);
 
                 void ResumeQueue()
                 {

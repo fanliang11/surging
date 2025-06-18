@@ -31,7 +31,9 @@ namespace DotNetty.Transport.Channels.Pool
     using System;
     using System.Collections.Concurrent;
     using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal;
     using DotNetty.Common.Utilities;
     using DotNetty.Transport.Bootstrapping;
@@ -181,23 +183,23 @@ namespace DotNetty.Transport.Channels.Pool
             }
             else
             {
-                var completionSource = new TaskCompletionSource<IChannel>();
+                var completionSource = new ManualResetValueTaskSource<IChannel>();
                 eventLoop.Execute(DoHealthCheck, channel, completionSource);
-                return new ValueTask<IChannel>(completionSource.Task);
+                return completionSource.AwaitValue(CancellationToken.None);
             }
         }
 
         async void DoHealthCheck(object channel, object state)
         {
-            var promise = state as TaskCompletionSource<IChannel>;
+            var promise = state as ManualResetValueTaskSource<IChannel>;
             try
             {
                 var result = await DoHealthCheck((IChannel)channel);
-                _ = promise.TrySetResult(result);
+                promise.SetResult(result);
             }
             catch (Exception ex)
             {
-                _ = promise.TrySetException(ex);
+                promise.SetException(ex);
             }
         }
 
@@ -257,9 +259,9 @@ namespace DotNetty.Transport.Channels.Pool
                 }
                 else
                 {
-                    var promise = new TaskCompletionSource<bool>();
+                    var promise = new ManualResetValueTaskSource<bool>();
                     loop.Execute(DoReleaseChannel, channel, promise);
-                    return await promise.Task;
+                    return await promise.AwaitValue(CancellationToken.None);
                 }
             }
             catch (Exception)
@@ -271,15 +273,15 @@ namespace DotNetty.Transport.Channels.Pool
 
         async void DoReleaseChannel(object channel, object state)
         {
-            var promise = state as TaskCompletionSource<bool>;
+            var promise = state as ManualResetValueTaskSource<bool>;
             try
             {
                 var result = await DoReleaseChannel((IChannel)channel);
-                _ = promise.TrySetResult(result);
+                _ = promise.SetResult(result);
             }
             catch (Exception ex)
             {
-                _ = promise.TrySetException(ex);
+                promise.SetException(ex);
             }
         }
 

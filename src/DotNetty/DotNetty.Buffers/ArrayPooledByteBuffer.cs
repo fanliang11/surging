@@ -32,7 +32,7 @@ namespace DotNetty.Buffers
 {
     abstract partial class ArrayPooledByteBuffer : AbstractReferenceCountedByteBuffer
     {
-        private readonly ThreadLocalPool.Handle _recyclerHandle;
+        private  ThreadLocalPool.Handle _recyclerHandle;
 
         protected internal byte[] Memory;
         protected ArrayPooledByteBufferAllocator _allocator;
@@ -150,11 +150,11 @@ namespace DotNetty.Buffers
             if (_arrayPool is object & buffer is object)
             {
                 FreeArray(buffer);
-                FreeArray(Memory);//fanly update
+                FreeArray(Memory);
                 _arrayPool = null;
                 Memory = null;
-
-                Recycle();
+               // _recyclerHandle = null;//fanly update
+               Recycle();
             }
         }
 

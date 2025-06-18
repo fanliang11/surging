@@ -266,8 +266,8 @@ namespace DotNetty.Transport.Channels
             }
 
             // recycle the entry
-            e.Recycle();
-
+            e.Recycle();//fanly update
+          // _flushedEntry = null;//fanly update
             return true;
         }
 
@@ -362,7 +362,7 @@ namespace DotNetty.Transport.Channels
                     if (writtenBytes != 0)
                     {
                         // Invalid nio buffer cache for partial writen, see https://github.com/Azure/DotNetty/issues/422
-                        _flushedEntry.Buffer = new ArraySegment<byte>();
+                        _flushedEntry.Buffer =null;
                         _flushedEntry.Buffers = null;
 
                         _ = buf.SetReaderIndex(readerIndex + (int)writtenBytes);
@@ -422,6 +422,7 @@ namespace DotNetty.Transport.Channels
             long ioBufferSize = 0;
             int nioBufferCount = 0;
             InternalThreadLocalMap threadLocalMap = InternalThreadLocalMap.Get();
+
             List<ArraySegment<byte>> nioBuffers = NioBuffers.Get(threadLocalMap);
             Entry entry = _flushedEntry;
             while (IsFlushedEntry(entry) && entry.Message is IByteBuffer buf)
@@ -456,14 +457,14 @@ namespace DotNetty.Transport.Channels
                         }
                         if (0u >= (uint)(count - 1))
                         {
-                            ArraySegment<byte> nioBuf = entry.Buffer;
-                            if (nioBuf.Array is null)
+                            ArraySegment<byte>? nioBuf = entry.Buffer;//fanly update
+                            if (nioBuf is null)
                             {
                                 // cache ByteBuffer as it may need to create a new ByteBuffer instance if its a
                                 // derived buffer
                                 entry.Buffer = nioBuf = buf.GetIoBuffer(readerIndex, readableBytes);
                             }
-                            nioBuffers.Add(nioBuf);
+                            nioBuffers.Add(nioBuf.Value);
                             nioBufferCount++;
                         }
                         else
@@ -482,7 +483,6 @@ namespace DotNetty.Transport.Channels
             }
             _nioBufferCount = nioBufferCount;
             _nioBufferSize = ioBufferSize;
-
             return nioBuffers;
         }
 
@@ -894,11 +894,11 @@ namespace DotNetty.Transport.Channels
         {
             static readonly ThreadLocalPool<Entry> Pool = new ThreadLocalPool<Entry>(h => new Entry(h));
 
-            private readonly ThreadLocalPool.Handle _handle;
+            private  ThreadLocalPool.Handle _handle;
             public Entry Next;
             public object Message;
             public ArraySegment<byte>[] Buffers;
-            public ArraySegment<byte> Buffer;
+            public ArraySegment<byte>? Buffer;
             public IPromise Promise;
             public long Progress;
             public long Total;
@@ -936,7 +936,7 @@ namespace DotNetty.Transport.Channels
                     Total = 0L;
                     Progress = 0L;
                     Buffers = null;
-                    Buffer = new ArraySegment<byte>();
+                    Buffer = null;
                     return pSize;
                 }
                 return 0;
@@ -946,7 +946,7 @@ namespace DotNetty.Transport.Channels
             {
                 Next = null;
                 Buffers = null;
-                Buffer = new ArraySegment<byte>();
+                Buffer = null;
                 Message = null;
                 Promise = null;
                 Progress = 0L;
@@ -954,7 +954,8 @@ namespace DotNetty.Transport.Channels
                 PendingSize = 0;
                 Count = -1;
                 Cancelled = false;
-                _handle.Release(this);
+                //_handle = null;//fanly update
+                 _handle.Release(this);
             }
 
             public Entry RecycleAndGetNext()

@@ -228,8 +228,7 @@ namespace DotNetty.Codecs
             {
                 FailOnFrameLengthLessThanInitialBytesToStrip(input, frameLengthInt, thisInitialBytesToStrip);
             }
-            _ = input.SkipBytes(thisInitialBytesToStrip);
-
+            _ = input.SkipBytes(thisInitialBytesToStrip); 
             // extract frame
             int readerIndex = input.ReaderIndex;
             int actualFrameLength = frameLengthInt - thisInitialBytesToStrip;

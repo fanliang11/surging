@@ -132,36 +132,36 @@ namespace DotNetty.Common.Concurrency
             public void Run() => _action(_context, _state);
         }
 
-        abstract class FuncQueueNodeBase<T> : IRunnable
+        abstract class FuncQueueNodeBase<T> : IRunnable//fanly update
         {
-            readonly TaskCompletionSource<T> _promise;
+            readonly ManualResetValueTaskSource<T> _promise;
             readonly CancellationToken _cancellationToken;
 
-            protected FuncQueueNodeBase(TaskCompletionSource<T> promise, CancellationToken cancellationToken)
+            protected FuncQueueNodeBase(ManualResetValueTaskSource<T> promise, CancellationToken cancellationToken)
             {
                 _promise = promise;
                 _cancellationToken = cancellationToken;
             }
 
-            public Task<T> Completion => _promise.Task;
+            public Task<T> Completion => _promise.AwaitValue(CancellationToken.None).AsTask();
 
             public void Run()
             {
                 if (_cancellationToken.IsCancellationRequested)
                 {
-                    _ = _promise.TrySetCanceled();
+                     _promise.SetCanceled();
                     return;
                 }
 
                 try
                 {
                     T result = Call();
-                    _ = _promise.TrySetResult(result);
+                    _ = _promise.SetResult(result);
                 }
                 catch (Exception ex)
                 {
                     // todo: handle fatal
-                    _ = _promise.TrySetException(ex);
+                    _promise.SetException(ex);
                 }
             }
 
@@ -173,7 +173,7 @@ namespace DotNetty.Common.Concurrency
             readonly Func<T> _func;
 
             public FuncSubmitQueueNode(Func<T> func, CancellationToken cancellationToken)
-                : base(new TaskCompletionSource<T>(), cancellationToken)
+                : base(new ManualResetValueTaskSource<T>(), cancellationToken)
             {
                 _func = func;
             }
@@ -186,7 +186,7 @@ namespace DotNetty.Common.Concurrency
             readonly Func<object, T> _func;
 
             public StateFuncSubmitQueueNode(Func<object, T> func, object state, CancellationToken cancellationToken)
-                : base(new TaskCompletionSource<T>(state), cancellationToken)
+                : base(new ManualResetValueTaskSource<T>(state), cancellationToken)
             {
                 _func = func;
             }
@@ -204,7 +204,7 @@ namespace DotNetty.Common.Concurrency
                 object context,
                 object state,
                 CancellationToken cancellationToken)
-                : base(new TaskCompletionSource<T>(state), cancellationToken)
+                : base(new ManualResetValueTaskSource<T>(state), cancellationToken)
             {
                 _func = func;
                 _context = context;

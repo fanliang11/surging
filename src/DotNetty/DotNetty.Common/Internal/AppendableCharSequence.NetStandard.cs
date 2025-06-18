@@ -22,7 +22,7 @@ namespace DotNetty.Common.Internal
                 return new ReadOnlySpan<byte>(_chars, 0, count);
             }
         }
-
+         
         public bool Equals(AppendableCharSequence other)
         {
             if (ReferenceEquals(this, other))
@@ -86,6 +86,19 @@ namespace DotNetty.Common.Internal
                 default:
                     return false;
             }
+        }
+    }
+
+   public  static class AppendableCharSequenceExtend
+    {
+        public static char SafeCharAt(this AppendableCharSequence value, int index)
+        {
+            if (index >= value.Count)
+            {
+                return (char)0;
+            }
+
+            return value[index];
         }
     }
 }

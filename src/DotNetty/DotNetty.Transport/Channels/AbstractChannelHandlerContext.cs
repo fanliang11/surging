@@ -960,7 +960,7 @@ namespace DotNetty.Transport.Channels
             PromiseNotificationUtil.TryFailure(promise, cause, promise.IsVoid ? null : DefaultChannelPipeline.Logger);
         }
 
-        public IPromise NewPromise() => new DefaultPromise();
+        public IPromise NewPromise() => new DefaultPromise();//fanly update
 
         public IPromise NewPromise(object state) => new DefaultPromise(state);
 

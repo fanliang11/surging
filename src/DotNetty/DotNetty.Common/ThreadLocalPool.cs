@@ -414,8 +414,7 @@ namespace DotNetty.Common
             internal int _size;
             private int _handleRecycleCount;
             private WeakOrderQueue _cursorQueue, _prevQueue;
-            private volatile WeakOrderQueue _headQueue;
-
+            private volatile WeakOrderQueue _headQueue; 
             internal Stack(ThreadLocalPool parent, Thread thread, int maxCapacity, int maxSharedCapacityFactor,
                 int interval, int maxDelayedQueues, int delayedQueueInterval)
             {
@@ -568,6 +567,7 @@ namespace DotNetty.Common
 
             internal bool TryPop(out DefaultHandle item)
             {
+
                 int size = _size;
                 if (0u >= (uint)size)
                 {
@@ -599,7 +599,7 @@ namespace DotNetty.Common
 
                 item = ret;
                 return true;
-            Failed:
+                Failed:
                 item = null;
                 return false;
             }
@@ -616,6 +616,7 @@ namespace DotNetty.Common
                 _prevQueue = null;
                 _cursorQueue = _headQueue;
                 return false;
+
             }
 
             private bool ScavengeSome()

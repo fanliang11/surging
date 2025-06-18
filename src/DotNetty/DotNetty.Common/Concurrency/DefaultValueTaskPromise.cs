@@ -1,92 +1,74 @@
-﻿/*
- * Copyright 2012 The Netty Project
- *
- * The Netty Project licenses this file to you under the Apache License,
- * version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at:
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
- * Copyright (c) The DotNetty Project (Microsoft). All rights reserved.
- *
- *   https://github.com/azure/dotnetty
- *
- * Licensed under the MIT license. See LICENSE file in the project root for full license information.
- *
- * Copyright (c) 2020 The Dotnetty-Span-Fork Project (cuteant@outlook.com) All rights reserved.
- *
- *   https://github.com/cuteant/dotnetty-span-fork
- *
- * Licensed under the MIT license. See LICENSE file in the project root for full license information.
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
-using DotNetty.Common.Utilities;
+using System.Threading;
+using System.Linq;
 
 namespace DotNetty.Common.Concurrency
 {
-    public class DefaultPromise : IPromise
+    public class DefaultValueTaskPromise: IValueTaskPromise
     {
+        private readonly CancellationToken _token;
 #if NET
         private readonly TaskCompletionSource _tcs;
 #else
-        private readonly TaskCompletionSource<int> _tcs;
+        private readonly ManualResetValueTaskSource<object> _tcs;
 #endif
 
         private int v_uncancellable = SharedConstants.False;
 
-        public DefaultPromise()
+        public DefaultValueTaskPromise()
         {
+            _token = CancellationToken.None;
 #if NET
             _tcs = new TaskCompletionSource();
 #else
-            _tcs = new TaskCompletionSource<int>();
+            _tcs = new ManualResetValueTaskSource<object>();
 #endif
         }
 
-        public DefaultPromise(object state)
+        public DefaultValueTaskPromise(object state)
         {
 #if NET
             _tcs = new TaskCompletionSource(state);
 #else
-            _tcs = new TaskCompletionSource<int>(state);
+            _tcs = new ManualResetValueTaskSource<object>(state);
 #endif
         }
 
-        public Task Task
+        public DefaultValueTaskPromise(CancellationToken cancellationToken)
+        {
+            _token= cancellationToken;
+        }
+
+
+
+        public ValueTask ValueTask
         {
             [MethodImpl(InlineMethod.AggressiveOptimization)]
-            get => _tcs.Task;
+            get => _tcs.AwaitVoid(_token);
         }
 
         public bool IsVoid => false;
 
-        public bool IsSuccess => Task.IsSuccess();
+        public bool IsSuccess => ValueTask.IsCompletedSuccessfully;
 
-        public bool IsCompleted => Task.IsCompleted;
+        public bool IsCompleted => ValueTask.IsCompleted;
 
-        public bool IsFaulted => Task.IsFaulted;
+        public bool IsFaulted => ValueTask.IsFaulted;
 
-        public bool IsCanceled => Task.IsCanceled;
+        public bool IsCanceled => ValueTask.IsCanceled;
 
-        public ValueTask ValueTask =>new ValueTask(_tcs.Task);
+       public  Task  Task => ValueTask.AsTask();
 
         public virtual bool TryComplete()
         {
 #if NET
             return _tcs.TrySetResult();
 #else
-            return _tcs.TrySetResult(0);
+            return _tcs.SetResult("0");
 #endif
         }
 
@@ -116,13 +98,14 @@ namespace DotNetty.Common.Concurrency
 
         public virtual void SetException(IEnumerable<Exception> exceptions)
         {
-            _tcs.SetException(exceptions);
+            _tcs.SetException(exceptions.FirstOrDefault());
         }
 
         public virtual bool TrySetCanceled()
         {
             if (SharedConstants.False < (uint)Volatile.Read(ref v_uncancellable)) { return false; }
-            return _tcs.TrySetCanceled();
+              _tcs.SetCanceled();
+            return true;
         }
 
         public virtual bool TrySetException(Exception exception)
@@ -131,12 +114,14 @@ namespace DotNetty.Common.Concurrency
             {
                 return TrySetException(aggregateException.InnerExceptions);
             }
-            return _tcs.TrySetException(exception);
+              _tcs.SetException(exception);
+            return true;
         }
 
         public virtual bool TrySetException(IEnumerable<Exception> exceptions)
         {
-            return _tcs.TrySetException(exceptions);
+              _tcs.SetException(exceptions.FirstOrDefault());
+            return true;
         }
 
         public bool SetUncancellable()
@@ -148,8 +133,9 @@ namespace DotNetty.Common.Concurrency
             return !IsCompleted;
         }
 
-        public override string ToString() => "TaskCompletionSource[status: " + Task.Status.ToString() + "]";
+        public override string ToString() => "TaskCompletionSource[status: " + ValueTask.AsTask().Status.ToString() + "]";
 
         public IPromise Unvoid() => this;
+         
     }
 }

@@ -263,9 +263,9 @@ namespace DotNetty.Common.Concurrency
         /// <inheritdoc />
         public abstract Task ShutdownGracefullyAsync(TimeSpan quietPeriod, TimeSpan timeout);
 
-        public IPromise NewPromise() => new DefaultPromise();
+        public IPromise NewPromise() => new DefaultValueTaskPromise();
 
-        public IPromise NewPromise(object state) => new DefaultPromise(state);
+        public IPromise NewPromise(object state) => new DefaultValueTaskPromise(state);
 
         /// <inheritdoc />
         protected void SetCurrentExecutor(IEventExecutor executor) => ExecutionEnvironment.SetCurrentExecutor(executor);

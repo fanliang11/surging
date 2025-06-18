@@ -657,7 +657,7 @@ namespace DotNetty.Codecs
 
         public IByteBuffer ReadBytes(byte[] destination)
         {
-            CheckReadableBytes(destination.Length);
+           CheckReadableBytes(destination.Length);
             _ = _buffer.ReadBytes(destination);
             return this;
         }
@@ -1111,7 +1111,7 @@ namespace DotNetty.Codecs
         {
             if ((uint)_buffer.ReadableBytes < (uint)readableBytes)
             {
-                ThrowReplay();
+               ThrowReplay(); 
             }
         }
 
