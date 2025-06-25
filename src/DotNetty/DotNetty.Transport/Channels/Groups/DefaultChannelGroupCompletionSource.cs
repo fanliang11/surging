@@ -33,9 +33,10 @@ namespace DotNetty.Transport.Channels.Groups
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using DotNetty.Common.Concurrency;
     using DotNetty.Common.Utilities;
 
-    public class DefaultChannelGroupCompletionSource : TaskCompletionSource<int>, IChannelGroupTaskCompletionSource
+    public class DefaultChannelGroupCompletionSource : ManualResetValueTaskSource<int>, IChannelGroupTaskCompletionSource
     {
         private readonly Dictionary<IChannel, Task> _futures;
         private int _failureCount;
@@ -92,11 +93,11 @@ namespace DotNetty.Transport.Channels.Groups
                                 }
                             }
                         }
-                        _ = TrySetException(new ChannelGroupException(failed));
+                         SetException(new ChannelGroupException(failed));
                     }
                     else
                     {
-                        _ = TrySetResult(0);
+                        _ = SetResult(0);
                     }
                 }
             };
@@ -109,7 +110,7 @@ namespace DotNetty.Transport.Channels.Groups
             // Done on arrival?
             if (0u >= (uint)futures.Count)
             {
-                _ = TrySetResult(0);
+                _ = SetResult(0);
             }
         }
 
@@ -130,7 +131,7 @@ namespace DotNetty.Transport.Channels.Groups
 #if NETCOREAPP || NETSTANDARD_2_0_GREATER
             return Task.IsCompletedSuccessfully;
 #else
-            var task = Task;
+            var task = AwaitVoid(System.Threading.CancellationToken.None);
             return task.IsCompleted && !task.IsFaulted && !task.IsCanceled;
 #endif
         }
@@ -143,7 +144,7 @@ namespace DotNetty.Transport.Channels.Groups
             }
         }
 
-        public ChannelGroupException Cause => (ChannelGroupException)Task.Exception.InnerException;
+        public ChannelGroupException Cause => (ChannelGroupException)GetException(Version).SourceException.InnerException;
 
         public Task Current => _futures.Values.GetEnumerator().Current;
 

@@ -141,7 +141,7 @@ namespace DotNetty.Transport.Channels.Groups
                         futures.Add(c, c.WriteAsync(SafeDuplicate(message)));
                     }
                 }
-                result = new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).Task;
+                result = new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).AwaitVoid(CancellationToken.None).AsTask();
             }
 
             _ = ReferenceCountUtil.Release(message);
@@ -252,7 +252,7 @@ namespace DotNetty.Transport.Channels.Groups
                     }
                 }
 
-                result = new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).Task;
+                result = new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).AwaitVoid(CancellationToken.None).AsTask();
             }
 
             _ = ReferenceCountUtil.Release(message);
@@ -280,7 +280,7 @@ namespace DotNetty.Transport.Channels.Groups
                 }
             }
 
-            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).Task;
+            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).AwaitVoid(CancellationToken.None).AsTask();
         }
 
         public Task CloseAsync() => CloseAsync(ChannelMatchers.All());
@@ -316,7 +316,7 @@ namespace DotNetty.Transport.Channels.Groups
                 }
             }
 
-            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).Task;
+            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).AwaitVoid(CancellationToken.None).AsTask();
         }
 
         public Task DeregisterAsync() => DeregisterAsync(ChannelMatchers.All());
@@ -340,7 +340,7 @@ namespace DotNetty.Transport.Channels.Groups
                 }
             }
 
-            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).Task;
+            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).AwaitVoid(CancellationToken.None).AsTask();
         }
 
         public Task NewCloseFuture() => NewCloseFuture(ChannelMatchers.All());
@@ -364,7 +364,7 @@ namespace DotNetty.Transport.Channels.Groups
                 }
             }
 
-            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).Task;
+            return new DefaultChannelGroupCompletionSource(this, futures /*, this.executor*/).AwaitVoid(CancellationToken.None).AsTask();
         }
 
         static object SafeDuplicate(object message)

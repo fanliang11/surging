@@ -123,8 +123,7 @@ namespace DotNetty.Transport.Libuv
         private static void Run(object state)
         {
             var loopExecutor = (LoopExecutor)state;
-            loopExecutor.SetCurrentExecutor(loopExecutor);
-
+            loopExecutor.SetCurrentExecutor(loopExecutor); 
             _ = Task.Factory.StartNew(
                 executor => ((LoopExecutor)executor).StartLoop(), state,
                 CancellationToken.None,

@@ -129,23 +129,23 @@ namespace DotNetty.Transport.Channels
 
         public IPromise Unvoid()
         {
-            var promise = new DefaultPromise();
+            var promise = new DefaultValueTaskPromise();
             if (_fireException)
             {
-                _ = promise.Task.ContinueWith(FireExceptionOnFailureAction, _channel, TaskContinuationOptions.ExecuteSynchronously);
+                _ = promise.ValueTask.FireExceptionOnFailure( _channel.Pipeline);
             }
             return promise;
         }
 
-        private static readonly Action<Task, object> FireExceptionOnFailureAction = (t, s) => FireExceptionOnFailure(t, s);
-        private static void FireExceptionOnFailure(Task t, object s)
-        {
-            var ch = (IChannel)s;
-            if (t.IsFaulted)// && ch.Registered)
-            {
-                _ = ch.Pipeline.FireExceptionCaught(t.Exception.InnerException);
-            }
-        }
+        //private static readonly Action<Task, object> FireExceptionOnFailureAction = (t, s) => FireExceptionOnFailure(t, s);
+        //private static void FireExceptionOnFailure(Task t, object s)
+        //{
+        //    var ch = (IChannel)s;
+        //    if (t.IsFaulted)// && ch.Registered)
+        //    {
+        //        _ = ch.Pipeline.FireExceptionCaught(t.Exception.InnerException);
+        //    }
+        //}
 
         private void FireException0(Exception cause)
         {

@@ -77,6 +77,8 @@ namespace DotNetty.Common.Concurrency
 
         public T GetResult(short token) => _logic.GetResult(token);
 
+        public ExceptionDispatchInfo GetException(short token) => _logic.GetException(token);
+
         void IValueTaskSource.GetResult(short token) => _logic.GetResult(token);
 
         public ValueTaskSourceStatus GetStatus(short token) => _logic.GetStatus(token);
@@ -175,6 +177,15 @@ namespace DotNetty.Common.Concurrency
 
             error?.Throw();
             return result;
+        }
+
+        public ExceptionDispatchInfo GetException(short token)
+        {
+            // ValidateToken(token);
+              
+            ExceptionDispatchInfo error = _error;
+            Reset(); 
+            return error;
         }
 
         public void Reset()

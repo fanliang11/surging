@@ -332,11 +332,11 @@ namespace DotNetty.Transport.Channels.Pool
             }
             else
             {
-                var promise = new TaskCompletionSource<bool>();
+                var promise = new ManualResetValueTaskSource<bool>();
 #pragma warning disable CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
                 _ = _executor.Schedule((c, p) => Release0(c, p), channel, promise, TimeSpan.Zero);
 #pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
-                return await promise.Task;
+                return await promise.AwaitValue(CancellationToken.None);
             }
         }
 
