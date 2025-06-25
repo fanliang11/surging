@@ -11,6 +11,8 @@ namespace Surging.Core.CPlatform.Configurations
 
         public string MappingIP { get; set; }
 
+        public int MaxPendingTasks { get; set; } = 64;
+
         public int MappingPort { get; set; }
 
         public string WanIp { get; set; }

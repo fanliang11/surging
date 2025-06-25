@@ -11,6 +11,7 @@
     "Libuv": true,
     "SoBacklog": 100,
     "Weight": 20,
+    "MaxPendingTasks": "${MaxPendingTasks}|64",
     "DisableDiagnostic": true,
     "EnableObjectConvert": true,
     "MaxConcurrentRequests": 20,

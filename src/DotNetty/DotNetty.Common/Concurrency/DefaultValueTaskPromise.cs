@@ -68,7 +68,7 @@ namespace DotNetty.Common.Concurrency
 #if NET
             return _tcs.TrySetResult();
 #else
-            return _tcs.SetResult("0");
+            return _tcs.SetResult(0);
 #endif
         }
 

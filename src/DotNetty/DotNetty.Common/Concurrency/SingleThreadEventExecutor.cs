@@ -255,20 +255,19 @@ namespace DotNetty.Common.Concurrency
         #region -- Thread --
 
         protected virtual Thread NewThread(IThreadFactory threadFactory)
-        {
-            return threadFactory.NewThread(_loopAction);
+        { 
+           return threadFactory.NewThread(_loopAction);
         }
 
         protected virtual void Start()
-        {
-            _thread.Start();
+        {  
+            _thread.Start(); 
         }
 
         private readonly XParameterizedThreadStart _loopAction;
         private void Loop(object s)
         {
             SetCurrentExecutor(this);
-
             _ = Task.Factory.StartNew(_loopCoreAciton, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
         }
 
