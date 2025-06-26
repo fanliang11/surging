@@ -22,26 +22,13 @@ namespace Surging.Core.DotNetty.Adapter
         }
 
         #region Overrides of ChannelHandlerAdapter
-
-        public override void ChannelRead(IChannelHandlerContext context, object message)
-        {
-            var buffer = (IByteBuffer)message;
-            var data = new Memory<byte>(new byte[buffer.ReadableBytes]);
-            try
-            {
-                buffer.ReadBytes(data);
-                var transportMessage = _transportMessageDecoder.Decode(data);
-                context.FireChannelRead(transportMessage);
-            }
-            finally
-            {
-                ReferenceCountUtil.Release(buffer);
-                message = null;
-            }
-        }
-
+          
         protected override void ChannelRead0(IChannelHandlerContext ctx, IByteBuffer msg)
         {
+            var data = new Memory<byte>(new byte[msg.ReadableBytes]);
+            msg.ReadBytes(data);
+            var transportMessage = _transportMessageDecoder.Decode(data);
+            ctx.FireChannelRead(transportMessage);
         }
 
         #endregion Overrides of ChannelHandlerAdapter
