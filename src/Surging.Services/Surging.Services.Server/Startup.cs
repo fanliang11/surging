@@ -3,8 +3,10 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Surging.Core.Caching.Configurations;
+using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Utilities;
-using Surging.Core.EventBusRabbitMQ.Configurations;
+using System;
+using System.Threading;
 
 namespace Surging.Services.Server
 {
@@ -12,8 +14,16 @@ namespace Surging.Services.Server
     {
         public Startup(IConfigurationBuilder config)
         {
+            ThreadPool.SetMinThreads(100, 100);
+            Environment.SetEnvironmentVariable("io.netty.allocator.maxOrder", "5");
+            Environment.SetEnvironmentVariable("io.netty.allocator.numDirectArenas", "0");
+            //According to the server process long time task
+            Environment.SetEnvironmentVariable("io.netty.eventexecutor.maxPendingTasks", AppConfig.ServerOptions.MaxPendingTasks.ToString());
+            Environment.SetEnvironmentVariable("io.netty.allocator.type", "unpooled");
+            Environment.SetEnvironmentVariable("io.netty.allocator.numHeapArenas", "0");
+            Environment.SetEnvironmentVariable("io.netty.leakDetection.level", "disabled");
             ConfigureEventBus(config);
-            ConfigureCache(config);
+          //  ConfigureCache(config);
         }
 
         public IContainer ConfigureServices(ContainerBuilder builder)
@@ -42,8 +52,8 @@ namespace Surging.Services.Server
 
         private static void ConfigureEventBus(IConfigurationBuilder build)
         {
-            build
-            .AddEventBusFile("eventBusSettings.json", optional: false);
+          //  build
+           // .AddEventBusFile("eventBusSettings.json", optional: false);
         }
 
         /// <summary>

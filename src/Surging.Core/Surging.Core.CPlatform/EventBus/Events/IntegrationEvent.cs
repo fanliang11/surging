@@ -12,6 +12,12 @@ namespace Surging.Core.CPlatform.EventBus.Events
             CreationDate = DateTime.UtcNow;
         }
 
+        public IntegrationEvent(IntegrationEvent integrationEvent)
+        {
+            Id = integrationEvent.Id;
+            CreationDate = integrationEvent.CreationDate;
+        }
+
         public Guid Id { get; }
         public DateTime CreationDate { get; }
     }

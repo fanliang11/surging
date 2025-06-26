@@ -1,5 +1,0 @@
-{
-  "ConnectionString": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Web_A2;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False",
-  "ModelAssemblyName": "Domain.Org"
-}
-

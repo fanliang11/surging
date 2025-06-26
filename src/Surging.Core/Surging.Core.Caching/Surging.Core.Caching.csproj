@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>0.8.0.1</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <Version>1.1.0.0</Version>
     <Authors>fanly</Authors>
     <Product>surging Micro Service Framework</Product>
     <Company />
@@ -11,30 +11,20 @@
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.8.0.1</AssemblyVersion>
-    <FileVersion>0.8.0.1</FileVersion>
-    <PackageReleaseNotes>1.consul and zookeeper add configuration file
-2.Add zookeeper new calls
-3.Add Environment variables
-4.Build environment variables
-5.Add Module Root Path Configuration
-6.Add public host ip and port mapping configuration
-7.Optimize service route and add EnableChildrenMonitor options
-8.Restore version, optimizing register node monitor branch to development
-9.Proxy build get the using namespace from the interface assembly
-10. Add the UseConsoleLifetime Configuration Does Not Close After the Console Application Runs
-11.Fix zookeeper configuration
-12.Refactor log component</PackageReleaseNotes>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <PackageReleaseNotes>1.multiple register center cluster
+2. fix bug</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.8.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
+    <PackageReference Include="Autofac" Version="4.9.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.2.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.505" />
   </ItemGroup>
 
   <ItemGroup>

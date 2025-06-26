@@ -1,13 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Surging.Core.CPlatform.Filters;
+using Surging.Core.CPlatform.Filters.Implementation;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
+using Surging.Core.CPlatform.Runtime.Client;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Implementation;
 using Surging.Core.CPlatform.Utilities;
 using System;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,20 +24,20 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
         private readonly IServiceEntryLocate _serviceEntryLocate;
         private readonly ILogger<DefaultServiceExecutor> _logger;
         private readonly IServiceRouteProvider _serviceRouteProvider;
-        private readonly IAuthorizationFilter _authorizationFilter;
+        private readonly IActionFilter _actionFilter;
 
         #endregion Field
 
         #region Constructor
 
         public DefaultServiceExecutor(IServiceEntryLocate serviceEntryLocate, IServiceRouteProvider serviceRouteProvider,
-            IAuthorizationFilter authorizationFilter,
+            IActionFilter actionFilter,
             ILogger<DefaultServiceExecutor> logger)
         {
             _serviceEntryLocate = serviceEntryLocate;
             _logger = logger;
             _serviceRouteProvider = serviceRouteProvider;
-            _authorizationFilter = authorizationFilter;
+            _actionFilter = actionFilter;
         }
 
         #endregion Constructor
@@ -51,9 +55,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
             if (_logger.IsEnabled(LogLevel.Trace))
                 _logger.LogTrace("服务提供者接收到消息。");
 
-            if (!message.IsInvokeMessage())
+            if (message==null && !message.IsInvokeMessage())
                 return;
-
+          
             RemoteInvokeMessage remoteInvokeMessage;
             try
             {
@@ -79,13 +83,12 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 foreach(var attachment in remoteInvokeMessage.Attachments)
                 RpcContext.GetContext().SetAttachment(attachment.Key,attachment.Value);
             }
-            
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("准备执行本地逻辑。");
 
             var resultMessage = new RemoteInvokeResultMessage();
-
+         
             //是否需要等待执行。
             if (entry.Descriptor.WaitExecution())
             {
@@ -111,29 +114,48 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
         #region Private Method
 
+         private  async Task ExecFilterSync(ServiceEntry entry, RemoteInvokeMessage remoteInvokeMessage, RemoteInvokeResultMessage resultMessage)
+        { 
+            if (entry.IsPermission)
+            {
+                var serviceRoute = await _serviceRouteProvider.GetRouteByPath(entry.RoutePath);
+                CancellationTokenSource tokenSource = new CancellationTokenSource();
+               await  _actionFilter.OnActionExecutingAsync(new ServiceRouteContext
+                {
+
+                    InvokeMessage = remoteInvokeMessage,
+                    ResultMessage = resultMessage,
+                    Route = serviceRoute
+                }, tokenSource.Token);
+            }
+        }
         private async Task LocalExecuteAsync(ServiceEntry entry, RemoteInvokeMessage remoteInvokeMessage, RemoteInvokeResultMessage resultMessage)
         {
             try
             {
-                var cancelTokenSource = new CancellationTokenSource();
-                var result = await entry.Func(remoteInvokeMessage.ServiceKey, remoteInvokeMessage.Parameters);
-                var task = result as Task;
+               await ExecFilterSync(entry, remoteInvokeMessage, resultMessage);
+                if (string.IsNullOrEmpty(resultMessage.ExceptionMessage))
+                {
+                    var result =await  entry.Func(remoteInvokeMessage.ServiceKey, remoteInvokeMessage.Parameters);
+                    var task = result as Task;
 
-                if (task == null)
-                {
-                    resultMessage.Result = result;
-                }
-                else
-                {
-                    await task;
-                    var taskType = task.GetType().GetTypeInfo();
-                    if (taskType.IsGenericType)
-                        resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
-                }
+                    if (task == null)
+                    {
+                        resultMessage.Result = result;
+                    }
+                    else
+                    {
+                        if (!task.IsCompletedSuccessfully)
+                            await task;
+                        var taskType = task.GetType().GetTypeInfo();
+                        if (taskType.IsGenericType)
+                            resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
+                    }
 
-                if (remoteInvokeMessage.DecodeJOject && !(resultMessage.Result is IConvertible && UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(resultMessage.Result.GetType())))
-                {
-                    resultMessage.Result = JsonConvert.SerializeObject(resultMessage.Result);
+                    if (remoteInvokeMessage.DecodeJOject)
+                    {
+                        resultMessage.Result = System.Text.Json.JsonSerializer.Serialize(resultMessage.Result);
+                    }
                 }
             }
             catch (Exception exception)
@@ -142,9 +164,14 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                     _logger.LogError(exception, "执行本地逻辑时候发生了错误。");
                 resultMessage.ExceptionMessage = GetExceptionMessage(exception);
                 resultMessage.StatusCode = exception.HResult;
+            } 
+            finally
+            {
+                RpcContext.RemoveContext();
             }
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async Task SendRemoteInvokeResult(IMessageSender sender, string messageId, RemoteInvokeResultMessage resultMessage)
         {
             try
@@ -161,7 +188,11 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError(exception,"发送响应消息时候发生了异常。" );
             }
-        }
+            finally
+            {
+                RpcContext.RemoveContext();
+            }
+        } 
 
         private static string GetExceptionMessage(Exception exception)
         {

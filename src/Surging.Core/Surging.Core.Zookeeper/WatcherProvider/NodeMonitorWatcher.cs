@@ -2,19 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Core.Zookeeper.WatcherProvider
 {
     internal class NodeMonitorWatcher : WatcherBase
     {
-        private readonly ZooKeeper _zooKeeper;
+        private readonly Func<ValueTask<(ManualResetEvent, ZooKeeper)>> _zooKeeperCall;
         private readonly Action<byte[], byte[]> _action;
         private byte[] _currentData;
 
-        public NodeMonitorWatcher(ZooKeeper zooKeeper, string path, Action<byte[], byte[]> action) : base(path)
+        public NodeMonitorWatcher(Func<ValueTask<(ManualResetEvent, ZooKeeper)>> zooKeeperCall, string path, Action<byte[], byte[]> action) : base(path)
         {
-            _zooKeeper = zooKeeper;
+            _zooKeeperCall = zooKeeperCall;
             _action = action;
         }
 
@@ -33,8 +34,9 @@ namespace Surging.Core.Zookeeper.WatcherProvider
             switch (watchedEvent.get_Type())
             {
                 case Event.EventType.NodeDataChanged:
-                    var watcher = new NodeMonitorWatcher(_zooKeeper, path, _action);
-                    var data = await _zooKeeper.getDataAsync(path, watcher);
+                    var zooKeeper = await _zooKeeperCall();
+                    var watcher = new NodeMonitorWatcher(_zooKeeperCall, path, _action);
+                    var data = await zooKeeper.Item2.getDataAsync(path, watcher);
                     var newData = data.Data;
                     _action(_currentData, newData);
                     watcher.SetCurrentData(newData);

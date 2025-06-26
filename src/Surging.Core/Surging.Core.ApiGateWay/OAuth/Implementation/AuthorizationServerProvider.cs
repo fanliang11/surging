@@ -14,13 +14,16 @@ using Surging.Core.CPlatform.Cache;
 
 namespace Surging.Core.ApiGateWay.OAuth
 {
+    /// <summary>
+    /// 授权服务提供者
+    /// </summary>
     public class AuthorizationServerProvider: IAuthorizationServerProvider
     {
         private readonly IServiceProxyProvider _serviceProxyProvider;
         private readonly IServiceRouteProvider _serviceRouteProvider;
         private readonly CPlatformContainer _serviceProvider;
         private readonly ICacheProvider _cacheProvider;
-        public AuthorizationServerProvider(ConfigInfo configInfo, IServiceProxyProvider serviceProxyProvider
+        public AuthorizationServerProvider(IServiceProxyProvider serviceProxyProvider
            ,IServiceRouteProvider serviceRouteProvider
             , CPlatformContainer serviceProvider)
         {
@@ -66,6 +69,22 @@ namespace Surging.Core.ApiGateWay.OAuth
             if (jwtToken.Length == 3)
             {
                 isSuccess = await _cacheProvider.GetAsync<string>(jwtToken[1]) == token;
+            }
+            return isSuccess;
+        }
+
+        public async Task<bool> RefreshToken(string token)
+        {
+            bool isSuccess = false;
+            var jwtToken = token.Split('.');
+            if (jwtToken.Length == 3)
+            {
+                var  value = await _cacheProvider.GetAsync<string>(jwtToken[1]);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _cacheProvider.Add(jwtToken[1], value, AppConfig.AccessTokenExpireTimeSpan);
+                    isSuccess = true;
+                }
             }
             return isSuccess;
         }

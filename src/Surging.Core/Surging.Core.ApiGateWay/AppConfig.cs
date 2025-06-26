@@ -18,9 +18,11 @@ namespace Surging.Core.ApiGateWay
         {
             get
             {
+                if (Configuration == null)
+                    return _authorizationServiceKey;
                 return Configuration["AuthorizationServiceKey"] ?? _authorizationServiceKey;
             }
-            internal set
+             set
             {
 
                 _authorizationServiceKey = value;
@@ -32,9 +34,11 @@ namespace Surging.Core.ApiGateWay
         {
             get
             {
+                if (Configuration == null)
+                    return _authorizationRoutePath;
                 return Configuration["AuthorizationRoutePath"] ?? _authorizationRoutePath;
             }
-            internal set
+            set
             {
 
                 _authorizationRoutePath = value;
@@ -46,6 +50,8 @@ namespace Surging.Core.ApiGateWay
         {
             get
             {
+                if (Configuration == null)
+                    return _accessTokenExpireTimeSpan;
                 int tokenExpireTime;
                 if (Configuration["AccessTokenExpireTimeSpan"] != null && int.TryParse(Configuration["AccessTokenExpireTimeSpan"], out tokenExpireTime))
                 {
@@ -53,7 +59,7 @@ namespace Surging.Core.ApiGateWay
                 }
                 return _accessTokenExpireTimeSpan;
             }
-            internal set
+            set
             {
                 _accessTokenExpireTimeSpan = value;
             }
@@ -65,9 +71,11 @@ namespace Surging.Core.ApiGateWay
         {
             get
             {
+                if (Configuration == null)
+                    return _tokenEndpointPath;
                 return Configuration["TokenEndpointPath"] ?? _tokenEndpointPath;
             }
-            internal set
+            set
             {
                 _tokenEndpointPath = value;
             }
@@ -104,7 +112,7 @@ namespace Surging.Core.ApiGateWay
             {
                 var result = new AccessPolicy();
                 var section = Configuration.GetSection("AccessPolicy");
-                if (section != null)
+                if (section.Exists() )
                     result = section.Get<AccessPolicy>();
                 return result;
             }
@@ -116,7 +124,14 @@ namespace Surging.Core.ApiGateWay
         {
             get
             {
+                if (Configuration == null)
+                    return _cacheMode;
+
                 return Configuration["CacheMode"] ?? _cacheMode;
+            }
+           set
+            {
+                _cacheMode = value;
             }
            
         }

@@ -43,7 +43,7 @@ namespace Surging.Core.Caching
 
         public T GetContextInstance<T>() where T : class
         {
-            var context = ServiceResolver.Current.GetService<T>(typeof(T));
+            var context = ServiceResolver.Current.GetService<T>();
             return context;
         }
 
