@@ -13,7 +13,7 @@ namespace Surging.Core.DotNetty.Adapter
 {
     public class TransportMessageHandlerEncoder : MessageToByteEncoder<TransportMessage>
     {
-  private readonly ITransportMessageEncoder _transportMessageEncoder;
+        private readonly ITransportMessageEncoder _transportMessageEncoder;
 
         public TransportMessageHandlerEncoder(ITransportMessageEncoder transportMessageEncoder)
         {
@@ -30,7 +30,5 @@ namespace Surging.Core.DotNetty.Adapter
                 message = null;
             }
         }
-
-     
     }
 }

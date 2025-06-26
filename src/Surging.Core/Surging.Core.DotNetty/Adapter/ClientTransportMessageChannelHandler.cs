@@ -1,22 +1,22 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Common.Utilities;
-using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Channels;
-using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty.Adapter
 {
-    public class TransportMessageChannelHandlerAdapter : ChannelHandlerAdapter
+    public class ClientTransportMessageChannelHandler : SimpleChannelInboundHandler2<IByteBuffer>
     {
         private readonly ITransportMessageDecoder _transportMessageDecoder;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public TransportMessageChannelHandlerAdapter(ITransportMessageDecoder transportMessageDecoder)
+        public ClientTransportMessageChannelHandler(ITransportMessageDecoder transportMessageDecoder)
         {
             _transportMessageDecoder = transportMessageDecoder;
         }
@@ -25,8 +25,8 @@ namespace Surging.Core.DotNetty.Adapter
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            var buffer = (IByteBuffer)message;           
-            var data =new Memory<byte>(new byte[buffer.ReadableBytes]);
+            var buffer = (IByteBuffer)message;
+            var data = new Memory<byte>(new byte[buffer.ReadableBytes]);
             try
             {
                 buffer.ReadBytes(data);
@@ -38,6 +38,10 @@ namespace Surging.Core.DotNetty.Adapter
                 ReferenceCountUtil.Release(buffer);
                 message = null;
             }
+        }
+
+        protected override void ChannelRead0(IChannelHandlerContext ctx, IByteBuffer msg)
+        {
         }
 
         #endregion Overrides of ChannelHandlerAdapter

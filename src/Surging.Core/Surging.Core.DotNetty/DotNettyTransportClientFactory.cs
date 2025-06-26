@@ -73,7 +73,7 @@ namespace Surging.Core.DotNetty
                 pipeline.AddLast(new LengthFieldPrepender2(2));
                 pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 2, 0, 2));
                 pipeline.AddLast(new TransportMessageHandlerEncoder(_transportMessageEncoder));
-                pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
+                pipeline.AddLast(new ClientTransportMessageChannelHandler(_transportMessageDecoder));
                 pipeline.AddLast(new DefaultChannelHandler(this,_logger));
             }));
         }
