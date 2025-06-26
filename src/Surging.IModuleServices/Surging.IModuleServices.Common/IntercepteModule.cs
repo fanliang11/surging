@@ -8,6 +8,7 @@ using System.Text;
 
 namespace Surging.IModuleServices.Common
 {
+    [ModuleMetadata(Description ="",Title ="缓存权限配置")]
     public class IntercepteModule : SystemModule
     {
         public override void Initialize(AppModuleContext context)

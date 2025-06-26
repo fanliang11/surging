@@ -47,7 +47,9 @@ namespace Surging.Core.CPlatform.Module
         /// 描述
         /// </summary>
         public string Description { get; set; }
-        
+
+        public bool IsInternal { get; internal set; } = true;
+
         /// <summary>
         /// 组件
         /// </summary>
@@ -60,6 +62,13 @@ namespace Surging.Core.CPlatform.Module
         {
             ModuleName = this.GetType().Name;
             TypeName = this.GetType().BaseType.Name;
+            var moduleMetadata = this.GetType().GetCustomAttribute<ModuleMetadata>();
+            if (moduleMetadata != null)
+            {
+                Title = moduleMetadata.Title;
+                Description = moduleMetadata.Description;
+                Enable = moduleMetadata.Enable;
+            }
         }
         #endregion
 

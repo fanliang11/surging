@@ -703,6 +703,8 @@ namespace Surging.Core.CPlatform
                     if (!_modules.Any(m => p.ModuleName == m.ModuleName))
                     {
                         services.RegisterModule(p);
+                        if (virtualPaths.Count() > 0)
+                            p.IsInternal = false;
                         if (packages.ContainsKey(p.TypeName))
                         {
                             var useModules = packages[p.TypeName];
