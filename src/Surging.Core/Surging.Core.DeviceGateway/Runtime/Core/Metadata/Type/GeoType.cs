@@ -8,9 +8,9 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     public class GeoType : IDataType, IConverter<GeoPoint>, IConverter<object>
     {
-        private readonly string _id = "geoPoint";
+        public readonly string id = "geoPoint";
 
-        private readonly string _name = "地理位置";
+        public readonly string name = "地理位置";
 
         public object Format(string format, object value)
         {
@@ -20,12 +20,12 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         public string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public bool Validate(object value)

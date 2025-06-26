@@ -9,10 +9,10 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     public class DateTimeType : IDataType, IConverter<DateTime?>, IConverter<object>
     {
-        private readonly string _id = "datetime";
+        private readonly string id = "datetime";
 
-        private readonly string _name = "时间";
-        private DateTimeKind _kind = DateTimeKind.Local;
+        private readonly string name = "时间";
+        private DateTimeKind kind = DateTimeKind.Local;
         private IFormatProvider _formatProvider = new CultureInfo("zh-CN");
 
         public DateTime? Convert(object value)
@@ -20,7 +20,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
             if (value == null) return null;
             if (value is DateTime)
             {
-                return DateTime.SpecifyKind((DateTime)value, _kind);
+                return DateTime.SpecifyKind((DateTime)value, kind);
             }
             if (value is DateTimeOffset)
             {
@@ -38,7 +38,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
                 }
                 if (DateTime.TryParse(value.ToString(), _formatProvider, DateTimeStyles.None, out DateTime dt))
                 {
-                    return DateTime.SpecifyKind(dt, _kind);
+                    return DateTime.SpecifyKind(dt, kind);
                 }
                 else
                 {
@@ -50,7 +50,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         public DateTimeType Kind(DateTimeKind kind)
         {
-            _kind = kind;
+            kind = kind;
             return this;
         }
 
@@ -67,17 +67,17 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
             {
                 return "";
             }
-            return string.Format(format, DateTime.SpecifyKind(dateValue.Value, _kind));
+            return string.Format(format, DateTime.SpecifyKind(dateValue.Value, kind));
         }
 
         public string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public bool Validate(object value)

@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DeviceGateway.Runtime.Device.Message.Property
 {
-    public class ReadPropertyMessageReply : CommonDeviceMessageReply<ReadPropertyMessageReply>
+    public class WritePropertyMessageReply : CommonDeviceMessageReply<ReadPropertyMessageReply>
     {
         public override MessageType MessageType { get; set; } = MessageType.READ_PROPERTY_REPLY;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
 
-        public ReadPropertyMessageReply AddProperties(string key, string value)
+        public WritePropertyMessageReply AddProperties(string key, string value)
         {
             if (!this.Properties.ContainsKey(key))
             {
@@ -25,7 +25,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Device.Message.Property
         }
 
 
-        public ReadPropertyMessageReply Success(Dictionary<string, object> properties)
+        public WritePropertyMessageReply Success(Dictionary<string, object> properties)
         {
             foreach (var item in properties)
             {

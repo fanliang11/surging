@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DeviceGateway.Runtime.Device.Message.Property
 {
-    internal class ReportPropertyMessage : CommonDeviceMessage<IDeviceMessage>
+    public class ReportPropertyMessage : CommonDeviceMessage<IDeviceMessage>
     {
         public override MessageType MessageType { get; set; } = MessageType.READ_PROPERTY;
 

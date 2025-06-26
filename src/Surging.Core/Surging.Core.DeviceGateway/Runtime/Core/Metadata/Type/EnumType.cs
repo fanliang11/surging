@@ -12,10 +12,10 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     public class EnumType : IDataType, IConverter<object>
     {
-        public readonly string _id = "enum";
+        public readonly string id = "enum";
 
-        private readonly string _name = "枚举值";
-        private volatile   List<Element> _elements=new List<Element>(); 
+        public readonly string name = "枚举值";
+        public volatile   List<Element> elements=new List<Element>(); 
 
         public static EnumType Instance { get; } = new EnumType();
         private IDataType _valueType;
@@ -24,7 +24,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
         {
             if (value != null)
             {
-                foreach (Element ele in _elements)
+                foreach (Element ele in elements)
                 {
                     if (Match(value, ele))
                     {
@@ -49,14 +49,14 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         public EnumType AddElement(Element element)
         { 
-            _elements.Add(element);
+            elements.Add(element);
             return this;
         }
 
         public object Format(string format, object value)
         {
             if (value == null) return null;
-            if (_elements == null)
+            if (elements == null)
             {
                 return value.ToString();
             }
@@ -74,17 +74,17 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         public string GetId()
         {
-           return _id;
+           return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public bool Validate(object value)
         {
-            if (_elements == null)
+            if (elements == null)
             {
                 return false;
             }
@@ -124,7 +124,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         private string? Format0(object value)
         {
-            var result = _elements
+            var result = elements
                 .Where(p => value.ToString().Equals(p.Value))
                 .FirstOrDefault();
             if(result != null)

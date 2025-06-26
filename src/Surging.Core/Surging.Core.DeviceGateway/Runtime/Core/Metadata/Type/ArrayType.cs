@@ -12,19 +12,19 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     internal class ArrayType : IDataType, IConverter<List<object>?>, IConverter<object>
     {
-        private readonly string _id = "array";
+        private readonly string id = "array";
 
-        private readonly string _name = "数组";
+        private readonly string name = "数组";
 
         private IDataType _elementType;
         public string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public ArrayType ElementType(IDataType elementType)

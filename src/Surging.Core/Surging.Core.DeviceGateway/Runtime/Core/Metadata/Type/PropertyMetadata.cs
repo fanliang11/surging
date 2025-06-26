@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
-    internal class PropertyMetadata
+    public class PropertyMetadata
     {
         public string Code { get; set; }
 

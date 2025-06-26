@@ -11,12 +11,12 @@ using System.Xml.Linq;
 
 namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
-    internal class ObjectType : IDataType, IConverter<Dictionary<string, object>>, IConverter<object>
+    public class ObjectType : IDataType, IConverter<Dictionary<string, object>>, IConverter<object>
     {
-        private readonly string _id = "object";
-        private readonly string _name = "对象类型";
+        public readonly string id = "object";
+        public readonly string name = "对象类型";
 
-        private List<PropertyMetadata> _properties = new List<PropertyMetadata>();
+        public List<PropertyMetadata> properties = new List<PropertyMetadata>();
         public Dictionary<string, object> Convert(object value)
         {
             return Handle(value, (valueType, data) =>
@@ -31,19 +31,19 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         public ObjectType AddPropertyMetadata(PropertyMetadata property)
         {
-            _properties.Add(property);
+            properties.Add(property);
             return this;
         }
 
         public List<PropertyMetadata> GetProperties()
         {
-            return _properties;
+            return properties;
         }
 
 
         public PropertyMetadata? GetProperty(string key)
         {
-            return _properties
+            return properties
                     .Where(p => p.Code == key).FirstOrDefault();
         }
 
@@ -71,9 +71,9 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
             if (value is Dictionary<string, object>)
             {
                 var mapValue = value as Dictionary<string, object>;
-                if (_properties != null && mapValue != null)
+                if (properties != null && mapValue != null)
                 {
-                    foreach (var property in _properties)
+                    foreach (var property in properties)
                     {
                         mapValue.TryGetValue(property.Code, out object data);
                         var valueType = property.DataType;
@@ -98,12 +98,12 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         public string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public bool Validate(object value)

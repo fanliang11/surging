@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
-    internal class LongType : NumberType<long?>, IConverter<object>
+    public class LongType : NumberType<long?>, IConverter<object>
     {
-        private readonly string _id = "long";
-        private readonly string _name = "长整型";
-        private int _decimalPlace = 0;
+        public readonly string id = "long";
+        public readonly string name = "长整型";
+        public int decimalPlace = 0;
         public override string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         protected override long? CastNumber(decimal? num)
@@ -30,7 +30,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         protected override int DefaultDecimalPlace()
         {
-            return _decimalPlace;
+            return decimalPlace;
         }
 
         object IConverter<object>.Convert(object value)

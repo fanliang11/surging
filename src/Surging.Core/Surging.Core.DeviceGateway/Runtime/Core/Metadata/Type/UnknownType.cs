@@ -8,8 +8,8 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     public class UnknownType : IDataType
     {
-        private readonly string _id = "unknown";
-        private readonly string _name = "未知类型";
+        private readonly string id = "unknown";
+        private readonly string name = "未知类型";
 
         public object Format(string format, object value)
         {
@@ -18,12 +18,12 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         public string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public bool Validate(object value)

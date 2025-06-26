@@ -29,6 +29,9 @@ namespace Surging.Core.DeviceGateway
             builder.RegisterType(typeof(DefaultDeviceGatewayManage)).As(typeof(IDeviceGatewayManage)).SingleInstance();
             builder.RegisterType(typeof(DefaultDeviceSessionManager)).As(typeof(IDeviceSessionManager)).SingleInstance();
             builder.RegisterType(typeof(DefaultDeviceRegistry)).As(typeof(IDeviceRegistry)).SingleInstance();
+            builder.RegisterType(typeof(DeviceMessageListenerManager)).As(typeof(IDeviceMessageListenerManager)).SingleInstance();
+
+
         }
     } 
 }

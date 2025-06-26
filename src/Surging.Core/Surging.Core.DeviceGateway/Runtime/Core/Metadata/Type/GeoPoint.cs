@@ -12,25 +12,25 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
     public class GeoPoint
     {
         //经度
-        private readonly double _lon;
+        public readonly double lon;
 
         //纬度
-        private readonly double _lat;
+        public readonly double lat;
 
         public GeoPoint(double lon, double lat)
         {
-            _lat = lat;
-            _lon = lon;
+            lat = lat;
+            lon = lon;
         }
 
         public int hashCode()
         {
 
             int result = 1;
-            long temp = BitConverter.DoubleToInt64Bits(_lat);
+            long temp = BitConverter.DoubleToInt64Bits(lat);
             result = 31 * result + (int)(temp ^ temp >> 32);
 
-            temp = BitConverter.DoubleToInt64Bits(_lon);
+            temp = BitConverter.DoubleToInt64Bits(lon);
             result = 31 * result + (int)(temp ^ temp >> 32);
 
             return result;
@@ -102,13 +102,13 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
             GeoPoint other = (GeoPoint)obj;
 
-            return BitConverter.DoubleToInt64Bits(_lon) == BitConverter.DoubleToInt64Bits(other._lon) &&
-                    BitConverter.DoubleToInt64Bits(_lat) == BitConverter.DoubleToInt64Bits(other._lat);
+            return BitConverter.DoubleToInt64Bits(lon) == BitConverter.DoubleToInt64Bits(other.lon) &&
+                    BitConverter.DoubleToInt64Bits(lat) == BitConverter.DoubleToInt64Bits(other.lat);
         }
 
         public override string ToString()
         {
-            return $"{_lon},{_lat}";
+            return $"{lon},{lat}";
         }
     }
 }

@@ -9,27 +9,27 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     internal class FileType : IDataType, IConverter<string?>, IConverter<object>
     {
-        public readonly string _id = "file";
+        public readonly string id = "file";
 
-        private readonly string _name = "布尔值";
+        public readonly string name = "布尔值";
 
-        private BodyTypeEnum _bodyType = BodyTypeEnum.Url;
+        public BodyTypeEnum bodyType = BodyTypeEnum.Url;
 
         private string _mediaType = "application/octet-stream";
 
         public string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public FileType BodyType(BodyTypeEnum type)
         {
-            _bodyType = type;
+            bodyType = type;
             return this;
         }
 

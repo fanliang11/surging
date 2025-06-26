@@ -12,5 +12,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core
         Mqtt,
         Http,
         Udp, 
+        Rtmp,
+        GB28181
     }
 }

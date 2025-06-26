@@ -8,17 +8,17 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     public class IntType : NumberType<int?>, IConverter<object>
     {
-        private readonly string _id = "int";
-        private readonly string _name = "整型";
-        private int _decimalPlace = 0;
+        public readonly string id = "int";
+        public readonly string name = "整型";
+        public int decimalPlace = 0;
         public override string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         protected override int? CastNumber(decimal? num)
@@ -30,7 +30,7 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
         protected override int DefaultDecimalPlace()
         {
-            return _decimalPlace;
+            return decimalPlace;
         }
 
         object IConverter<object>.Convert(object value)

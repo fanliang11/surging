@@ -9,49 +9,49 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 {
     public class BooleanType : IDataType, IConverter<bool?>, IConverter<object>
     {
-        private readonly string _id = "boolean";
+        public readonly string id = "boolean";
 
-        private readonly string _name = "布尔值";
+        public readonly string name = "布尔值";
 
-        private string _trueText = "是";
+        public string trueText = "是";
 
-        private string _falseText = "否";
+        public string falseText = "否";
 
-        private string _trueValue = "true";
+        public string trueValue = "true";
 
-        private string _falseValue = "false";
+        public string falseValue = "false";
         public BooleanType TrueText(string trueText)
         {
-            _trueText = trueText;
+            trueText = trueText;
             return this;
         }
 
         public BooleanType FalseText(string falseText)
         {
-            _falseText = falseText;
+            falseText = falseText;
             return this;
         }
 
         public BooleanType TrueValue(string trueValue)
         {
-            _trueValue = trueValue;
+            trueValue = trueValue;
             return this;
         }
 
         public BooleanType FalseValue(string falseValue)
         {
-            _falseText = falseValue;
+            falseText = falseValue;
             return this;
         }
 
         public string GetId()
         {
-            return _id;
+            return id;
         }
 
         public string GetName()
         {
-            return _name;
+            return name;
         }
 
         public bool? Convert(object value)
@@ -63,12 +63,12 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
             }
 
             var stringVal = value.ToString().Trim();
-            if (stringVal.Equals(_trueValue) || stringVal.Equals(_trueText))
+            if (stringVal.Equals(trueValue) || stringVal.Equals(trueText))
             {
                 return true;
             }
 
-            if (stringVal.Equals(_falseValue) || stringVal.Equals(_falseText))
+            if (stringVal.Equals(falseValue) || stringVal.Equals(falseText))
             {
                 return false;
             }
@@ -98,11 +98,11 @@ namespace Surging.Core.DeviceGateway.Runtime.Core.Metadata.Type
 
             if (true.Equals(trueOrFalse))
             {
-                return _trueText;
+                return trueText;
             }
             if (false.Equals(trueOrFalse))
             {
-                return _falseText;
+                return falseText;
             }
             return "unknown:" + value;
         }

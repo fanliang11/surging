@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.DeviceGateway.Runtime.Device.Message
 {
-    internal class ReadPropertyMessageReply : CommonDeviceMessageReply<ReadPropertyMessageReply>
+    public class ReadPropertyMessageReply : CommonDeviceMessageReply<ReadPropertyMessageReply>
     {
         public override MessageType MessageType { get; set; } = MessageType.READ_PROPERTY_REPLY;
         
