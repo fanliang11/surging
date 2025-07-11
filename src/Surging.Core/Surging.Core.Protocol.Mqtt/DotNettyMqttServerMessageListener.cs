@@ -51,21 +51,21 @@ namespace Surging.Core.Protocol.Mqtt
 
         #region Constructor
         public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger,
-      IEventExecutorProvider eventExecutorProvider,
-            IChannelService channelService,
-       IMqttBehaviorProvider mqttBehaviorProvider):this(logger, eventExecutorProvider, channelService, mqttBehaviorProvider, new NetworkProperties())
+       IChannelService channelService,
+       IEventExecutorProvider eventExecutorProvider,
+       IMqttBehaviorProvider mqttBehaviorProvider):this(logger, channelService, eventExecutorProvider, mqttBehaviorProvider, new NetworkProperties())
         {
 
         }
-        public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger,
-                IEventExecutorProvider eventExecutorProvider,
+        public DotNettyMqttServerMessageListener(ILogger<DotNettyMqttServerMessageListener> logger, 
             IChannelService channelService,
+             IEventExecutorProvider eventExecutorProvider,
             IMqttBehaviorProvider mqttBehaviorProvider,
              NetworkProperties properties)
         {
-            _eventExecutorProvider = eventExecutorProvider;
             Id = properties?.Id;
             _logger = logger;
+            _eventExecutorProvider = eventExecutorProvider;
             _channelService = channelService;
             _mqttBehaviorProvider = mqttBehaviorProvider;
             _diagnosticListener = new DiagnosticListener(DiagnosticListenerExtensions.DiagnosticListenerName);
@@ -98,7 +98,7 @@ namespace Surging.Core.Protocol.Mqtt
             }
             else
             {
-                bootstrap.Channel<TcpServerSocketChannel>();
+                bootstrap.Channel<TcpServerSocketChannel>(); 
             }
             bootstrap
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
@@ -121,7 +121,7 @@ namespace Surging.Core.Protocol.Mqtt
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug($"mqtt服务主机启动成功，监听地址：{endPoint}。");
             }
-            catch
+            catch(Exception ex)
             {
                 _logger.LogError($"mqtt服务主机启动失败，监听地址：{endPoint}。 ");
             }

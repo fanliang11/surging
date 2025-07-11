@@ -5,6 +5,7 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Routing.Template;
@@ -32,17 +33,19 @@ namespace Surging.Core.Protocol.Http
         private IChannel _channel;
         private readonly ISerializer<string> _serializer;
         private readonly IServiceRouteProvider _serviceRouteProvider;
-
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         #endregion Field
 
         #region Constructor
 
         public DotNettyHttpServerMessageListener(ILogger<DotNettyHttpServerMessageListener> logger,
-            ITransportMessageCodecFactory codecFactory, 
+            ITransportMessageCodecFactory codecFactory,
+            IEventExecutorProvider eventExecutorProvider,
             ISerializer<string> serializer, 
             IServiceRouteProvider serviceRouteProvider)
         {
             _logger = logger;
+            _eventExecutorProvider = eventExecutorProvider;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
             _serializer = serializer;
@@ -75,8 +78,8 @@ namespace Surging.Core.Protocol.Http
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
             var serverCompletion = new TaskCompletionSource();
-            var bossGroup = new MultithreadEventLoopGroup(1);
-            var workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
+            var bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+            var workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
             bootstrap
             .Group(bossGroup, workerGroup)

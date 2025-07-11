@@ -34,7 +34,6 @@ namespace Surging.Core.Protocol.Coap.Runtime.Implementation
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            var i = 0;
             if (!IsEnabled(logLevel))
             {
                 return;
@@ -54,7 +53,7 @@ namespace Surging.Core.Protocol.Coap.Runtime.Implementation
                 Content = message,
                 CreateDate = DateTime.UtcNow,
                 EventName = eventId.Name,
-                NetworkType = NetworkType.Tcp,
+                NetworkType = NetworkType.Coap,
                 Id = _id,
                 logLevel = logLevel,
             });

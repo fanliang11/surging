@@ -151,8 +151,8 @@ namespace DotNetty.Common.Concurrency
             }
         }
 
-        private void OperationComplete(Task future)
-        {
+        private async void OperationComplete(Task future)
+        { 
             Debug.Assert(_executor.InEventLoop);
             ++_doneCount;
             if (future.IsFailure() && _cause is null)
@@ -163,6 +163,7 @@ namespace DotNetty.Common.Concurrency
             {
                 _ = TryPromise();
             }
+            future.Dispose();
         }
 
         sealed class OperationCompleteTask : IRunnable

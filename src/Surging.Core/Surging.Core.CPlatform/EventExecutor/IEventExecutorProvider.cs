@@ -11,8 +11,8 @@ namespace Surging.Core.CPlatform.EventExecutor
     public interface IEventExecutorProvider
     {
         public IEventLoopGroup GetBossEventExecutor();
-         
+
         public IEventLoopGroup GetWorkEventExecutor();
-         
+
     }
 }

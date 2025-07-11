@@ -12,7 +12,6 @@ namespace Surging.Core.CPlatform.Module
         public string Title { get; set; }
         public string Description { get; set; }
 
-
-        public bool Enable { get; set; } = true;
+        public bool Enable { get; set; } 
     }
 }

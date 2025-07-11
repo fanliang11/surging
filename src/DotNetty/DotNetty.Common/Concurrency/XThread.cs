@@ -91,11 +91,11 @@ namespace DotNetty.Common.Concurrency
                 _task = Task.Factory.StartNew(
                     () =>
                     {
-                    // We start the task running, then unleash it by signaling the readyToStart event.
-                    // This is needed to avoid thread reuse for tasks (see below)
-                    _ = _readyToStart.WaitOne();
-                    // This is the first time we're using this thread, therefore the TLS slot must be empty
-                    if (s_currentThread is object)
+                        // We start the task running, then unleash it by signaling the readyToStart event.
+                        // This is needed to avoid thread reuse for tasks (see below)
+                        _ = _readyToStart.WaitOne();
+                        // This is the first time we're using this thread, therefore the TLS slot must be empty
+                        if (s_currentThread is object)
                         {
                             Debug.WriteLine("warning: currentThread already created; OS thread reused");
                             Debug.Assert(false);

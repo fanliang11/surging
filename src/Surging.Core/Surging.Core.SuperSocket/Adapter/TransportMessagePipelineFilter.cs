@@ -10,7 +10,7 @@ namespace Surging.Core.SuperSocket.Adapter
     public class TransportMessagePipelineFilter : TerminatorPipelineFilter<TransportMessage>
     {
         private readonly ITransportMessageDecoder _transportMessageDecoder;
-        public TransportMessagePipelineFilter() : base(new[] { (byte)'\r', (byte)'\n' })
+        public TransportMessagePipelineFilter() : base(new[] { (byte)'!', (byte)'!' , (byte)'!' })
         {
             _transportMessageDecoder = ServiceLocator.GetService<ITransportMessageCodecFactory>().GetDecoder();
         }
@@ -20,7 +20,7 @@ namespace Surging.Core.SuperSocket.Adapter
         {
             try
             {
-                var bytes = bufferStream.Sequence.Slice(0, bufferStream.Length - 2).ToArray();
+                var bytes = bufferStream.Sequence.Slice(0, bufferStream.Length - 3).ToArray();
                 var transportMessage = _transportMessageDecoder.Decode(bytes);
                 return transportMessage;
             }

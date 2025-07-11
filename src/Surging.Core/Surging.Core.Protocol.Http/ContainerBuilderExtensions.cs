@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
@@ -38,6 +39,7 @@ namespace Surging.Core.Protocol.Http
             {
                 return new DotNettyHttpServerMessageListener(provider.Resolve<ILogger<DotNettyHttpServerMessageListener>>(),
                       provider.Resolve<ITransportMessageCodecFactory>(),
+                      provider.Resolve<IEventExecutorProvider>(),
                       provider.Resolve<ISerializer<string>>(),
                       provider.Resolve<IServiceRouteProvider>()
                       );
@@ -63,6 +65,7 @@ namespace Surging.Core.Protocol.Http
             {
                 return new DotNettyHttpServerMessageListener(provider.Resolve<ILogger<DotNettyHttpServerMessageListener>>(),
                       provider.Resolve<ITransportMessageCodecFactory>(),
+                      provider.Resolve<IEventExecutorProvider>(),
                       provider.Resolve<ISerializer<string>>(),
                       provider.Resolve<IServiceRouteProvider>()
                       );

@@ -24,6 +24,7 @@ namespace DotNetty.Transport.Channels
 {
     using DotNetty.Common.Concurrency;
     using DotNetty.Common.Internal;
+    using System.Threading;
 
     /// <summary>
     /// Default <see cref="SingleThreadEventLoopBase"/> implementation which just execute all submitted task in a serial fashion.

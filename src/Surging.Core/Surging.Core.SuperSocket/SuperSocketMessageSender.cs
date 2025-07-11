@@ -27,7 +27,7 @@ namespace Surging.Core.SuperSocket
         protected byte[] GetByteBuffer(TransportMessage message)
         {
             var data = _transportMessageEncoder.Encode(message).ToList();
-            data.AddRange(Encoding.UTF8.GetBytes("\r\n"));
+            data.AddRange(Encoding.UTF8.GetBytes("!!!"));
             //var buffer = PooledByteBufferAllocator.Default.Buffer();
             return data.ToArray();
         }

@@ -23,6 +23,7 @@
 namespace DotNetty.Common.Concurrency
 {
     using DotNetty.Common.Internal;
+    using System.Threading;
 
     /// <summary>
     /// Default <see cref="SingleThreadEventExecutor"/> implementation which just execute all submitted task in a serial fashion.
@@ -155,7 +156,7 @@ namespace DotNetty.Common.Concurrency
         protected override void Run()
         {
             do
-            {
+            { 
                 IRunnable task = TakeTask();
                 if (task is object)
                 {

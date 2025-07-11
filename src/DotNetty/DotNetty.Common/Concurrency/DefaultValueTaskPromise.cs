@@ -31,6 +31,7 @@ namespace DotNetty.Common.Concurrency
 
         public DefaultValueTaskPromise(object state)
         {
+            _token = CancellationToken.None;
 #if NET
             _tcs = new TaskCompletionSource(state);
 #else

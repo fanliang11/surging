@@ -45,10 +45,10 @@ namespace Surging.Core.Protocol.Tcp
         #endregion Field
 
         #region Constructor
-        public DotNettyTcpServerMessageListener(ILogger logger, IEventExecutorProvider eventExecutorProvider,  string id, ITcpServiceEntryProvider tcpServiceEntryProvider, NetworkProperties properties)
+        public DotNettyTcpServerMessageListener(ILogger logger, string id, IEventExecutorProvider eventExecutorProvider, ITcpServiceEntryProvider tcpServiceEntryProvider, NetworkProperties properties)
         {
-            _eventExecutorProvider = eventExecutorProvider;
             _tcpServiceEntry = tcpServiceEntryProvider.GetEntry();
+            _eventExecutorProvider= eventExecutorProvider;
             _logger = logger; 
             Id = id;
             _tcpServerProperties= properties;
@@ -77,7 +77,7 @@ namespace Surging.Core.Protocol.Tcp
 
         public bool IsAlive()
         {
-            return _channel.Active;
+            return _channel.IsActive;
         }
 
         public bool IsAutoReload()
@@ -112,10 +112,10 @@ namespace Surging.Core.Protocol.Tcp
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{_tcpServerProperties.Host}:{_tcpServerProperties.Port}。");
 
-            var bossGroup = _eventExecutorProvider.GetBossEventExecutor();
-            var workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
+            IEventLoopGroup bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+            IEventLoopGroup workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var tcpServiceEntryProvider = ServiceLocator.GetService<ITcpServiceEntryProvider>();
-            var workerGroup1 = new MultithreadEventLoopGroup();
+            var workerGroup1 = _eventExecutorProvider.GetWorkEventExecutor();
 
             var bootstrap = new ServerBootstrap();
             bootstrap

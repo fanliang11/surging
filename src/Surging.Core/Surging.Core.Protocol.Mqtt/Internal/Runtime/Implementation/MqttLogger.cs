@@ -54,7 +54,7 @@ namespace Surging.Core.Protocol.Mqtt.Internal.Runtime.Implementation
                 Content = message,
                 CreateDate = DateTime.UtcNow,
                 EventName = eventId.Name,
-                NetworkType = NetworkType.Tcp,
+                NetworkType = NetworkType.Mqtt,
                 Id = _id,
                 logLevel = logLevel,
             });

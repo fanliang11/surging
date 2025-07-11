@@ -12,6 +12,7 @@ using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Surging.Core.DotNetty
@@ -32,7 +33,7 @@ namespace Surging.Core.DotNetty
             base.RegisterBuilder(builder);
             builder.Register(provider =>
             {
-                IServiceExecutor serviceExecutor = null;
+                IServiceExecutor serviceExecutor = null; 
                 if (provider.IsRegistered(typeof(IServiceExecutor)))
                     serviceExecutor = provider.ResolveNamed<IServiceExecutor>(CommunicationProtocol.Tcp.ToString());
                 return new DotNettyTransportClientFactory(provider.Resolve<ITransportMessageCodecFactory>(),
@@ -53,7 +54,7 @@ namespace Surging.Core.DotNetty
             builder.Register(provider =>
             {
                 return new DotNettyServerMessageListener(provider.Resolve<ILogger<DotNettyServerMessageListener>>(),
-                    provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<IEventExecutorProvider>(), 
                     provider.Resolve<ITransportMessageCodecFactory>());
             }).SingleInstance();
             builder.Register(provider =>

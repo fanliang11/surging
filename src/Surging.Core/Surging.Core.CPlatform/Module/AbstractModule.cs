@@ -21,7 +21,9 @@ namespace Surging.Core.CPlatform.Module
         /// <summary>
         /// 唯一标识guid
         /// </summary>
-        public Guid Identifier { get; set; }
+        public string Identifier { get; set; }
+
+        public string ModulePath { get; set; }
 
         /// <summary>
         /// 模块名
@@ -43,13 +45,13 @@ namespace Surging.Core.CPlatform.Module
         /// </summary>
         public bool Enable { get; set; } = true;
 
+        public bool IsInternal { get; internal set; } = true;
+
         /// <summary>
         /// 描述
         /// </summary>
         public string Description { get; set; }
-
-        public bool IsInternal { get; internal set; } = true;
-
+        
         /// <summary>
         /// 组件
         /// </summary>
@@ -62,12 +64,14 @@ namespace Surging.Core.CPlatform.Module
         {
             ModuleName = this.GetType().Name;
             TypeName = this.GetType().BaseType.Name;
+            var type = this.GetType().DeclaringType?.FullName;
             var moduleMetadata = this.GetType().GetCustomAttribute<ModuleMetadata>();
             if (moduleMetadata != null)
             {
-                Title = moduleMetadata.Title;
-                Description = moduleMetadata.Description;
-                Enable = moduleMetadata.Enable;
+                 Title = moduleMetadata.Title;
+                 Description = moduleMetadata.Description;
+                 Enable = moduleMetadata.Enable;
+                Identifier =$"{this.GetType().FullName}";
             }
         }
         #endregion
@@ -166,7 +170,7 @@ namespace Surging.Core.CPlatform.Module
         /// </summary>
         public virtual void ValidateModule()
         {
-            if (this.Identifier == Guid.Empty || string.IsNullOrEmpty(this.ModuleName) || string.IsNullOrEmpty(this.TypeName)
+            if (string.IsNullOrEmpty(this.Identifier ) || string.IsNullOrEmpty(this.ModuleName) || string.IsNullOrEmpty(this.TypeName)
                 || string.IsNullOrEmpty(this.Title))
             {
                 throw new CPlatformException("模块属性：Identifier，ModuleName，TypeName，Title 是必须的不能为空！");

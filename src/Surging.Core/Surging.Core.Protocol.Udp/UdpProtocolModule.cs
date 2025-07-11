@@ -54,7 +54,7 @@ namespace Surging.Core.Protocol.Udp
             builder.Register(provider =>
             {
                 return new DotNettyUdpServerMessageListener(provider.Resolve<ILogger<DotNettyUdpServerMessageListener>>(),
-                    provider.Resolve<IEventExecutorProvider>(),
+                              provider.Resolve<IEventExecutorProvider>(),
                     provider.Resolve<ITransportMessageCodecFactory>(),
                        provider.Resolve<IUdpServiceEntryProvider>()
                       );

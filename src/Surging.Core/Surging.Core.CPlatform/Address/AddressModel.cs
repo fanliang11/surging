@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Net;
+using System.Text;
 
 namespace Surging.Core.CPlatform.Address
 {
@@ -28,6 +29,8 @@ namespace Surging.Core.CPlatform.Address
         /// </summary>
         /// <returns>一个字符串。</returns>
         public abstract override string ToString();
+
+        public abstract  StringBuilder ToStringBuilder();
 
         #region Equality members
 

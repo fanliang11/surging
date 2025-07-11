@@ -2,7 +2,7 @@
 {
     using System;
 
-    public interface IBlockingQueue<T> : IQueue<T>
+    public interface IBlockingQueue<T> : IQueue<T>,IDisposable
     {
         T Take();
 

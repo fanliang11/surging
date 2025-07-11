@@ -16,12 +16,12 @@ namespace Surging.Core.Protocol.Tcp.Runtime.Implementation
     internal class TcpClientNetworkProvider : INetworkProvider<NetworkProperties>
     {
         private readonly ILogger<DotNettyTcpTransportClientFactory> _logger;
-        private readonly ConcurrentDictionary<string, DotNettyTcpTransportClientFactory> _hosts = new ConcurrentDictionary<string, DotNettyTcpTransportClientFactory>();
         private readonly IEventExecutorProvider _eventExecutorProvider;
+        private readonly ConcurrentDictionary<string, DotNettyTcpTransportClientFactory> _hosts = new ConcurrentDictionary<string, DotNettyTcpTransportClientFactory>();
         public TcpClientNetworkProvider(ILogger<DotNettyTcpTransportClientFactory> logger, IEventExecutorProvider eventExecutorProvider)
         {
-            _logger = logger;
             _eventExecutorProvider = eventExecutorProvider;
+            _logger = logger;
         }
 
         public INetwork CreateNetwork(NetworkProperties properties)

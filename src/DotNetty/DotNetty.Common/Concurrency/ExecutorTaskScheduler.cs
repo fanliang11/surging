@@ -28,25 +28,31 @@
 
 namespace DotNetty.Common.Concurrency
 {
+    using DotNetty.Common.Utilities;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public sealed class ExecutorTaskScheduler : TaskScheduler
     {
         private readonly IEventExecutor _executor;
         private bool _started;
+        private CancellationToken _cancellationToken;
 
         public ExecutorTaskScheduler(IEventExecutor executor)
         {
+            _cancellationToken = CancellationToken.None;
             _executor = executor;
         }
-
+         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void QueueTask(Task task)
         {
             if (_started)
             {
+
                 _executor.Execute(new TaskQueueNode(this, task));
             }
             else
@@ -84,7 +90,7 @@ namespace DotNetty.Common.Concurrency
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Run() => _scheduler.TryExecuteTask(_task);
+            public void Run()=> _scheduler.TryExecuteTask(_task);
         }
     }
 }

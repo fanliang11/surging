@@ -26,7 +26,7 @@ namespace Surging.Core.CPlatform.Transport.Codec.Implementation
 
         public TransportMessage Decode(Memory<byte> data)
         {
-            return Decode(data.ToArray());
+           return Decode(data.ToArray());
         }
 
         #endregion Implementation of ITransportMessageDecoder

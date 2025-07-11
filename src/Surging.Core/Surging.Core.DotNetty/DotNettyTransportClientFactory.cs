@@ -65,6 +65,7 @@ namespace Surging.Core.DotNetty
             _transportMessageDecoder = codecFactory.GetDecoder();
             _logger = logger;
             _healthCheckService = healthCheckService;
+            var eventExecutor = _eventExecutorProvider.GetWorkEventExecutor();
             _serviceExecutor = serviceExecutor;
             _bootstrap = GetBootstrap(eventExecutorProvider.GetWorkEventExecutor());
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
@@ -72,9 +73,9 @@ namespace Surging.Core.DotNetty
                 var pipeline = c.Pipeline;
                 pipeline.AddLast(new LengthFieldPrepender2(2));
                 pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 2, 0, 2));
-                pipeline.AddLast(new TransportMessageHandlerEncoder(_transportMessageEncoder));
-                pipeline.AddLast(new ClientTransportMessageChannelHandler(_transportMessageDecoder));
-                pipeline.AddLast(new DefaultChannelHandler(this,_logger));
+                pipeline.AddLast(eventExecutor, "transportMessageHandler", new TransportMessageHandlerEncoder(_transportMessageEncoder));//Time-consuming execution, add eventExecutor, otherwise memory leak
+                pipeline.AddLast(eventExecutor, "clientTransportMessageHandler", new ClientTransportMessageChannelHandler(_transportMessageDecoder));//Time-consuming execution, add eventExecutor, otherwise memory leak
+                pipeline.AddLast(eventExecutor, "clientHandler", new DefaultChannelHandler(this,_logger));//Time-consuming execution, add eventExecutor, otherwise memory leak
             }));
         }
 
@@ -148,6 +149,7 @@ namespace Surging.Core.DotNetty
             bootstrap
                 .Channel<TcpSocketChannel>()
                 .Option(ChannelOption.TcpNodelay, true)
+                .Option(ChannelOption.SoKeepalive, true)
                 .Option(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
                 .Group(group);
 

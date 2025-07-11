@@ -23,6 +23,7 @@
 namespace DotNetty.Common.Concurrency
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
@@ -45,7 +46,6 @@ namespace DotNetty.Common.Concurrency
         protected const int ShuttingDownState = 3;
         protected const int ShutdownState = 4;
         protected const int TerminatedState = 5;
-
         internal static readonly int DefaultMaxPendingExecutorTasks = Math.Max(16,
                 SystemPropertyUtil.GetInt("io.netty.eventexecutor.maxPendingTasks", int.MaxValue));
         protected static readonly IInternalLogger Logger =
@@ -56,7 +56,6 @@ namespace DotNetty.Common.Concurrency
         private readonly CountdownEvent _threadLock;
         private readonly IPromise _terminationCompletionSource;
         private volatile int v_executionState = NotStartedState;
-
         protected readonly IQueue<IRunnable> _taskQueue;
         private readonly IBlockingQueue<IRunnable> _blockingTaskQueue;
         private readonly IRejectedExecutionHandler _rejectedExecutionHandler;
@@ -186,7 +185,6 @@ namespace DotNetty.Common.Concurrency
             _shutdownHooks = new HashSet<Action>();
             _terminationCompletionSource = NewPromise();
             _threadLock = new CountdownEvent(1);
-
             _taskScheduler = new ExecutorTaskScheduler(this);
         }
 
@@ -215,6 +213,8 @@ namespace DotNetty.Common.Concurrency
         /// Gets length of backlog of tasks queued for immediate execution.
         /// </summary>
         public int BacklogLength => PendingTasks;
+
+        public long LastExecutionTime => _lastExecutionTime;
 
         /// <inheritdoc />
         protected override bool HasTasks => _taskQueue.NonEmpty;
@@ -255,29 +255,34 @@ namespace DotNetty.Common.Concurrency
         #region -- Thread --
 
         protected virtual Thread NewThread(IThreadFactory threadFactory)
-        { 
-           return threadFactory.NewThread(_loopAction);
+        {
+            return threadFactory.NewThread(_loopAction);
         }
 
         protected virtual void Start()
-        {  
-            _thread.Start(); 
+        {
+            _thread.Start();
         }
+
 
         private readonly XParameterizedThreadStart _loopAction;
         private void Loop(object s)
         {
             SetCurrentExecutor(this);
-            _ = Task.Factory.StartNew(_loopCoreAciton, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+            var cancellation = new CancellationTokenSource();
+            //high CPU consumption tasks, running RunAllTasks in a dead loop, set TaskCreationOptions.LongRunning to avoid running out of thread pool resources. ‌‌
+            _ = Task.Factory.StartNew(() => _loopCoreAciton(cancellation), cancellation.Token, TaskCreationOptions.LongRunning, _taskScheduler);
+            //Loop processing is too fast and generates a large number of loopCoreAciton task schedulers.
+            //Using ManualResetEventSlim to process it is too late to wait, Using threadLock, LoopCore task schedulers will be released after execution
+            _threadLock.Wait();
         }
 
-        private readonly Action _loopCoreAciton;
-        private void LoopCore()
+        private readonly Action<CancellationTokenSource> _loopCoreAciton;
+        private void LoopCore(CancellationTokenSource cancellation)
         {
             try
             {
                 _ = CompareAndSetExecutionState(NotStartedState, StartedState);
-
                 bool success = false;
                 UpdateLastExecutionTime();
                 try
@@ -299,6 +304,14 @@ namespace DotNetty.Common.Concurrency
                 Logger.ExecutionLoopFailed(_thread, ex);
                 SetExecutionState(TerminatedState);
                 _ = _terminationCompletionSource.TrySetException(ex);
+            }
+            finally
+            {
+                if (IsShuttingDown)
+                {
+                    cancellation.Cancel();
+                    cancellation.Dispose();
+                }
             }
         }
 
@@ -694,9 +707,7 @@ namespace DotNetty.Common.Concurrency
             }
 
             OnEndRunningAllTasks();
-
             AfterRunningAllTasks();
-
             _lastExecutionTime = executionTime;
             return true;
         }

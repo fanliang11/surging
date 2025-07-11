@@ -54,7 +54,7 @@ namespace Surging.Core.Protocol.Udp.Runtime.Implementation
                 Content = message,
                 CreateDate = DateTime.UtcNow,
                 EventName = eventId.Name,
-                NetworkType = NetworkType.Tcp,
+                NetworkType = NetworkType.Udp,
                 Id = _id,
                 logLevel = logLevel,
             });

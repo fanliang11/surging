@@ -25,7 +25,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         private readonly IServiceRouteManager _serviceRouteManager;
         private readonly int _timeout = 30000;
         private readonly Timer _timer;
-        private ITransportClientFactory _transportClientFactory = null;
+        private  ITransportClientFactory _transportClientFactory=null;
         private EventHandler<HealthCheckEventArgs> _removed;
 
         private EventHandler<HealthCheckEventArgs> _changed;
@@ -48,7 +48,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
         /// <param name="serviceRouteManager"></param>
         public DefaultHealthCheckService(IServiceRouteManager serviceRouteManager)
         {
-            var timeSpan = TimeSpan.FromSeconds(10);
+            var timeSpan = TimeSpan.FromSeconds(30); 
             _isService = async address => (await _serviceRouteManager.GetAddressAsync(address.ToString())).Count() > 0;
             _serviceRouteManager = serviceRouteManager;
             //建立计时器
@@ -206,7 +206,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.HealthChecks.Implementation
 
         private async Task<bool> CheckService(EndPoint address, int timeout)
         {
-            if (_transportClientFactory == null)
+            if(_transportClientFactory==null)
                 _transportClientFactory = ServiceLocator.GetService<ITransportClientFactory>();
             bool isHealth = false;
             var client = await _transportClientFactory.CreateClientAsync(address);

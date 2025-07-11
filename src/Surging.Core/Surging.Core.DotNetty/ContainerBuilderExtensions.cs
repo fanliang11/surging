@@ -48,7 +48,7 @@ namespace Surging.Core.DotNetty
             builder.Register(provider =>
             {
                 return new DotNettyServerMessageListener(provider.Resolve<ILogger<DotNettyServerMessageListener>>(),
-                    provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<IEventExecutorProvider>(), 
                     provider.Resolve<ITransportMessageCodecFactory>());
             }).SingleInstance();
             builder.Register(provider =>

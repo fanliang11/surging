@@ -43,6 +43,7 @@ namespace Surging.Core.DotNetty
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
         }
+
         #endregion Constructor
 
         #region Implementation of IMessageListener
@@ -67,7 +68,7 @@ namespace Surging.Core.DotNetty
         public async Task StartAsync(EndPoint endPoint)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
+                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。"); 
             IEventLoopGroup bossGroup = _eventExecutorProvider.GetBossEventExecutor();
             IEventLoopGroup workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
@@ -75,7 +76,7 @@ namespace Surging.Core.DotNetty
             if (AppConfig.ServerOptions.Libuv)
             {
                 bossGroup = _eventExecutorProvider.GetBossEventExecutor();
-                workerGroup = _eventExecutorProvider.GetWorkEventExecutor();
+                workerGroup = _eventExecutorProvider.GetWorkEventExecutor(); 
                 bootstrap.Channel<TcpServerChannel>();
             }
             else
@@ -88,16 +89,13 @@ namespace Surging.Core.DotNetty
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
             .ChildOption(ChannelOption.TcpNodelay, true)
-            .ChildOption(ChannelOption.SoReuseaddr, true)
+            .ChildOption(ChannelOption.SoReuseaddr,true)
             .Group(bossGroup, workerGroup)
             .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
             {
                 var pipeline = channel.Pipeline;
-                pipeline.AddLast(new LengthFieldPrepender2(4));
-                /* best settings for multiplexing */
-                // pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 4, 0, 4)); //Video stream push  
-                //pipeline.AddLast(new LengthFieldBasedFrameDecoder2(1024*1024*50, 0, 4, 0, 4)); //big data  50m-200m
-                // pipeline.AddLast(new LengthFieldBasedFrameDecoder2(1024*1024*4, 0, 4, 0, 4)); //small data 4m 
+                pipeline.AddLast(new LengthFieldPrepender2(2));
+                pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 2, 0, 2));
                 pipeline.AddLast(new TransportMessageHandlerEncoder(_transportMessageEncoder));
                 pipeline.AddLast(eventExecutor, "HandlerAdapter", new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
                 pipeline.AddLast(eventExecutor, "ServerHandler", new ServerHandler(async (contenxt, message) =>
@@ -108,12 +106,12 @@ namespace Surging.Core.DotNetty
                         var invokeMessage = message.GetContent<RemoteInvokeMessage>();
                         if (invokeMessage.ServiceId == "client.checkService")
                         {
-                            await sender.SendAndFlushAsync(TransportMessage.CreateInvokeResultMessage(message.Id, new RemoteInvokeResultMessage()));
+                           await sender.SendAndFlushAsync(TransportMessage.CreateInvokeResultMessage(message.Id,new RemoteInvokeResultMessage()));
                             return;
                         }
                     }
                     await OnReceived(sender, message);
-                }, _logger));
+                },  _logger));
             }));
             try
             {
@@ -155,8 +153,8 @@ namespace Surging.Core.DotNetty
         {
             private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
             private readonly ILogger _logger;
-
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
+            
+            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction,  ILogger logger)
             {
                 _readAction = readAction;
                 _logger = logger;
@@ -182,7 +180,7 @@ namespace Surging.Core.DotNetty
             {
                 context.CloseAsync();//客户端主动断开需要应答，否则socket变成CLOSE_WAIT状态导致socket资源耗尽
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError(exception, $"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
+                    _logger.LogError(exception,$"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。");
             }
 
             #endregion Overrides of ChannelHandlerAdapter

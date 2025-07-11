@@ -20,39 +20,39 @@ namespace Surging.Core.Protocol.Tcp
         public override void Initialize(AppModuleContext serviceProvider)
         {
             base.Initialize(serviceProvider);
-            var config =new Dictionary<string, object>();
-            config.Add("script", @"parser.Fixed(4).Handler(
-                  function(buffer){
-                    var buf = BytesUtils.Slice(buffer,1,4);
-                    parser.Fixed(buffer.ReadableBytes).Result(buf);
-             }).Handler(
-                    function(buffer){parser.Fixed(8).Result(buffer);}
-            ).Handler(function(buffer){
-                    parser.Result('处理完成','gb2312').Complete();
-                 }
-             )");
-          var network=  serviceProvider.ServiceProvoider.GetInstances<INetworkProvider<NetworkProperties>>(NetworkType.Tcp.ToString()).CreateNetwork(new NetworkProperties
-          {
-              Id="233r",
-               ParserType = PayloadParserType.Script,
-               PayloadType = PayloadType.String,
-               Host = "127.0.0.1",
-               Port = 322,
-               ParserConfiguration = config
-           });
-            network.StartAsync();
+          //  var config =new Dictionary<string, object>();
+          //  config.Add("script", @"parser.Fixed(4).Handler(
+          //        function(buffer){
+          //          var buf = BytesUtils.Slice(buffer,1,4);
+          //          parser.Fixed(buffer.ReadableBytes).Result(buf);
+          //   }).Handler(
+          //          function(buffer){parser.Fixed(8).Result(buffer);}
+          //  ).Handler(function(buffer){
+          //          parser.Result('处理完成','gb2312').Complete();
+          //       }
+          //   )");
+          //var network=  serviceProvider.ServiceProvoider.GetInstances<INetworkProvider<NetworkProperties>>(NetworkType.Tcp.ToString()).CreateNetwork(new NetworkProperties
+          //{
+          //    Id="233r",
+          //     ParserType = PayloadParserType.Script,
+          //     PayloadType = PayloadType.String,
+          //     Host = "127.0.0.1",
+          //     Port = 322,
+          //     ParserConfiguration = config
+          // });
+          //  network.StartAsync();
 
           
-            var network1 = serviceProvider.ServiceProvoider.GetInstances<INetworkProvider<NetworkProperties>>(NetworkType.Tcp.ToString()).CreateNetwork(new NetworkProperties
-            {
-                Id = "233rt",
-                ParserType = PayloadParserType.Script,
-                PayloadType = PayloadType.String,
-                Host = "127.0.0.1",
-                Port = 321,
-                ParserConfiguration = config
-            });
-            network1.StartAsync();
+          //  var network1 = serviceProvider.ServiceProvoider.GetInstances<INetworkProvider<NetworkProperties>>(NetworkType.Tcp.ToString()).CreateNetwork(new NetworkProperties
+          //  {
+          //      Id = "233rt",
+          //      ParserType = PayloadParserType.Script,
+          //      PayloadType = PayloadType.String,
+          //      Host = "127.0.0.1",
+          //      Port = 321,
+          //      ParserConfiguration = config
+          //  });
+          //  network1.StartAsync();
         }
 
         /// <summary>
@@ -89,8 +89,7 @@ namespace Surging.Core.Protocol.Tcp
             builder.Register(provider =>
             {
                 return new DotNettyTcpServerMessageListener(provider.Resolve<ILogger<DotNettyTcpServerMessageListener>>(),
-                   provider.Resolve<IEventExecutorProvider>(),
-                    "default", provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
+                     "default", provider.Resolve<IEventExecutorProvider>(), provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -111,8 +110,8 @@ namespace Surging.Core.Protocol.Tcp
             builder.Register(provider =>
             {
                 return new DotNettyTcpServerMessageListener(provider.Resolve<ILogger<DotNettyTcpServerMessageListener>>(),
-                                      provider.Resolve<IEventExecutorProvider>(),
-                    "default", provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
+                    
+                    "default", provider.Resolve<IEventExecutorProvider>(), provider.Resolve<ITcpServiceEntryProvider>(), new NetworkProperties()
                       );
             }).SingleInstance();
             builder.Register(provider =>

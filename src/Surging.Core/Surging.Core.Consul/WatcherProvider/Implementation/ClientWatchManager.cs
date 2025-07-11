@@ -1,10 +1,19 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Consul;
+using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
+using Surging.Core.Consul.Utilitys;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Surging.Core.Consul.WatcherProvider.Implementation
 {

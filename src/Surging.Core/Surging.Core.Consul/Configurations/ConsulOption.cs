@@ -16,6 +16,8 @@ namespace Surging.Core.Consul.Configurations
 
         public NotifyType NotifyMode { get; set; } = NotifyType.Heartbeat;
 
+        public int WatchInterval { get; set; }
+
         public string CommandPath { get; set; }
 
         public string CachePath { get; set; }

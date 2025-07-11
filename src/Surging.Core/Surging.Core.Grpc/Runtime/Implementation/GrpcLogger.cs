@@ -54,7 +54,7 @@ namespace Surging.Core.Grpc.Runtime.Implementation
                 Content = message,
                 CreateDate = DateTime.UtcNow,
                 EventName = eventId.Name,
-                NetworkType = NetworkType.Tcp,
+                NetworkType = NetworkType.Grpc,
                 Id = _id,
                 logLevel = logLevel,
             });

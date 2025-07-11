@@ -85,8 +85,8 @@ namespace Surging.Core.Protocol.Mqtt
             builder.Register(provider =>
             {
                 return new DotNettyMqttServerMessageListener(provider.Resolve<ILogger<DotNettyMqttServerMessageListener>>(),
-                    provider.Resolve<IEventExecutorProvider>(), 
-                    provider.Resolve<IChannelService>(),
+                      provider.Resolve<IChannelService>(),
+                     provider.Resolve<IEventExecutorProvider>(),
                       provider.Resolve<IMqttBehaviorProvider>()
                       );
             }).SingleInstance();
@@ -111,8 +111,8 @@ namespace Surging.Core.Protocol.Mqtt
             builder.Register(provider =>
             {
                 return new DotNettyMqttServerMessageListener(provider.Resolve<ILogger<DotNettyMqttServerMessageListener>>(),
-                       provider.Resolve<IEventExecutorProvider>(),
-                    provider.Resolve<IChannelService>(),
+                     provider.Resolve<IChannelService>(),
+                    provider.Resolve<IEventExecutorProvider>(),
                      provider.Resolve<IMqttBehaviorProvider>()
                      );
             }).SingleInstance();

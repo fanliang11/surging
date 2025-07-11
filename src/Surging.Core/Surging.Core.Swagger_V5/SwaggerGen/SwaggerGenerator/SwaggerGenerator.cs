@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 using Autofac;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -25,12 +26,15 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
         private readonly ISchemaGenerator _schemaGenerator;
         private readonly SwaggerGeneratorOptions _options;
         private readonly IServiceEntryProvider _serviceEntryProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public SwaggerGenerator(
             SwaggerGeneratorOptions options,
             IApiDescriptionGroupCollectionProvider apiDescriptionsProvider,
+            IHttpContextAccessor httpContextAccessor,
             ISchemaGenerator schemaGenerator)
         {
+            _httpContextAccessor = httpContextAccessor;
             _options = options ?? new SwaggerGeneratorOptions();
             _apiDescriptionsProvider = apiDescriptionsProvider;
             _schemaGenerator = schemaGenerator;
@@ -49,6 +53,13 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
 
             var schemaRepository = new SchemaRepository(documentName);
             var entries = _serviceEntryProvider.GetALLEntries();
+            var query=  _httpContextAccessor.HttpContext.Request.Query;
+            if (query.ContainsKey("moduleId"))
+            {
+                var moduleId = query["moduleId"].ToString();
+                var path= moduleId.AsSpan().Slice(0, moduleId.AsSpan().LastIndexOf(".")).ToString();
+                entries = entries.Where(p => p.Descriptor.Id.StartsWith(path));
+            }
             var mapRoutePaths = AppConfig.SwaggerConfig.Options?.MapRoutePaths;
             if (mapRoutePaths != null)
             {
@@ -222,9 +233,6 @@ namespace Surging.Core.Swagger_V5.SwaggerGen
             try
             {
                 var operation = new OpenApiOperation();
-
-             
-
                 operation.Tags = GenerateOperationTags(entry);
                     operation.OperationId = _options.EntryOperationIdSelector(entry);
                 operation.Parameters = GenerateParameters(entry, schemaRepository); 

@@ -170,7 +170,7 @@ namespace DotNetty.Transport.Channels
             }
             else
             {
-                if (!IsShuttingDown) { _emptyEvent.Wait(); } 
+                if (!IsShuttingDown) { _emptyEvent.Wait(); }
                 task = PollTaskFrom(taskQueue);
             }
             return task;

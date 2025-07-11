@@ -20,7 +20,7 @@ namespace Surging.Core.Codec.ProtoBuffer
 
         public TransportMessage Decode(Memory<byte> data)
         {
-            return Decode(data);
+           return Decode(data.ToArray());
         }
 
         #endregion Implementation of ITransportMessageDecoder

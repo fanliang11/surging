@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Protocol.Udp
 {
-    public interface IUdpMessageSender: IMessageSender
+    public interface IUdpMessageSender: IMessageSender, IDeviceMessageSender
     {
         T GetAndSet<T>(AttributeKey<T> attributeKey, T obj) where T : class;
         T Get<T>(AttributeKey<T> attributeKey) where T : class;

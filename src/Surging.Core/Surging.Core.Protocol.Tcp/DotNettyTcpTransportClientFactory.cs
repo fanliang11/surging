@@ -54,7 +54,7 @@ namespace Surging.Core.Protocol.Tcp
             _eventExecutorProvider = eventExecutorProvider;
             _networkProperties = networkProperties;
             _logger = logger;
-            _bootstrap = GetBootstrap(_eventExecutorProvider.GetWorkEventExecutor());
+            _bootstrap = GetBootstrap(eventExecutorProvider.GetWorkEventExecutor());
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
             {
                 var pipeline = c.Pipeline;

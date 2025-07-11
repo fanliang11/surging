@@ -10,7 +10,7 @@ namespace Surging.Core.CPlatform.Network
     {
         TcpClient,//TCP客户端
         Tcp,//TCP服务
-        MqttClient,//MQTT客户端
+        Rtmp,//MQTT客户端
         Mqtt,//MQTT服务
         HttpClient,//HTTP客户端
         Http,//HTTP服务
@@ -19,6 +19,8 @@ namespace Surging.Core.CPlatform.Network
         Udp,//UDP
         Grpc,
         CoapClient,//CoAP客户端
-        Coap//CoAP服务
+        Coap,//CoAP服务
+        HttpFlv,
+        MqttClient,
     }
 }

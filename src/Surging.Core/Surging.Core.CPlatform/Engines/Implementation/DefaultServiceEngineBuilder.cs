@@ -37,6 +37,9 @@ namespace Surging.Core.CPlatform.Engines.Implementation
                     serviceBuilder.RegisterRepositories(paths);
                     serviceBuilder.RegisterServiceBus(paths);
                     serviceBuilder.RegisterInstanceByConstraint(paths);
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                        _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的组件模块。");
+                    serviceBuilder.RegisterModules(paths);
                 }
                 if (_serviceEngine.ComponentServiceLocationFormats != null)
                 {
@@ -74,6 +77,9 @@ namespace Surging.Core.CPlatform.Engines.Implementation
                         serviceBuilder.RegisterServices(paths);
                         serviceBuilder.RegisterRepositories(paths);
                         serviceBuilder.RegisterServiceBus(paths);
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug($"准备加载路径${string.Join(',', paths)}下的组件模块。");
+                        serviceBuilder.RegisterModules(paths);
                         result = new ValueTuple<List<Type>, IEnumerable<string>>(serviceBuilder.GetInterfaceService(paths), serviceBuilder.GetDataContractName(paths));
                         _lastBuildTime = DateTime.Now;
                     }

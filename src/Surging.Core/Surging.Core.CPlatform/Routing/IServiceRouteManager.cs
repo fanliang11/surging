@@ -94,7 +94,7 @@ namespace Surging.Core.CPlatform.Routing
                 {
                     routes = routes.Where(p => p.Address.Any(m => m.ToString() == condition));
                     var addresses = routes.FirstOrDefault()?.Address;
-                    return addresses == null ? new List<AddressModel>() : addresses.Where(p => p.ToString() == condition);
+                    return addresses==null?new List<AddressModel>():  addresses.Where(p => p.ToString() == condition);
                 }
             }
 

@@ -89,8 +89,8 @@ namespace Surging.Core.CPlatform.DependencyResolution
             }
             finally
             {
-                if (result == null || weekRef == null)
-                    _initializers.Remove(valueTuple, out WeakReference<object> weekRef1);
+                if(result==null || weekRef==null)
+                _initializers.Remove(valueTuple, out WeakReference<object> weekRef1);
             }
         }
 

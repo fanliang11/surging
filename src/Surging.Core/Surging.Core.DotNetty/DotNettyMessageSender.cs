@@ -1,4 +1,5 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Common.Concurrency;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Surging.Core.CPlatform.Messages;
@@ -6,6 +7,7 @@ using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
@@ -23,7 +25,7 @@ namespace Surging.Core.DotNetty
         }
 
         protected IByteBuffer GetByteBuffer(TransportMessage message)
-        {
+        { 
             var data = _transportMessageEncoder.Encode(message);
             //var buffer = PooledByteBufferAllocator.Default.Buffer();
             return Unpooled.WrappedBuffer(data);
@@ -64,7 +66,7 @@ namespace Surging.Core.DotNetty
         /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
-            //var buffer = GetByteBuffer(message);
+           // var buffer = GetByteBuffer(message); 
             await _channel.WriteAndFlushAsync(message);
         }
 
@@ -76,7 +78,7 @@ namespace Surging.Core.DotNetty
         public async Task SendAndFlushAsync(TransportMessage message)
         {
             //var buffer = GetByteBuffer(message);
-             await _channel.WriteAndFlushAsync(message);
+            await _channel.WriteAndFlushAsync(message);
         }
 
         #endregion Implementation of IMessageSender
@@ -114,7 +116,7 @@ namespace Surging.Core.DotNetty
         /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            //var buffer = GetByteBuffer(message);
+          //  var buffer = GetByteBuffer(message);
             await _context.WriteAndFlushAsync(message);
         }
 

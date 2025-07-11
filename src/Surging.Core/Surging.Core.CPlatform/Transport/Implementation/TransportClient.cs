@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Sources;
 
 namespace Surging.Core.CPlatform.Transport.Implementation
 {
@@ -126,9 +125,10 @@ namespace Surging.Core.CPlatform.Transport.Implementation
             _resultDictionary.TryAdd(id, task);
             try
             {
-                //var valueTask =  task.GetTask();
-                //var result = valueTask.IsCompletedSuccessfully ? valueTask.Result :await valueTask.AsTask().WaitAsync(cancellationToken);
-                var result =await task.AwaitValue(cancellationToken);
+
+                //var valueTask = task.GetTask();
+                // var result = valueTask.IsCompletedSuccessfully ? valueTask.Result : await valueTask.AsTask().WaitAsync(cancellationToken);
+                var result = await task.AwaitValue(cancellationToken);
                 return result.GetContent<RemoteInvokeResultMessage>();
             }
             finally

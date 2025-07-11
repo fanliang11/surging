@@ -15,8 +15,8 @@ namespace Surging.Core.Protocol.Tcp.Runtime.Implementation
     {
         private   readonly ILogger<TcpNetworkProvider> _logger;
         private readonly ITcpServiceEntryProvider _provider;
-        private readonly ConcurrentDictionary<string, DotNettyTcpServerMessageListener> _hosts = new ConcurrentDictionary<string, DotNettyTcpServerMessageListener>();
         private readonly IEventExecutorProvider _eventExecutorProvider;
+        private readonly ConcurrentDictionary<string, DotNettyTcpServerMessageListener> _hosts = new ConcurrentDictionary<string, DotNettyTcpServerMessageListener>();
         public TcpNetworkProvider(ILogger<TcpNetworkProvider> logger, IEventExecutorProvider eventExecutorProvider,ITcpServiceEntryProvider provider)
         {
             _logger = logger;
@@ -25,7 +25,7 @@ namespace Surging.Core.Protocol.Tcp.Runtime.Implementation
         }
         public INetwork CreateNetwork(NetworkProperties properties)
         {
-            var tcpServer = _hosts.GetOrAdd(properties.Id, p=>new DotNettyTcpServerMessageListener(_logger, _eventExecutorProvider, properties.Id, _provider, properties));
+            var tcpServer = _hosts.GetOrAdd(properties.Id, p=>new DotNettyTcpServerMessageListener(_logger, properties.Id, _eventExecutorProvider, _provider, properties));
             return tcpServer;
         }
 
@@ -56,7 +56,7 @@ namespace Surging.Core.Protocol.Tcp.Runtime.Implementation
 
         public INetwork CreateNetwork(NetworkProperties properties, ISubject<NetworkLogMessage> subject)
         {
-            var tcpServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyTcpServerMessageListener(new TcpLogger(subject, properties.Id), _eventExecutorProvider, properties.Id, _provider, properties));
+            var tcpServer = _hosts.GetOrAdd(properties.Id, p => new DotNettyTcpServerMessageListener(new TcpLogger(subject, properties.Id), properties.Id, _eventExecutorProvider, _provider, properties));
             return tcpServer;
         }
     }

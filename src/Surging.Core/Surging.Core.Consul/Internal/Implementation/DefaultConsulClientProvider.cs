@@ -70,8 +70,10 @@ namespace Surging.Core.Consul.Internal.Implementation
             {
                 var ipAddress = addr as IpAddressModel;
                 result = _consulClients.GetOrAdd(ipAddress.ToString(), new ConsulClient(config =>
-                  {
-                      config.Address = new Uri($"http://{ipAddress.Ip}:{ipAddress.Port}");
+                {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.Append($"http://").Append(addr.ToStringBuilder());
+                    config.Address = new Uri(stringBuilder.ToString());
                   }, null, h => { h.UseProxy = false; h.Proxy = null; }));
             }
             return result;
@@ -87,7 +89,9 @@ namespace Surging.Core.Consul.Internal.Implementation
                 {
                     result.Add(_consulClients.GetOrAdd(ipAddress.ToString(), new ConsulClient(config =>
                     {
-                        config.Address = new Uri($"http://{ipAddress.Ip}:{ipAddress.Port}");
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.Append($"http://").Append(address.ToStringBuilder());
+                        config.Address = new Uri(stringBuilder.ToString());
                     }, null, h => { h.UseProxy = false; h.Proxy = null; })));
 
                 }

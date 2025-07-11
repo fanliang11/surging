@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Serialization;
@@ -54,6 +55,7 @@ namespace Surging.Core.DNS
             builder.Register(provider =>
             {
                 return new DotNettyDnsServerMessageListener(provider.Resolve<ILogger<DotNettyDnsServerMessageListener>>(),
+                      provider.Resolve<IEventExecutorProvider>(),
                       provider.Resolve<ITransportMessageCodecFactory>()
                       );
             }).SingleInstance();
@@ -76,7 +78,8 @@ namespace Surging.Core.DNS
             builder.Register(provider =>
             {
                 return new DotNettyDnsServerMessageListener(provider.Resolve<ILogger<DotNettyDnsServerMessageListener>>(),
-                      provider.Resolve<ITransportMessageCodecFactory>()
+                    provider.Resolve<IEventExecutorProvider>(),
+                    provider.Resolve<ITransportMessageCodecFactory>()
                       );
             }).SingleInstance();
             builder.Register(provider =>

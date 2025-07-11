@@ -238,6 +238,7 @@ namespace Surging.Core.Consul
                     config.EnableChildrenMonitor
                    );
                 config.NotifyMode = option.NotifyMode;
+                config.WatchInterval = option.WatchInterval;
             }
             return config;
         }

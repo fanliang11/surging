@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +26,6 @@ namespace Surging.Core.CPlatform.Utilities
             return await task;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static async Task<T> WithCancellation<T>(
     this Task<T> task, CancellationTokenSource cts, int requestTimeout)
         {

@@ -11,6 +11,7 @@ using DotNetty.Transport.Channels.Sockets;
 using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
@@ -32,14 +33,17 @@ namespace Surging.Core.DotNettyWSServer
         private readonly ILogger<DotNettyWSMessageListener> _logger; 
         private IChannel _channel;
         private List<WSServiceEntry> _wSServiceEntries;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         public event ReceivedDelegate Received;
 
         #endregion Field
 
         #region Constructor
-        public DotNettyWSMessageListener(ILogger<DotNettyWSMessageListener> logger
-            ,  IWSServiceEntryProvider wsServiceEntryProvider)
+        public DotNettyWSMessageListener(ILogger<DotNettyWSMessageListener> logger,
+            IEventExecutorProvider eventExecutorProvider,
+             IWSServiceEntryProvider wsServiceEntryProvider)
         {
+            _eventExecutorProvider= eventExecutorProvider;
             _logger = logger; 
             _wSServiceEntries = wsServiceEntryProvider.GetEntries().ToList();
         }
@@ -51,23 +55,11 @@ namespace Surging.Core.DotNettyWSServer
 
             var ipEndPoint = endPoint as IPEndPoint;
             var host = $"ws://{ipEndPoint.Address}:{ipEndPoint.Port}";
-            IEventLoopGroup bossGroup = new MultithreadEventLoopGroup(1);
-            IEventLoopGroup workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
+            IEventLoopGroup bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+            IEventLoopGroup workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
 
-            if (AppConfig.ServerOptions.Libuv)
-            {
-                var dispatcher = new DispatcherEventLoopGroup();
-                bossGroup = dispatcher;
-                workerGroup = new WorkerEventLoopGroup(dispatcher);
-                bootstrap.Channel<TcpServerChannel>();
-            }
-            else
-            {
-                bossGroup = new MultithreadEventLoopGroup(1);
-                workerGroup = new MultithreadEventLoopGroup();
-                bootstrap.Channel<TcpServerSocketChannel>();
-            }
+          
             bootstrap
             .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
             .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)

@@ -41,16 +41,16 @@ namespace Surging.Core.Protocol.Udp
 
         #region Constructor
         public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger,
-            IEventExecutorProvider eventExecutorProvider
-           , ITransportMessageCodecFactory codecFactory, IUdpServiceEntryProvider udpServiceEntryProvider) :this(logger, eventExecutorProvider, codecFactory, new NetworkProperties(), udpServiceEntryProvider) { 
+            IEventExecutorProvider eventExecutorProvider,
+             ITransportMessageCodecFactory codecFactory, IUdpServiceEntryProvider udpServiceEntryProvider) :this(logger, eventExecutorProvider, codecFactory, new NetworkProperties(), udpServiceEntryProvider) { 
         
         }
-        public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger,
-              IEventExecutorProvider eventExecutorProvider
+        public DotNettyUdpServerMessageListener(ILogger<DotNettyUdpServerMessageListener> logger
+            , IEventExecutorProvider eventExecutorProvider
             , ITransportMessageCodecFactory codecFactory, NetworkProperties networkProperties, IUdpServiceEntryProvider udpServiceEntryProvider)
         {
-            _udpServiceEntry = udpServiceEntryProvider.GetEntry();
             _eventExecutorProvider = eventExecutorProvider;
+            _udpServiceEntry = udpServiceEntryProvider.GetEntry();
             Id =networkProperties?.Id;
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
@@ -65,7 +65,7 @@ namespace Surging.Core.Protocol.Udp
             IMessageSender sender=null;
             object isMulticast=null; 
             _networkProperties.ParserConfiguration?.TryGetValue("isMulticast", out  isMulticast);
-            var group = _eventExecutorProvider.GetBossEventExecutor();
+            var group = _eventExecutorProvider.GetWorkEventExecutor();
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(group)

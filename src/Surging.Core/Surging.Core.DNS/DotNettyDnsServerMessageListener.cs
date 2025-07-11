@@ -9,6 +9,7 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Serialization;
 using Surging.Core.CPlatform.Transport;
@@ -28,6 +29,7 @@ namespace Surging.Core.DNS
         private readonly ILogger<DotNettyDnsServerMessageListener> _logger;
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ITransportMessageEncoder _transportMessageEncoder;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
         private IChannel _channel;
 
         public event ReceivedDelegate Received;
@@ -36,8 +38,9 @@ namespace Surging.Core.DNS
 
         #region Constructor
 
-        public DotNettyDnsServerMessageListener(ILogger<DotNettyDnsServerMessageListener> logger, ITransportMessageCodecFactory codecFactory)
+        public DotNettyDnsServerMessageListener(ILogger<DotNettyDnsServerMessageListener> logger, IEventExecutorProvider eventExecutorProvider, ITransportMessageCodecFactory codecFactory)
         {
+            _eventExecutorProvider= eventExecutorProvider;
             _logger = logger;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
@@ -50,7 +53,7 @@ namespace Surging.Core.DNS
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
 
-            var group = new MultithreadEventLoopGroup();
+            var group = _eventExecutorProvider.GetWorkEventExecutor();
             var bootstrap = new Bootstrap();
             bootstrap
                 .Group(group)

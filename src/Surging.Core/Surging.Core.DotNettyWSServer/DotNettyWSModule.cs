@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Module;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
@@ -47,6 +48,7 @@ namespace Surging.Core.DotNettyWSServer
             {
                 return new DotNettyWSMessageListener(
                     provider.Resolve<ILogger<DotNettyWSMessageListener>>(),
+                                    provider.Resolve<IEventExecutorProvider>(),
                               provider.Resolve<IWSServiceEntryProvider>()
                       );
             }).SingleInstance();
@@ -67,6 +69,7 @@ namespace Surging.Core.DotNettyWSServer
             builder.Register(provider =>
             {
                 return new DotNettyWSMessageListener(provider.Resolve<ILogger<DotNettyWSMessageListener>>(),
+                     provider.Resolve<IEventExecutorProvider>(),
                       provider.Resolve<IWSServiceEntryProvider>()
                       );
             }).SingleInstance();

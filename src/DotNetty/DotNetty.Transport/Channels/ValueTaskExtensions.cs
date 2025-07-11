@@ -24,7 +24,11 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseChannelOnCompleteAction = (t, s) => CloseChannelOnComplete(t, s);
-        private static void CloseChannelOnComplete(Task t, object c) => _ = ((IChannel)c).CloseAsync();
+        private static void CloseChannelOnComplete(Task t, object c) 
+        {
+            _ = ((IChannel) c).CloseAsync();
+            t.Dispose();
+        }
 
 
         [MethodImpl(InlineMethod.AggressiveOptimization)]
@@ -45,6 +49,7 @@ namespace DotNetty.Transport.Channels
         {
             var wrapped = ((IChannel, IPromise))s;
             _ = wrapped.Item1.CloseAsync(wrapped.Item2);
+            t.Dispose();
         }
 
 
@@ -62,7 +67,11 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseContextOnCompleteAction = (t, s) => CloseContextOnComplete(t, s);
-        private static void CloseContextOnComplete(Task t, object c) => _ = ((IChannelHandlerContext)c).CloseAsync();
+        private static void CloseContextOnComplete(Task t, object c)
+        {
+             _ = ((IChannelHandlerContext)c).CloseAsync();
+            t.Dispose();
+        }
 
 
         [MethodImpl(InlineMethod.AggressiveOptimization)]
@@ -83,6 +92,7 @@ namespace DotNetty.Transport.Channels
         {
             var wrapped = ((IChannelHandlerContext, IPromise))s;
             _ = wrapped.Item1.CloseAsync(wrapped.Item2);
+            t.Dispose();
         }
 
 
@@ -109,6 +119,7 @@ namespace DotNetty.Transport.Channels
             {
                 _ = ((IChannel)c).CloseAsync();
             }
+            t.Dispose();
         }
 
 
@@ -136,6 +147,7 @@ namespace DotNetty.Transport.Channels
                 var wrapped = ((IChannel, IPromise))s;
                 _ = wrapped.Item1.CloseAsync(wrapped.Item2);
             }
+            t.Dispose();
         }
 
 
@@ -162,6 +174,7 @@ namespace DotNetty.Transport.Channels
             {
                 _ = ((IChannelHandlerContext)c).CloseAsync();
             }
+            t.Dispose();
         }
 
 
@@ -189,6 +202,7 @@ namespace DotNetty.Transport.Channels
                 var wrapped = ((IChannelHandlerContext, IPromise))s;
                 _ = wrapped.Item1.CloseAsync(wrapped.Item2);
             }
+            t.Dispose();
         }
 
 
@@ -214,6 +228,7 @@ namespace DotNetty.Transport.Channels
             {
                 _ = ((IChannelPipeline)s).FireExceptionCaught(TaskUtil.Unwrap(t.Exception));
             }
+            t.Dispose();
         }
 
 
@@ -239,6 +254,7 @@ namespace DotNetty.Transport.Channels
             {
                 _ = ((IChannelHandlerContext)s).FireExceptionCaught(TaskUtil.Unwrap(t.Exception));
             }
+            t.Dispose();
         }
     }
 }

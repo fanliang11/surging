@@ -85,7 +85,7 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
             var address = new List<AddressModel>(addresses.Count());
             foreach (var addressModel in addresses)
             {
-                var task = _healthCheckService.MonitorHealth(addressModel);
+                var task = _healthCheckService.MonitorHealth(addressModel); 
                 if (!(task.IsCompletedSuccessfully ? task.Result : await task))
                 {
                     continue;
