@@ -10,10 +10,18 @@ using Newtonsoft.Json.Linq;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Ioc;
 using Surging.Core.ProxyGenerator;
+using Surging.Core.KestrelHttpServer.Internal;
+using System.IO;
+using Surging.Core.KestrelHttpServer;
+using Surging.Core.Common;
+using Surging.Core.Thrift.Attributes;
+using static ThriftCore.Calculator;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace Surging.Modules.Common.Domain
 {
-    [ModuleName("Person")]
+    [ModuleName("Person")] 
     public class PersonService : ProxyServiceBase, IUserService
     {
         #region Implementation of IUserService
@@ -60,6 +68,15 @@ namespace Surging.Modules.Common.Domain
         public Task<bool> Update(int id, UserModel model)
         {
             return Task.FromResult(true);
+        }
+
+
+        public Task<UserModel> GetUserById(Guid id)
+        {
+            return Task.FromResult(new UserModel
+            {
+
+            });
         }
 
         public Task<bool> GetDictionary()
@@ -109,6 +126,81 @@ namespace Surging.Modules.Common.Domain
             return Task.FromResult("type is List<int>");
         }
 
+        public async Task<bool> UploadFile(HttpFormCollection form1)
+        {
+            var files = form1.Files;
+            foreach (var file in files)
+            {
+                using (var stream = new FileStream(Path.Combine(AppContext.BaseDirectory, file.FileName), FileMode.Create))
+                {
+                    await stream.WriteAsync(file.File, 0, (int)file.Length);
+                }
+            }
+            return true;
+        }
+
+        public async Task<IActionResult> DownFile(string fileName, string contentType)
+        {
+            string uploadPath = Path.Combine("C:", fileName);
+            if (File.Exists(uploadPath))
+            {
+                using (var stream = new FileStream(uploadPath, FileMode.Open))
+                {
+
+                    var bytes = new Byte[stream.Length];
+                    await stream.WriteAsync(bytes, 0, bytes.Length);
+                    return new FileContentResult(bytes, contentType, fileName);
+                }
+            }
+            else
+            {
+                throw new FileNotFoundException(fileName);
+            }
+
+        }
+
+        public async Task<Sex> SetSex(Sex sex)
+        {
+            return await Task.FromResult(sex);
+        }
+
+        public async Task<Dictionary<string, object>> GetAllThings()
+        {
+            return await Task.FromResult(new Dictionary<string, object> { { "aaa", 12 } });
+        }
+
+        public Task<bool> RemoveUser(UserModel user)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<int> ReactiveTest(int value)
+        {
+
+            // 定义事件流
+            var sequence = GetGenerateObservable();
+            // 对事件流进行筛选
+            sequence = sequence.Where(a => a < 23);
+
+            // 注册观察者
+            ISubject<int> subject = new ReplaySubject<int>();
+            subject.Subscribe(async (temperature) => await Write(temperature));
+
+            // 触发
+            sequence.Subscribe();
+            return Task.FromResult<int>(default);
+        }
         #endregion Implementation of IUserService
+
+        private static IObservable<int> GetGenerateObservable()
+        {
+            // 类似for循环
+            return Observable.Generate(
+                1,              // 初始值
+                x => x < 10,    // 循环停止条件
+                x => x + 1,     // 循环一次+1
+                x => x + 20     // 循环中执行的操作
+            );
+        }
     }
 }

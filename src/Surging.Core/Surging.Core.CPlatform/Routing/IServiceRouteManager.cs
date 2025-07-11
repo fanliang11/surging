@@ -42,6 +42,7 @@ namespace Surging.Core.CPlatform.Routing
         /// <returns>一个任务。</returns>
         Task SetRoutesAsync(IEnumerable<ServiceRoute> routes);
 
+        ValueTask AddNodeMonitorWatcher(string serviceId);
         /// <summary>
         /// 移除地址列表
         /// </summary>
@@ -53,6 +54,8 @@ namespace Surging.Core.CPlatform.Routing
         /// </summary>
         /// <returns>一个任务。</returns>
         Task ClearAsync();
+
+        void ClearRoute();
     }
 
     /// <summary>
@@ -90,8 +93,8 @@ namespace Surging.Core.CPlatform.Routing
                 else
                 {
                     routes = routes.Where(p => p.Address.Any(m => m.ToString() == condition));
-                    var addresses = routes.FirstOrDefault().Address;
-                    return addresses.Where(p => p.ToString() == condition);
+                    var addresses = routes.FirstOrDefault()?.Address;
+                    return addresses==null?new List<AddressModel>():  addresses.Where(p => p.ToString() == condition);
                 }
             }
 

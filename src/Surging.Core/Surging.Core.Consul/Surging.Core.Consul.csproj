@@ -1,34 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Authors>fanly</Authors>
-    <Version>0.8.0.1</Version>
+    <Version>1.1.0.0</Version>
     <Product>surging Micro Service Framework</Product>
     <Company />
     <Copyright>Copyright © fanly All Rights Reserved</Copyright>
-    <PackageReleaseNotes>1.consul and zookeeper add configuration file
-2.Add zookeeper new calls
-3.Add Environment variables
-4.Build environment variables
-5.Add Module Root Path Configuration
-6.Add public host ip and port mapping configuration
-7.Optimize service route and add EnableChildrenMonitor options
-8.Restore version, optimizing register node monitor branch to development
-9.Proxy build get the using namespace from the interface assembly
-10. Add the UseConsoleLifetime Configuration Does Not Close After the Console Application Runs
-11.Fix zookeeper configuration
-12.Refactor log component</PackageReleaseNotes>
+    <PackageReleaseNotes>1.multiple register center cluster
+2. fix bug</PackageReleaseNotes>
     <Description>surging is a distributed micro service framework that provides high-performance RPC remote service calls, using Zookeeper, Consul as the registration center for surging services, integrating hash, random, polling as a load balancing algorithm, RPC integration using the netty framework, Using asynchronous transmission. Use json.net, protobuf, messagepack for serialization Codec</Description>
     <PackageLicenseUrl>https://github.com/dotnetcore/surging/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/dotnetcore/surging</PackageProjectUrl>
     <PackageTags>MicroService surging</PackageTags>
-    <AssemblyVersion>0.8.0.1</AssemblyVersion>
-    <FileVersion>0.8.0.1</FileVersion>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Consul" Version="0.7.2.4" />
+    <PackageReference Include="Consul" Version="1.7.14.7" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Surging.Services.Server": {
+      "commandName": "Project"
+    }
+  }
+}
