@@ -20,7 +20,11 @@ namespace Surging.Core.KestrelHttpServer.Internal
             { 
                 return dateTime;
             }
-            if(reader.TokenType==JsonTokenType.String)
+            if (reader.TokenType == JsonTokenType.String && DateTimeOffset.TryParseExact(reader.GetString(), DateTimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTimeOffset dateTimeOffset))
+            {
+                return dateTimeOffset;
+            }
+            if (reader.TokenType==JsonTokenType.String)
             {
                 return reader.GetString();
             }

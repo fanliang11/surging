@@ -28,8 +28,6 @@
 
 namespace DotNetty.Common.Concurrency
 {
-    using DotNetty.Common.Utilities;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -39,11 +37,9 @@ namespace DotNetty.Common.Concurrency
     {
         private readonly IEventExecutor _executor;
         private bool _started;
-        private CancellationToken _cancellationToken;
 
         public ExecutorTaskScheduler(IEventExecutor executor)
         {
-            _cancellationToken = CancellationToken.None;
             _executor = executor;
         }
          

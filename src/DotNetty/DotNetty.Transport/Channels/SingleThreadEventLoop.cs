@@ -44,7 +44,7 @@ namespace DotNetty.Transport.Channels
         protected static readonly TimeSpan DefaultBreakoutInterval = TimeSpan.FromMilliseconds(100);
 
         private readonly long _breakoutNanosInterval;
-        private readonly ManualResetEventSlim _emptyEvent;
+        private  ManualResetEventSlim _emptyEvent;
 
         public SingleThreadEventLoop(IEventLoopGroup parent)
             : this(parent, DefaultBreakoutInterval)

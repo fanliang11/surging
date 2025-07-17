@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Surging.Core.Caching;
 using Surging.Core.CPlatform.Cache;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Threading.Tasks;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 
 namespace Surging.Core.System.Intercept
 {
@@ -34,7 +37,7 @@ namespace Surging.Core.System.Intercept
                 }
                 else
                 {
-                    returnValue = JsonConvert.DeserializeObject(resultJson, returnType);
+                    returnValue = JsonSerializer.Deserialize(resultJson, returnType, JsonOption.SerializeOptions);
                 }
                 return returnValue as T;
             }
@@ -80,7 +83,7 @@ namespace Surging.Core.System.Intercept
                     }
                     else
                     { 
-                       returnValue = JsonConvert.DeserializeObject(l2Cache.Item2, returnType);
+                       returnValue = JsonSerializer.Deserialize(l2Cache.Item2, returnType, JsonOption.SerializeOptions);
                     }
                 }
                 return returnValue as T;
