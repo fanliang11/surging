@@ -4,9 +4,7 @@ using Surging.Core.CPlatform.Cache;
 using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Threading.Tasks;
-using JsonSerializer = System.Text.Json.JsonSerializer;
-
-
+ 
 namespace Surging.Core.System.Intercept
 {
     public static class CacheProviderExtension
@@ -37,7 +35,7 @@ namespace Surging.Core.System.Intercept
                 }
                 else
                 {
-                    returnValue = JsonSerializer.Deserialize(resultJson, returnType, JsonOption.SerializeOptions);
+                    returnValue = JsonConvert.DeserializeObject(resultJson, returnType);
                 }
                 return returnValue as T;
             }
@@ -83,7 +81,7 @@ namespace Surging.Core.System.Intercept
                     }
                     else
                     { 
-                       returnValue = JsonSerializer.Deserialize(l2Cache.Item2, returnType, JsonOption.SerializeOptions);
+                       returnValue = JsonConvert.DeserializeObject(l2Cache.Item2, returnType);
                     }
                 }
                 return returnValue as T;
