@@ -160,5 +160,15 @@ namespace DotNetty.Transport.Channels
         }
 
         public override string ToString() => "VoidPromise";
+
+        public Exception Execption()
+        {
+            return _task?.Value.Exception.InnerException;
+        }
+
+        public void Dispose()
+        {
+            _task?.Value?.Dispose();
+        }
     }
 }

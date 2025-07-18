@@ -105,7 +105,7 @@ namespace DotNetty.Transport.Libuv
                 }
             }
 
-            return ThrowHelper.ThrowInvalidOperationException(loopHandle);
+            return  ThrowHelper.ThrowInvalidOperationException(loopHandle);
         }
     }
 }

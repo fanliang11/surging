@@ -24,8 +24,8 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseChannelOnCompleteAction = (t, s) => CloseChannelOnComplete(t, s);
-        private static void CloseChannelOnComplete(Task t, object c) 
-        {
+        private static  void CloseChannelOnComplete(Task t, object c) 
+        { 
             _ = ((IChannel) c).CloseAsync();
             t.Dispose();
         }
@@ -45,7 +45,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseWrappedChannelOnCompleteAction = (t, s) => CloseWrappedChannelOnComplete(t, s);
-        private static void CloseWrappedChannelOnComplete(Task t, object s)
+        private static  void CloseWrappedChannelOnComplete(Task t, object s)
         {
             var wrapped = ((IChannel, IPromise))s;
             _ = wrapped.Item1.CloseAsync(wrapped.Item2);
@@ -67,7 +67,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseContextOnCompleteAction = (t, s) => CloseContextOnComplete(t, s);
-        private static void CloseContextOnComplete(Task t, object c)
+        private static  void CloseContextOnComplete(Task t, object c)
         {
              _ = ((IChannelHandlerContext)c).CloseAsync();
             t.Dispose();
@@ -88,7 +88,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseWrappedContextOnCompleteAction = (t, s) => CloseWrappedContextOnComplete(t, s);
-        private static void CloseWrappedContextOnComplete(Task t, object s)
+        private static  void CloseWrappedContextOnComplete(Task t, object s)
         {
             var wrapped = ((IChannelHandlerContext, IPromise))s;
             _ = wrapped.Item1.CloseAsync(wrapped.Item2);
@@ -113,7 +113,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseChannelOnFailureAction = (t, s) => CloseChannelOnFailure(t, s);
-        private static void CloseChannelOnFailure(Task t, object c)
+        private static  void CloseChannelOnFailure(Task t, object c)
         {
             if (t.IsFaulted || t.IsCanceled)
             {
@@ -140,7 +140,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseWrappedChannelOnFailureAction = (t, s) => CloseWrappedChannelOnFailure(t, s);
-        private static void CloseWrappedChannelOnFailure(Task t, object s)
+        private static  void CloseWrappedChannelOnFailure(Task t, object s)
         {
             if (t.IsFaulted || t.IsCanceled)
             {
@@ -168,7 +168,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseContextOnFailureAction = (t, s) => CloseContextOnFailure(t, s);
-        private static void CloseContextOnFailure(Task t, object c)
+        private static  void CloseContextOnFailure(Task t, object c)
         {
             if (t.IsFaulted || t.IsCanceled)
             {
@@ -195,7 +195,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseWrappedContextOnFailureAction = (t, s) => CloseWrappedContextOnFailure(t, s);
-        private static void CloseWrappedContextOnFailure(Task t, object s)
+        private static async void CloseWrappedContextOnFailure(Task t, object s)
         {
             if (t.IsFaulted || t.IsCanceled)
             {
@@ -222,7 +222,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> FirePipelineExceptionOnFailureAction = (t, s) => FirePipelineExceptionOnFailure(t, s);
-        private static void FirePipelineExceptionOnFailure(Task t, object s)
+        private static  void FirePipelineExceptionOnFailure(Task t, object s)
         {
             if (t.IsFailure())
             {
@@ -248,7 +248,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> FireContextExceptionOnFailureAction = (t, s) => FireContextExceptionOnFailure(t, s);
-        private static void FireContextExceptionOnFailure(Task t, object s)
+        private static  void FireContextExceptionOnFailure(Task t, object s)
         {
             if (t.IsFailure())
             {

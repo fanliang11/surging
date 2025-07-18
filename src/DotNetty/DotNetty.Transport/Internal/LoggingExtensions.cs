@@ -193,7 +193,7 @@ namespace DotNetty.Transport
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void FailedToMarkAPromiseAsSuccess(this IInternalLogger logger, IPromise promise)
         {
-            var err = promise.Task.Exception?.InnerException;
+            var err = promise.Execption();
             if (err is null)
             {
                 logger.Warn("Failed to mark a promise as success because it has succeeded already: {}", promise);
@@ -207,7 +207,7 @@ namespace DotNetty.Transport
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void FailedToMarkAPromiseAsFailure(this IInternalLogger logger, IPromise promise, Exception cause)
         {
-            var err = promise.Task.Exception?.InnerException;
+            var err = promise.Execption();
             if (err is null)
             {
                 logger.Warn("Failed to mark a promise as failure because it has succeeded already: {}", promise, cause);

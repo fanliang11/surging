@@ -109,7 +109,7 @@ namespace DotNetty.Transport.Libuv
             var promise = _connectPromise;
             if (promise is object)
             {
-                _ = promise.TrySetException(ThrowHelper.GetClosedChannelException());
+                _ = promise.TrySetException(ThrowHelper.GetClosedChannelException()); 
                 _connectPromise = null;
             }
         }

@@ -24,13 +24,16 @@ namespace DotNetty.Common.Concurrency
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.ExceptionServices;
     using System.Threading.Tasks;
 
-    public interface IPromise
+    public interface IPromise: IDisposable
     {
         Task Task { get; }
 
         ValueTask ValueTask { get; }
+
+        Exception Execption();
 
         bool IsVoid { get; }
 

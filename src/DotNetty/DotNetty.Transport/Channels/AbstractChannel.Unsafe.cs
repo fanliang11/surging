@@ -583,7 +583,7 @@ namespace DotNetty.Transport.Channels
                 outboundBuffer.AddFlush();
                 Flush0();
             }
-             
+
             protected virtual void Flush0()
             {
                 if (_inFlush0)

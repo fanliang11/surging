@@ -135,8 +135,7 @@ namespace DotNetty.Common.Utilities
             {
                 ((IPromise)tcs).TryComplete(); return;
             }
-#endif
-
+#endif 
             ThrowHelper.ThrowArgumentOutOfRangeException();
         }
 
@@ -178,7 +177,6 @@ namespace DotNetty.Common.Utilities
         static readonly Action<Task, object> CascadeToContinuationAction = (t, s) => CascadeToContinuation(t, s);
         private static void CascadeToContinuation(Task t, object s)
         {
-
             var wrapped = ((IPromise, IInternalLogger))s;
 #if NETCOREAPP || NETSTANDARD_2_0_GREATER
             if (t.IsCompletedSuccessfully)

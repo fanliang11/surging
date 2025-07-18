@@ -124,10 +124,12 @@ namespace DotNetty.Transport.Libuv
         {
             var loopExecutor = (LoopExecutor)state;
             loopExecutor.SetCurrentExecutor(loopExecutor);
+
+            //High CPU consumption tasks, run libuv's UV_RUN_DEFAULT mode in a loop, and set TaskCreationOptions. LongRunning can prevent thread pool resource depletion.  ‌‌ ‌‌. ‌‌
             _ = Task.Factory.StartNew(
                 executor => ((LoopExecutor)executor).StartLoop(), state,
                 CancellationToken.None,
-                TaskCreationOptions.AttachedToParent,
+                TaskCreationOptions.RunContinuationsAsynchronously,// TaskCreationOptions.RunContinuationsAsynchronously?
                 loopExecutor.Scheduler);
         }
 

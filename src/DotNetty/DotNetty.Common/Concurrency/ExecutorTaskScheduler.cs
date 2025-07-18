@@ -30,7 +30,6 @@ namespace DotNetty.Common.Concurrency
 {
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using System.Threading;
     using System.Threading.Tasks;
 
     public sealed class ExecutorTaskScheduler : TaskScheduler
@@ -48,7 +47,6 @@ namespace DotNetty.Common.Concurrency
         {
             if (_started)
             {
-
                 _executor.Execute(new TaskQueueNode(this, task));
             }
             else

@@ -65,7 +65,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseWrappedChannelOnCompleteAction = (t, s) => CloseWrappedChannelOnComplete(t, s);
-        private static void CloseWrappedChannelOnComplete(Task t, object s)
+        private static  void CloseWrappedChannelOnComplete(Task t, object s)
         {
             var wrapped = ((IChannel, IPromise))s;
             _ = wrapped.Item1.CloseAsync(wrapped.Item2);
@@ -88,7 +88,7 @@ namespace DotNetty.Transport.Channels
         }
         private static readonly Action<Task, object> CloseContextOnCompleteAction = (t, s) => CloseContextOnComplete(t, s);
         private static void CloseContextOnComplete(Task t, object c)
-        { 
+        {
             _ = ((IChannelHandlerContext)c).CloseAsync();
             t.Dispose();
         }
@@ -215,7 +215,7 @@ namespace DotNetty.Transport.Channels
             }
         }
         private static readonly Action<Task, object> CloseWrappedContextOnFailureAction = (t, s) => CloseWrappedContextOnFailure(t, s);
-        private static void CloseWrappedContextOnFailure(Task t, object s)
+        private static  void CloseWrappedContextOnFailure(Task t, object s)
         {
             if (t.IsFailure())
             {

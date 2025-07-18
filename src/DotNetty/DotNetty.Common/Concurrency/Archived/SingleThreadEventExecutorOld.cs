@@ -625,7 +625,7 @@ namespace DotNetty.Common.Concurrency
                 if (!_taskQueue.TryEnqueue(scheduledTask))
                 {
                     // No space left in the task queue add it back to the scheduledTaskQueue so we pick it up again.
-                    _ = _scheduledTaskQueue.TryEnqueue(scheduledTask);
+                    _= _scheduledTaskQueue.TryEnqueue(scheduledTask);
                     return false;
                 }
                 scheduledTask = PollScheduledTask(nanoTime);

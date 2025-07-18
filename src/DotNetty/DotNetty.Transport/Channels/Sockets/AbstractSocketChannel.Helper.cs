@@ -58,12 +58,12 @@ namespace DotNetty.Transport.Channels.Sockets
             }
         }
 
-        private static void OnCloseSafeOnComplete(Task t, object s)
+        private static  void OnCloseSafeOnComplete(Task t, object s)
         {
             var c = (TChannel)s;
             c._connectCancellationTask?.Cancel();
             c._connectPromise = null;
-            c.CloseSafe();
+            c.CloseSafe(); 
         }
     }
 }

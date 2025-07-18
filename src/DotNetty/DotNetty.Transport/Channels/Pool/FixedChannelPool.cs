@@ -586,7 +586,6 @@ namespace DotNetty.Transport.Channels.Pool
                     t =>
                     {
                         Debug.Assert(_pool._executor.InEventLoop);
-
                         if (_pool.IsClosed)
                         {
                             if (t.IsSuccess())

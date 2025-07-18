@@ -28,14 +28,14 @@
 
 namespace DotNetty.Common.Concurrency
 {
+    using DotNetty.Common.Internal;
+    using DotNetty.Common.Utilities;
     using System;
     using System.Diagnostics;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using DotNetty.Common.Internal;
-    using DotNetty.Common.Utilities;
 
     /// <summary>
     /// Abstract base class for <see cref="IEventExecutor" />s that need to support scheduling.
@@ -498,7 +498,7 @@ namespace DotNetty.Common.Concurrency
 
             var isBacklogEmpty = !HasTasks && _scheduledTaskQueue.IsEmpty;
 
-            _ = _scheduledTaskQueue.TryEnqueue(task.SetId(nextTaskId));
+             _=  _scheduledTaskQueue.TryEnqueue(task.SetId(nextTaskId));
 
             if (isBacklogEmpty)
             {
