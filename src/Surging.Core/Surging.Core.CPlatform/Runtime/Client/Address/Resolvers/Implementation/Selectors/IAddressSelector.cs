@@ -1,4 +1,5 @@
 ﻿using Surging.Core.CPlatform.Address;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,15 +16,15 @@ namespace Surging.Core.CPlatform.Runtime.Client.Address.Resolvers.Implementation
         public ServiceDescriptor Descriptor { get; set; }
 
         /// <summary>
-        /// 参数的哈希值
+        /// 哈希参数
         /// </summary>
-        public int HashCode { get; set; }
+        public string Item { get; set; }
         /// <summary>
         /// 服务可用地址。
         /// </summary>
         public IEnumerable<AddressModel> Address { get; set; }
     }
-
+      
     /// <summary>
     /// 一个抽象的地址选择器。
     /// </summary>

@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Surging.Core.Caching.Internal.Implementation
 {
+    /// <summary>
+    /// 默认的服务缓存工程
+    /// </summary>
     public class DefaultServiceCacheFactory : IServiceCacheFactory
     {
         private readonly ISerializer<string> _serializer;

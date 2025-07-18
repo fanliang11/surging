@@ -1,15 +1,23 @@
 ﻿using DotNetty.Buffers;
 using DotNetty.Codecs;
+using DotNetty.Common;
+using DotNetty.Common.Concurrency;
+using DotNetty.Common.Utilities;
+using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using DotNetty.Transport.Libuv;
 using Microsoft.Extensions.Logging;
+using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using Surging.Core.DotNetty.Adapter;
 using System;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
@@ -22,14 +30,16 @@ namespace Surging.Core.DotNetty
         private readonly ITransportMessageDecoder _transportMessageDecoder;
         private readonly ITransportMessageEncoder _transportMessageEncoder;
         private IChannel _channel;
+        private readonly IEventExecutorProvider _eventExecutorProvider;
 
         #endregion Field
 
         #region Constructor
 
-        public DotNettyServerMessageListener(ILogger<DotNettyServerMessageListener> logger, ITransportMessageCodecFactory codecFactory)
+        public DotNettyServerMessageListener(ILogger<DotNettyServerMessageListener> logger, IEventExecutorProvider eventExecutorProvider, ITransportMessageCodecFactory codecFactory)
         {
             _logger = logger;
+            _eventExecutorProvider = eventExecutorProvider;
             _transportMessageEncoder = codecFactory.GetEncoder();
             _transportMessageDecoder = codecFactory.GetDecoder();
         }
@@ -45,7 +55,7 @@ namespace Surging.Core.DotNetty
         /// </summary>
         /// <param name="sender">消息发送者。</param>
         /// <param name="message">接收到的消息。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task OnReceived(IMessageSender sender, TransportMessage message)
         {
             if (Received == null)
@@ -58,27 +68,50 @@ namespace Surging.Core.DotNetty
         public async Task StartAsync(EndPoint endPoint)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。");
-
-            var bossGroup = new MultithreadEventLoopGroup(1);
-            var workerGroup = new MultithreadEventLoopGroup();//Default eventLoopCount is Environment.ProcessorCount * 2
+                _logger.LogDebug($"准备启动服务主机，监听地址：{endPoint}。"); 
+            IEventLoopGroup bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+            IEventLoopGroup workerGroup = _eventExecutorProvider.GetWorkEventExecutor();//Default eventLoopCount is Environment.ProcessorCount * 2
             var bootstrap = new ServerBootstrap();
+            IEventLoopGroup eventExecutor = _eventExecutorProvider.GetWorkEventExecutor();
+            if (AppConfig.ServerOptions.Libuv)
+            {
+                bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+                workerGroup = _eventExecutorProvider.GetWorkEventExecutor(); 
+                bootstrap.Channel<TcpServerChannel>();
+            }
+            else
+            {
+                bossGroup = _eventExecutorProvider.GetBossEventExecutor();
+                workerGroup = _eventExecutorProvider.GetWorkEventExecutor();
+                bootstrap.Channel<TcpServerSocketChannel>();
+            }
             bootstrap
+            .Option(ChannelOption.SoBacklog, AppConfig.ServerOptions.SoBacklog)
+            .ChildOption(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
+            .ChildOption(ChannelOption.TcpNodelay, true)
+            .ChildOption(ChannelOption.SoReuseaddr,true)
             .Group(bossGroup, workerGroup)
-            .Channel<TcpServerSocketChannel>()
-            .Option(ChannelOption.SoBacklog, 100)
-            .ChildOption(ChannelOption.Allocator, PooledByteBufferAllocator.Default)
-            .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
+            .ChildHandler(new ActionChannelInitializer<IChannel>(channel =>
             {
                 var pipeline = channel.Pipeline;
-                pipeline.AddLast(new LengthFieldPrepender(4));
-                pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                pipeline.AddLast(new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
-                pipeline.AddLast(new ServerHandler(async (contenxt, message) =>
+                pipeline.AddLast(new LengthFieldPrepender2(2));
+                pipeline.AddLast(new LengthFieldBasedFrameDecoder2(int.MaxValue, 0, 2, 0, 2));
+                pipeline.AddLast(new TransportMessageHandlerEncoder(_transportMessageEncoder));
+                pipeline.AddLast(eventExecutor, "HandlerAdapter", new TransportMessageChannelHandlerAdapter(_transportMessageDecoder));
+                pipeline.AddLast(eventExecutor, "ServerHandler", new ServerHandler(async (contenxt, message) =>
                 {
                     var sender = new DotNettyServerMessageSender(_transportMessageEncoder, contenxt);
+                    if (message.IsInvokeMessage())
+                    {
+                        var invokeMessage = message.GetContent<RemoteInvokeMessage>();
+                        if (invokeMessage.ServiceId == "client.checkService")
+                        {
+                           await sender.SendAndFlushAsync(TransportMessage.CreateInvokeResultMessage(message.Id,new RemoteInvokeResultMessage()));
+                            return;
+                        }
+                    }
                     await OnReceived(sender, message);
-                }, _logger));
+                },  _logger));
             }));
             try
             {
@@ -120,29 +153,29 @@ namespace Surging.Core.DotNetty
         {
             private readonly Action<IChannelHandlerContext, TransportMessage> _readAction;
             private readonly ILogger _logger;
-
-            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction, ILogger logger)
+            
+            public ServerHandler(Action<IChannelHandlerContext, TransportMessage> readAction,  ILogger logger)
             {
                 _readAction = readAction;
                 _logger = logger;
             }
 
             #region Overrides of ChannelHandlerAdapter
+            [MethodImpl(MethodImplOptions.NoInlining)]
 
             public override void ChannelRead(IChannelHandlerContext context, object message)
             {
-                Task.Run(() =>
-                {
-                    var transportMessage = (TransportMessage)message;
-                    _readAction(context, transportMessage);
-                });
+                var transportMessage = message as TransportMessage;
+                _readAction(context, transportMessage);
             }
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public override void ChannelReadComplete(IChannelHandlerContext context)
             {
                 context.Flush();
             }
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
             {
                 context.CloseAsync();//客户端主动断开需要应答，否则socket变成CLOSE_WAIT状态导致socket资源耗尽

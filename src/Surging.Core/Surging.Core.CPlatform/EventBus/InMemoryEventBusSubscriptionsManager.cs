@@ -74,7 +74,7 @@ namespace Surging.Core.CPlatform.EventBus
             var handler = OnEventRemoved;
             if (handler != null)
             {
-                OnEventRemoved(this,new ValueTuple<string,string>(consumerName, eventName));
+                handler(this,new ValueTuple<string,string>(consumerName, eventName));
             }
         }
 

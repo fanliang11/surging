@@ -46,11 +46,8 @@ namespace Surging.Core.Protocol.Http
                 return;
             _serverMessageListener = await _messageListenerFactory(endPoint);
             _serverMessageListener.Received += async (sender, message) =>
-            {
-                await Task.Run(() =>
-                {
-                    MessageListener.OnReceived(sender, message);
-                });
+            { 
+                   await MessageListener.OnReceived(sender, message); 
             };
         }
 
@@ -58,7 +55,7 @@ namespace Surging.Core.Protocol.Http
         {
             if (_serverMessageListener != null)
                 return;
-            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort));
+            _serverMessageListener = await _messageListenerFactory(new IPEndPoint(IPAddress.Parse(ip), AppConfig.ServerOptions.Ports.HttpPort??0));
             _serverMessageListener.Received += async (sender, message) =>
             {
                 await Task.Run(() =>

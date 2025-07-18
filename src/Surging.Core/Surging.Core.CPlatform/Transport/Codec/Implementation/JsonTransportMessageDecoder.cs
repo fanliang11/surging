@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Surging.Core.CPlatform.Messages;
+using System;
 using System.Text;
 
 namespace Surging.Core.CPlatform.Transport.Codec.Implementation
@@ -21,6 +22,11 @@ namespace Surging.Core.CPlatform.Transport.Codec.Implementation
                 message.Content = JsonConvert.DeserializeObject<RemoteInvokeResultMessage>(message.Content.ToString());
             }
             return message;
+        }
+
+        public TransportMessage Decode(Memory<byte> data)
+        {
+           return Decode(data.ToArray());
         }
 
         #endregion Implementation of ITransportMessageDecoder

@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using Surging.Core.Caching;
 using Surging.Core.Caching.Configurations;
 using Surging.Core.Codec.MessagePack;
+using Surging.Core.Configuration.Apollo.Configurations;
+using Surging.Core.Configuration.Apollo.Extensions;
 using Surging.Core.Consul;
 using Surging.Core.Consul.Configurations;
 using Surging.Core.CPlatform;
@@ -11,7 +13,6 @@ using Surging.Core.CPlatform.Utilities;
 using Surging.Core.DotNetty;
 using Surging.Core.EventBusKafka.Configurations;
 //using Surging.Core.EventBusKafka;
-using Surging.Core.EventBusRabbitMQ;
 using Surging.Core.Log4net;
 using Surging.Core.Nlog;
 using Surging.Core.Protocol.Http;
@@ -30,7 +31,6 @@ namespace Surging.Services.Server
     {
         static void Main(string[] args)
         {
-
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var host = new ServiceHostBuilder()
                 .RegisterServices(builder =>
@@ -50,12 +50,14 @@ namespace Surging.Services.Server
                     logger.AddConfiguration(
                         Core.CPlatform.AppConfig.GetSection("Logging"));
                 })
-                .UseServer(options =>{ })
+                .UseServer(options => { })
+                .UseProxy()
                 .UseConsoleLifetime()
                 .Configure(build =>
-                build.AddCacheFile("${cachepath}|cacheSettings.json", optional: false, reloadOnChange: true))
+                build.AddCacheFile("${cachepath}|cacheSettings.json", basePath: AppContext.BaseDirectory, optional: false, reloadOnChange: true))
                   .Configure(build =>
                 build.AddCPlatformFile("${surgingpath}|surgingSettings.json", optional: false, reloadOnChange: true))
+                     .Configure(build => build.UseApollo(apollo => apollo.AddNamespaceSurgingApollo("surgingSettings")))
                 .UseStartup<Startup>()
                 .Build();
 

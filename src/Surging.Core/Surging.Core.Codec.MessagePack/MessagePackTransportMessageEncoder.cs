@@ -2,6 +2,7 @@
 using Surging.Core.Codec.MessagePack.Utilities;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport.Codec;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack
 {
@@ -9,6 +10,7 @@ namespace Surging.Core.Codec.MessagePack
     {
         #region Implementation of ITransportMessageEncoder
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] Encode(TransportMessage message)
         {
             var transportMessage = new MessagePackTransportMessage(message)

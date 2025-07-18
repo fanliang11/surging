@@ -1,7 +1,9 @@
 ﻿using Autofac;
 using Microsoft.Extensions.Logging;
 using Surging.Core.CPlatform;
+using Surging.Core.CPlatform.EventExecutor;
 using Surging.Core.CPlatform.Module;
+using Surging.Core.CPlatform.Routing;
 using Surging.Core.CPlatform.Runtime.Server;
 using Surging.Core.CPlatform.Runtime.Server.Implementation;
 using Surging.Core.CPlatform.Serialization;
@@ -14,9 +16,9 @@ namespace Surging.Core.Protocol.Http
 {
     public class HttpProtocolModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            base.Initialize(context);
         }
 
         /// <summary>
@@ -44,7 +46,9 @@ namespace Surging.Core.Protocol.Http
             {
                 return new DotNettyHttpServerMessageListener(provider.Resolve<ILogger<DotNettyHttpServerMessageListener>>(),
                       provider.Resolve<ITransportMessageCodecFactory>(),
-                      provider.Resolve<ISerializer<string>>()
+                      provider.Resolve<IEventExecutorProvider>(),
+                      provider.Resolve<ISerializer<string>>(),
+                      provider.Resolve<IServiceRouteProvider>()
                       );
             }).SingleInstance();
             builder.Register(provider =>
@@ -68,7 +72,9 @@ namespace Surging.Core.Protocol.Http
             {
                 return new DotNettyHttpServerMessageListener(provider.Resolve<ILogger<DotNettyHttpServerMessageListener>>(),
                       provider.Resolve<ITransportMessageCodecFactory>(),
-                      provider.Resolve<ISerializer<string>>()
+                      provider.Resolve<IEventExecutorProvider>(),
+                      provider.Resolve<ISerializer<string>>(),
+                      provider.Resolve<IServiceRouteProvider>()
                       );
             }).SingleInstance();
             builder.Register(provider =>

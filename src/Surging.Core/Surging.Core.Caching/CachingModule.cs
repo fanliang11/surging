@@ -22,9 +22,10 @@ namespace Surging.Core.Caching
 {
     public class CachingModule : EnginePartModule
     {
-        public override void Initialize(CPlatformContainer serviceProvider)
+        public override void Initialize(AppModuleContext context)
         {
-            base.Initialize(serviceProvider);
+            var serviceProvider = context.ServiceProvoider;
+            base.Initialize(context);
             var serviceCacheProvider = serviceProvider.GetInstances<ICacheNodeProvider>();
             var addressDescriptors = serviceCacheProvider.GetServiceCaches().ToList();
             serviceProvider.GetInstances<IServiceCacheManager>().SetCachesAsync(addressDescriptors);

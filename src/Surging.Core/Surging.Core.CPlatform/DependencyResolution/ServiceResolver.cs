@@ -1,7 +1,9 @@
-﻿using Surging.Core.CPlatform.Utilities;
+﻿using Surging.Core.CPlatform.Runtime.Server;
+using Surging.Core.CPlatform.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -18,8 +20,9 @@ namespace Surging.Core.CPlatform.DependencyResolution
     {
         #region 字段
         private static readonly ServiceResolver _defaultInstance = new ServiceResolver();
-        private readonly ConcurrentDictionary<ValueTuple<Type, string>, object> _initializers =
-            new ConcurrentDictionary<ValueTuple<Type, string>, object>();
+        private readonly ConcurrentDictionary<ValueTuple<string, string>, WeakReference<object>> _initializers =
+       new ConcurrentDictionary<ValueTuple<string, string>, WeakReference<object>>(Environment.ProcessorCount, 230);
+
         #endregion
 
         #region 公共方法
@@ -37,18 +40,18 @@ namespace Surging.Core.CPlatform.DependencyResolution
             DebugCheck.NotNull(value);
             // DebugCheck.NotNull(key);
 
-            _initializers.GetOrAdd(ValueTuple.Create(value.GetType(), key), value);
+            _initializers.TryAdd(ValueTuple.Create(value.GetType().FullName, key), new WeakReference<object>(value));
             var interFaces = value.GetType().GetTypeInfo().GetInterfaces();
             foreach (var interFace in interFaces)
             {
-                _initializers.GetOrAdd(ValueTuple.Create(interFace, key), value);
+                _initializers.TryAdd(ValueTuple.Create(interFace.FullName, key), new WeakReference<object>(value));
             }
         }
-        
-        public virtual void Register(string key, object value,Type type)
+
+        public virtual void Register(string key, object value, Type type)
         {
             DebugCheck.NotNull(value);
-            _initializers.GetOrAdd(ValueTuple.Create(type, key), value);
+            _initializers.TryAdd(ValueTuple.Create(type?.FullName, key), new WeakReference<object>(value));
         }
 
         /// <summary>
@@ -73,11 +76,22 @@ namespace Surging.Core.CPlatform.DependencyResolution
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public virtual object GetService(Type type, object key)
+        public virtual object GetService(Type type, string key)
         {
-            object result;
-            _initializers.TryGetValue(ValueTuple.Create(type, key == null ? null : key.ToString()), out result);
-            return result;
+            object result = null;
+            var valueTuple = ValueTuple.Create(type?.FullName, key);
+            _initializers.TryGetValue(valueTuple, out WeakReference<object> weekRef);
+            try
+            {
+                if (weekRef != null)
+                    weekRef.TryGetTarget(out result);
+                return result;
+            }
+            finally
+            {
+                if(result==null || weekRef==null)
+                _initializers.Remove(valueTuple, out WeakReference<object> weekRef1);
+            }
         }
 
         /// <summary>
@@ -90,11 +104,11 @@ namespace Surging.Core.CPlatform.DependencyResolution
         /// 	<para>创建：范亮</para>
         /// 	<para>日期：2016/4/2</para>
         /// </remarks>
-        public IEnumerable<object> GetServices(Type type, object key)
+        public IEnumerable<object> GetServices(Type type, string key)
         {
             return this.GetServiceAsServices(type, key);
         }
         #endregion
     }
-
 }
+

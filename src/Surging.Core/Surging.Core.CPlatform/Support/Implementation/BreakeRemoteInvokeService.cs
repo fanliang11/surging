@@ -13,6 +13,7 @@ using Surging.Core.CPlatform.Filters;
 using Autofac;
 using System.Threading;
 using Surging.Core.CPlatform.Filters.Implementation;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.CPlatform.Support.Implementation
 {
@@ -23,7 +24,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
         private readonly ILogger<BreakeRemoteInvokeService> _logger;
         private readonly ConcurrentDictionary<string, ServiceInvokeListenInfo> _serviceInvokeListenInfo = new ConcurrentDictionary<string, ServiceInvokeListenInfo>();
         private readonly IHashAlgorithm _hashAlgorithm;
-        private readonly IEnumerable<IExceptionFilter> exceptionFilters=new List<IExceptionFilter>();
+        private readonly IEnumerable<IExceptionFilter> exceptionFilters = new List<IExceptionFilter>();
 
         public BreakeRemoteInvokeService(IHashAlgorithm hashAlgorithm, IServiceCommandProvider commandProvider, ILogger<BreakeRemoteInvokeService> logger,
             IRemoteInvokeService remoteInvokeService,
@@ -34,26 +35,30 @@ namespace Surging.Core.CPlatform.Support.Implementation
             _logger = logger;
             _hashAlgorithm = hashAlgorithm;
             if (serviceProvider.Current.IsRegistered<IExceptionFilter>())
-                exceptionFilters= serviceProvider.GetInstances<IEnumerable<IExceptionFilter>>();
+                exceptionFilters = serviceProvider.GetInstances<IEnumerable<IExceptionFilter>>();
         }
 
         public async Task<RemoteInvokeResultMessage> InvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject)
         {
             var serviceInvokeInfos = _serviceInvokeListenInfo.GetOrAdd(serviceId,
-                new ServiceInvokeListenInfo() { FirstInvokeTime=DateTime.Now,
-                FinalRemoteInvokeTime =DateTime.Now });
-            var command = await _commandProvider.GetCommand(serviceId);
+                new ServiceInvokeListenInfo()
+                {
+                    FirstInvokeTime = DateTime.Now,
+                    FinalRemoteInvokeTime = DateTime.Now
+                });
+            var vt = _commandProvider.GetCommand(serviceId);
+            var command = vt.IsCompletedSuccessfully ? vt.Result : await vt;
             var intervalSeconds = (DateTime.Now - serviceInvokeInfos.FinalRemoteInvokeTime).TotalSeconds;
             bool reachConcurrentRequest() => serviceInvokeInfos.ConcurrentRequests > command.MaxConcurrentRequests;
             bool reachRequestVolumeThreshold() => intervalSeconds <= 10
                 && serviceInvokeInfos.SinceFaultRemoteServiceRequests > command.BreakerRequestVolumeThreshold;
             bool reachErrorThresholdPercentage() =>
                 (double)serviceInvokeInfos.FaultRemoteServiceRequests / (double)(serviceInvokeInfos.RemoteServiceRequests ?? 1) * 100 > command.BreakeErrorThresholdPercentage;
-            var hashCode = GetHashCode(command,parameters);
+            var item = GetHashItem(command, parameters);
             if (command.BreakerForceClosed)
             {
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) => { v.LocalServiceRequests++; return v; });
-                return null;
+                return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, item);
             }
             else
             {
@@ -61,7 +66,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 {
                     if (intervalSeconds * 1000 > command.BreakeSleepWindowInMilliseconds)
                     {
-                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, hashCode);
+                        return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, item);
                     }
                     else
                     {
@@ -71,14 +76,13 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 }
                 else
                 {
-                    return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, hashCode);
+                    return await MonitorRemoteInvokeAsync(parameters, serviceId, serviceKey, decodeJOject, command.ExecutionTimeoutInMilliseconds, item);
                 }
             }
         }
 
-        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout,int hashCode)
+        private async Task<RemoteInvokeResultMessage> MonitorRemoteInvokeAsync(IDictionary<string, object> parameters, string serviceId, string serviceKey, bool decodeJOject, int requestTimeout, string item)
         {
-            var serviceInvokeInfo = _serviceInvokeListenInfo.GetOrAdd(serviceId, new ServiceInvokeListenInfo());
             CancellationTokenSource source = new CancellationTokenSource();
             var token = source.Token;
             var invokeMessage = new RemoteInvokeMessage
@@ -100,7 +104,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 });
                 var message = await _remoteInvokeService.InvokeAsync(new RemoteInvokeContext
                 {
-                    HashCode=hashCode ,
+                    Item = item,
                     InvokeMessage = invokeMessage
                 }, requestTimeout);
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
@@ -110,7 +114,7 @@ namespace Surging.Core.CPlatform.Support.Implementation
                 });
                 return message;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _serviceInvokeListenInfo.AddOrUpdate(serviceId, new ServiceInvokeListenInfo(), (k, v) =>
                 {
@@ -126,23 +130,24 @@ namespace Surging.Core.CPlatform.Support.Implementation
 
         private async Task ExecuteExceptionFilter(Exception ex, RemoteInvokeMessage invokeMessage, CancellationToken token)
         {
-                foreach (var filter in exceptionFilters)
+            foreach (var filter in exceptionFilters)
+            {
+                await filter.ExecuteExceptionFilterAsync(new RpcActionExecutedContext
                 {
-                    await filter.ExecuteExceptionFilterAsync(new RpcActionExecutedContext
-                    {
-                        Exception = ex,
-                        InvokeMessage = invokeMessage
-                    }, token);
-                }
+                    Exception = ex,
+                    InvokeMessage = invokeMessage
+                }, token);
+            }
         }
 
-        private int GetHashCode(ServiceCommand command, IDictionary<string, object> parameters)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private string GetHashItem(ServiceCommand command, IDictionary<string, object> parameters)
         {
-            var result = 0;
-            if(command.ShuntStrategy==AddressSelectorMode.HashAlgorithm)
+            string result = "";
+            if (command.ShuntStrategy == AddressSelectorMode.HashAlgorithm)
             {
                 var parameter = parameters.Values.FirstOrDefault();
-                result= _hashAlgorithm.Hash(parameter?.ToString());
+                result = parameter?.ToString();
             }
             return result;
         }

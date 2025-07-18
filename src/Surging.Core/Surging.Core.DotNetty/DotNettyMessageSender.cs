@@ -1,9 +1,13 @@
 ﻿using DotNetty.Buffers;
+using DotNetty.Common.Concurrency;
+using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Surging.Core.CPlatform.Messages;
 using Surging.Core.CPlatform.Transport;
 using Surging.Core.CPlatform.Transport.Codec;
 using System;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Surging.Core.DotNetty
@@ -21,7 +25,7 @@ namespace Surging.Core.DotNetty
         }
 
         protected IByteBuffer GetByteBuffer(TransportMessage message)
-        {
+        { 
             var data = _transportMessageEncoder.Encode(message);
             //var buffer = PooledByteBufferAllocator.Default.Buffer();
             return Unpooled.WrappedBuffer(data);
@@ -59,22 +63,22 @@ namespace Surging.Core.DotNetty
         /// 发送消息。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _channel.WriteAndFlushAsync(buffer);
+           // var buffer = GetByteBuffer(message); 
+            await _channel.WriteAndFlushAsync(message);
         }
 
         /// <summary>
         /// 发送消息并清空缓冲区。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _channel.WriteAndFlushAsync(buffer);
+            //var buffer = GetByteBuffer(message);
+            await _channel.WriteAndFlushAsync(message);
         }
 
         #endregion Implementation of IMessageSender
@@ -98,22 +102,22 @@ namespace Surging.Core.DotNetty
         /// 发送消息。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _context.WriteAsync(buffer);
+            //var buffer = GetByteBuffer(message);
+            await _context.WriteAsync(message);
         }
 
         /// <summary>
         /// 发送消息并清空缓冲区。
         /// </summary>
         /// <param name="message">消息内容。</param>
-        /// <returns>一个任务。</returns>
+        /// <returns>一个任务。</returns> 
         public async Task SendAndFlushAsync(TransportMessage message)
         {
-            var buffer = GetByteBuffer(message);
-            await _context.WriteAndFlushAsync(buffer);
+          //  var buffer = GetByteBuffer(message);
+            await _context.WriteAndFlushAsync(message);
         }
 
         #endregion Implementation of IMessageSender

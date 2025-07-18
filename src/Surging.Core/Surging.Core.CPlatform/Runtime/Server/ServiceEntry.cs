@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Surging.Core.CPlatform.Runtime.Server
@@ -12,11 +14,16 @@ namespace Surging.Core.CPlatform.Runtime.Server
         /// <summary>
         /// 执行委托。
         /// </summary>
-        public  Func<string, IDictionary<string, object>, Task<object>> Func { get; set; }
-       
+        public Func<string, IDictionary<string, object>, Task<object>> Func { get; set; }
+        public IEnumerable<string> Methods { get; set; }
         public string RoutePath { get; set; }
         public Type Type { get; set; }
+
+        public bool IsPermission { get; set; }
+
+        public ParameterInfo[] Parameters { get;set;}
         public string MethodName { get; set; }
+
         public List<Attribute> Attributes { get; set; }
         /// <summary>
         /// 服务描述符。

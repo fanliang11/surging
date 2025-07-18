@@ -1,7 +1,7 @@
 ﻿# surging 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/surging/blob/master/README.EN.md)
 [![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://mit-license.org/)
-### surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，RPC集成采用的是netty框架，采用异步传输。
+### surging 是一个分布式微服务框架,提供高性能RPC远程服务调用，采用Zookeeper、Consul作为surging服务的注册中心，集成了哈希，随机，轮询，压力最小优先作为负载均衡的算法，RPC可以选择采用netty或thrift框架，采用异步非阻塞传输。
 
 <br />
 
@@ -17,6 +17,11 @@
 
 ### 微服务定义
 微服务应该是可以自由组合拆分，对于每个业务都是独立的，针对于业务模块的 CRUD 可以注册为服务，而每个服务都是高度自治的，从开发，部署都是独立，而每个服务只做单一功能，利用领域驱动设计去更好的拆分成粒度更小的模块
+
+### 微服务边界
+微服务是针对业务的松耦合，也是粒度最小的功能业务模块，针对于行业解决方案，集成相应的service host,而针对于业务需要一些中间件来辅助，比如缓存中间件，eventbus中间件（消息中间件），数据储存中间件,而各个服务又可以互相通过rpc进行可靠性通信。
+
+引擎是微服务的容器，而docker 是服务引擎的容器，而利用k8s或rancher可以针对docker集群化管理，可以服务编排弹性扩容，熟知工具，让工具物尽其用。
 
 ### 能做什么
 1.简化的服务调用，通过服务规则的指定，就可以做到服务之间的远程调用，无需其它方式的侵入
@@ -39,9 +44,13 @@ docker hub : docker pull serviceengine/surging:版本号
 
 nuget:Install-Package surging -Version  版本号
 
-### surging模块功能
+### 架构图
 
-<img src="https://github.com/dotnetcore/surging/blob/master/docs/SurgingFunction.png" alt="surging模块功能" />
+<img src="https://github.com/dotnetcore/surging/blob/master/docs/Architecture.png" alt="架构图" />
+
+### 调用链
+
+<img src="https://github.com/dotnetcore/surging/blob/master/docs/call-chain.png" alt="链路图" />
 
 ### 配置：
 
@@ -262,11 +271,18 @@ Task.FromResult(new Surging.IModuleServices.Common.Models.UserModel
  .AddClientIntercepted(typeof(CacheProviderInterceptor))
 ```
 
+## 捐赠明细
+
+surging 接受来自社区的捐赠，所有款项将通过 [捐赠明细表](Statement-of-Income-and-Expense.md) 进行公示，接受社区监督。
+
 IDE:Visual Studio 2017 15.5,vscode
 <br/>
 框架：.NET core 2.1
 <br/>
 QQ群：615562965
-* [Demo](https://github.com/billyang/SurgingDemo)
 * [文档](http://docs.dotnet-china.org/surging/)
 * [简单示例](https://github.com/dotnetcore/surging/blob/master/docs/docs.en/INDEX.md)
+
+## 谁在使用
+
+

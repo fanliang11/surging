@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 {
@@ -11,7 +12,9 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
     {
         #region Field
 
-        private readonly IEnumerable<ServiceEntry> _serviceEntries;
+        private  IEnumerable<ServiceEntry> _serviceEntries;
+
+        private  IEnumerable<ServiceEntry> _allEntries;
 
         #endregion Field
 
@@ -19,7 +22,17 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
 
         public DefaultServiceEntryManager(IEnumerable<IServiceEntryProvider> providers)
         {
-            var list = new List<ServiceEntry>();
+            UpdateEntries(providers);
+        }
+
+        #endregion Constructor
+
+        #region Implementation of IServiceEntryManager
+
+        public void UpdateEntries(IEnumerable<IServiceEntryProvider> providers)
+        {
+             var list = new List<ServiceEntry>();
+            var  allEntries = new List<ServiceEntry>();
             foreach (var provider in providers)
             {
                 var entries = provider.GetEntries().ToArray();
@@ -29,21 +42,26 @@ namespace Surging.Core.CPlatform.Runtime.Server.Implementation
                         throw new InvalidOperationException($"本地包含多个Id为：{entry.Descriptor.Id} 的服务条目。");
                 }
                 list.AddRange(entries);
-            }
+                allEntries.AddRange( provider.GetALLEntries());
+            } 
             _serviceEntries = list.ToArray();
+            _allEntries = allEntries;
         }
-
-        #endregion Constructor
-
-        #region Implementation of IServiceEntryManager
 
         /// <summary>
         /// 获取服务条目集合。
         /// </summary>
         /// <returns>服务条目集合。</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<ServiceEntry> GetEntries()
         {
             return _serviceEntries;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<ServiceEntry> GetAllEntries()
+        {
+            return _allEntries;
         }
 
         #endregion Implementation of IServiceEntryManager

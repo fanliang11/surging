@@ -26,8 +26,13 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
         /// <returns>类型转换器集合。</returns>
         public IEnumerable<TypeConvertDelegate> GetConverters()
         {
+            //枚举转换器
             yield return EnumTypeConvert;
+            //简单类型
             yield return SimpleTypeConvert;
+            //guid转换器
+            yield return GuidTypeConvert;
+            //复杂类型
             yield return ComplexTypeConvert;
         }
 
@@ -35,6 +40,12 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
 
         #region Private Method
 
+        /// <summary>
+        /// 枚举类型转换器
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="conversionType"></param>
+        /// <returns></returns>
         private static object EnumTypeConvert(object instance, Type conversionType)
         {
             if (instance == null || !conversionType.GetTypeInfo().IsEnum)
@@ -42,6 +53,12 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             return Enum.Parse(conversionType, instance.ToString());
         }
 
+        /// <summary>
+        /// 简单类型转换器
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="conversionType"></param>
+        /// <returns></returns>
         private static object SimpleTypeConvert(object instance, Type conversionType)
         {
             if (instance is IConvertible && UtilityType.ConvertibleType.GetTypeInfo().IsAssignableFrom(conversionType))
@@ -49,9 +66,36 @@ namespace Surging.Core.CPlatform.Convertibles.Implementation
             return null;
         }
 
+        /// <summary>
+        /// 复杂类型转换器
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="conversionType"></param>
+        /// <returns></returns>
         private object ComplexTypeConvert(object instance, Type conversionType)
         {
-            return _serializer.Deserialize(instance, conversionType);
+            try
+            {
+                return _serializer.Deserialize(instance, conversionType);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// GUID转换器
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="conversionType"></param>
+        /// <returns></returns>
+        private static object GuidTypeConvert(object instance, Type conversionType)
+        {
+            if (instance == null || conversionType != typeof(Guid))
+                return null;
+            Guid.TryParse(instance.ToString(), out Guid result);
+            return result;
         }
 
         #endregion Private Method

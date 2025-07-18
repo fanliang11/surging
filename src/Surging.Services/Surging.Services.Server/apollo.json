@@ -1,0 +1,14 @@
+{
+  "apollo": {
+    "AppId": "SampleApp",
+    "MetaServer": "http://localhost:8080/",
+    //"RefreshInterval": 60000,
+    "Env": "Dev",
+    "Meta": {
+      "DEV": "http://localhost:8080/",
+      "FAT": "http://localhost:8080/",
+      "UAT": "http://localhost:8080/",
+      "PRO": "http://localhost:8080/"
+    }
+  }
+}

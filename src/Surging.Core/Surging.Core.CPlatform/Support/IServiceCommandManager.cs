@@ -30,6 +30,8 @@ namespace Surging.Core.CPlatform.Support
         /// <returns>服务路由集合。</returns>
         Task<IEnumerable<ServiceCommandDescriptor>> GetServiceCommandsAsync();
 
+        ValueTask AddNodeMonitorWatcher(string serviceId);
+
         /// <summary>
         /// 设置服务命令。
         /// </summary>

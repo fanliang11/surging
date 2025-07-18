@@ -2,30 +2,34 @@
 using System.Collections.Generic;
 using Surging.Core.CPlatform.Routing;
 using System.Threading.Tasks;
-using Surging.Core.System;
 using Surging.Core.CPlatform.Runtime.Client.HealthChecks;
 using Surging.Core.CPlatform;
 using Surging.Core.CPlatform.Address;
 using System.Linq;
+using Surging.Core.CPlatform.Utilities;
 
 namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 {
-    public class ServiceDiscoveryProvider : ServiceBase, IServiceDiscoveryProvider
+    /// <summary>
+    /// 服务发现提供者
+    /// </summary>
+    public class ServiceDiscoveryProvider : IServiceDiscoveryProvider
     {
         public ServiceDiscoveryProvider()
         {
 
         }
         public async Task<IEnumerable<ServiceAddressModel>> GetAddressAsync(string condition = null)
-        {
-            var result = new List<ServiceAddressModel>();
-            var addresses = await GetService<IServiceRouteManager>().GetAddressAsync(condition);
+        { 
+            var addresses = await ServiceLocator.GetService<IServiceRouteManager>().GetAddressAsync(condition);
+            var result = new List<ServiceAddressModel>(addresses.Count());
+           
             foreach (var address in addresses)
             {
                 result.Add(new ServiceAddressModel
                 {
                     Address = address,
-                    IsHealth = await GetService<IHealthCheckService>().IsHealth(address)
+                    IsHealth = await ServiceLocator.GetService<IHealthCheckService>().IsHealth(address)
                 });
             }
             return result;
@@ -33,14 +37,14 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
 
         public async Task<IEnumerable<ServiceDescriptor>> GetServiceDescriptorAsync(string address, string condition = null)
         {
-            return await GetService<IServiceRouteManager>().GetServiceDescriptorAsync(address, condition);
+            return await ServiceLocator.GetService<IServiceRouteManager>().GetServiceDescriptorAsync(address, condition);
         }
 
         public async Task EditServiceToken(AddressModel address)
         {
-            var routes = await GetService<IServiceRouteManager>().GetRoutesAsync(address.ToString());
+            var routes = await ServiceLocator.GetService<IServiceRouteManager>().GetRoutesAsync(address.ToString());
             routes = routes.ToList();
-            List<ServiceRoute> serviceRoutes = new List<ServiceRoute>();
+            List<ServiceRoute> serviceRoutes = new List<ServiceRoute>(routes.Count());
             routes.ToList().ForEach(route =>
             {
                 var addresses = new List<AddressModel>();
@@ -51,8 +55,8 @@ namespace Surging.Core.ApiGateWay.ServiceDiscovery.Implementation
                     Address = addresses
                 });
             });
-            await GetService<IServiceRouteManager>().ClearAsync();
-            await GetService<IServiceRouteManager>().SetRoutesAsync(serviceRoutes);
+            await ServiceLocator.GetService<IServiceRouteManager>().ClearAsync();
+            await ServiceLocator.GetService<IServiceRouteManager>().SetRoutesAsync(serviceRoutes);
 
         }
 

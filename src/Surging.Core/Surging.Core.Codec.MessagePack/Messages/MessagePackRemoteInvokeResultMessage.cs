@@ -1,5 +1,6 @@
 using MessagePack;
 using Surging.Core.CPlatform.Messages;
+using System.Runtime.CompilerServices;
 
 namespace Surging.Core.Codec.MessagePack.Messages
 {
@@ -7,7 +8,6 @@ namespace Surging.Core.Codec.MessagePack.Messages
     public class MessagePackRemoteInvokeResultMessage
     {
         #region Constructor
-
         public MessagePackRemoteInvokeResultMessage(RemoteInvokeResultMessage message)
         {
             ExceptionMessage = message.ExceptionMessage;
@@ -26,6 +26,7 @@ namespace Surging.Core.Codec.MessagePack.Messages
         [Key(1)]
         public DynamicItem Result { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public RemoteInvokeResultMessage GetRemoteInvokeResultMessage()
         {
             return new RemoteInvokeResultMessage

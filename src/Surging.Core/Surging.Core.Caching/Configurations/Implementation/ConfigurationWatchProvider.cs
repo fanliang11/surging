@@ -17,6 +17,9 @@ using Newtonsoft.Json;
 
 namespace Surging.Core.Caching.Configurations.Implementation
 {
+    /// <summary>
+    /// 配置watch提供者
+    /// </summary>
     public class ConfigurationWatchProvider : ConfigurationWatch, IConfigurationWatchProvider
     {
         #region Field  
@@ -54,23 +57,34 @@ namespace Surging.Core.Caching.Configurations.Implementation
         {
             if (this.queue.Count > 0) this.queue.Dequeue();
             var setting = _cachingProvider.CachingSettings.Where(p => p.Id == cache.CacheDescriptor.Prefix).FirstOrDefault();
-            setting.Properties.ForEach(p =>
+            if (setting != null)
             {
-                if (p.Maps != null)
-                    p.Maps.ForEach(m =>
+                setting.Properties.ForEach(p =>
                 {
-                    if (m.Name == cache.CacheDescriptor.Type)
-                        m.Properties = cache.CacheEndpoint.Select(n =>
-                        {
-                            var hashNode = n as ConsistentHashNode;
-                            return new Property
+                    if (p.Maps != null)
+                        p.Maps.ForEach(m =>
+                    {
+                        if (m.Name == cache.CacheDescriptor.Type)
+                            m.Properties = cache.CacheEndpoint.Select(n =>
                             {
-                                Value = $"{hashNode.Host}:{hashNode.Port}::{hashNode.Db}"
-                            };
-                        }).ToList();
+                                var hashNode = n as ConsistentHashNode;
+                                if (!string.IsNullOrEmpty(hashNode.UserName) || !string.IsNullOrEmpty(hashNode.Password))
+                                {
+                                    return new Property
+                                    {
+                                        Value = $"{hashNode.UserName}:{hashNode.Password}@{hashNode.Host}:{hashNode.Port}::{hashNode.Db}"
+                                    };
+                                }
+                                return new Property
+                                {
+                                    Value = $"{hashNode.Host}:{hashNode.Port}::{hashNode.Db}"
+                                };
+
+                            }).ToList();
+                    });
                 });
-            });
-            this.queue.Enqueue(true);
+                this.queue.Enqueue(true);
+            }
         }
 
         public override async Task Process()

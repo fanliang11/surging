@@ -1,6 +1,7 @@
 ﻿using Consul;
 using Microsoft.Extensions.Logging;
 using Surging.Core.Consul.Configurations;
+using Surging.Core.Consul.Internal;
 using Surging.Core.Consul.Utilitys;
 using Surging.Core.Consul.WatcherProvider;
 using Surging.Core.Consul.WatcherProvider.Implementation;
@@ -17,65 +18,56 @@ namespace Surging.Core.Consul
 {
     public class ConsulServiceCacheManager : ServiceCacheManagerBase, IDisposable
     {
-        private readonly ConsulClient _consul;
         private readonly ConfigInfo _configInfo;
         private readonly ISerializer<byte[]> _serializer;
         private readonly ILogger<ConsulServiceCacheManager> _logger;
         private readonly IClientWatchManager _manager;
         private ServiceCache[] _serviceCaches;
         private readonly IServiceCacheFactory _serviceCacheFactory;
-        private readonly ISerializer<string> _stringSerializer; 
+        private readonly ISerializer<string> _stringSerializer;
+        private readonly IConsulClientProvider _consulClientFactory;
 
         public ConsulServiceCacheManager(ConfigInfo configInfo, ISerializer<byte[]> serializer,
         ISerializer<string> stringSerializer, IClientWatchManager manager, IServiceCacheFactory serviceCacheFactory,
-        ILogger<ConsulServiceCacheManager> logger) : base(stringSerializer)
+        ILogger<ConsulServiceCacheManager> logger, IConsulClientProvider consulClientFactory) : base(stringSerializer)
         {
             _configInfo = configInfo;
             _serializer = serializer;
             _stringSerializer = stringSerializer;
             _serviceCacheFactory = serviceCacheFactory;
+            _consulClientFactory = consulClientFactory;
             _logger = logger;
-            _manager = manager; 
-            _consul = new ConsulClient(config =>
-            {
-                config.Address = new Uri($"http://{configInfo.Host}:{configInfo.Port}");
-            }, null, h => { h.UseProxy = false; h.Proxy = null; });
+            _manager = manager;
             EnterCaches().Wait();
         }
 
         public override async Task ClearAsync()
         {
-
-            var queryResult = await _consul.KV.List(_configInfo.CachePath);
-
-            var response = queryResult.Response;
-            if (response != null)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                foreach (var result in response)
+                // 根据前缀获取consul结果
+                var queryResult = await client.KV.List(_configInfo.CachePath);
+                var response = queryResult.Response;
+                if (response != null)
                 {
-                    await _consul.KV.DeleteCAS(result);
+                    foreach (var result in response)
+                    {
+                        await client.KV.DeleteCAS(result);
+                    }
                 }
             }
         }
 
         public void Dispose()
         {
-            _consul.Dispose();
         }
 
         public override async Task SetCachesAsync(IEnumerable<ServiceCache> caches)
         {
             var serviceCaches = await GetCaches(caches.Select(p => $"{ _configInfo.CachePath}{p.CacheDescriptor.Id}"));
-            foreach (var cache in caches)
-            {
-                var serviceCache = serviceCaches.Where(p => p.CacheDescriptor.Id == cache.CacheDescriptor.Id).FirstOrDefault();
-                if (serviceCache != null)
-                {
-                    cache.CacheEndpoint = serviceCache.CacheEndpoint.Concat(
-                      cache.CacheEndpoint.Except(serviceCache.CacheEndpoint));
-                }
-            }
-            await RemoveExceptCachesAsync(caches);
+
+            await RemoveCachesAsync(caches);
             await base.SetCachesAsync(caches);
         }
 
@@ -84,7 +76,7 @@ namespace Surging.Core.Consul
             await EnterCaches();
             return _serviceCaches;
         }
-        
+
         public override async Task RemveAddressAsync(IEnumerable<CacheEndpoint> endpoints)
         {
             var caches = await GetCachesAsync();
@@ -104,11 +96,15 @@ namespace Surging.Core.Consul
 
         public override async Task SetCachesAsync(IEnumerable<ServiceCacheDescriptor> cacheDescriptors)
         {
-            foreach (var cacheDescriptor in cacheDescriptors)
+            var clients = await _consulClientFactory.GetClients();
+            foreach (var client in clients)
             {
-                var nodeData = _serializer.Serialize(cacheDescriptor);
-                var keyValuePair = new KVPair($"{_configInfo.CachePath}{cacheDescriptor.CacheDescriptor.Id}") { Value = nodeData };
-                await _consul.KV.Put(keyValuePair);
+                foreach (var cacheDescriptor in cacheDescriptors)
+                {
+                    var nodeData = _serializer.Serialize(cacheDescriptor);
+                    var keyValuePair = new KVPair($"{_configInfo.CachePath}{cacheDescriptor.CacheDescriptor.Id}") { Value = nodeData };
+                    await client.KV.Put(keyValuePair);
+                }
             }
         }
 
@@ -130,15 +126,40 @@ namespace Surging.Core.Consul
             return caches.ToArray();
         }
 
+        private async Task<ServiceCache[]> GetCaches(IEnumerable<byte[]> childrens)
+        {
+            if (childrens == null) return new ServiceCache[0];
+            childrens = childrens.ToArray();
+            var caches = new List<ServiceCache>(childrens.Count());
+
+            foreach (var children in childrens)
+            {
+                if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    _logger.LogDebug($"准备从节点：{children}中获取缓存信息。");
+
+                var cache = await GetCache(children);
+                if (cache != null)
+                {
+                    caches.Add(cache);
+                    var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, $"{_configInfo.CachePath}{cache.CacheDescriptor.Id}",
+                   async (oldData, newData) => await NodeChange(oldData, newData), null);
+                    watcher.SetCurrentData(children);
+                }
+            }
+            return caches.ToArray();
+        }
+
+
         private async Task<ServiceCache> GetCache(string path)
         {
             ServiceCache result = null;
-            var watcher = new NodeMonitorWatcher(_consul, _manager, path,
-                 async (oldData, newData) => await NodeChange(oldData, newData));
-            var queryResult = await _consul.KV.Keys(path);
+            var client = await GetConsulClient();
+            var watcher = new NodeMonitorWatcher(GetConsulClient, _manager, path,
+                 async (oldData, newData) => await NodeChange(oldData, newData), null);
+            var queryResult = await client.KV.Keys(path);
             if (queryResult.Response != null)
             {
-                var data = (await _consul.GetDataAsync(path));
+                var data = (await client.GetDataAsync(path));
                 if (data != null)
                 {
                     watcher.SetCurrentData(data);
@@ -150,24 +171,22 @@ namespace Surging.Core.Consul
 
         #region 私有方法
 
-        private async Task RemoveExceptCachesAsync(IEnumerable<ServiceCache> caches)
+        private async Task RemoveCachesAsync(IEnumerable<ServiceCache> caches)
         {
             var path = _configInfo.CachePath;
             caches = caches.ToArray();
 
             if (_serviceCaches != null)
             {
-                var oldCacheIds = _serviceCaches.Select(i => i.CacheDescriptor.Id).ToArray();
-                var newCacheIds = _serviceCaches.Select(i => i.CacheDescriptor.Id).ToArray();
-                var deletedCacheIds = oldCacheIds.Except(newCacheIds).ToArray();
-                foreach (var deletedCacheId in deletedCacheIds)
+                var clients = await _consulClientFactory.GetClients();
+                foreach (var client in clients)
                 {
-                    var endpoints = _serviceCaches.Where(p => p.CacheDescriptor.Id == deletedCacheId).Select(p => p.CacheEndpoint).FirstOrDefault();
-                    var nodePath = $"{path}{deletedCacheId}";
-                    foreach (var endpoint in endpoints)
+
+                    var deletedCacheIds = caches.Select(i => i.CacheDescriptor.Id).ToArray();
+                    foreach (var deletedCacheId in deletedCacheIds)
                     {
-                        if (caches.Any(p => p.CacheEndpoint.Select(a => a.ToString()).Contains(endpoint.ToString())))
-                            await _consul.KV.Delete(nodePath);
+                        var nodePath = $"{path}{deletedCacheId}";
+                        await client.KV.Delete(nodePath);
                     }
                 }
             }
@@ -176,17 +195,17 @@ namespace Surging.Core.Consul
         private async Task EnterCaches()
         {
             if (_serviceCaches != null && _serviceCaches.Length > 0)
-                return; 
-             var watcher = new ChildrenMonitorWatcher(_consul, _manager, _configInfo.CachePath,
-                async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
-                  (result) => ConvertPaths(result).Result);
-            if (_consul.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
+                return;
+            var client = await GetConsulClient();
+            var watcher = new ChildrenMonitorWatcher(GetConsulClient, _manager, _configInfo.CachePath,
+               async (oldChildrens, newChildrens) => await ChildrenChange(oldChildrens, newChildrens),
+                 (result) => ConvertPaths(result).Result);
+            if (client.KV.Keys(_configInfo.CachePath).Result.Response?.Count() > 0)
             {
-                var result = await _consul.GetChildrenAsync(_configInfo.CachePath);
-                var keys = await _consul.KV.Keys(_configInfo.CachePath);
-                var childrens = result; 
-                watcher.SetCurrentData(ConvertPaths(childrens).Result.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
-                _serviceCaches = await GetCaches(keys.Response);
+                var response = await client.GetChildrenListAsync(_configInfo.CachePath);
+                _serviceCaches = await GetCaches(response);
+                var serviceCacheIds = _serviceCaches.Select(p => p.CacheDescriptor.Id).ToArray();
+                watcher.SetCurrentData(serviceCacheIds.Select(key => $"{_configInfo.CachePath}{key}").ToArray());
             }
             else
             {
@@ -233,7 +252,7 @@ namespace Surging.Core.Consul
 
         private async Task<ServiceCache[]> GetCacheDatas(string[] caches)
         {
-            List<ServiceCache> serviceCaches = new List<ServiceCache>();
+            List<ServiceCache> serviceCaches = new List<ServiceCache>(caches.Length);
             foreach (var cache in caches)
             {
                 var serviceCache = await GetCacheData(cache);
@@ -244,7 +263,7 @@ namespace Surging.Core.Consul
 
         private async Task<string[]> ConvertPaths(string[] datas)
         {
-            List<string> paths = new List<string>();
+            List<string> paths = new List<string>(datas.Length);
             foreach (var data in datas)
             {
                 var result = await GetCacheData(data);
@@ -253,6 +272,40 @@ namespace Surging.Core.Consul
                     paths.Add(serviceId);
             }
             return paths.ToArray();
+        }
+
+        private async ValueTask<ConsulClient> GetConsulClient()
+        {
+            var client = await _consulClientFactory.GetClient();
+            return client;
+        }
+
+        public async Task NodeChange(byte[] newData)
+        {
+            var newCache = await GetCache(newData);
+            //得到旧缓存。
+            var oldCache = _serviceCaches.FirstOrDefault(i => i.CacheDescriptor.Id == newCache.CacheDescriptor.Id);
+            if (oldCache.Equals(newCache))
+                return;
+            lock (_serviceCaches)
+            {
+                //删除旧缓存，并添加上新的缓存。
+                _serviceCaches =
+                    _serviceCaches
+                        .Where(i => i.CacheDescriptor.Id != newCache.CacheDescriptor.Id)
+                        .Concat(new[] { newCache }).ToArray();
+            }
+
+            if (newCache == null)
+                //触发删除事件。
+                OnRemoved(new ServiceCacheEventArgs(oldCache));
+
+            else if (oldCache == null)
+                OnCreated(new ServiceCacheEventArgs(newCache));
+
+            else
+                //触发缓存变更事件。
+                OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
         }
 
         private async Task NodeChange(byte[] oldData, byte[] newData)
@@ -280,9 +333,60 @@ namespace Surging.Core.Consul
             else if (oldCache == null)
                 OnCreated(new ServiceCacheEventArgs(newCache));
 
-            else 
-            //触发缓存变更事件。
-            OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+            else
+                //触发缓存变更事件。
+                OnChanged(new ServiceCacheChangedEventArgs(newCache, oldCache));
+        }
+
+
+        public async Task ChildrenChange(Dictionary<string, byte[]> newDatas)
+        {
+
+            var oldChildrens = _serviceCaches.Select(p => $"{_configInfo.CachePath}{p.CacheDescriptor.Id}").ToList();
+            var newChildrens = newDatas.Keys.ToList();
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"最新的节点信息：{string.Join(",", newChildrens)}");
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"旧的节点信息：{string.Join(",", oldChildrens)}");
+
+            //计算出已被删除的节点。
+            var deletedChildrens = oldChildrens.Except(newChildrens).ToArray();
+            //计算出新增的节点。
+            var createdChildrens = newChildrens.Except(oldChildrens).ToArray();
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被删除的服务缓存节点：{string.Join(",", deletedChildrens)}");
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                _logger.LogDebug($"需要被添加的服务缓存节点：{string.Join(",", createdChildrens)}");
+
+
+            var newServiceCacheBytes = newDatas.Where(p => createdChildrens.Contains(p.Key)).Select(p => p.Value).ToList();
+            var newServiceCaches = new List<ServiceCache>(newServiceCacheBytes.Count);
+            foreach (var newServiceCacheByte in newServiceCacheBytes)
+            {
+                newServiceCaches.Add(await GetCache(newServiceCacheByte));
+            }
+            var caches = _serviceCaches.ToArray();
+            lock (_serviceCaches)
+            {
+                _serviceCaches = _serviceCaches
+                    //删除无效的缓存节点。
+                    .Where(i => !deletedChildrens.Contains($"{_configInfo.CachePath}{i.CacheDescriptor.Id}"))
+                    //连接上新的缓存。
+                    .Concat(newServiceCaches)
+                    .ToArray();
+            }
+            //需要删除的缓存集合。
+            var deletedCaches = caches.Where(i => deletedChildrens.Contains($"{_configInfo.CachePath}{i.CacheDescriptor.Id}")).ToArray();
+            //触发删除事件。
+            OnRemoved(deletedCaches.Select(cache => new ServiceCacheEventArgs(cache)).ToArray());
+
+            //触发缓存被创建事件。
+            OnCreated(newServiceCaches.Select(cache => new ServiceCacheEventArgs(cache)).ToArray());
+
+            if (_logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information))
+                _logger.LogInformation("缓存数据更新成功。");
         }
 
         private async Task ChildrenChange(string[] oldChildrens, string[] newChildrens)
